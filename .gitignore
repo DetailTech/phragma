@@ -1,0 +1,12 @@
+# Build output and locally installed tools
+/bin/
+
+# Test and coverage artifacts
+*.out
+coverage.html
+
+# Editor/OS noise
+.idea/
+.vscode/
+*.swp
+.DS_Store
