@@ -95,6 +95,19 @@ func Compile(p *openngfwv1.Policy) (*IR, error) {
 	}
 	ir.VPN = vpn
 
+	if intel := p.GetIntel(); intel != nil {
+		enabled := len(intel.GetCustomFeeds()) > 0
+		for _, fe := range intel.GetFeeds() {
+			if fe.GetEnabled() {
+				enabled = true
+				break
+			}
+		}
+		if enabled {
+			ir.Intel = &IntelIR{Enabled: true}
+		}
+	}
+
 	return ir, nil
 }
 

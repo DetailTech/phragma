@@ -29,6 +29,11 @@ type PolicyServer struct {
 	sup    *engines.Supervisor
 	render Pipeline
 
+	// OnCommit, when set, runs after every successful commit/rollback
+	// (e.g. to retrigger the intel updater, since a table replace
+	// clears dynamic sets).
+	OnCommit func()
+
 	mu sync.Mutex
 }
 
@@ -191,6 +196,9 @@ func (s *PolicyServer) apply(ctx context.Context, p *openngfwv1.Policy, action, 
 		Actor: actor(ctx), Action: action, Detail: comment, Version: id,
 	}); err != nil {
 		return 0, status.Errorf(codes.Internal, "committed version %d but audit write failed: %v", id, err)
+	}
+	if s.OnCommit != nil {
+		s.OnCommit()
 	}
 	return id, nil
 }

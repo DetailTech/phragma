@@ -33,6 +33,13 @@ func Render(ir *compiler.IR) ([]byte, error) {
 
 	fmt.Fprintf(&b, "table inet %s {\n", TableName)
 
+	if ir.Intel != nil && ir.Intel.Enabled {
+		// Blocklist sets are populated by the intel updater out of band;
+		// the ruleset only declares them and the drop rules.
+		b.WriteString("\tset intel4 {\n\t\ttype ipv4_addr\n\t\tflags interval\n\t}\n\n")
+		b.WriteString("\tset intel6 {\n\t\ttype ipv6_addr\n\t\tflags interval\n\t}\n\n")
+	}
+
 	// Host-input hardening is deliberately out of M1 scope (the v1 use
 	// case filters *forwarded* traffic; a drop-by-default input chain
 	// would lock operators out of management). Tracked for the M5 self-
@@ -52,6 +59,12 @@ func Render(ir *compiler.IR) ([]byte, error) {
 	}
 	b.WriteString("\t\tct state established,related accept\n")
 	b.WriteString("\t\tct state invalid drop\n")
+	if ir.Intel != nil && ir.Intel.Enabled {
+		b.WriteString("\t\tip saddr @intel4 log prefix \"ngfw:intel-block: \" counter drop comment \"intel-block-src\"\n")
+		b.WriteString("\t\tip daddr @intel4 log prefix \"ngfw:intel-block: \" counter drop comment \"intel-block-dst\"\n")
+		b.WriteString("\t\tip6 saddr @intel6 log prefix \"ngfw:intel-block: \" counter drop comment \"intel-block-src6\"\n")
+		b.WriteString("\t\tip6 daddr @intel6 log prefix \"ngfw:intel-block: \" counter drop comment \"intel-block-dst6\"\n")
+	}
 	for _, r := range ir.Rules {
 		lines, err := ruleLines(r)
 		if err != nil {

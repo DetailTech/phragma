@@ -122,3 +122,95 @@ func scanAlerts(r io.Reader, limit int) ([]Alert, error) {
 	}
 	return alerts, nil
 }
+
+// Flow is one Suricata flow record with its app-layer label.
+type Flow struct {
+	Timestamp     time.Time
+	SrcIP         string
+	SrcPort       int
+	DestIP        string
+	DestPort      int
+	Proto         string
+	AppProto      string
+	BytesToServer uint64
+	BytesToClient uint64
+	Packets       uint64
+}
+
+type eveFlowEvent struct {
+	Timestamp string `json:"timestamp"`
+	EventType string `json:"event_type"`
+	SrcIP     string `json:"src_ip"`
+	SrcPort   int    `json:"src_port"`
+	DestIP    string `json:"dest_ip"`
+	DestPort  int    `json:"dest_port"`
+	Proto     string `json:"proto"`
+	AppProto  string `json:"app_proto"`
+	Flow      struct {
+		PktsToserver  uint64 `json:"pkts_toserver"`
+		PktsToclient  uint64 `json:"pkts_toclient"`
+		BytesToserver uint64 `json:"bytes_toserver"`
+		BytesToclient uint64 `json:"bytes_toclient"`
+	} `json:"flow"`
+}
+
+// ReadFlows returns up to limit flow events from the EVE file, newest
+// first. App labels come from the engine's app-layer classification.
+func ReadFlows(path string, limit int) ([]Flow, error) {
+	if limit <= 0 {
+		limit = 100
+	}
+	f, err := os.Open(path)
+	if os.IsNotExist(err) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = f.Close() }()
+
+	var r io.Reader = f
+	if fi, err := f.Stat(); err == nil && fi.Size() > maxTail {
+		if _, err := f.Seek(fi.Size()-maxTail, io.SeekStart); err != nil {
+			return nil, err
+		}
+		br := bufio.NewReader(f)
+		_, _ = br.ReadString('\n')
+		r = br
+	}
+
+	sc := bufio.NewScanner(r)
+	sc.Buffer(make([]byte, 0, 1<<20), 1<<20)
+	var flows []Flow
+	for sc.Scan() {
+		line := sc.Bytes()
+		if len(line) == 0 {
+			continue
+		}
+		var ev eveFlowEvent
+		if err := json.Unmarshal(line, &ev); err != nil || ev.EventType != "flow" {
+			continue
+		}
+		ts, err := time.Parse("2006-01-02T15:04:05.999999-0700", ev.Timestamp)
+		if err != nil {
+			ts = time.Time{}
+		}
+		flows = append(flows, Flow{
+			Timestamp: ts, SrcIP: ev.SrcIP, SrcPort: ev.SrcPort,
+			DestIP: ev.DestIP, DestPort: ev.DestPort, Proto: ev.Proto,
+			AppProto:      ev.AppProto,
+			BytesToServer: ev.Flow.BytesToserver, BytesToClient: ev.Flow.BytesToclient,
+			Packets: ev.Flow.PktsToserver + ev.Flow.PktsToclient,
+		})
+	}
+	if err := sc.Err(); err != nil {
+		return nil, fmt.Errorf("scan eve file: %w", err)
+	}
+	for i, j := 0, len(flows)-1; i < j; i, j = i+1, j-1 {
+		flows[i], flows[j] = flows[j], flows[i]
+	}
+	if len(flows) > limit {
+		flows = flows[:limit]
+	}
+	return flows, nil
+}

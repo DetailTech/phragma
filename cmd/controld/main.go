@@ -7,6 +7,7 @@ package main
 
 import (
 	"context"
+
 	"errors"
 	"flag"
 	"fmt"
@@ -26,6 +27,7 @@ import (
 	openngfwv1 "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1"
 	"github.com/detailtech/oss-ngfw/internal/apiserver"
 	"github.com/detailtech/oss-ngfw/internal/engines"
+	"github.com/detailtech/oss-ngfw/internal/intel"
 	"github.com/detailtech/oss-ngfw/internal/renderers"
 	"github.com/detailtech/oss-ngfw/internal/store"
 	"github.com/detailtech/oss-ngfw/internal/version"
@@ -96,10 +98,29 @@ func run(grpcListen, httpListen, dataDir, logDir string, dryRun bool) error {
 		return fmt.Errorf("listen on %s: %w", grpcListen, err)
 	}
 
+	updater := &intel.Updater{RunningPolicy: func() (*openngfwv1.Policy, error) {
+		p, _, err := st.GetRunning()
+		return p, err
+	}}
+	intelTrigger := make(chan struct{}, 1)
+	rootCtx, rootCancel := context.WithCancel(context.Background())
+	defer rootCancel()
+	go updater.Run(rootCtx, time.Hour, intelTrigger)
+
+	policyServer := apiserver.NewPolicyServer(st, sup, renderers.Pipeline(opts))
+	policyServer.OnCommit = func() {
+		select {
+		case intelTrigger <- struct{}{}:
+		default:
+		}
+	}
+
 	srv := grpc.NewServer()
 	openngfwv1.RegisterSystemServiceServer(srv, &apiserver.SystemService{})
-	openngfwv1.RegisterPolicyServiceServer(srv, apiserver.NewPolicyServer(st, sup, renderers.Pipeline(opts)))
+	openngfwv1.RegisterPolicyServiceServer(srv, policyServer)
 	openngfwv1.RegisterAlertServiceServer(srv, &apiserver.AlertServer{EvePath: opts.EvePath()})
+	openngfwv1.RegisterIntelServiceServer(srv, &apiserver.IntelServer{Store: st, Updater: updater})
+	openngfwv1.RegisterFlowServiceServer(srv, &apiserver.FlowServer{EvePath: opts.EvePath()})
 
 	errCh := make(chan error, 2)
 	go func() { errCh <- srv.Serve(lis) }()
@@ -118,6 +139,12 @@ func run(grpcListen, httpListen, dataDir, logDir string, dryRun bool) error {
 		}
 		if err := openngfwv1.RegisterAlertServiceHandlerFromEndpoint(ctx, mux, grpcListen, dialOpts); err != nil {
 			return fmt.Errorf("register alert gateway: %w", err)
+		}
+		if err := openngfwv1.RegisterIntelServiceHandlerFromEndpoint(ctx, mux, grpcListen, dialOpts); err != nil {
+			return fmt.Errorf("register intel gateway: %w", err)
+		}
+		if err := openngfwv1.RegisterFlowServiceHandlerFromEndpoint(ctx, mux, grpcListen, dialOpts); err != nil {
+			return fmt.Errorf("register flow gateway: %w", err)
 		}
 		httpSrv = &http.Server{Addr: httpListen, Handler: mux, ReadHeaderTimeout: 10 * time.Second}
 		go func() {

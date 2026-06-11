@@ -1,0 +1,53 @@
+// IntelService exposes the feed-license registry and blocklist state.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service IntelService {
+  // ListFeeds returns every registry feed with license metadata and
+  // current enablement/refresh state.
+  rpc ListFeeds(ListFeedsRequest) returns (ListFeedsResponse) {
+    option (google.api.http) = {get: "/v1/intel/feeds"};
+  }
+
+  // RefreshFeeds fetches enabled feeds now and reprograms the
+  // blocklist sets.
+  rpc RefreshFeeds(RefreshFeedsRequest) returns (RefreshFeedsResponse) {
+    option (google.api.http) = {post: "/v1/intel/refresh"};
+  }
+}
+
+message ListFeedsRequest {}
+
+message ListFeedsResponse {
+  repeated FeedInfo feeds = 1;
+}
+
+message FeedInfo {
+  string name = 1;
+  string description = 2;
+  string url = 3;
+  // License identifier/summary, e.g. "CC0", "non-commercial only".
+  string license = 4;
+  bool allows_commercial_use = 5;
+  bool allows_redistribution = 6;
+  // Attribution text that must accompany use, if any.
+  string attribution = 7;
+  bool enabled = 8;
+  // True for operator-defined custom feeds.
+  bool custom = 9;
+}
+
+message RefreshFeedsRequest {}
+
+message RefreshFeedsResponse {
+  // Entries programmed into the blocklist sets.
+  uint32 entries = 1;
+  google.protobuf.Timestamp refreshed_at = 2;
+}

@@ -34,6 +34,8 @@ func NewRootCommand() *cobra.Command {
 		newVersionsCommand(&server),
 		newAuditCommand(&server),
 		newAlertsCommand(&server),
+		newIntelCommand(&server),
+		newFlowsCommand(&server),
 	)
 	return root
 }

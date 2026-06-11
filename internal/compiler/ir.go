@@ -19,6 +19,7 @@ type IR struct {
 	Telemetry *TelemetryIR
 	Routing   *RoutingIR
 	VPN       *VPNIR
+	Intel     *IntelIR
 }
 
 // ZoneIR is a zone with its member interfaces.
@@ -186,4 +187,11 @@ type WireguardPeerIR struct {
 	Endpoint   string
 	AllowedIPs []netip.Prefix
 	Keepalive  uint16
+}
+
+// IntelIR marks threat-intel enforcement; nil when no feeds are
+// enabled. Set contents are dynamic (intel updater), so the IR only
+// carries enablement for the renderer to declare sets and drop rules.
+type IntelIR struct {
+	Enabled bool
 }
