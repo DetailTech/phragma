@@ -15,10 +15,24 @@ agents live in [`CLAUDE.md`](CLAUDE.md).
 
 ## Status
 
-**M0 — Foundation.** Scaffolding: build/CI pipeline, canonical API skeleton,
-`controld` (control-plane daemon) and `ngfwctl` (CLI) that build, run, and
-report version. The policy model, compiler, nftables renderer, and
-candidate/commit store land in **M1**.
+**M0–M5 v1 implementations are complete:**
+
+- **M1** — zone-based stateful firewall: policy model, candidate →
+  validate → commit → rollback, compiler → IR → nftables renderer,
+  NAT, static routes, audit log, gRPC/REST/CLI.
+- **M2** — Suricata IDS/IPS (detect + inline prevent) supervised through
+  the commit path; Vector → ClickHouse telemetry; alerts via API/CLI.
+- **M3** — FRR (BGP/OSPF), strongSwan IPsec, and WireGuard managed
+  through the same policy model; secrets stay in operator-owned files.
+- **M4** — threat-intel federation with a license-aware feed registry
+  enforced at commit time; nftables blocklist sets; app-labeled flows.
+- **M5** — local token auth + RBAC (viewer/operator/admin), audited
+  actors, read-first web UI at /ui/. OIDC is scaffold-only pending
+  security review.
+
+Real-engine integration tests (`make integration-test`) prove filtering,
+NAT, rollback, IDS detection, and intel enforcement against live traffic
+in network namespaces. Field-test guide: [`docs/testing-plan.md`](docs/testing-plan.md).
 
 ## Quick start (development)
 

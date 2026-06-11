@@ -1,0 +1,22 @@
+# Telemetry backend for a single OpenNGFW node: ClickHouse receiving
+# events from the Vector pipeline that controld manages.
+#
+#   docker compose up -d
+#   docker compose exec clickhouse clickhouse-client --multiquery < ../clickhouse/init.sql
+#
+# controld + engines run on the host (they program the host kernel);
+# only the log store is containerized in v1.
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.8
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8123:8123" # HTTP (Vector sink + queries)
+      - "127.0.0.1:9000:9000" # native client
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    ulimits:
+      nofile: 262144
+
+volumes:
+  clickhouse-data:

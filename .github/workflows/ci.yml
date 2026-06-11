@@ -31,6 +31,20 @@ jobs:
           ./bin/controld --version
           ./bin/ngfwctl version
 
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - name: Install engines
+        run: sudo apt-get update -q && sudo apt-get install -y -q nftables suricata frr netcat-openbsd
+      - name: Build integration test binary
+        run: go test -c -tags integration -o /tmp/openngfw-itest ./test/integration
+      - name: Run real-engine integration tests (root)
+        run: sudo /tmp/openngfw-itest -test.v -test.timeout 300s
+
   proto-verify:
     runs-on: ubuntu-latest
     steps:

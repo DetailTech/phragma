@@ -14,9 +14,13 @@ the CLI, and the telemetry pipeline.
 
 ## Current milestone
 
-**M0 — Foundation is complete. Current work targets M1** (single-node stateful
-firewall + control loop). Milestone order and scope are locked in
-`docs/build-plan.md` §7. Do not pull future-milestone scope forward.
+**M0–M5 v1 implementations are complete** (see `docs/testing-plan.md` for
+what is machine-verified vs. pending human field testing). Remaining known
+work before calling v1 done: OIDC implementation (needs human security
+review — scaffold only), policy *editing* in the WebUI, the full React UI,
+self-zone/input-chain hardening, GitOps reconciliation, and the §8
+performance harness. Milestone order and scope stay locked in
+`docs/build-plan.md` §7.
 
 ## Guardrails `[LOCKED]`
 

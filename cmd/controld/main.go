@@ -90,7 +90,7 @@ func run(grpcListen, httpListen, dataDir, logDir, usersFile string, dryRun bool)
 			&engines.Routes{StateDir: dataDir},
 			suricata,
 			vector,
-			&engines.FRR{},
+			&engines.FRR{StateDir: dataDir},
 			&engines.Strongswan{},
 			&engines.Wireguard{StateDir: dataDir},
 		)
@@ -109,6 +109,25 @@ func run(grpcListen, httpListen, dataDir, logDir, usersFile string, dryRun bool)
 	rootCtx, rootCancel := context.WithCancel(context.Background())
 	defer rootCancel()
 	go updater.Run(rootCtx, time.Hour, intelTrigger)
+
+	// Re-apply the running policy at startup: kernel rulesets and child
+	// engines do not survive reboots/daemon restarts, the store does.
+	if p, ver, err := st.GetRunning(); err != nil {
+		return fmt.Errorf("read running policy: %w", err)
+	} else if ver > 0 && !dryRun {
+		artifacts, err := renderers.RenderAll(p, opts)
+		if err != nil {
+			return fmt.Errorf("render running policy v%d: %w", ver, err)
+		}
+		if err := sup.Apply(rootCtx, artifacts, nil); err != nil {
+			return fmt.Errorf("re-apply running policy v%d: %w", ver, err)
+		}
+		slog.Info("running policy re-applied at startup", "version", ver)
+		select {
+		case intelTrigger <- struct{}{}:
+		default:
+		}
+	}
 
 	policyServer := apiserver.NewPolicyServer(st, sup, renderers.Pipeline(opts))
 	policyServer.OnCommit = func() {

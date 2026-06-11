@@ -5,11 +5,13 @@ package cli
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/grpc/metadata"
 
 	openngfwv1 "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1"
 	"github.com/detailtech/oss-ngfw/internal/version"
@@ -25,6 +27,8 @@ func NewRootCommand() *cobra.Command {
 		SilenceErrors: false,
 	}
 	root.PersistentFlags().StringVar(&server, "server", "127.0.0.1:9443", "controld gRPC address")
+	root.PersistentFlags().StringVar(&apiToken, "token", os.Getenv("NGFW_TOKEN"),
+		"API token when controld runs with --users-file (env: NGFW_TOKEN)")
 
 	root.AddCommand(
 		newVersionCommand(&server),
@@ -40,14 +44,20 @@ func NewRootCommand() *cobra.Command {
 	return root
 }
 
+// apiToken is the bearer token sent with every RPC when set.
+var apiToken string
+
 // dial connects to controld and returns the connection plus a deadline
-// context for one RPC.
+// context for one RPC, with authentication attached when configured.
 func dial(ctx context.Context, addr string) (*grpc.ClientConn, context.Context, context.CancelFunc, error) {
 	conn, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, nil, nil, fmt.Errorf("connect to controld at %s: %w", addr, err)
 	}
 	rpcCtx, cancel := context.WithTimeout(ctx, 30*time.Second)
+	if apiToken != "" {
+		rpcCtx = metadata.AppendToOutgoingContext(rpcCtx, "authorization", "Bearer "+apiToken)
+	}
 	return conn, rpcCtx, cancel, nil
 }
 

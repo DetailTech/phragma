@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 )
 
@@ -24,6 +25,9 @@ type FRR struct {
 	// ReloadCmd reloads FRR after a config write
 	// (default: systemctl reload-or-restart frr).
 	ReloadCmd []string
+	// StateDir holds the managed marker: FRR is only ever reconfigured
+	// or cleaned up if OpenNGFW enabled routing in the first place.
+	StateDir string
 }
 
 // Name implements Engine.
@@ -81,19 +85,24 @@ func (f *FRR) Validate(ctx context.Context, config []byte) error {
 	return runCmd(ctx, "vtysh", "-C", "-f", tmp)
 }
 
+func (f *FRR) markerPath() string { return filepath.Join(f.StateDir, "frr.managed") }
+
 // Apply writes frr.conf, enables the needed daemons, and reloads FRR.
+// A node whose policy never enabled routing is left completely alone —
+// FRR may be operated by something else.
 func (f *FRR) Apply(ctx context.Context, config []byte) error {
 	daemons := parseDaemons(config)
 	if len(daemons) == 0 {
-		// Routing disabled: rewrite an empty config only if FRR is
-		// present; a node without FRR has nothing to clean up.
-		if _, err := os.Stat(f.configPath()); err != nil {
-			return nil
+		if _, err := os.Stat(f.markerPath()); err != nil {
+			return nil // we never managed FRR here
 		}
 		if err := os.WriteFile(f.configPath(), config, 0o640); err != nil {
 			return err
 		}
-		return f.reload(ctx)
+		if err := f.reload(ctx); err != nil {
+			return err
+		}
+		return os.Remove(f.markerPath())
 	}
 
 	if err := f.enableDaemons(daemons); err != nil {
@@ -102,7 +111,13 @@ func (f *FRR) Apply(ctx context.Context, config []byte) error {
 	if err := os.WriteFile(f.configPath(), config, 0o640); err != nil {
 		return err
 	}
-	return f.reload(ctx)
+	if err := f.reload(ctx); err != nil {
+		return err
+	}
+	if err := os.MkdirAll(f.StateDir, 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(f.markerPath(), []byte("managed\n"), 0o644)
 }
 
 func (f *FRR) reload(ctx context.Context) error {
