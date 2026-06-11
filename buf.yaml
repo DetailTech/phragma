@@ -4,6 +4,11 @@ modules:
 lint:
   use:
     - STANDARD
+  ignore:
+    # Vendored googleapis protos; not ours to lint.
+    - api/proto/google
 breaking:
   use:
     - FILE
+  ignore:
+    - api/proto/google

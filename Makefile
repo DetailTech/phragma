@@ -17,8 +17,9 @@ TOOLS_DIR   := $(BIN_DIR)/tools
 BUF_VERSION                 := v1.50.1
 PROTOC_GEN_GO_VERSION       := v1.36.11
 PROTOC_GEN_GO_GRPC_VERSION  := v1.5.1
+PROTOC_GEN_GW_VERSION       := v2.27.7
 
-.PHONY: all build test lint proto proto-verify tools clean
+.PHONY: all build test lint proto proto-verify tools clean integration-test
 
 all: build test lint
 
@@ -28,6 +29,11 @@ build:
 test:
 	go test -race ./...
 
+# Real-engine tests: nftables + network namespaces + live traffic.
+# Requires root, nft, ip, nc (skips itself otherwise).
+integration-test:
+	go test -tags integration -count=1 -v ./test/integration/
+
 lint:
 	golangci-lint run ./...
 	go vet ./...
@@ -35,6 +41,7 @@ lint:
 tools:
 	GOBIN=$(abspath $(TOOLS_DIR)) go install google.golang.org/protobuf/cmd/protoc-gen-go@$(PROTOC_GEN_GO_VERSION)
 	GOBIN=$(abspath $(TOOLS_DIR)) go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@$(PROTOC_GEN_GO_GRPC_VERSION)
+	GOBIN=$(abspath $(TOOLS_DIR)) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@$(PROTOC_GEN_GW_VERSION)
 	GOBIN=$(abspath $(TOOLS_DIR)) go install github.com/bufbuild/buf/cmd/buf@$(BUF_VERSION)
 
 proto: tools

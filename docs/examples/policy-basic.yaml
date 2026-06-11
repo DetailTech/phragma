@@ -1,0 +1,21 @@
+# Minimal two-zone policy: LAN may reach WAN, everything else drops.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1]
+addresses:
+  - name: lan-net
+    cidr: 10.10.0.0/24
+rules:
+  - name: lan-to-wan
+    from_zones: [lan]
+    to_zones: [wan]
+    source_addresses: [lan-net]
+    action: ACTION_ALLOW
+nat:
+  source:
+    - name: lan-masq
+      to_zone: wan
+      source_address: lan-net
+      masquerade: true

@@ -13,6 +13,7 @@
 package openngfwv1
 
 import (
+	_ "google.golang.org/genproto/googleapis/api/annotations"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"
@@ -130,16 +131,16 @@ var File_openngfw_v1_system_proto protoreflect.FileDescriptor
 
 const file_openngfw_v1_system_proto_rawDesc = "" +
 	"\n" +
-	"\x18openngfw/v1/system.proto\x12\vopenngfw.v1\"\x13\n" +
+	"\x18openngfw/v1/system.proto\x12\vopenngfw.v1\x1a\x1cgoogle/api/annotations.proto\"\x13\n" +
 	"\x11GetVersionRequest\"e\n" +
 	"\x12GetVersionResponse\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\tR\aversion\x12\x16\n" +
 	"\x06commit\x18\x02 \x01(\tR\x06commit\x12\x1d\n" +
 	"\n" +
-	"build_date\x18\x03 \x01(\tR\tbuildDate2^\n" +
-	"\rSystemService\x12M\n" +
+	"build_date\x18\x03 \x01(\tR\tbuildDate2z\n" +
+	"\rSystemService\x12i\n" +
 	"\n" +
-	"GetVersion\x12\x1e.openngfw.v1.GetVersionRequest\x1a\x1f.openngfw.v1.GetVersionResponseB\xaa\x01\n" +
+	"GetVersion\x12\x1e.openngfw.v1.GetVersionRequest\x1a\x1f.openngfw.v1.GetVersionResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/system/versionB\xaa\x01\n" +
 	"\x0fcom.openngfw.v1B\vSystemProtoP\x01Z=github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1\xa2\x02\x03OXX\xaa\x02\vOpenngfw.V1\xca\x02\vOpenngfw\\V1\xe2\x02\x17Openngfw\\V1\\GPBMetadata\xea\x02\fOpenngfw::V1b\x06proto3"
 
 var (

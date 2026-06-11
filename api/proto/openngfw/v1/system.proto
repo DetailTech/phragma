@@ -8,12 +8,16 @@ syntax = "proto3";
 
 package openngfw.v1;
 
+import "google/api/annotations.proto";
+
 option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
 
 // SystemService exposes daemon identity and health.
 service SystemService {
   // GetVersion reports the running controld build.
-  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse);
+  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {
+    option (google.api.http) = {get: "/v1/system/version"};
+  }
 }
 
 message GetVersionRequest {}
