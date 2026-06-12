@@ -1,0 +1,16 @@
+# Threat-intel enforcement: blocklist sets + drop rules are declared by
+# the ruleset; the intel updater fills the sets out of band.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1]
+rules:
+  - name: lan-to-wan
+    from_zones: [lan]
+    to_zones: [wan]
+    action: ACTION_ALLOW
+intel:
+  feeds:
+    - name: feodo-tracker
+      enabled: true

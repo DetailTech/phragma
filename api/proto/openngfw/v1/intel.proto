@@ -1,0 +1,33 @@
+// Threat-intelligence configuration (M4). Feeds are enforced as
+// nftables blocklist sets. Every built-in feed carries license metadata
+// in the registry; enforcement respects declared use (build plan §10).
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+message Intel {
+  // Built-in registry feeds to enable, by registry name.
+  repeated FeedEnable feeds = 1;
+  // Operator-defined feeds (plain text, one IP/CIDR per line). License
+  // compliance for custom feeds is the operator's responsibility.
+  repeated CustomFeed custom_feeds = 2;
+  // Declared use of this deployment. The registry refuses feeds whose
+  // license forbids commercial use when this is true.
+  bool commercial_use = 3;
+  // Refresh interval in minutes; default 60, minimum 5.
+  uint32 refresh_interval_minutes = 4;
+}
+
+message FeedEnable {
+  string name = 1;
+  bool enabled = 2;
+}
+
+message CustomFeed {
+  string name = 1;
+  string url = 2;
+  string description = 3;
+}

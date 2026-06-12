@@ -1,0 +1,13 @@
+{
+  "name": "OpenNGFW",
+  "image": "mcr.microsoft.com/devcontainers/go:1.25",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/HEAD/install.sh | sh -s -- -b $(go env GOPATH)/bin v2.5.0 && make tools",
+  "customizations": {
+    "vscode": {
+      "extensions": ["golang.go", "bufbuild.vscode-buf"]
+    }
+  }
+}

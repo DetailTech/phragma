@@ -1,0 +1,148 @@
+// PolicyService — the candidate/commit/rollback control surface.
+//
+// Every configuration change flows candidate → validate → commit, with
+// rollback to any retained version (build plan §3, non-negotiable).
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "openngfw/v1/policy.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service PolicyService {
+  // GetPolicy returns the running, candidate, or a historical policy.
+  rpc GetPolicy(GetPolicyRequest) returns (GetPolicyResponse) {
+    option (google.api.http) = {get: "/v1/policy"};
+  }
+
+  // SetCandidate replaces the candidate policy. Nothing is applied.
+  rpc SetCandidate(SetCandidateRequest) returns (SetCandidateResponse) {
+    option (google.api.http) = {
+      put: "/v1/candidate"
+      body: "*"
+    };
+  }
+
+  // Validate checks the candidate (schema, references, renderability)
+  // without touching any engine.
+  rpc Validate(ValidateRequest) returns (ValidateResponse) {
+    option (google.api.http) = {post: "/v1/candidate/validate"};
+  }
+
+  // Commit validates the candidate, applies it to the engines
+  // atomically, and records a new version. On any failure the previous
+  // running config is restored and an error is returned.
+  rpc Commit(CommitRequest) returns (CommitResponse) {
+    option (google.api.http) = {
+      post: "/v1/commit"
+      body: "*"
+    };
+  }
+
+  // Rollback re-applies a historical version as a new commit.
+  rpc Rollback(RollbackRequest) returns (RollbackResponse) {
+    option (google.api.http) = {
+      post: "/v1/rollback"
+      body: "*"
+    };
+  }
+
+  // ListVersions returns committed version metadata, newest first.
+  rpc ListVersions(ListVersionsRequest) returns (ListVersionsResponse) {
+    option (google.api.http) = {get: "/v1/versions"};
+  }
+
+  // ListAuditEntries returns the audit log, newest first.
+  rpc ListAuditEntries(ListAuditEntriesRequest) returns (ListAuditEntriesResponse) {
+    option (google.api.http) = {get: "/v1/audit"};
+  }
+}
+
+enum PolicySource {
+  POLICY_SOURCE_UNSPECIFIED = 0;
+  POLICY_SOURCE_RUNNING = 1;
+  POLICY_SOURCE_CANDIDATE = 2;
+  POLICY_SOURCE_VERSION = 3;
+}
+
+message GetPolicyRequest {
+  PolicySource source = 1;
+  // Version id; required when source == POLICY_SOURCE_VERSION.
+  uint64 version = 2;
+}
+
+message GetPolicyResponse {
+  Policy policy = 1;
+  // Version the policy came from (0 for an uncommitted candidate).
+  uint64 version = 2;
+}
+
+message SetCandidateRequest {
+  Policy policy = 1;
+}
+
+message SetCandidateResponse {}
+
+message ValidateRequest {}
+
+message ValidateResponse {
+  bool valid = 1;
+  repeated string errors = 2;
+}
+
+message CommitRequest {
+  string comment = 1;
+}
+
+message CommitResponse {
+  uint64 version = 1;
+}
+
+message RollbackRequest {
+  // Version to restore.
+  uint64 version = 1;
+}
+
+message RollbackResponse {
+  // New version created by the rollback commit.
+  uint64 version = 1;
+}
+
+message ListVersionsRequest {
+  // Maximum entries to return; 0 means server default (100).
+  uint32 limit = 1;
+}
+
+message ListVersionsResponse {
+  repeated VersionInfo versions = 1;
+}
+
+message VersionInfo {
+  uint64 id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  string actor = 3;
+  string comment = 4;
+}
+
+message ListAuditEntriesRequest {
+  uint32 limit = 1;
+}
+
+message ListAuditEntriesResponse {
+  repeated AuditEntry entries = 1;
+}
+
+message AuditEntry {
+  uint64 id = 1;
+  google.protobuf.Timestamp time = 2;
+  string actor = 3;
+  // Action verb, e.g. "set-candidate", "commit", "rollback".
+  string action = 4;
+  string detail = 5;
+  // Version created by this action, if any.
+  uint64 version = 6;
+}

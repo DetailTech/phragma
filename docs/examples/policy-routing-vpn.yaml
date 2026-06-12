@@ -1,0 +1,59 @@
+# M3 example: BGP peering, an IPsec site-to-site tunnel, and a
+# WireGuard road-warrior interface. Key material is referenced by path,
+# never stored in policy:
+#   - /etc/openngfw/secrets/site-b.conf  (swanctl snippet, e.g.
+#       secrets { ike-site-b { secret = "use-a-real-psk" } }            )
+#   - /etc/openngfw/keys/wg0.key         (wg genkey > wg0.key)
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1]
+addresses:
+  - name: lan-net
+    cidr: 10.10.0.0/24
+rules:
+  - name: lan-to-wan
+    from_zones: [lan]
+    to_zones: [wan]
+    source_addresses: [lan-net]
+    action: ACTION_ALLOW
+  - name: allow-wireguard-clients
+    from_zones: [any]
+    to_zones: [lan]
+    action: ACTION_ALLOW
+nat:
+  source:
+    - name: lan-masq
+      to_zone: wan
+      source_address: lan-net
+      masquerade: true
+routing:
+  bgp:
+    enabled: true
+    asn: 65001
+    router_id: 192.0.2.1
+    neighbors:
+      - address: 198.51.100.2
+        remote_asn: 65002
+        description: upstream-router
+    announce_networks: [10.10.0.0/24]
+vpn:
+  ipsec_tunnels:
+    - name: site-b
+      local_address: 198.51.100.1
+      remote_address: 203.0.113.1
+      local_subnets: [10.10.0.0/24]
+      remote_subnets: [10.20.0.0/24]
+      psk_file: /etc/openngfw/secrets/site-b.conf
+      initiate: true
+  wireguard_interfaces:
+    - name: wg0
+      address: 10.99.0.1/24
+      listen_port: 51820
+      private_key_file: /etc/openngfw/keys/wg0.key
+      peers:
+        - name: laptop
+          public_key: "REPLACE_WITH_PEER_PUBLIC_KEY_BASE64_44CHARS="
+          allowed_ips: [10.99.0.2/32]
+          persistent_keepalive: 25

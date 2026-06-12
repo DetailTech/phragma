@@ -1,0 +1,32 @@
+// IDS/IPS configuration (M2). Suricata is integrated as a separate
+// process; this model selects mode, monitored scope, and rulesets — it
+// never reimplements inspection.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+enum IdsMode {
+  IDS_MODE_UNSPECIFIED = 0;
+  // Passive detection: Suricata sniffs interfaces via AF_PACKET.
+  IDS_MODE_DETECT = 1;
+  // Inline prevention: forwarded traffic is queued to Suricata via
+  // NFQUEUE (fail-open: if Suricata is down, traffic bypasses).
+  IDS_MODE_PREVENT = 2;
+}
+
+message Ids {
+  bool enabled = 1;
+  IdsMode mode = 2;
+  // Interfaces to sniff in detect mode. Empty = every zone interface.
+  repeated string monitor_interfaces = 3;
+  // HOME_NET CIDRs. Empty = RFC1918 private ranges.
+  repeated string home_networks = 4;
+  // Rule files loaded from the managed rules directory.
+  // Empty = ["local.rules"]. Populate via suricata-update or drop-in.
+  repeated string rule_files = 5;
+  // NFQUEUE number for prevent mode (default 0).
+  uint32 queue_num = 6;
+}

@@ -1,0 +1,67 @@
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+  id-token: write # cosign keyless signing + provenance
+  attestations: write # SLSA build provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build release binaries
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          for arch in amd64 arm64; do
+            GOOS=linux GOARCH=$arch make build BIN_DIR=dist/linux-$arch VERSION="${GITHUB_REF_NAME}"
+            for bin in controld ngfwctl; do
+              cp "dist/linux-$arch/$bin" "dist/${bin}_${GITHUB_REF_NAME}_linux_${arch}"
+            done
+          done
+          (cd dist && sha256sum *_linux_* > checksums.txt)
+
+      - name: Generate SBOM (SPDX)
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: spdx-json
+          output-file: dist/sbom.spdx.json
+          upload-artifact: false
+
+      - name: Install cosign
+        uses: sigstore/cosign-installer@v3
+
+      - name: Sign checksums and SBOM (keyless)
+        run: |
+          cosign sign-blob --yes dist/checksums.txt \
+            --output-signature dist/checksums.txt.sig \
+            --output-certificate dist/checksums.txt.pem
+          cosign sign-blob --yes dist/sbom.spdx.json \
+            --output-signature dist/sbom.spdx.json.sig \
+            --output-certificate dist/sbom.spdx.json.pem
+
+      - name: SLSA build provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            dist/*_linux_*
+            dist/sbom.spdx.json
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*_linux_*
+            dist/checksums.txt*
+            dist/sbom.spdx.json*
+          generate_release_notes: true

@@ -1,0 +1,56 @@
+// VPN configuration (M3): IPsec via strongSwan (swanctl), WireGuard via
+// the kernel. Key material never enters the policy store — fields
+// reference files the operator provisions on the node.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+message Vpn {
+  repeated IpsecTunnel ipsec_tunnels = 1;
+  repeated WireguardInterface wireguard_interfaces = 2;
+}
+
+message IpsecTunnel {
+  string name = 1;
+  // Local IKE endpoint ("%any" to accept any).
+  string local_address = 2;
+  string remote_address = 3;
+  // Traffic selectors (CIDR).
+  repeated string local_subnets = 4;
+  repeated string remote_subnets = 5;
+  // Path to a swanctl secrets snippet providing this tunnel's PSK,
+  // e.g.: secrets { ike-<name> { secret = "..." } }
+  string psk_file = 6;
+  // IKE proposal; default aes256-sha256-modp2048.
+  string ike_proposal = 7;
+  // ESP proposal; default aes256-sha256-modp2048.
+  string esp_proposal = 8;
+  // Initiate on load instead of waiting for traffic/responder mode.
+  bool initiate = 9;
+}
+
+message WireguardInterface {
+  // Interface name (e.g. wg0).
+  string name = 1;
+  // Interface address in CIDR form.
+  string address = 2;
+  uint32 listen_port = 3;
+  // Path to the private-key file (wg format).
+  string private_key_file = 4;
+  repeated WireguardPeer peers = 5;
+}
+
+message WireguardPeer {
+  string name = 1;
+  // Peer public key (base64).
+  string public_key = 2;
+  // Optional host:port to dial.
+  string endpoint = 3;
+  // CIDRs routed to this peer.
+  repeated string allowed_ips = 4;
+  // Keepalive seconds; 0 disables.
+  uint32 persistent_keepalive = 5;
+}

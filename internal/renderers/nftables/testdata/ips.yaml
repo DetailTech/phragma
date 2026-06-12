@@ -1,0 +1,16 @@
+# Inline IPS: forwarded traffic queues to Suricata (fail-open) before
+# policy evaluation.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1]
+rules:
+  - name: lan-to-wan
+    from_zones: [lan]
+    to_zones: [wan]
+    action: ACTION_ALLOW
+ids:
+  enabled: true
+  mode: IDS_MODE_PREVENT
+  queue_num: 0

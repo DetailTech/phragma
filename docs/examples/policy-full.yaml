@@ -1,0 +1,92 @@
+# Exercises every M1 feature: multi-interface zones, v4+v6 addresses,
+# multi-port services, log/reject/deny actions, disabled rules, SNAT
+# (masquerade + static), DNAT with port rewrite, and static routes.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1, eth2]
+  - name: dmz
+    interfaces: [eth3]
+addresses:
+  - name: lan-net
+    cidr: 10.10.0.0/24
+  - name: lan-net-v6
+    cidr: 2001:db8:10::/64
+  - name: web-server
+    cidr: 10.20.0.80/32
+  - name: public-vip
+    cidr: 203.0.113.10/32
+  - name: snat-ip
+    cidr: 203.0.113.11/32
+  - name: blocked-host
+    cidr: 192.0.2.66/32
+services:
+  - name: web
+    protocol: PROTOCOL_TCP
+    ports:
+      - { start: 80 }
+      - { start: 443 }
+      - { start: 8000, end: 8100 }
+  - name: dns
+    protocol: PROTOCOL_UDP
+    ports:
+      - { start: 53 }
+  - name: ping
+    protocol: PROTOCOL_ICMP
+rules:
+  - name: block-bad-host
+    from_zones: [any]
+    to_zones: [any]
+    source_addresses: [blocked-host]
+    action: ACTION_DENY
+    log: true
+  - name: lan-to-wan
+    from_zones: [lan]
+    to_zones: [wan]
+    source_addresses: [lan-net, lan-net-v6]
+    action: ACTION_ALLOW
+  - name: wan-to-web
+    from_zones: [wan]
+    to_zones: [dmz]
+    destination_addresses: [web-server]
+    services: [web]
+    action: ACTION_ALLOW
+    log: true
+  - name: lan-dns-and-ping
+    from_zones: [lan]
+    to_zones: [wan]
+    services: [dns, ping]
+    action: ACTION_ALLOW
+  - name: dmz-to-lan-reject
+    from_zones: [dmz]
+    to_zones: [lan]
+    action: ACTION_REJECT
+  - name: disabled-rule
+    from_zones: [lan]
+    to_zones: [dmz]
+    action: ACTION_ALLOW
+    disabled: true
+nat:
+  source:
+    - name: lan-masq
+      to_zone: wan
+      source_address: lan-net
+      masquerade: true
+    - name: dmz-static-snat
+      to_zone: wan
+      translated_address: snat-ip
+  destination:
+    - name: web-dnat
+      from_zone: wan
+      service: web
+      destination_address: public-vip
+      translated_address: web-server
+      translated_port: 8080
+static_routes:
+  - destination: 192.168.50.0/24
+    via: 10.10.0.254
+  - destination: 0.0.0.0/0
+    via: 198.51.100.1
+    interface: eth0
+    metric: 100

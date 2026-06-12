@@ -1,0 +1,3 @@
+# An empty policy still renders a safe baseline: established/related
+# accepted, all other forwarded traffic dropped.
+{}

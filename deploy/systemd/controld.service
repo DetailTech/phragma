@@ -1,0 +1,25 @@
+[Unit]
+Description=OpenNGFW control-plane daemon
+Documentation=https://github.com/DetailTech/oss-ngfw
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/controld \
+  --listen 127.0.0.1:9443 \
+  --http-listen 127.0.0.1:8080 \
+  --data-dir /var/lib/openngfw \
+  --log-dir /var/log/openngfw \
+  --users-file /etc/openngfw/users.yaml
+Restart=on-failure
+RestartSec=2
+
+# controld renders configs and supervises engines; it needs root for
+# nftables/netlink. Hardening that still permits that:
+NoNewPrivileges=yes
+ProtectHome=yes
+PrivateTmp=yes
+
+[Install]
+WantedBy=multi-user.target

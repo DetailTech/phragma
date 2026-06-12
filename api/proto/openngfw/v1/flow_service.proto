@@ -1,0 +1,42 @@
+// FlowService surfaces recent flows with app/protocol labels (M4
+// visibility). Labels come from the integrated inspection engine's
+// app-layer classification in the EVE stream.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service FlowService {
+  // ListFlows returns recent flows, newest first.
+  rpc ListFlows(ListFlowsRequest) returns (ListFlowsResponse) {
+    option (google.api.http) = {get: "/v1/flows"};
+  }
+}
+
+message ListFlowsRequest {
+  // Maximum flows to return; 0 means server default (100).
+  uint32 limit = 1;
+}
+
+message ListFlowsResponse {
+  repeated Flow flows = 1;
+}
+
+message Flow {
+  google.protobuf.Timestamp time = 1;
+  string src_ip = 2;
+  uint32 src_port = 3;
+  string dest_ip = 4;
+  uint32 dest_port = 5;
+  string protocol = 6;
+  // Application-layer protocol label (e.g. http, tls, dns, ssh).
+  string app_protocol = 7;
+  uint64 bytes_to_server = 8;
+  uint64 bytes_to_client = 9;
+  uint64 packets = 10;
+}

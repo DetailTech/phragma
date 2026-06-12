@@ -1,0 +1,44 @@
+// AlertService surfaces IDS/IPS detections (M2). It reads the local EVE
+// stream; long-term storage and analytics live in ClickHouse via the
+// telemetry pipeline.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service AlertService {
+  // ListAlerts returns recent IDS/IPS alerts, newest first.
+  rpc ListAlerts(ListAlertsRequest) returns (ListAlertsResponse) {
+    option (google.api.http) = {get: "/v1/alerts"};
+  }
+}
+
+message ListAlertsRequest {
+  // Maximum alerts to return; 0 means server default (100).
+  uint32 limit = 1;
+}
+
+message ListAlertsResponse {
+  repeated Alert alerts = 1;
+}
+
+message Alert {
+  google.protobuf.Timestamp time = 1;
+  string signature = 2;
+  int64 signature_id = 3;
+  // Suricata severity (1 = highest).
+  uint32 severity = 4;
+  string category = 5;
+  string src_ip = 6;
+  uint32 src_port = 7;
+  string dest_ip = 8;
+  uint32 dest_port = 9;
+  string protocol = 10;
+  // Suricata action: "allowed" (detected) or "blocked" (prevented).
+  string action = 11;
+}

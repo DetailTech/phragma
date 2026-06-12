@@ -1,0 +1,32 @@
+// OpenNGFW canonical API — v1 skeleton.
+//
+// The gRPC API is the seam and the contract (build plan §3). Everything —
+// CLI, UI, GitOps, future fleet controller — is a client of this API.
+// The policy model protos land in M1; M0 ships only the system surface.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+// SystemService exposes daemon identity and health.
+service SystemService {
+  // GetVersion reports the running controld build.
+  rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {
+    option (google.api.http) = {get: "/v1/system/version"};
+  }
+}
+
+message GetVersionRequest {}
+
+message GetVersionResponse {
+  // Semantic version or "dev" for unreleased builds.
+  string version = 1;
+  // VCS commit hash the binary was built from.
+  string commit = 2;
+  // RFC 3339 build timestamp.
+  string build_date = 3;
+}

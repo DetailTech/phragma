@@ -1,0 +1,16 @@
+// Telemetry pipeline configuration (M2): Vector ships Suricata EVE JSON
+// and system logs to ClickHouse.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+message Telemetry {
+  bool enabled = 1;
+  // ClickHouse HTTP endpoint; default http://127.0.0.1:8123.
+  string clickhouse_url = 2;
+  // Target database; default "openngfw".
+  string database = 3;
+}

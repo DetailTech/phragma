@@ -1,0 +1,137 @@
+// OpenNGFW declarative policy model (M1 core).
+//
+// One model spans firewall/NAT/routing; it is compiled to an internal IR
+// and rendered per engine (build plan §3). Objects reference each other
+// by name; validation resolves references before compilation.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "openngfw/v1/ids.proto";
+import "openngfw/v1/intel.proto";
+import "openngfw/v1/routing.proto";
+import "openngfw/v1/telemetry.proto";
+import "openngfw/v1/vpn.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+// Policy is the complete declarative configuration of one node.
+message Policy {
+  repeated Zone zones = 1;
+  repeated Address addresses = 2;
+  repeated Service services = 3;
+  repeated Rule rules = 4;
+  Nat nat = 5;
+  repeated StaticRoute static_routes = 6;
+  Ids ids = 7;
+  Telemetry telemetry = 8;
+  Routing routing = 9;
+  Vpn vpn = 10;
+  Intel intel = 11;
+}
+
+// Zone groups interfaces into a security zone. Rules match on zone pairs.
+message Zone {
+  string name = 1;
+  repeated string interfaces = 2;
+  string description = 3;
+}
+
+// Address is a named IPv4/IPv6 prefix (host addresses use /32 or /128).
+message Address {
+  string name = 1;
+  string cidr = 2;
+  string description = 3;
+}
+
+// Service is a named L4 matcher.
+message Service {
+  string name = 1;
+  Protocol protocol = 2;
+  repeated PortRange ports = 3;
+  string description = 4;
+}
+
+enum Protocol {
+  PROTOCOL_UNSPECIFIED = 0;
+  PROTOCOL_TCP = 1;
+  PROTOCOL_UDP = 2;
+  PROTOCOL_ICMP = 3;
+  // PROTOCOL_ANY matches any IP protocol; ports must be empty.
+  PROTOCOL_ANY = 4;
+}
+
+// PortRange matches a single port (end unset/0) or an inclusive range.
+message PortRange {
+  uint32 start = 1;
+  uint32 end = 2;
+}
+
+// Rule is a stateful zone-pair filtering rule. Rules are evaluated in
+// list order; the first match wins. Reference values are object names;
+// the literal "any" is allowed everywhere a name is.
+message Rule {
+  string name = 1;
+  repeated string from_zones = 2;
+  repeated string to_zones = 3;
+  repeated string source_addresses = 4;
+  repeated string destination_addresses = 5;
+  repeated string services = 6;
+  Action action = 7;
+  bool log = 8;
+  bool disabled = 9;
+  string description = 10;
+}
+
+enum Action {
+  ACTION_UNSPECIFIED = 0;
+  ACTION_ALLOW = 1;
+  // ACTION_DENY drops silently.
+  ACTION_DENY = 2;
+  // ACTION_REJECT sends ICMP unreachable / TCP RST.
+  ACTION_REJECT = 3;
+}
+
+message Nat {
+  repeated SourceNat source = 1;
+  repeated DestinationNat destination = 2;
+}
+
+// SourceNat translates the source of traffic leaving via to_zone.
+message SourceNat {
+  string name = 1;
+  // Egress zone whose interfaces this SNAT applies to.
+  string to_zone = 2;
+  // Optional Address reference restricting which sources are translated.
+  string source_address = 3;
+  // Exactly one of masquerade / translated_address.
+  bool masquerade = 4;
+  // Address reference used as the translated source (SNAT to a fixed IP).
+  string translated_address = 5;
+}
+
+// DestinationNat rewrites the destination of traffic arriving in from_zone.
+message DestinationNat {
+  string name = 1;
+  // Ingress zone whose interfaces this DNAT applies to.
+  string from_zone = 2;
+  // Service reference selecting protocol/ports to match (required).
+  string service = 3;
+  // Address reference for the original (public) destination.
+  string destination_address = 4;
+  // Address reference for the rewritten (internal) destination.
+  string translated_address = 5;
+  // Optional port rewrite; 0 keeps the original port.
+  uint32 translated_port = 6;
+}
+
+message StaticRoute {
+  // Destination prefix in CIDR form ("0.0.0.0/0" for default).
+  string destination = 1;
+  // Next-hop IP; may be empty for directly attached interface routes.
+  string via = 2;
+  // Optional egress interface.
+  string interface = 3;
+  uint32 metric = 4;
+}

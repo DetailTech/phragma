@@ -1,0 +1,44 @@
+// Dynamic routing configuration (M3). FRR runs as separate daemons; the
+// model selects protocols, peers, and announcements — never routing
+// internals.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+message Routing {
+  Bgp bgp = 1;
+  Ospf ospf = 2;
+}
+
+message Bgp {
+  bool enabled = 1;
+  // Local autonomous system number.
+  uint32 asn = 2;
+  // Router id in IPv4 dotted form.
+  string router_id = 3;
+  repeated BgpNeighbor neighbors = 4;
+  // Prefixes announced to peers (CIDR).
+  repeated string announce_networks = 5;
+}
+
+message BgpNeighbor {
+  string address = 1;
+  uint32 remote_asn = 2;
+  string description = 3;
+}
+
+message Ospf {
+  bool enabled = 1;
+  string router_id = 2;
+  repeated OspfArea areas = 3;
+}
+
+message OspfArea {
+  // Area id, e.g. "0.0.0.0".
+  string area = 1;
+  // Networks advertised into this area (CIDR).
+  repeated string networks = 2;
+}
