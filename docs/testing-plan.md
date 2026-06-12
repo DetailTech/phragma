@@ -2,6 +2,9 @@
 
 This is the human field-test guide for the M1–M5 v1 implementation. It has
 two parts: **deploying a test bench on OCI** and a **structured test plan**.
+This walkthrough targets Ubuntu 24.04; for Oracle Linux 9 use
+[`docs/testing-plan-ol9.md`](testing-plan-ol9.md) (same test phases,
+EL9-specific deployment and command substitutions).
 
 ## What is already machine-verified vs. what needs you
 

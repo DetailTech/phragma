@@ -29,6 +29,14 @@ func (s *Strongswan) confDir() string {
 	if s.ConfDir != "" {
 		return s.ConfDir
 	}
+	// Debian/Ubuntu install swanctl under /etc/swanctl; EL9 (Oracle
+	// Linux, RHEL, Rocky — EPEL strongswan) uses /etc/strongswan/swanctl.
+	// Prefer whichever tree the package created.
+	for _, dir := range []string{"/etc/swanctl", "/etc/strongswan/swanctl"} {
+		if fi, err := os.Stat(dir); err == nil && fi.IsDir() {
+			return filepath.Join(dir, "conf.d")
+		}
+	}
 	return "/etc/swanctl/conf.d"
 }
 
