@@ -1,0 +1,35 @@
+// Global network/dataplane settings (post-M5). One declaration here
+// keeps every component consistent: kernel interface MTU, TCP MSS
+// clamping in the ruleset, the inspection engine's capture size, and
+// NIC offload state on monitored interfaces. Useful for jumbo-frame
+// (MTU 9000) and SR-IOV deployments.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+message Network {
+  // MTU applied to every zone interface (e.g. 9000 for jumbo frames).
+  // 0 leaves interface MTUs unmanaged. The IDS capture size
+  // (default-packet-size) is derived from the largest configured MTU
+  // automatically.
+  uint32 mtu = 1;
+  // Per-interface MTU overrides; may also name interfaces outside any
+  // zone (e.g. a management interface).
+  repeated InterfaceMtu interface_mtus = 2;
+  // Clamp forwarded TCP SYN MSS to the path MTU. Strongly recommended
+  // with jumbo frames or VPN tunnels, where path MTUs differ per hop.
+  bool clamp_mss_to_pmtu = 3;
+  // Disable NIC offloads (GRO/LRO/TSO/GSO) on IDS-monitored interfaces
+  // so the inspection engine sees real wire frames instead of
+  // reassembled super-packets. Applies only in IDS detect mode; has a
+  // forwarding-throughput cost on those interfaces.
+  bool manage_nic_offloads = 4;
+}
+
+message InterfaceMtu {
+  string interface = 1;
+  uint32 mtu = 2;
+}

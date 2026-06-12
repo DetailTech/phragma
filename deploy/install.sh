@@ -38,7 +38,7 @@ if [[ $FAMILY == debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -q
   apt-get install -y -q nftables suricata frr wireguard-tools \
-    strongswan-swanctl charon-systemd curl jq
+    strongswan-swanctl charon-systemd ethtool curl jq
 else
   # Suricata, strongSwan, and wireguard-tools live in EPEL on EL9.
   if [[ $ID == ol ]]; then
@@ -46,7 +46,7 @@ else
   else
     dnf install -y epel-release
   fi
-  dnf install -y nftables frr suricata strongswan wireguard-tools curl jq tar
+  dnf install -y nftables frr suricata strongswan wireguard-tools ethtool curl jq tar
 fi
 
 echo "[2/7] Host services"

@@ -79,6 +79,7 @@ func run(grpcListen, httpListen, dataDir, logDir, usersFile string, dryRun bool)
 			&engines.DryRun{EngineName: engines.FRRName},
 			&engines.DryRun{EngineName: engines.StrongswanName},
 			&engines.DryRun{EngineName: engines.WireguardName},
+			&engines.DryRun{EngineName: engines.NetdevName},
 		)
 	} else {
 		suricata := &engines.Suricata{StateDir: filepath.Join(dataDir, "suricata"), LogDir: logDir}
@@ -93,6 +94,7 @@ func run(grpcListen, httpListen, dataDir, logDir, usersFile string, dryRun bool)
 			&engines.FRR{StateDir: dataDir},
 			&engines.Strongswan{},
 			&engines.Wireguard{StateDir: dataDir},
+			&engines.Netdev{},
 		)
 	}
 

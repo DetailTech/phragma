@@ -1,0 +1,19 @@
+# Global network settings: jumbo MTU with MSS clamping for mixed-MTU
+# paths. The MTU itself is applied by the netdev engine; the ruleset
+# carries the clamp.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1]
+rules:
+  - name: lan-to-wan
+    from_zones: [lan]
+    to_zones: [wan]
+    action: ACTION_ALLOW
+network:
+  mtu: 9000
+  interface_mtus:
+    - interface: eth0
+      mtu: 1500
+  clamp_mss_to_pmtu: true

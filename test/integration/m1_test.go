@@ -147,6 +147,7 @@ func newStack(t *testing.T) *apiserver.PolicyServer {
 	sup := engines.NewSupervisor(
 		&engines.Nftables{StateDir: dir},
 		&engines.Routes{StateDir: dir},
+		&engines.Netdev{},
 	)
 	opts := renderers.DefaultOptions(dir, dir+"/log")
 	return apiserver.NewPolicyServer(st, sup, renderers.Pipeline(opts))

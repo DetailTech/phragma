@@ -10,6 +10,7 @@ package openngfw.v1;
 
 import "openngfw/v1/ids.proto";
 import "openngfw/v1/intel.proto";
+import "openngfw/v1/network.proto";
 import "openngfw/v1/routing.proto";
 import "openngfw/v1/telemetry.proto";
 import "openngfw/v1/vpn.proto";
@@ -29,6 +30,7 @@ message Policy {
   Routing routing = 9;
   Vpn vpn = 10;
   Intel intel = 11;
+  Network network = 12;
 }
 
 // Zone groups interfaces into a security zone. Rules match on zone pairs.

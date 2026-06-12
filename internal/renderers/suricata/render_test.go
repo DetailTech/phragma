@@ -107,3 +107,23 @@ func TestRenderedConfigPassesSuricataT(t *testing.T) {
 		t.Fatalf("suricata -T rejected rendered config: %v\n%s\n--- config ---\n%s", err, out, got)
 	}
 }
+
+func TestRenderDerivesPacketSizeFromMTU(t *testing.T) {
+	ir := detectIR()
+	ir.Network = &compiler.NetworkIR{MaxMTU: 9000}
+	got, err := Render(ir, Options{RulesDir: "/r", LogDir: "/l"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(got), "default-packet-size: 9018") {
+		t.Errorf("capture size not derived from MTU:\n%s", got)
+	}
+	// Without managed MTU the engine default stands.
+	plain, err := Render(detectIR(), Options{RulesDir: "/r", LogDir: "/l"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(plain), "default-packet-size") {
+		t.Error("default-packet-size must be absent when no MTU is managed")
+	}
+}

@@ -142,6 +142,11 @@ applying these substitutions:
 | client peer install (T3.3) | `sudo dnf install -y epel-release && sudo dnf install -y strongswan` |
 | FRR daemons file | same path `/etc/frr/daemons`; service name `frr` — unchanged |
 
+Phase 7 (jumbo frames / SR-IOV) applies unchanged — `ethtool` is
+installed by the installer, and OL9's `nmcli` profiles from §1.3 don't
+fight the managed MTU (the netdev engine re-applies it on every commit
+and at boot).
+
 ### OL9-specific additions
 
 | ID | Action | Expect |

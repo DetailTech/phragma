@@ -11,6 +11,7 @@ import (
 	"github.com/detailtech/oss-ngfw/internal/engines"
 	"github.com/detailtech/oss-ngfw/internal/renderers/frr"
 	"github.com/detailtech/oss-ngfw/internal/renderers/iproute"
+	"github.com/detailtech/oss-ngfw/internal/renderers/netdev"
 	"github.com/detailtech/oss-ngfw/internal/renderers/nftables"
 	"github.com/detailtech/oss-ngfw/internal/renderers/strongswan"
 	"github.com/detailtech/oss-ngfw/internal/renderers/suricata"
@@ -98,6 +99,12 @@ func RenderAll(p *openngfwv1.Policy, opts Options) (map[string][]byte, error) {
 		return nil, fmt.Errorf("render wireguard: %w", err)
 	}
 	out[engines.WireguardName] = wg
+
+	nd, err := netdev.Render(ir)
+	if err != nil {
+		return nil, fmt.Errorf("render netdev: %w", err)
+	}
+	out[engines.NetdevName] = nd
 
 	return out, nil
 }

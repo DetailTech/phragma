@@ -57,6 +57,12 @@ func Render(ir *compiler.IR) ([]byte, error) {
 	if ir.IDs != nil && ir.IDs.Prevent {
 		fmt.Fprintf(&b, "\t\tcounter queue flags bypass to %d comment \"ips-inspect\"\n", ir.IDs.QueueNum)
 	}
+	// MSS clamp sits before the established accept so both SYN and the
+	// returning SYN-ACK are rewritten (mixed-MTU paths: jumbo inside,
+	// 1500 outside, tunnels).
+	if ir.Network != nil && ir.Network.ClampMSS {
+		b.WriteString("\t\ttcp flags syn tcp option maxseg size set rt mtu counter comment \"mss-clamp\"\n")
+	}
 	b.WriteString("\t\tct state established,related accept\n")
 	b.WriteString("\t\tct state invalid drop\n")
 	if ir.Intel != nil && ir.Intel.Enabled {

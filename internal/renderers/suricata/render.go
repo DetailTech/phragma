@@ -60,7 +60,13 @@ func Render(ir *compiler.IR, opts Options) ([]byte, error) {
 	fmt.Fprintf(&b, "    HOME_NET: \"[%s]\"\n", strings.Join(homeNets, ","))
 	b.WriteString("    EXTERNAL_NET: \"!$HOME_NET\"\n\n")
 
-	fmt.Fprintf(&b, "default-log-dir: %s\n\n", opts.LogDir)
+	fmt.Fprintf(&b, "default-log-dir: %s\n", opts.LogDir)
+	// Capture size follows the managed MTU so jumbo frames are not
+	// truncated in detect mode (+18 covers the Ethernet header).
+	if ir.Network != nil && ir.Network.MaxMTU > 0 {
+		fmt.Fprintf(&b, "default-packet-size: %d\n", ir.Network.MaxMTU+18)
+	}
+	b.WriteString("\n")
 
 	b.WriteString("stats:\n  enabled: no\n\n")
 

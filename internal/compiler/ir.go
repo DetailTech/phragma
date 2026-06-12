@@ -20,6 +20,7 @@ type IR struct {
 	Routing   *RoutingIR
 	VPN       *VPNIR
 	Intel     *IntelIR
+	Network   *NetworkIR
 }
 
 // ZoneIR is a zone with its member interfaces.
@@ -194,4 +195,26 @@ type WireguardPeerIR struct {
 // carries enablement for the renderer to declare sets and drop rules.
 type IntelIR struct {
 	Enabled bool
+}
+
+// NetworkIR is the resolved global network configuration; nil when
+// nothing is managed.
+type NetworkIR struct {
+	// Links lists interfaces whose MTU is managed, in deterministic
+	// order (zone order, then overrides for non-zone interfaces).
+	Links []LinkIR
+	// ClampMSS adds a forward-chain MSS-to-PMTU clamp.
+	ClampMSS bool
+	// OffloadOffIfaces lists interfaces whose NIC offloads are disabled
+	// for IDS accuracy (detect mode only).
+	OffloadOffIfaces []string
+	// MaxMTU is the largest managed MTU; the IDS capture size derives
+	// from it (0 when no MTU is managed).
+	MaxMTU uint32
+}
+
+// LinkIR is one managed interface link setting.
+type LinkIR struct {
+	Interface string
+	MTU       uint32
 }

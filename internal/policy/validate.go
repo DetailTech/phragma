@@ -41,6 +41,7 @@ func Validate(p *openngfwv1.Policy) []string {
 	v.checkRouting(p.GetRouting())
 	v.checkVPN(p.GetVpn())
 	v.checkIntel(p.GetIntel())
+	v.checkNetwork(p.GetNetwork())
 	return v.errs
 }
 

@@ -246,6 +246,23 @@ Conventions: run `ngfwctl …` on the firewall (with `NGFW_TOKEN` set),
 | T-OPS-3 | `sudo journalctl -u controld` | no silent failures; engine exits logged loudly |
 | T-OPS-4 | Kill suricata manually (`sudo pkill -9 suricata`) | controld logs "engine process exited unexpectedly"; **note:** auto-restart is not implemented — re-commit to restart (known v1 limitation) |
 
+### Phase 7 — Global network settings: jumbo frames & SR-IOV
+
+OCI VCNs support MTU 9000 natively, and on SR-IOV ("hardware-assisted/
+VFIO networking") shapes the VNICs appear as ordinary interfaces — zones
+reference them by name, nothing else changes.
+
+| ID | Action | Expect |
+|----|--------|--------|
+| T7.1 | Add to policy and commit:<br>`network: {mtu: 9000, clamp_mss_to_pmtu: true, manage_nic_offloads: true}` | `ip link show ens4`/`ens5` on fw report `mtu 9000` |
+| T7.2 | Set client+server NIC MTU to 9000 too; `client$ ping -M do -s 8972 10.0.2.20` | jumbo ping passes un-fragmented through the firewall |
+| T7.3 | `sudo nft list table inet openngfw \| grep maxseg` | `tcp option maxseg size set rt mtu` present |
+| T7.4 | From client, fetch something beyond the jumbo segment via a 1500-MTU path (e.g. DNAT out the wan-side 1500 interface) | no PMTUD black-holing — transfer completes (MSS clamped) |
+| T7.5 | With IDS detect enabled: `sudo ethtool -k ens5 \| grep -E 'generic-receive\|tcp-segmentation'` | both `off` on monitored interfaces (wire-true frames for Suricata) |
+| T7.6 | Repeat T2.3 (EVILSTRING) with jumbo MTU active | alert still fires (capture size follows MTU; check `default-packet-size: 9018` in `/var/lib/openngfw/suricata/suricata.yaml`) |
+| T7.7 | On an SR-IOV shape (VFIO networking) re-run T1.3–T1.5 and T7.2 | identical results — interface type is transparent to the policy model |
+| T7.8 | Remove the `network:` section + commit | links keep their last MTU/offload values (documented apply-only behavior, not a bug) |
+
 ### Known v1 limitations (expected findings, not bugs)
 
 1. **Input chain is `accept`** — the firewall filters *forwarded* traffic;

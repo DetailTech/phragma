@@ -151,6 +151,7 @@ type Policy struct {
 	Routing       *Routing               `protobuf:"bytes,9,opt,name=routing,proto3" json:"routing,omitempty"`
 	Vpn           *Vpn                   `protobuf:"bytes,10,opt,name=vpn,proto3" json:"vpn,omitempty"`
 	Intel         *Intel                 `protobuf:"bytes,11,opt,name=intel,proto3" json:"intel,omitempty"`
+	Network       *Network               `protobuf:"bytes,12,opt,name=network,proto3" json:"network,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -258,6 +259,13 @@ func (x *Policy) GetVpn() *Vpn {
 func (x *Policy) GetIntel() *Intel {
 	if x != nil {
 		return x.Intel
+	}
+	return nil
+}
+
+func (x *Policy) GetNetwork() *Network {
+	if x != nil {
+		return x.Network
 	}
 	return nil
 }
@@ -923,7 +931,7 @@ var File_openngfw_v1_policy_proto protoreflect.FileDescriptor
 
 const file_openngfw_v1_policy_proto_rawDesc = "" +
 	"\n" +
-	"\x18openngfw/v1/policy.proto\x12\vopenngfw.v1\x1a\x15openngfw/v1/ids.proto\x1a\x17openngfw/v1/intel.proto\x1a\x19openngfw/v1/routing.proto\x1a\x1bopenngfw/v1/telemetry.proto\x1a\x15openngfw/v1/vpn.proto\"\xfb\x03\n" +
+	"\x18openngfw/v1/policy.proto\x12\vopenngfw.v1\x1a\x15openngfw/v1/ids.proto\x1a\x17openngfw/v1/intel.proto\x1a\x19openngfw/v1/network.proto\x1a\x19openngfw/v1/routing.proto\x1a\x1bopenngfw/v1/telemetry.proto\x1a\x15openngfw/v1/vpn.proto\"\xab\x04\n" +
 	"\x06Policy\x12'\n" +
 	"\x05zones\x18\x01 \x03(\v2\x11.openngfw.v1.ZoneR\x05zones\x122\n" +
 	"\taddresses\x18\x02 \x03(\v2\x14.openngfw.v1.AddressR\taddresses\x120\n" +
@@ -936,7 +944,8 @@ const file_openngfw_v1_policy_proto_rawDesc = "" +
 	"\arouting\x18\t \x01(\v2\x14.openngfw.v1.RoutingR\arouting\x12\"\n" +
 	"\x03vpn\x18\n" +
 	" \x01(\v2\x10.openngfw.v1.VpnR\x03vpn\x12(\n" +
-	"\x05intel\x18\v \x01(\v2\x12.openngfw.v1.IntelR\x05intel\"\\\n" +
+	"\x05intel\x18\v \x01(\v2\x12.openngfw.v1.IntelR\x05intel\x12.\n" +
+	"\anetwork\x18\f \x01(\v2\x14.openngfw.v1.NetworkR\anetwork\"\\\n" +
 	"\x04Zone\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1e\n" +
 	"\n" +
@@ -1036,6 +1045,7 @@ var file_openngfw_v1_policy_proto_goTypes = []any{
 	(*Routing)(nil),        // 14: openngfw.v1.Routing
 	(*Vpn)(nil),            // 15: openngfw.v1.Vpn
 	(*Intel)(nil),          // 16: openngfw.v1.Intel
+	(*Network)(nil),        // 17: openngfw.v1.Network
 }
 var file_openngfw_v1_policy_proto_depIdxs = []int32{
 	3,  // 0: openngfw.v1.Policy.zones:type_name -> openngfw.v1.Zone
@@ -1049,16 +1059,17 @@ var file_openngfw_v1_policy_proto_depIdxs = []int32{
 	14, // 8: openngfw.v1.Policy.routing:type_name -> openngfw.v1.Routing
 	15, // 9: openngfw.v1.Policy.vpn:type_name -> openngfw.v1.Vpn
 	16, // 10: openngfw.v1.Policy.intel:type_name -> openngfw.v1.Intel
-	0,  // 11: openngfw.v1.Service.protocol:type_name -> openngfw.v1.Protocol
-	6,  // 12: openngfw.v1.Service.ports:type_name -> openngfw.v1.PortRange
-	1,  // 13: openngfw.v1.Rule.action:type_name -> openngfw.v1.Action
-	9,  // 14: openngfw.v1.Nat.source:type_name -> openngfw.v1.SourceNat
-	10, // 15: openngfw.v1.Nat.destination:type_name -> openngfw.v1.DestinationNat
-	16, // [16:16] is the sub-list for method output_type
-	16, // [16:16] is the sub-list for method input_type
-	16, // [16:16] is the sub-list for extension type_name
-	16, // [16:16] is the sub-list for extension extendee
-	0,  // [0:16] is the sub-list for field type_name
+	17, // 11: openngfw.v1.Policy.network:type_name -> openngfw.v1.Network
+	0,  // 12: openngfw.v1.Service.protocol:type_name -> openngfw.v1.Protocol
+	6,  // 13: openngfw.v1.Service.ports:type_name -> openngfw.v1.PortRange
+	1,  // 14: openngfw.v1.Rule.action:type_name -> openngfw.v1.Action
+	9,  // 15: openngfw.v1.Nat.source:type_name -> openngfw.v1.SourceNat
+	10, // 16: openngfw.v1.Nat.destination:type_name -> openngfw.v1.DestinationNat
+	17, // [17:17] is the sub-list for method output_type
+	17, // [17:17] is the sub-list for method input_type
+	17, // [17:17] is the sub-list for extension type_name
+	17, // [17:17] is the sub-list for extension extendee
+	0,  // [0:17] is the sub-list for field type_name
 }
 
 func init() { file_openngfw_v1_policy_proto_init() }
@@ -1068,6 +1079,7 @@ func file_openngfw_v1_policy_proto_init() {
 	}
 	file_openngfw_v1_ids_proto_init()
 	file_openngfw_v1_intel_proto_init()
+	file_openngfw_v1_network_proto_init()
 	file_openngfw_v1_routing_proto_init()
 	file_openngfw_v1_telemetry_proto_init()
 	file_openngfw_v1_vpn_proto_init()
