@@ -2,8 +2,9 @@ package intel
 
 import (
 	"context"
+	"io"
 	"net/http"
-	"net/http/httptest"
+	"net/netip"
 	"strings"
 	"testing"
 
@@ -64,17 +65,83 @@ junk line that is not an ip
 }
 
 func TestFetch(t *testing.T) {
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		_, _ = w.Write([]byte("# test feed\n192.0.2.10\n192.0.2.0/28\n"))
-	}))
-	defer srv.Close()
+	client := &http.Client{Transport: roundTripFunc(func(*http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(strings.NewReader("# test feed\n192.0.2.10\n192.0.2.0/28\n")),
+			Header:     make(http.Header),
+		}, nil
+	})}
 
-	prefixes, err := Fetch(context.Background(), srv.Client(), srv.URL)
+	prefixes, err := Fetch(context.Background(), client, "https://feeds.example.com/blocklist.txt")
 	if err != nil {
 		t.Fatal(err)
 	}
 	if len(prefixes) != 2 {
 		t.Fatalf("prefixes = %v", prefixes)
+	}
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (fn roundTripFunc) RoundTrip(req *http.Request) (*http.Response, error) {
+	return fn(req)
+}
+
+func TestFetchRejectsUnsafeFeedURLs(t *testing.T) {
+	tests := []string{
+		"http://127.0.0.1/feed.txt",
+		"http://10.0.0.10/feed.txt",
+		"http://169.254.169.254/opc/v2/instance/",
+		"http://[::1]/feed.txt",
+		"http://metadata.google.internal/feed.txt",
+		"http://feed.local/blocklist.txt",
+	}
+	for _, raw := range tests {
+		t.Run(raw, func(t *testing.T) {
+			if _, err := Fetch(context.Background(), nil, raw); err == nil {
+				t.Fatalf("expected unsafe feed URL %q to be rejected", raw)
+			}
+		})
+	}
+}
+
+func TestDefaultHTTPClientRejectsUnsafeRedirect(t *testing.T) {
+	client := DefaultHTTPClient()
+	client.Transport = roundTripFunc(func(req *http.Request) (*http.Response, error) {
+		return &http.Response{
+			StatusCode: http.StatusFound,
+			Header:     http.Header{"Location": []string{"http://127.0.0.1/feed.txt"}},
+			Body:       io.NopCloser(strings.NewReader("")),
+			Request:    req,
+		}, nil
+	})
+
+	if _, err := Fetch(context.Background(), client, "https://feeds.example.com/blocklist.txt"); err == nil {
+		t.Fatal("expected unsafe redirect destination to be rejected")
+	}
+}
+
+func TestNormalizePrefixesRemovesNestedIntervals(t *testing.T) {
+	in := map[netip.Prefix]bool{
+		netip.MustParsePrefix("204.236.0.0/14"):  true,
+		netip.MustParsePrefix("204.236.0.0/16"):  true,
+		netip.MustParsePrefix("204.236.10.0/24"): true,
+		netip.MustParsePrefix("198.51.100.4/24"): true, // host bits should be masked
+		netip.MustParsePrefix("198.51.100.0/25"): true,
+		netip.MustParsePrefix("2001:db8::/32"):   true,
+		netip.MustParsePrefix("2001:db8:1::/48"): true,
+	}
+
+	got := normalizePrefixes(in)
+	want := []string{"198.51.100.0/24", "204.236.0.0/14", "2001:db8::/32"}
+	if len(got) != len(want) {
+		t.Fatalf("normalizePrefixes = %v, want %v", got, want)
+	}
+	for i, w := range want {
+		if got[i].String() != w {
+			t.Fatalf("normalizePrefixes[%d] = %s, want %s (all: %v)", i, got[i], w, got)
+		}
 	}
 }
 

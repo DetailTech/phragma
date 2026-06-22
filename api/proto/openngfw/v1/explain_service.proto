@@ -1,0 +1,225 @@
+// ExplainService answers why a candidate or running policy would allow,
+// block, reject, or fail to match a flow. It is the API surface for the
+// OpenNGFW explanation requirement; engine-native events are still adapted
+// into this product model over time.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "openngfw/v1/alert_service.proto";
+import "openngfw/v1/flow_service.proto";
+import "openngfw/v1/ids.proto";
+import "openngfw/v1/policy.proto";
+import "openngfw/v1/policy_service.proto";
+import "openngfw/v1/system.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service ExplainService {
+  // ExplainFlow evaluates one flow tuple against a selected policy source.
+  rpc ExplainFlow(ExplainFlowRequest) returns (ExplainFlowResponse) {
+    option (google.api.http) = {
+      post: "/v1/explain/flow"
+      body: "*"
+    };
+  }
+}
+
+enum ExplainVerdict {
+  EXPLAIN_VERDICT_UNSPECIFIED = 0;
+  EXPLAIN_VERDICT_ALLOWED = 1;
+  EXPLAIN_VERDICT_DENIED = 2;
+  EXPLAIN_VERDICT_REJECTED = 3;
+  EXPLAIN_VERDICT_DEFAULT_DROP = 4;
+}
+
+enum ExplainInspectionState {
+  EXPLAIN_INSPECTION_STATE_UNSPECIFIED = 0;
+  EXPLAIN_INSPECTION_STATE_NOT_INSPECTED = 1;
+  EXPLAIN_INSPECTION_STATE_IDS_DETECT = 2;
+  EXPLAIN_INSPECTION_STATE_IPS_PREVENT = 3;
+  EXPLAIN_INSPECTION_STATE_BLOCKED_BEFORE_INSPECTION = 4;
+}
+
+// ExplainDecisionTerm is the stable hard-requirement vocabulary exposed to
+// API, CLI, and WebUI consumers. Existing verdict and inspection enums remain
+// more granular product-model detail; these terms are the operator-facing
+// decision language used for release acceptance.
+enum ExplainDecisionTerm {
+  EXPLAIN_DECISION_TERM_UNSPECIFIED = 0;
+  EXPLAIN_DECISION_TERM_ALLOWED = 1;
+  EXPLAIN_DECISION_TERM_BLOCKED = 2;
+  EXPLAIN_DECISION_TERM_BYPASSED = 3;
+  EXPLAIN_DECISION_TERM_PARTIALLY_INSPECTED = 4;
+  EXPLAIN_DECISION_TERM_FULLY_INSPECTED = 5;
+  EXPLAIN_DECISION_TERM_DECRYPTED = 6;
+  EXPLAIN_DECISION_TERM_FAILED = 7;
+  EXPLAIN_DECISION_TERM_FAIL_OPEN = 8;
+  EXPLAIN_DECISION_TERM_FAIL_CLOSED = 9;
+}
+
+message ExplainInspectionProfile {
+  bool ids_enabled = 1;
+  IdsMode ids_mode = 2;
+  IdsFailureBehavior failure_behavior = 3;
+  // The inspection/matching engine used for the current IDS/IPS mode. This is
+  // evidence, not the OpenNGFW product model.
+  string engine = 4;
+  bool flow_offload_enabled = 5;
+  // True when policy or runtime degradation can intentionally bypass userspace
+  // inspection. The reason field explains the exact policy-controlled bypass.
+  bool bypass_possible = 6;
+  string bypass_reason = 7;
+  // Human-readable ordering between policy enforcement and inspection handoff.
+  string inspection_order = 8;
+  // Human-readable behavior if the userspace inspection engine is unavailable.
+  string degraded_behavior = 9;
+  repeated string evidence = 10;
+}
+
+message ExplainRouteProfile {
+  // True when the policy verdict allows forwarding and a route lookup is
+  // meaningful. Blocked flows do not evaluate routing.
+  bool evaluated = 1;
+  bool matched = 2;
+  // Destination prefix selected by longest-prefix match.
+  string destination = 3;
+  string next_hop = 4;
+  string egress_interface = 5;
+  uint32 metric = 6;
+  // Current values include "static", "kernel-unresolved", and "not-evaluated".
+  string source = 7;
+  string reason = 8;
+  repeated string evidence = 9;
+}
+
+message ExplainRuntimeEvidence {
+  // True when the server attempted to inspect live dataplane state for this
+  // tuple. Runtime evidence never changes the policy-model verdict.
+  bool queried = 1;
+  // ready, degraded, or unavailable. Empty means runtime evidence was skipped.
+  string state = 2;
+  string detail = 3;
+  // Running policy version at runtime-evidence query time. This can differ
+  // from policy_version when explaining a candidate or historical version.
+  uint64 running_policy_version = 4;
+  string policy_context = 5;
+  // Matching Linux conntrack sessions from the active dataplane.
+  repeated ConntrackSession sessions = 6;
+  repeated string evidence = 7;
+  repeated string warnings = 8;
+  // Matching EVE flow records for request.flow_id, when supplied.
+  repeated Flow correlated_flows = 9;
+  // Matching EVE alert records for request.flow_id, when supplied.
+  repeated Alert correlated_alerts = 10;
+  // Matching packet capture artifacts for request.flow_id, when supplied.
+  repeated PacketCaptureJob correlated_captures = 11;
+}
+
+message ExplainDestinationNatProfile {
+  // True when destination NAT was evaluated before policy matching.
+  bool evaluated = 1;
+  bool matched = 2;
+  string matched_rule = 3;
+  // Zero-based index in policy.nat.destination. Meaningful only when
+  // matched_rule is set.
+  uint32 matched_rule_index = 4;
+  string original_destination_ip = 5;
+  uint32 original_destination_port = 6;
+  string translated_destination_ip = 7;
+  uint32 translated_destination_port = 8;
+  string reason = 9;
+  repeated string evidence = 10;
+  // Durable destination-NAT rule identity when a rule matched.
+  string matched_rule_id = 11;
+}
+
+message ExplainSourceNatProfile {
+  // True when source NAT was evaluated after an allow verdict.
+  bool evaluated = 1;
+  bool matched = 2;
+  string matched_rule = 3;
+  // Zero-based index in policy.nat.source. Meaningful only when matched_rule
+  // is set.
+  uint32 matched_rule_index = 4;
+  string original_source_ip = 5;
+  // Empty for masquerade because the runtime egress address is selected by
+  // the dataplane, not the pure policy model.
+  string translated_source_ip = 6;
+  bool masquerade = 7;
+  string reason = 8;
+  repeated string evidence = 9;
+  // Durable source-NAT rule identity when a rule matched.
+  string matched_rule_id = 10;
+}
+
+message ExplainNatProfile {
+  ExplainDestinationNatProfile destination = 1;
+  ExplainSourceNatProfile source = 2;
+  repeated string evidence = 3;
+}
+
+message ExplainFlowRequest {
+  PolicySource policy_source = 1;
+  // Version id; required when policy_source == POLICY_SOURCE_VERSION.
+  uint64 version = 2;
+  string from_zone = 3;
+  string to_zone = 4;
+  string src_ip = 5;
+  uint32 src_port = 6;
+  string dest_ip = 7;
+  uint32 dest_port = 8;
+  Protocol protocol = 9;
+  // Optional canonical OpenNGFW App-ID or supported engine signal for the
+  // observed flow. When omitted, port-hint App-ID rules can still be explained;
+  // signal-only App-ID rules require observed application evidence.
+  string app_id = 10;
+  // When true, the API server augments the policy-model verdict with live
+  // runtime evidence such as conntrack sessions. Missing runtime evidence is
+  // reported in the response and never changes the policy verdict.
+  bool include_runtime = 11;
+  // Optional engine/telemetry flow identifier used by future EVE-backed
+  // correlation. Conntrack correlation still uses the tuple fields above.
+  string flow_id = 12;
+  // Optional User-ID/device-posture context supplied by the caller for pure
+  // policy-model matching. The server does not perform live directory or MDM
+  // lookup for these values.
+  RuleMatchContext match_context = 13;
+}
+
+message ExplainFlowResponse {
+  PolicySource policy_source = 1;
+  uint64 policy_version = 2;
+  ExplainVerdict verdict = 3;
+  ExplainInspectionState inspection_state = 4;
+  string reason = 5;
+  string matched_rule = 6;
+  // Zero-based index in the original policy rule list. Meaningful only
+  // when matched_rule is set.
+  uint32 matched_rule_index = 7;
+  bool default_policy = 8;
+  repeated string evidence = 9;
+  repeated string trace = 10;
+  repeated string warnings = 11;
+  ExplainInspectionProfile inspection_profile = 12;
+  ExplainRouteProfile route_profile = 13;
+  ExplainRuntimeEvidence runtime_evidence = 14;
+  ExplainNatProfile nat_profile = 15;
+  // First-class decision vocabulary required by the product hard
+  // requirements. Terms are additive: for example an allowed flow can also be
+  // partially inspected and fail-open by policy.
+  repeated ExplainDecisionTerm decision_terms = 16;
+  // Human-readable summary derived from decision_terms without replacing the
+  // detailed reason/evidence fields.
+  string decision_summary = 17;
+  // The identity/posture context attached to the first matching rule, when
+  // present. This mirrors policy context and does not prove live IdP or MDM
+  // state.
+  RuleMatchContext matched_rule_context = 18;
+  // Durable forwarding-rule identity for API/UI targeting, audit correlation,
+  // compiler IR, renderer metadata, and SIEM/counter joins. Names remain
+  // operator-facing labels and may change.
+  string matched_rule_id = 19;
+}

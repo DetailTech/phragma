@@ -80,6 +80,281 @@ func (PolicySource) EnumDescriptor() ([]byte, []int) {
 	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{0}
 }
 
+type PolicyObjectKind int32
+
+const (
+	PolicyObjectKind_POLICY_OBJECT_KIND_UNSPECIFIED             PolicyObjectKind = 0
+	PolicyObjectKind_POLICY_OBJECT_KIND_ZONE                    PolicyObjectKind = 1
+	PolicyObjectKind_POLICY_OBJECT_KIND_ADDRESS                 PolicyObjectKind = 2
+	PolicyObjectKind_POLICY_OBJECT_KIND_SERVICE                 PolicyObjectKind = 3
+	PolicyObjectKind_POLICY_OBJECT_KIND_APPLICATION             PolicyObjectKind = 4
+	PolicyObjectKind_POLICY_OBJECT_KIND_SECURITY_PROFILE        PolicyObjectKind = 5
+	PolicyObjectKind_POLICY_OBJECT_KIND_QOS_PROFILE             PolicyObjectKind = 6
+	PolicyObjectKind_POLICY_OBJECT_KIND_ZONE_PROTECTION_PROFILE PolicyObjectKind = 7
+)
+
+// Enum value maps for PolicyObjectKind.
+var (
+	PolicyObjectKind_name = map[int32]string{
+		0: "POLICY_OBJECT_KIND_UNSPECIFIED",
+		1: "POLICY_OBJECT_KIND_ZONE",
+		2: "POLICY_OBJECT_KIND_ADDRESS",
+		3: "POLICY_OBJECT_KIND_SERVICE",
+		4: "POLICY_OBJECT_KIND_APPLICATION",
+		5: "POLICY_OBJECT_KIND_SECURITY_PROFILE",
+		6: "POLICY_OBJECT_KIND_QOS_PROFILE",
+		7: "POLICY_OBJECT_KIND_ZONE_PROTECTION_PROFILE",
+	}
+	PolicyObjectKind_value = map[string]int32{
+		"POLICY_OBJECT_KIND_UNSPECIFIED":             0,
+		"POLICY_OBJECT_KIND_ZONE":                    1,
+		"POLICY_OBJECT_KIND_ADDRESS":                 2,
+		"POLICY_OBJECT_KIND_SERVICE":                 3,
+		"POLICY_OBJECT_KIND_APPLICATION":             4,
+		"POLICY_OBJECT_KIND_SECURITY_PROFILE":        5,
+		"POLICY_OBJECT_KIND_QOS_PROFILE":             6,
+		"POLICY_OBJECT_KIND_ZONE_PROTECTION_PROFILE": 7,
+	}
+)
+
+func (x PolicyObjectKind) Enum() *PolicyObjectKind {
+	p := new(PolicyObjectKind)
+	*p = x
+	return p
+}
+
+func (x PolicyObjectKind) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PolicyObjectKind) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_service_proto_enumTypes[1].Descriptor()
+}
+
+func (PolicyObjectKind) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_service_proto_enumTypes[1]
+}
+
+func (x PolicyObjectKind) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PolicyObjectKind.Descriptor instead.
+func (PolicyObjectKind) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{1}
+}
+
+type PolicyDiffLineType int32
+
+const (
+	PolicyDiffLineType_POLICY_DIFF_LINE_TYPE_UNSPECIFIED PolicyDiffLineType = 0
+	PolicyDiffLineType_POLICY_DIFF_LINE_TYPE_CONTEXT     PolicyDiffLineType = 1
+	PolicyDiffLineType_POLICY_DIFF_LINE_TYPE_ADD         PolicyDiffLineType = 2
+	PolicyDiffLineType_POLICY_DIFF_LINE_TYPE_DELETE      PolicyDiffLineType = 3
+)
+
+// Enum value maps for PolicyDiffLineType.
+var (
+	PolicyDiffLineType_name = map[int32]string{
+		0: "POLICY_DIFF_LINE_TYPE_UNSPECIFIED",
+		1: "POLICY_DIFF_LINE_TYPE_CONTEXT",
+		2: "POLICY_DIFF_LINE_TYPE_ADD",
+		3: "POLICY_DIFF_LINE_TYPE_DELETE",
+	}
+	PolicyDiffLineType_value = map[string]int32{
+		"POLICY_DIFF_LINE_TYPE_UNSPECIFIED": 0,
+		"POLICY_DIFF_LINE_TYPE_CONTEXT":     1,
+		"POLICY_DIFF_LINE_TYPE_ADD":         2,
+		"POLICY_DIFF_LINE_TYPE_DELETE":      3,
+	}
+)
+
+func (x PolicyDiffLineType) Enum() *PolicyDiffLineType {
+	p := new(PolicyDiffLineType)
+	*p = x
+	return p
+}
+
+func (x PolicyDiffLineType) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PolicyDiffLineType) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_service_proto_enumTypes[2].Descriptor()
+}
+
+func (PolicyDiffLineType) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_service_proto_enumTypes[2]
+}
+
+func (x PolicyDiffLineType) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PolicyDiffLineType.Descriptor instead.
+func (PolicyDiffLineType) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{2}
+}
+
+type ValidationSeverity int32
+
+const (
+	ValidationSeverity_VALIDATION_SEVERITY_UNSPECIFIED ValidationSeverity = 0
+	ValidationSeverity_VALIDATION_SEVERITY_ERROR       ValidationSeverity = 1
+	ValidationSeverity_VALIDATION_SEVERITY_WARNING     ValidationSeverity = 2
+	ValidationSeverity_VALIDATION_SEVERITY_INFO        ValidationSeverity = 3
+)
+
+// Enum value maps for ValidationSeverity.
+var (
+	ValidationSeverity_name = map[int32]string{
+		0: "VALIDATION_SEVERITY_UNSPECIFIED",
+		1: "VALIDATION_SEVERITY_ERROR",
+		2: "VALIDATION_SEVERITY_WARNING",
+		3: "VALIDATION_SEVERITY_INFO",
+	}
+	ValidationSeverity_value = map[string]int32{
+		"VALIDATION_SEVERITY_UNSPECIFIED": 0,
+		"VALIDATION_SEVERITY_ERROR":       1,
+		"VALIDATION_SEVERITY_WARNING":     2,
+		"VALIDATION_SEVERITY_INFO":        3,
+	}
+)
+
+func (x ValidationSeverity) Enum() *ValidationSeverity {
+	p := new(ValidationSeverity)
+	*p = x
+	return p
+}
+
+func (x ValidationSeverity) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ValidationSeverity) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_service_proto_enumTypes[3].Descriptor()
+}
+
+func (ValidationSeverity) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_service_proto_enumTypes[3]
+}
+
+func (x ValidationSeverity) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ValidationSeverity.Descriptor instead.
+func (ValidationSeverity) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{3}
+}
+
+type ValidationStage int32
+
+const (
+	ValidationStage_VALIDATION_STAGE_UNSPECIFIED     ValidationStage = 0
+	ValidationStage_VALIDATION_STAGE_POLICY_MODEL    ValidationStage = 1
+	ValidationStage_VALIDATION_STAGE_RENDER          ValidationStage = 2
+	ValidationStage_VALIDATION_STAGE_ENGINE_VALIDATE ValidationStage = 3
+	ValidationStage_VALIDATION_STAGE_IMPACT          ValidationStage = 4
+)
+
+// Enum value maps for ValidationStage.
+var (
+	ValidationStage_name = map[int32]string{
+		0: "VALIDATION_STAGE_UNSPECIFIED",
+		1: "VALIDATION_STAGE_POLICY_MODEL",
+		2: "VALIDATION_STAGE_RENDER",
+		3: "VALIDATION_STAGE_ENGINE_VALIDATE",
+		4: "VALIDATION_STAGE_IMPACT",
+	}
+	ValidationStage_value = map[string]int32{
+		"VALIDATION_STAGE_UNSPECIFIED":     0,
+		"VALIDATION_STAGE_POLICY_MODEL":    1,
+		"VALIDATION_STAGE_RENDER":          2,
+		"VALIDATION_STAGE_ENGINE_VALIDATE": 3,
+		"VALIDATION_STAGE_IMPACT":          4,
+	}
+)
+
+func (x ValidationStage) Enum() *ValidationStage {
+	p := new(ValidationStage)
+	*p = x
+	return p
+}
+
+func (x ValidationStage) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ValidationStage) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_service_proto_enumTypes[4].Descriptor()
+}
+
+func (ValidationStage) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_service_proto_enumTypes[4]
+}
+
+func (x ValidationStage) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ValidationStage.Descriptor instead.
+func (ValidationStage) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{4}
+}
+
+type ChangeRisk int32
+
+const (
+	ChangeRisk_CHANGE_RISK_UNSPECIFIED ChangeRisk = 0
+	ChangeRisk_CHANGE_RISK_LOW         ChangeRisk = 1
+	ChangeRisk_CHANGE_RISK_MEDIUM      ChangeRisk = 2
+	ChangeRisk_CHANGE_RISK_HIGH        ChangeRisk = 3
+)
+
+// Enum value maps for ChangeRisk.
+var (
+	ChangeRisk_name = map[int32]string{
+		0: "CHANGE_RISK_UNSPECIFIED",
+		1: "CHANGE_RISK_LOW",
+		2: "CHANGE_RISK_MEDIUM",
+		3: "CHANGE_RISK_HIGH",
+	}
+	ChangeRisk_value = map[string]int32{
+		"CHANGE_RISK_UNSPECIFIED": 0,
+		"CHANGE_RISK_LOW":         1,
+		"CHANGE_RISK_MEDIUM":      2,
+		"CHANGE_RISK_HIGH":        3,
+	}
+)
+
+func (x ChangeRisk) Enum() *ChangeRisk {
+	p := new(ChangeRisk)
+	*p = x
+	return p
+}
+
+func (x ChangeRisk) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ChangeRisk) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_service_proto_enumTypes[5].Descriptor()
+}
+
+func (ChangeRisk) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_service_proto_enumTypes[5]
+}
+
+func (x ChangeRisk) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ChangeRisk.Descriptor instead.
+func (ChangeRisk) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{5}
+}
+
 type GetPolicyRequest struct {
 	state  protoimpl.MessageState `protogen:"open.v1"`
 	Source PolicySource           `protobuf:"varint,1,opt,name=source,proto3,enum=openngfw.v1.PolicySource" json:"source,omitempty"`
@@ -187,10 +462,14 @@ func (x *GetPolicyResponse) GetVersion() uint64 {
 }
 
 type SetCandidateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Policy        *Policy                `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Policy *Policy                `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
+	// Optional optimistic-concurrency guard. When set, the server rejects the
+	// write unless it matches the current candidate_revision from
+	// GetCandidateStatusResponse.
+	ExpectedCandidateRevision string `protobuf:"bytes,2,opt,name=expected_candidate_revision,json=expectedCandidateRevision,proto3" json:"expected_candidate_revision,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *SetCandidateRequest) Reset() {
@@ -230,10 +509,19 @@ func (x *SetCandidateRequest) GetPolicy() *Policy {
 	return nil
 }
 
+func (x *SetCandidateRequest) GetExpectedCandidateRevision() string {
+	if x != nil {
+		return x.ExpectedCandidateRevision
+	}
+	return ""
+}
+
 type SetCandidateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Revision assigned to the stored candidate after the write succeeds.
+	CandidateRevision string `protobuf:"bytes,1,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
 }
 
 func (x *SetCandidateResponse) Reset() {
@@ -266,8 +554,18 @@ func (*SetCandidateResponse) Descriptor() ([]byte, []int) {
 	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{3}
 }
 
+func (x *SetCandidateResponse) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
 type ValidateRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Optional unstaged policy to validate. Empty keeps the legacy behavior of
+	// validating the currently stored candidate.
+	Policy        *Policy `protobuf:"bytes,1,opt,name=policy,proto3" json:"policy,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -302,10 +600,26 @@ func (*ValidateRequest) Descriptor() ([]byte, []int) {
 	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{4}
 }
 
+func (x *ValidateRequest) GetPolicy() *Policy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
 type ValidateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Valid         bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
-	Errors        []string               `protobuf:"bytes,2,rep,name=errors,proto3" json:"errors,omitempty"`
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Valid  bool                   `protobuf:"varint,1,opt,name=valid,proto3" json:"valid,omitempty"`
+	Errors []string               `protobuf:"bytes,2,rep,name=errors,proto3" json:"errors,omitempty"`
+	// First-party impact summary comparing candidate to running policy.
+	// Clients should surface high-risk changes before commit.
+	Impact *ChangeImpact `protobuf:"bytes,3,opt,name=impact,proto3" json:"impact,omitempty"`
+	// Structured validation, render, engine, and semantic findings. `errors`
+	// remains for compatibility; new clients should prefer findings.
+	Findings []*ValidationFinding `protobuf:"bytes,4,rep,name=findings,proto3" json:"findings,omitempty"`
+	// Rendered engine artifact plan produced during validation. Empty when
+	// policy-model validation fails before render.
+	RenderPlan    *RenderPlan `protobuf:"bytes,5,opt,name=render_plan,json=renderPlan,proto3" json:"render_plan,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -354,16 +668,3054 @@ func (x *ValidateResponse) GetErrors() []string {
 	return nil
 }
 
-type CommitRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Comment       string                 `protobuf:"bytes,1,opt,name=comment,proto3" json:"comment,omitempty"`
+func (x *ValidateResponse) GetImpact() *ChangeImpact {
+	if x != nil {
+		return x.Impact
+	}
+	return nil
+}
+
+func (x *ValidateResponse) GetFindings() []*ValidationFinding {
+	if x != nil {
+		return x.Findings
+	}
+	return nil
+}
+
+func (x *ValidateResponse) GetRenderPlan() *RenderPlan {
+	if x != nil {
+		return x.RenderPlan
+	}
+	return nil
+}
+
+type ValidationFinding struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Severity ValidationSeverity     `protobuf:"varint,1,opt,name=severity,proto3,enum=openngfw.v1.ValidationSeverity" json:"severity,omitempty"`
+	Stage    ValidationStage        `protobuf:"varint,2,opt,name=stage,proto3,enum=openngfw.v1.ValidationStage" json:"stage,omitempty"`
+	// Stable machine-readable family, e.g. POLICY_VALIDATION_ERROR.
+	Code string `protobuf:"bytes,3,opt,name=code,proto3" json:"code,omitempty"`
+	// Operator-facing summary.
+	Message string `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`
+	// Optional policy path or generated artifact name when known.
+	FieldPath string `protobuf:"bytes,5,opt,name=field_path,json=fieldPath,proto3" json:"field_path,omitempty"`
+	// Optional detail or remediation hint.
+	Detail        string `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *ValidationFinding) Reset() {
+	*x = ValidationFinding{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidationFinding) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidationFinding) ProtoMessage() {}
+
+func (x *ValidationFinding) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidationFinding.ProtoReflect.Descriptor instead.
+func (*ValidationFinding) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ValidationFinding) GetSeverity() ValidationSeverity {
+	if x != nil {
+		return x.Severity
+	}
+	return ValidationSeverity_VALIDATION_SEVERITY_UNSPECIFIED
+}
+
+func (x *ValidationFinding) GetStage() ValidationStage {
+	if x != nil {
+		return x.Stage
+	}
+	return ValidationStage_VALIDATION_STAGE_UNSPECIFIED
+}
+
+func (x *ValidationFinding) GetCode() string {
+	if x != nil {
+		return x.Code
+	}
+	return ""
+}
+
+func (x *ValidationFinding) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *ValidationFinding) GetFieldPath() string {
+	if x != nil {
+		return x.FieldPath
+	}
+	return ""
+}
+
+func (x *ValidationFinding) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type RenderPlan struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Artifacts     []*RenderArtifact      `protobuf:"bytes,1,rep,name=artifacts,proto3" json:"artifacts,omitempty"`
+	ArtifactCount uint32                 `protobuf:"varint,2,opt,name=artifact_count,json=artifactCount,proto3" json:"artifact_count,omitempty"`
+	TotalBytes    uint64                 `protobuf:"varint,3,opt,name=total_bytes,json=totalBytes,proto3" json:"total_bytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RenderPlan) Reset() {
+	*x = RenderPlan{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenderPlan) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenderPlan) ProtoMessage() {}
+
+func (x *RenderPlan) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenderPlan.ProtoReflect.Descriptor instead.
+func (*RenderPlan) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *RenderPlan) GetArtifacts() []*RenderArtifact {
+	if x != nil {
+		return x.Artifacts
+	}
+	return nil
+}
+
+func (x *RenderPlan) GetArtifactCount() uint32 {
+	if x != nil {
+		return x.ArtifactCount
+	}
+	return 0
+}
+
+func (x *RenderPlan) GetTotalBytes() uint64 {
+	if x != nil {
+		return x.TotalBytes
+	}
+	return 0
+}
+
+type RenderArtifact struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Engine or subsystem name, matching the renderer/supervisor artifact key.
+	Engine string `protobuf:"bytes,1,opt,name=engine,proto3" json:"engine,omitempty"`
+	// Artifact key/name used by the local engine supervisor.
+	Name          string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	SizeBytes     uint64 `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RenderArtifact) Reset() {
+	*x = RenderArtifact{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenderArtifact) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenderArtifact) ProtoMessage() {}
+
+func (x *RenderArtifact) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenderArtifact.ProtoReflect.Descriptor instead.
+func (*RenderArtifact) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RenderArtifact) GetEngine() string {
+	if x != nil {
+		return x.Engine
+	}
+	return ""
+}
+
+func (x *RenderArtifact) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RenderArtifact) GetSizeBytes() uint64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+type GetCandidateStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetCandidateStatusRequest) Reset() {
+	*x = GetCandidateStatusRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCandidateStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCandidateStatusRequest) ProtoMessage() {}
+
+func (x *GetCandidateStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCandidateStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetCandidateStatusRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{9}
+}
+
+type GetCandidateStatusResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// True when a candidate blob exists in the store, even if it currently
+	// matches running policy.
+	HasCandidate bool `protobuf:"varint,1,opt,name=has_candidate,json=hasCandidate,proto3" json:"has_candidate,omitempty"`
+	// True when candidate differs from the running policy.
+	Dirty bool `protobuf:"varint,2,opt,name=dirty,proto3" json:"dirty,omitempty"`
+	// Current running policy version used as the comparison baseline.
+	RunningVersion uint64 `protobuf:"varint,3,opt,name=running_version,json=runningVersion,proto3" json:"running_version,omitempty"`
+	// Total added + modified + removed items across section summaries.
+	ChangeCount uint32 `protobuf:"varint,4,opt,name=change_count,json=changeCount,proto3" json:"change_count,omitempty"`
+	// Section-level summaries suitable for candidate bars and automation.
+	Changes []*CandidateChangeSummary `protobuf:"bytes,5,rep,name=changes,proto3" json:"changes,omitempty"`
+	// First-party impact summary comparing candidate to running policy.
+	Impact *ChangeImpact `protobuf:"bytes,6,opt,name=impact,proto3" json:"impact,omitempty"`
+	// Optimistic-concurrency token for candidate writes. When no candidate blob
+	// exists, this is scoped to the running policy version so stale empty-state
+	// clients cannot overwrite a newer running baseline.
+	CandidateRevision string `protobuf:"bytes,7,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *GetCandidateStatusResponse) Reset() {
+	*x = GetCandidateStatusResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetCandidateStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetCandidateStatusResponse) ProtoMessage() {}
+
+func (x *GetCandidateStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetCandidateStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetCandidateStatusResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *GetCandidateStatusResponse) GetHasCandidate() bool {
+	if x != nil {
+		return x.HasCandidate
+	}
+	return false
+}
+
+func (x *GetCandidateStatusResponse) GetDirty() bool {
+	if x != nil {
+		return x.Dirty
+	}
+	return false
+}
+
+func (x *GetCandidateStatusResponse) GetRunningVersion() uint64 {
+	if x != nil {
+		return x.RunningVersion
+	}
+	return 0
+}
+
+func (x *GetCandidateStatusResponse) GetChangeCount() uint32 {
+	if x != nil {
+		return x.ChangeCount
+	}
+	return 0
+}
+
+func (x *GetCandidateStatusResponse) GetChanges() []*CandidateChangeSummary {
+	if x != nil {
+		return x.Changes
+	}
+	return nil
+}
+
+func (x *GetCandidateStatusResponse) GetImpact() *ChangeImpact {
+	if x != nil {
+		return x.Impact
+	}
+	return nil
+}
+
+func (x *GetCandidateStatusResponse) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+type ListNatRulesRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Target policy snapshot. Defaults to running when unspecified.
+	Source PolicySource `protobuf:"varint,1,opt,name=source,proto3,enum=openngfw.v1.PolicySource" json:"source,omitempty"`
+	// Version id; required when source == POLICY_SOURCE_VERSION.
+	Version       uint64 `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNatRulesRequest) Reset() {
+	*x = ListNatRulesRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNatRulesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNatRulesRequest) ProtoMessage() {}
+
+func (x *ListNatRulesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNatRulesRequest.ProtoReflect.Descriptor instead.
+func (*ListNatRulesRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ListNatRulesRequest) GetSource() PolicySource {
+	if x != nil {
+		return x.Source
+	}
+	return PolicySource_POLICY_SOURCE_UNSPECIFIED
+}
+
+func (x *ListNatRulesRequest) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+type ListNatRulesResponse struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	SourceNat      []*SourceNat           `protobuf:"bytes,1,rep,name=source_nat,json=sourceNat,proto3" json:"source_nat,omitempty"`
+	DestinationNat []*DestinationNat      `protobuf:"bytes,2,rep,name=destination_nat,json=destinationNat,proto3" json:"destination_nat,omitempty"`
+	// Version the policy came from (0 for an uncommitted candidate).
+	Version uint64 `protobuf:"varint,3,opt,name=version,proto3" json:"version,omitempty"`
+	// Human-readable source label for CLI/UI display.
+	Source        string `protobuf:"bytes,4,opt,name=source,proto3" json:"source,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListNatRulesResponse) Reset() {
+	*x = ListNatRulesResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListNatRulesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListNatRulesResponse) ProtoMessage() {}
+
+func (x *ListNatRulesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListNatRulesResponse.ProtoReflect.Descriptor instead.
+func (*ListNatRulesResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *ListNatRulesResponse) GetSourceNat() []*SourceNat {
+	if x != nil {
+		return x.SourceNat
+	}
+	return nil
+}
+
+func (x *ListNatRulesResponse) GetDestinationNat() []*DestinationNat {
+	if x != nil {
+		return x.DestinationNat
+	}
+	return nil
+}
+
+func (x *ListNatRulesResponse) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *ListNatRulesResponse) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+type UpsertCandidateSourceNatRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Rule  *SourceNat             `protobuf:"bytes,1,opt,name=rule,proto3" json:"rule,omitempty"`
+	// Required optimistic-concurrency guard from GetCandidateStatusResponse.
+	ExpectedCandidateRevision string `protobuf:"bytes,2,opt,name=expected_candidate_revision,json=expectedCandidateRevision,proto3" json:"expected_candidate_revision,omitempty"`
+	// Operator audit comment. Either comment or reason must be supplied.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Optional structured reason recorded alongside the audit comment.
+	Reason string `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Optional durable rule ID resolver. When supplied, the server updates the
+	// existing source NAT rule with this ID and preserves that ID even when the
+	// operator renames the rule. Missing, duplicate, or unknown IDs are rejected;
+	// the server never falls back to name matching for by-ID requests.
+	Id            string `protobuf:"bytes,5,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertCandidateSourceNatRequest) Reset() {
+	*x = UpsertCandidateSourceNatRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertCandidateSourceNatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertCandidateSourceNatRequest) ProtoMessage() {}
+
+func (x *UpsertCandidateSourceNatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertCandidateSourceNatRequest.ProtoReflect.Descriptor instead.
+func (*UpsertCandidateSourceNatRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *UpsertCandidateSourceNatRequest) GetRule() *SourceNat {
+	if x != nil {
+		return x.Rule
+	}
+	return nil
+}
+
+func (x *UpsertCandidateSourceNatRequest) GetExpectedCandidateRevision() string {
+	if x != nil {
+		return x.ExpectedCandidateRevision
+	}
+	return ""
+}
+
+func (x *UpsertCandidateSourceNatRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *UpsertCandidateSourceNatRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *UpsertCandidateSourceNatRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type UpsertCandidateDestinationNatRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Rule  *DestinationNat        `protobuf:"bytes,1,opt,name=rule,proto3" json:"rule,omitempty"`
+	// Required optimistic-concurrency guard from GetCandidateStatusResponse.
+	ExpectedCandidateRevision string `protobuf:"bytes,2,opt,name=expected_candidate_revision,json=expectedCandidateRevision,proto3" json:"expected_candidate_revision,omitempty"`
+	// Operator audit comment. Either comment or reason must be supplied.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Optional structured reason recorded alongside the audit comment.
+	Reason string `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Optional durable rule ID resolver. When supplied, the server updates the
+	// existing destination NAT rule with this ID and preserves that ID even when
+	// the operator renames the rule. Missing, duplicate, or unknown IDs are
+	// rejected; the server never falls back to name matching for by-ID requests.
+	Id            string `protobuf:"bytes,5,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpsertCandidateDestinationNatRequest) Reset() {
+	*x = UpsertCandidateDestinationNatRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertCandidateDestinationNatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertCandidateDestinationNatRequest) ProtoMessage() {}
+
+func (x *UpsertCandidateDestinationNatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertCandidateDestinationNatRequest.ProtoReflect.Descriptor instead.
+func (*UpsertCandidateDestinationNatRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UpsertCandidateDestinationNatRequest) GetRule() *DestinationNat {
+	if x != nil {
+		return x.Rule
+	}
+	return nil
+}
+
+func (x *UpsertCandidateDestinationNatRequest) GetExpectedCandidateRevision() string {
+	if x != nil {
+		return x.ExpectedCandidateRevision
+	}
+	return ""
+}
+
+func (x *UpsertCandidateDestinationNatRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *UpsertCandidateDestinationNatRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *UpsertCandidateDestinationNatRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteCandidateSourceNatRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Required optimistic-concurrency guard from GetCandidateStatusResponse.
+	ExpectedCandidateRevision string `protobuf:"bytes,2,opt,name=expected_candidate_revision,json=expectedCandidateRevision,proto3" json:"expected_candidate_revision,omitempty"`
+	// Operator audit comment. Either comment or reason must be supplied.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Optional structured reason recorded alongside the audit comment.
+	Reason string `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Optional durable rule ID resolver. When supplied, deletion is strictly by
+	// ID and never falls back to name matching.
+	Id            string `protobuf:"bytes,5,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCandidateSourceNatRequest) Reset() {
+	*x = DeleteCandidateSourceNatRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCandidateSourceNatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCandidateSourceNatRequest) ProtoMessage() {}
+
+func (x *DeleteCandidateSourceNatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCandidateSourceNatRequest.ProtoReflect.Descriptor instead.
+func (*DeleteCandidateSourceNatRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *DeleteCandidateSourceNatRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DeleteCandidateSourceNatRequest) GetExpectedCandidateRevision() string {
+	if x != nil {
+		return x.ExpectedCandidateRevision
+	}
+	return ""
+}
+
+func (x *DeleteCandidateSourceNatRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *DeleteCandidateSourceNatRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *DeleteCandidateSourceNatRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type DeleteCandidateDestinationNatRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Required optimistic-concurrency guard from GetCandidateStatusResponse.
+	ExpectedCandidateRevision string `protobuf:"bytes,2,opt,name=expected_candidate_revision,json=expectedCandidateRevision,proto3" json:"expected_candidate_revision,omitempty"`
+	// Operator audit comment. Either comment or reason must be supplied.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Optional structured reason recorded alongside the audit comment.
+	Reason string `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Optional durable rule ID resolver. When supplied, deletion is strictly by
+	// ID and never falls back to name matching.
+	Id            string `protobuf:"bytes,5,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DeleteCandidateDestinationNatRequest) Reset() {
+	*x = DeleteCandidateDestinationNatRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCandidateDestinationNatRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCandidateDestinationNatRequest) ProtoMessage() {}
+
+func (x *DeleteCandidateDestinationNatRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCandidateDestinationNatRequest.ProtoReflect.Descriptor instead.
+func (*DeleteCandidateDestinationNatRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *DeleteCandidateDestinationNatRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DeleteCandidateDestinationNatRequest) GetExpectedCandidateRevision() string {
+	if x != nil {
+		return x.ExpectedCandidateRevision
+	}
+	return ""
+}
+
+func (x *DeleteCandidateDestinationNatRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *DeleteCandidateDestinationNatRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *DeleteCandidateDestinationNatRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type UpsertCandidateSourceNatResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// "added" or "updated".
+	Action string `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	// "source".
+	NatType   string     `protobuf:"bytes,2,opt,name=nat_type,json=natType,proto3" json:"nat_type,omitempty"`
+	SourceNat *SourceNat `protobuf:"bytes,3,opt,name=source_nat,json=sourceNat,proto3" json:"source_nat,omitempty"`
+	// Validation result for the staged candidate that was stored.
+	Validation *ValidateResponse `protobuf:"bytes,4,opt,name=validation,proto3" json:"validation,omitempty"`
+	// Candidate status after the mutation, including impact and new revision.
+	CandidateStatus *GetCandidateStatusResponse `protobuf:"bytes,5,opt,name=candidate_status,json=candidateStatus,proto3" json:"candidate_status,omitempty"`
+	// Revision assigned to the stored candidate after the write succeeds.
+	CandidateRevision string `protobuf:"bytes,6,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UpsertCandidateSourceNatResponse) Reset() {
+	*x = UpsertCandidateSourceNatResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertCandidateSourceNatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertCandidateSourceNatResponse) ProtoMessage() {}
+
+func (x *UpsertCandidateSourceNatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertCandidateSourceNatResponse.ProtoReflect.Descriptor instead.
+func (*UpsertCandidateSourceNatResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *UpsertCandidateSourceNatResponse) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *UpsertCandidateSourceNatResponse) GetNatType() string {
+	if x != nil {
+		return x.NatType
+	}
+	return ""
+}
+
+func (x *UpsertCandidateSourceNatResponse) GetSourceNat() *SourceNat {
+	if x != nil {
+		return x.SourceNat
+	}
+	return nil
+}
+
+func (x *UpsertCandidateSourceNatResponse) GetValidation() *ValidateResponse {
+	if x != nil {
+		return x.Validation
+	}
+	return nil
+}
+
+func (x *UpsertCandidateSourceNatResponse) GetCandidateStatus() *GetCandidateStatusResponse {
+	if x != nil {
+		return x.CandidateStatus
+	}
+	return nil
+}
+
+func (x *UpsertCandidateSourceNatResponse) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+type DeleteCandidateSourceNatResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// "deleted".
+	Action string `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	// "source".
+	NatType   string     `protobuf:"bytes,2,opt,name=nat_type,json=natType,proto3" json:"nat_type,omitempty"`
+	SourceNat *SourceNat `protobuf:"bytes,3,opt,name=source_nat,json=sourceNat,proto3" json:"source_nat,omitempty"`
+	// Validation result for the staged candidate that was stored.
+	Validation *ValidateResponse `protobuf:"bytes,4,opt,name=validation,proto3" json:"validation,omitempty"`
+	// Candidate status after the mutation, including impact and new revision.
+	CandidateStatus *GetCandidateStatusResponse `protobuf:"bytes,5,opt,name=candidate_status,json=candidateStatus,proto3" json:"candidate_status,omitempty"`
+	// Revision assigned to the stored candidate after the write succeeds.
+	CandidateRevision string `protobuf:"bytes,6,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *DeleteCandidateSourceNatResponse) Reset() {
+	*x = DeleteCandidateSourceNatResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCandidateSourceNatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCandidateSourceNatResponse) ProtoMessage() {}
+
+func (x *DeleteCandidateSourceNatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCandidateSourceNatResponse.ProtoReflect.Descriptor instead.
+func (*DeleteCandidateSourceNatResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *DeleteCandidateSourceNatResponse) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *DeleteCandidateSourceNatResponse) GetNatType() string {
+	if x != nil {
+		return x.NatType
+	}
+	return ""
+}
+
+func (x *DeleteCandidateSourceNatResponse) GetSourceNat() *SourceNat {
+	if x != nil {
+		return x.SourceNat
+	}
+	return nil
+}
+
+func (x *DeleteCandidateSourceNatResponse) GetValidation() *ValidateResponse {
+	if x != nil {
+		return x.Validation
+	}
+	return nil
+}
+
+func (x *DeleteCandidateSourceNatResponse) GetCandidateStatus() *GetCandidateStatusResponse {
+	if x != nil {
+		return x.CandidateStatus
+	}
+	return nil
+}
+
+func (x *DeleteCandidateSourceNatResponse) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+type UpsertCandidateDestinationNatResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// "added" or "updated".
+	Action string `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	// "destination".
+	NatType        string          `protobuf:"bytes,2,opt,name=nat_type,json=natType,proto3" json:"nat_type,omitempty"`
+	DestinationNat *DestinationNat `protobuf:"bytes,3,opt,name=destination_nat,json=destinationNat,proto3" json:"destination_nat,omitempty"`
+	// Validation result for the staged candidate that was stored.
+	Validation *ValidateResponse `protobuf:"bytes,4,opt,name=validation,proto3" json:"validation,omitempty"`
+	// Candidate status after the mutation, including impact and new revision.
+	CandidateStatus *GetCandidateStatusResponse `protobuf:"bytes,5,opt,name=candidate_status,json=candidateStatus,proto3" json:"candidate_status,omitempty"`
+	// Revision assigned to the stored candidate after the write succeeds.
+	CandidateRevision string `protobuf:"bytes,6,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *UpsertCandidateDestinationNatResponse) Reset() {
+	*x = UpsertCandidateDestinationNatResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpsertCandidateDestinationNatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpsertCandidateDestinationNatResponse) ProtoMessage() {}
+
+func (x *UpsertCandidateDestinationNatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpsertCandidateDestinationNatResponse.ProtoReflect.Descriptor instead.
+func (*UpsertCandidateDestinationNatResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *UpsertCandidateDestinationNatResponse) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *UpsertCandidateDestinationNatResponse) GetNatType() string {
+	if x != nil {
+		return x.NatType
+	}
+	return ""
+}
+
+func (x *UpsertCandidateDestinationNatResponse) GetDestinationNat() *DestinationNat {
+	if x != nil {
+		return x.DestinationNat
+	}
+	return nil
+}
+
+func (x *UpsertCandidateDestinationNatResponse) GetValidation() *ValidateResponse {
+	if x != nil {
+		return x.Validation
+	}
+	return nil
+}
+
+func (x *UpsertCandidateDestinationNatResponse) GetCandidateStatus() *GetCandidateStatusResponse {
+	if x != nil {
+		return x.CandidateStatus
+	}
+	return nil
+}
+
+func (x *UpsertCandidateDestinationNatResponse) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+type DeleteCandidateDestinationNatResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// "deleted".
+	Action string `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	// "destination".
+	NatType        string          `protobuf:"bytes,2,opt,name=nat_type,json=natType,proto3" json:"nat_type,omitempty"`
+	DestinationNat *DestinationNat `protobuf:"bytes,3,opt,name=destination_nat,json=destinationNat,proto3" json:"destination_nat,omitempty"`
+	// Validation result for the staged candidate that was stored.
+	Validation *ValidateResponse `protobuf:"bytes,4,opt,name=validation,proto3" json:"validation,omitempty"`
+	// Candidate status after the mutation, including impact and new revision.
+	CandidateStatus *GetCandidateStatusResponse `protobuf:"bytes,5,opt,name=candidate_status,json=candidateStatus,proto3" json:"candidate_status,omitempty"`
+	// Revision assigned to the stored candidate after the write succeeds.
+	CandidateRevision string `protobuf:"bytes,6,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *DeleteCandidateDestinationNatResponse) Reset() {
+	*x = DeleteCandidateDestinationNatResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DeleteCandidateDestinationNatResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DeleteCandidateDestinationNatResponse) ProtoMessage() {}
+
+func (x *DeleteCandidateDestinationNatResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DeleteCandidateDestinationNatResponse.ProtoReflect.Descriptor instead.
+func (*DeleteCandidateDestinationNatResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *DeleteCandidateDestinationNatResponse) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *DeleteCandidateDestinationNatResponse) GetNatType() string {
+	if x != nil {
+		return x.NatType
+	}
+	return ""
+}
+
+func (x *DeleteCandidateDestinationNatResponse) GetDestinationNat() *DestinationNat {
+	if x != nil {
+		return x.DestinationNat
+	}
+	return nil
+}
+
+func (x *DeleteCandidateDestinationNatResponse) GetValidation() *ValidateResponse {
+	if x != nil {
+		return x.Validation
+	}
+	return nil
+}
+
+func (x *DeleteCandidateDestinationNatResponse) GetCandidateStatus() *GetCandidateStatusResponse {
+	if x != nil {
+		return x.CandidateStatus
+	}
+	return nil
+}
+
+func (x *DeleteCandidateDestinationNatResponse) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+type CandidateChangeSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Section       string                 `protobuf:"bytes,1,opt,name=section,proto3" json:"section,omitempty"`
+	Added         uint32                 `protobuf:"varint,2,opt,name=added,proto3" json:"added,omitempty"`
+	Modified      uint32                 `protobuf:"varint,3,opt,name=modified,proto3" json:"modified,omitempty"`
+	Removed       uint32                 `protobuf:"varint,4,opt,name=removed,proto3" json:"removed,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CandidateChangeSummary) Reset() {
+	*x = CandidateChangeSummary{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CandidateChangeSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CandidateChangeSummary) ProtoMessage() {}
+
+func (x *CandidateChangeSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CandidateChangeSummary.ProtoReflect.Descriptor instead.
+func (*CandidateChangeSummary) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *CandidateChangeSummary) GetSection() string {
+	if x != nil {
+		return x.Section
+	}
+	return ""
+}
+
+func (x *CandidateChangeSummary) GetAdded() uint32 {
+	if x != nil {
+		return x.Added
+	}
+	return 0
+}
+
+func (x *CandidateChangeSummary) GetModified() uint32 {
+	if x != nil {
+		return x.Modified
+	}
+	return 0
+}
+
+func (x *CandidateChangeSummary) GetRemoved() uint32 {
+	if x != nil {
+		return x.Removed
+	}
+	return 0
+}
+
+type ListObjectReferencesRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Policy snapshot to inspect. Defaults to running when unspecified.
+	Source PolicySource `protobuf:"varint,1,opt,name=source,proto3,enum=openngfw.v1.PolicySource" json:"source,omitempty"`
+	// Version id; required when source == POLICY_SOURCE_VERSION.
+	Version uint64 `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`
+	// Required object collection to scan.
+	Kind PolicyObjectKind `protobuf:"varint,3,opt,name=kind,proto3,enum=openngfw.v1.PolicyObjectKind" json:"kind,omitempty"`
+	// Optional object name. Empty returns references for every object of kind.
+	Name          string `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListObjectReferencesRequest) Reset() {
+	*x = ListObjectReferencesRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListObjectReferencesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListObjectReferencesRequest) ProtoMessage() {}
+
+func (x *ListObjectReferencesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListObjectReferencesRequest.ProtoReflect.Descriptor instead.
+func (*ListObjectReferencesRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ListObjectReferencesRequest) GetSource() PolicySource {
+	if x != nil {
+		return x.Source
+	}
+	return PolicySource_POLICY_SOURCE_UNSPECIFIED
+}
+
+func (x *ListObjectReferencesRequest) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *ListObjectReferencesRequest) GetKind() PolicyObjectKind {
+	if x != nil {
+		return x.Kind
+	}
+	return PolicyObjectKind_POLICY_OBJECT_KIND_UNSPECIFIED
+}
+
+func (x *ListObjectReferencesRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+type ListObjectReferencesResponse struct {
+	state      protoimpl.MessageState   `protogen:"open.v1"`
+	References []*PolicyObjectReference `protobuf:"bytes,1,rep,name=references,proto3" json:"references,omitempty"`
+	// Version the policy came from (0 for an uncommitted candidate).
+	Version       uint64 `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListObjectReferencesResponse) Reset() {
+	*x = ListObjectReferencesResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListObjectReferencesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListObjectReferencesResponse) ProtoMessage() {}
+
+func (x *ListObjectReferencesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListObjectReferencesResponse.ProtoReflect.Descriptor instead.
+func (*ListObjectReferencesResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ListObjectReferencesResponse) GetReferences() []*PolicyObjectReference {
+	if x != nil {
+		return x.References
+	}
+	return nil
+}
+
+func (x *ListObjectReferencesResponse) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+type PolicyObjectReference struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Referenced object name.
+	ObjectName string `protobuf:"bytes,1,opt,name=object_name,json=objectName,proto3" json:"object_name,omitempty"`
+	// Human-readable policy area, e.g. "security rule" or "destination NAT".
+	Area string `protobuf:"bytes,2,opt,name=area,proto3" json:"area,omitempty"`
+	// Referencing item name, or a stable "#N" fallback.
+	Item string `protobuf:"bytes,3,opt,name=item,proto3" json:"item,omitempty"`
+	// Zero-based index of the referencing item in its policy list.
+	Index uint32 `protobuf:"varint,4,opt,name=index,proto3" json:"index,omitempty"`
+	// Human-readable referenced field, e.g. "destination address".
+	Field string `protobuf:"bytes,5,opt,name=field,proto3" json:"field,omitempty"`
+	// Short operator-facing explanation of the policy coupling.
+	Detail string `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
+	// Durable id of the referencing item when available. Security rules carry
+	// Rule.id here so API/UI callers can target by identity instead of position.
+	ItemId        string `protobuf:"bytes,7,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PolicyObjectReference) Reset() {
+	*x = PolicyObjectReference{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PolicyObjectReference) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PolicyObjectReference) ProtoMessage() {}
+
+func (x *PolicyObjectReference) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PolicyObjectReference.ProtoReflect.Descriptor instead.
+func (*PolicyObjectReference) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *PolicyObjectReference) GetObjectName() string {
+	if x != nil {
+		return x.ObjectName
+	}
+	return ""
+}
+
+func (x *PolicyObjectReference) GetArea() string {
+	if x != nil {
+		return x.Area
+	}
+	return ""
+}
+
+func (x *PolicyObjectReference) GetItem() string {
+	if x != nil {
+		return x.Item
+	}
+	return ""
+}
+
+func (x *PolicyObjectReference) GetIndex() uint32 {
+	if x != nil {
+		return x.Index
+	}
+	return 0
+}
+
+func (x *PolicyObjectReference) GetField() string {
+	if x != nil {
+		return x.Field
+	}
+	return ""
+}
+
+func (x *PolicyObjectReference) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *PolicyObjectReference) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+type RenamePolicyObjectRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required reusable object collection to mutate.
+	Kind PolicyObjectKind `protobuf:"varint,1,opt,name=kind,proto3,enum=openngfw.v1.PolicyObjectKind" json:"kind,omitempty"`
+	// Existing object name in the candidate policy.
+	OldName string `protobuf:"bytes,2,opt,name=old_name,json=oldName,proto3" json:"old_name,omitempty"`
+	// Replacement object name. It must pass normal policy validation and must not
+	// already exist in the selected collection.
+	NewName string `protobuf:"bytes,3,opt,name=new_name,json=newName,proto3" json:"new_name,omitempty"`
+	// Optional operator reason recorded in the candidate audit log.
+	Comment       string `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RenamePolicyObjectRequest) Reset() {
+	*x = RenamePolicyObjectRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenamePolicyObjectRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenamePolicyObjectRequest) ProtoMessage() {}
+
+func (x *RenamePolicyObjectRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenamePolicyObjectRequest.ProtoReflect.Descriptor instead.
+func (*RenamePolicyObjectRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{25}
+}
+
+func (x *RenamePolicyObjectRequest) GetKind() PolicyObjectKind {
+	if x != nil {
+		return x.Kind
+	}
+	return PolicyObjectKind_POLICY_OBJECT_KIND_UNSPECIFIED
+}
+
+func (x *RenamePolicyObjectRequest) GetOldName() string {
+	if x != nil {
+		return x.OldName
+	}
+	return ""
+}
+
+func (x *RenamePolicyObjectRequest) GetNewName() string {
+	if x != nil {
+		return x.NewName
+	}
+	return ""
+}
+
+func (x *RenamePolicyObjectRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+type RenamePolicyObjectResponse struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Object kind that was renamed.
+	Kind    PolicyObjectKind `protobuf:"varint,1,opt,name=kind,proto3,enum=openngfw.v1.PolicyObjectKind" json:"kind,omitempty"`
+	OldName string           `protobuf:"bytes,2,opt,name=old_name,json=oldName,proto3" json:"old_name,omitempty"`
+	NewName string           `protobuf:"bytes,3,opt,name=new_name,json=newName,proto3" json:"new_name,omitempty"`
+	// True when the object definition name was changed.
+	ObjectRenamed bool `protobuf:"varint,4,opt,name=object_renamed,json=objectRenamed,proto3" json:"object_renamed,omitempty"`
+	// References that pointed to old_name before the mutation and were rewritten
+	// to new_name in the candidate policy.
+	RewrittenReferences []*PolicyObjectReference `protobuf:"bytes,5,rep,name=rewritten_references,json=rewrittenReferences,proto3" json:"rewritten_references,omitempty"`
+	// Candidate workspace state after the mutation.
+	CandidateStatus *GetCandidateStatusResponse `protobuf:"bytes,6,opt,name=candidate_status,json=candidateStatus,proto3" json:"candidate_status,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *RenamePolicyObjectResponse) Reset() {
+	*x = RenamePolicyObjectResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RenamePolicyObjectResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RenamePolicyObjectResponse) ProtoMessage() {}
+
+func (x *RenamePolicyObjectResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RenamePolicyObjectResponse.ProtoReflect.Descriptor instead.
+func (*RenamePolicyObjectResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *RenamePolicyObjectResponse) GetKind() PolicyObjectKind {
+	if x != nil {
+		return x.Kind
+	}
+	return PolicyObjectKind_POLICY_OBJECT_KIND_UNSPECIFIED
+}
+
+func (x *RenamePolicyObjectResponse) GetOldName() string {
+	if x != nil {
+		return x.OldName
+	}
+	return ""
+}
+
+func (x *RenamePolicyObjectResponse) GetNewName() string {
+	if x != nil {
+		return x.NewName
+	}
+	return ""
+}
+
+func (x *RenamePolicyObjectResponse) GetObjectRenamed() bool {
+	if x != nil {
+		return x.ObjectRenamed
+	}
+	return false
+}
+
+func (x *RenamePolicyObjectResponse) GetRewrittenReferences() []*PolicyObjectReference {
+	if x != nil {
+		return x.RewrittenReferences
+	}
+	return nil
+}
+
+func (x *RenamePolicyObjectResponse) GetCandidateStatus() *GetCandidateStatusResponse {
+	if x != nil {
+		return x.CandidateStatus
+	}
+	return nil
+}
+
+type DiffPolicyRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Baseline policy snapshot. Defaults to running when unspecified.
+	FromSource PolicySource `protobuf:"varint,1,opt,name=from_source,json=fromSource,proto3,enum=openngfw.v1.PolicySource" json:"from_source,omitempty"`
+	// Version id; required when from_source == POLICY_SOURCE_VERSION.
+	FromVersion uint64 `protobuf:"varint,2,opt,name=from_version,json=fromVersion,proto3" json:"from_version,omitempty"`
+	// Target policy snapshot. Defaults to candidate when unspecified.
+	ToSource PolicySource `protobuf:"varint,3,opt,name=to_source,json=toSource,proto3,enum=openngfw.v1.PolicySource" json:"to_source,omitempty"`
+	// Version id; required when to_source == POLICY_SOURCE_VERSION.
+	ToVersion     uint64 `protobuf:"varint,4,opt,name=to_version,json=toVersion,proto3" json:"to_version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DiffPolicyRequest) Reset() {
+	*x = DiffPolicyRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DiffPolicyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiffPolicyRequest) ProtoMessage() {}
+
+func (x *DiffPolicyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DiffPolicyRequest.ProtoReflect.Descriptor instead.
+func (*DiffPolicyRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *DiffPolicyRequest) GetFromSource() PolicySource {
+	if x != nil {
+		return x.FromSource
+	}
+	return PolicySource_POLICY_SOURCE_UNSPECIFIED
+}
+
+func (x *DiffPolicyRequest) GetFromVersion() uint64 {
+	if x != nil {
+		return x.FromVersion
+	}
+	return 0
+}
+
+func (x *DiffPolicyRequest) GetToSource() PolicySource {
+	if x != nil {
+		return x.ToSource
+	}
+	return PolicySource_POLICY_SOURCE_UNSPECIFIED
+}
+
+func (x *DiffPolicyRequest) GetToVersion() uint64 {
+	if x != nil {
+		return x.ToVersion
+	}
+	return 0
+}
+
+type DiffPolicyResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	FromLabel     string                 `protobuf:"bytes,1,opt,name=from_label,json=fromLabel,proto3" json:"from_label,omitempty"`
+	ToLabel       string                 `protobuf:"bytes,2,opt,name=to_label,json=toLabel,proto3" json:"to_label,omitempty"`
+	FromVersion   uint64                 `protobuf:"varint,3,opt,name=from_version,json=fromVersion,proto3" json:"from_version,omitempty"`
+	ToVersion     uint64                 `protobuf:"varint,4,opt,name=to_version,json=toVersion,proto3" json:"to_version,omitempty"`
+	Changed       bool                   `protobuf:"varint,5,opt,name=changed,proto3" json:"changed,omitempty"`
+	Lines         []*PolicyDiffLine      `protobuf:"bytes,6,rep,name=lines,proto3" json:"lines,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DiffPolicyResponse) Reset() {
+	*x = DiffPolicyResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DiffPolicyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DiffPolicyResponse) ProtoMessage() {}
+
+func (x *DiffPolicyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DiffPolicyResponse.ProtoReflect.Descriptor instead.
+func (*DiffPolicyResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *DiffPolicyResponse) GetFromLabel() string {
+	if x != nil {
+		return x.FromLabel
+	}
+	return ""
+}
+
+func (x *DiffPolicyResponse) GetToLabel() string {
+	if x != nil {
+		return x.ToLabel
+	}
+	return ""
+}
+
+func (x *DiffPolicyResponse) GetFromVersion() uint64 {
+	if x != nil {
+		return x.FromVersion
+	}
+	return 0
+}
+
+func (x *DiffPolicyResponse) GetToVersion() uint64 {
+	if x != nil {
+		return x.ToVersion
+	}
+	return 0
+}
+
+func (x *DiffPolicyResponse) GetChanged() bool {
+	if x != nil {
+		return x.Changed
+	}
+	return false
+}
+
+func (x *DiffPolicyResponse) GetLines() []*PolicyDiffLine {
+	if x != nil {
+		return x.Lines
+	}
+	return nil
+}
+
+type PolicyDiffLine struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          PolicyDiffLineType     `protobuf:"varint,1,opt,name=type,proto3,enum=openngfw.v1.PolicyDiffLineType" json:"type,omitempty"`
+	Text          string                 `protobuf:"bytes,2,opt,name=text,proto3" json:"text,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PolicyDiffLine) Reset() {
+	*x = PolicyDiffLine{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PolicyDiffLine) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PolicyDiffLine) ProtoMessage() {}
+
+func (x *PolicyDiffLine) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PolicyDiffLine.ProtoReflect.Descriptor instead.
+func (*PolicyDiffLine) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *PolicyDiffLine) GetType() PolicyDiffLineType {
+	if x != nil {
+		return x.Type
+	}
+	return PolicyDiffLineType_POLICY_DIFF_LINE_TYPE_UNSPECIFIED
+}
+
+func (x *PolicyDiffLine) GetText() string {
+	if x != nil {
+		return x.Text
+	}
+	return ""
+}
+
+type ChangeImpact struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Risk          ChangeRisk             `protobuf:"varint,1,opt,name=risk,proto3,enum=openngfw.v1.ChangeRisk" json:"risk,omitempty"`
+	Items         []*ChangeImpactItem    `protobuf:"bytes,2,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangeImpact) Reset() {
+	*x = ChangeImpact{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangeImpact) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeImpact) ProtoMessage() {}
+
+func (x *ChangeImpact) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeImpact.ProtoReflect.Descriptor instead.
+func (*ChangeImpact) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *ChangeImpact) GetRisk() ChangeRisk {
+	if x != nil {
+		return x.Risk
+	}
+	return ChangeRisk_CHANGE_RISK_UNSPECIFIED
+}
+
+func (x *ChangeImpact) GetItems() []*ChangeImpactItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+type ChangeImpactItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Risk          ChangeRisk             `protobuf:"varint,1,opt,name=risk,proto3,enum=openngfw.v1.ChangeRisk" json:"risk,omitempty"`
+	Title         string                 `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
+	Detail        string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ChangeImpactItem) Reset() {
+	*x = ChangeImpactItem{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangeImpactItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeImpactItem) ProtoMessage() {}
+
+func (x *ChangeImpactItem) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeImpactItem.ProtoReflect.Descriptor instead.
+func (*ChangeImpactItem) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *ChangeImpactItem) GetRisk() ChangeRisk {
+	if x != nil {
+		return x.Risk
+	}
+	return ChangeRisk_CHANGE_RISK_UNSPECIFIED
+}
+
+func (x *ChangeImpactItem) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ChangeImpactItem) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type CreateChangeApprovalRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required candidate_revision from GetCandidateStatusResponse. The approval
+	// is valid only for this exact candidate blob.
+	CandidateRevision string `protobuf:"bytes,1,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	// Required approval rationale recorded in durable store and audit.
+	Comment string `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Records that the approver reviewed high-risk impact. Commit still enforces
+	// its own ack_risk flag for the committing operator.
+	AckRisk bool `protobuf:"varint,3,opt,name=ack_risk,json=ackRisk,proto3" json:"ack_risk,omitempty"`
+	// Records that the approver reviewed runtime readiness warnings. Commit still
+	// enforces its own ack_runtime flag for the committing operator.
+	AckRuntime    bool `protobuf:"varint,4,opt,name=ack_runtime,json=ackRuntime,proto3" json:"ack_runtime,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateChangeApprovalRequest) Reset() {
+	*x = CreateChangeApprovalRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateChangeApprovalRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateChangeApprovalRequest) ProtoMessage() {}
+
+func (x *CreateChangeApprovalRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateChangeApprovalRequest.ProtoReflect.Descriptor instead.
+func (*CreateChangeApprovalRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *CreateChangeApprovalRequest) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+func (x *CreateChangeApprovalRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *CreateChangeApprovalRequest) GetAckRisk() bool {
+	if x != nil {
+		return x.AckRisk
+	}
+	return false
+}
+
+func (x *CreateChangeApprovalRequest) GetAckRuntime() bool {
+	if x != nil {
+		return x.AckRuntime
+	}
+	return false
+}
+
+type CreateChangeApprovalResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Approval      *ChangeApproval        `protobuf:"bytes,1,opt,name=approval,proto3" json:"approval,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateChangeApprovalResponse) Reset() {
+	*x = CreateChangeApprovalResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateChangeApprovalResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateChangeApprovalResponse) ProtoMessage() {}
+
+func (x *CreateChangeApprovalResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateChangeApprovalResponse.ProtoReflect.Descriptor instead.
+func (*CreateChangeApprovalResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *CreateChangeApprovalResponse) GetApproval() *ChangeApproval {
+	if x != nil {
+		return x.Approval
+	}
+	return nil
+}
+
+type ListChangeApprovalsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Optional candidate_revision filter.
+	CandidateRevision string `protobuf:"bytes,1,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	// Include approvals already consumed by a commit intent.
+	IncludeConsumed bool `protobuf:"varint,2,opt,name=include_consumed,json=includeConsumed,proto3" json:"include_consumed,omitempty"`
+	// Maximum entries to return; 0 means server default (100).
+	Limit         uint32 `protobuf:"varint,3,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListChangeApprovalsRequest) Reset() {
+	*x = ListChangeApprovalsRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListChangeApprovalsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListChangeApprovalsRequest) ProtoMessage() {}
+
+func (x *ListChangeApprovalsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListChangeApprovalsRequest.ProtoReflect.Descriptor instead.
+func (*ListChangeApprovalsRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *ListChangeApprovalsRequest) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+func (x *ListChangeApprovalsRequest) GetIncludeConsumed() bool {
+	if x != nil {
+		return x.IncludeConsumed
+	}
+	return false
+}
+
+func (x *ListChangeApprovalsRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type ListChangeApprovalsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Approvals     []*ChangeApproval      `protobuf:"bytes,1,rep,name=approvals,proto3" json:"approvals,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListChangeApprovalsResponse) Reset() {
+	*x = ListChangeApprovalsResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListChangeApprovalsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListChangeApprovalsResponse) ProtoMessage() {}
+
+func (x *ListChangeApprovalsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListChangeApprovalsResponse.ProtoReflect.Descriptor instead.
+func (*ListChangeApprovalsResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *ListChangeApprovalsResponse) GetApprovals() []*ChangeApproval {
+	if x != nil {
+		return x.Approvals
+	}
+	return nil
+}
+
+type ChangeApproval struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	Id                   string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CandidateRevision    string                 `protobuf:"bytes,2,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	Actor                string                 `protobuf:"bytes,3,opt,name=actor,proto3" json:"actor,omitempty"`
+	ActorRole            string                 `protobuf:"bytes,4,opt,name=actor_role,json=actorRole,proto3" json:"actor_role,omitempty"`
+	AuthSource           string                 `protobuf:"bytes,5,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	Comment              string                 `protobuf:"bytes,6,opt,name=comment,proto3" json:"comment,omitempty"`
+	AckRisk              bool                   `protobuf:"varint,7,opt,name=ack_risk,json=ackRisk,proto3" json:"ack_risk,omitempty"`
+	AckRuntime           bool                   `protobuf:"varint,8,opt,name=ack_runtime,json=ackRuntime,proto3" json:"ack_runtime,omitempty"`
+	CreatedAt            *timestamppb.Timestamp `protobuf:"bytes,9,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Consumed             bool                   `protobuf:"varint,10,opt,name=consumed,proto3" json:"consumed,omitempty"`
+	ConsumedVersion      uint64                 `protobuf:"varint,11,opt,name=consumed_version,json=consumedVersion,proto3" json:"consumed_version,omitempty"`
+	ConsumedAt           *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=consumed_at,json=consumedAt,proto3" json:"consumed_at,omitempty"`
+	ConsumedBy           string                 `protobuf:"bytes,13,opt,name=consumed_by,json=consumedBy,proto3" json:"consumed_by,omitempty"`
+	ConsumedByRole       string                 `protobuf:"bytes,14,opt,name=consumed_by_role,json=consumedByRole,proto3" json:"consumed_by_role,omitempty"`
+	ConsumedByAuthSource string                 `protobuf:"bytes,15,opt,name=consumed_by_auth_source,json=consumedByAuthSource,proto3" json:"consumed_by_auth_source,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *ChangeApproval) Reset() {
+	*x = ChangeApproval{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ChangeApproval) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ChangeApproval) ProtoMessage() {}
+
+func (x *ChangeApproval) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ChangeApproval.ProtoReflect.Descriptor instead.
+func (*ChangeApproval) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *ChangeApproval) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetActor() string {
+	if x != nil {
+		return x.Actor
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetActorRole() string {
+	if x != nil {
+		return x.ActorRole
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetAckRisk() bool {
+	if x != nil {
+		return x.AckRisk
+	}
+	return false
+}
+
+func (x *ChangeApproval) GetAckRuntime() bool {
+	if x != nil {
+		return x.AckRuntime
+	}
+	return false
+}
+
+func (x *ChangeApproval) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *ChangeApproval) GetConsumed() bool {
+	if x != nil {
+		return x.Consumed
+	}
+	return false
+}
+
+func (x *ChangeApproval) GetConsumedVersion() uint64 {
+	if x != nil {
+		return x.ConsumedVersion
+	}
+	return 0
+}
+
+func (x *ChangeApproval) GetConsumedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ConsumedAt
+	}
+	return nil
+}
+
+func (x *ChangeApproval) GetConsumedBy() string {
+	if x != nil {
+		return x.ConsumedBy
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetConsumedByRole() string {
+	if x != nil {
+		return x.ConsumedByRole
+	}
+	return ""
+}
+
+func (x *ChangeApproval) GetConsumedByAuthSource() string {
+	if x != nil {
+		return x.ConsumedByAuthSource
+	}
+	return ""
+}
+
+type CreateBackupSnapshotRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Snapshot source. Defaults to running. Candidate snapshots require an
+	// existing candidate. Version snapshots require version.
+	Source PolicySource `protobuf:"varint,1,opt,name=source,proto3,enum=openngfw.v1.PolicySource" json:"source,omitempty"`
+	// Required when source == POLICY_SOURCE_VERSION.
+	Version uint64 `protobuf:"varint,2,opt,name=version,proto3" json:"version,omitempty"`
+	// Optional audit comment describing the recovery point.
+	Comment       string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBackupSnapshotRequest) Reset() {
+	*x = CreateBackupSnapshotRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBackupSnapshotRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBackupSnapshotRequest) ProtoMessage() {}
+
+func (x *CreateBackupSnapshotRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBackupSnapshotRequest.ProtoReflect.Descriptor instead.
+func (*CreateBackupSnapshotRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *CreateBackupSnapshotRequest) GetSource() PolicySource {
+	if x != nil {
+		return x.Source
+	}
+	return PolicySource_POLICY_SOURCE_UNSPECIFIED
+}
+
+func (x *CreateBackupSnapshotRequest) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *CreateBackupSnapshotRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+type CreateBackupSnapshotResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Snapshot      *BackupSnapshot        `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateBackupSnapshotResponse) Reset() {
+	*x = CreateBackupSnapshotResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateBackupSnapshotResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateBackupSnapshotResponse) ProtoMessage() {}
+
+func (x *CreateBackupSnapshotResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateBackupSnapshotResponse.ProtoReflect.Descriptor instead.
+func (*CreateBackupSnapshotResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *CreateBackupSnapshotResponse) GetSnapshot() *BackupSnapshot {
+	if x != nil {
+		return x.Snapshot
+	}
+	return nil
+}
+
+type ListBackupSnapshotsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Maximum entries to return; 0 means server default (100).
+	Limit         uint32 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBackupSnapshotsRequest) Reset() {
+	*x = ListBackupSnapshotsRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBackupSnapshotsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBackupSnapshotsRequest) ProtoMessage() {}
+
+func (x *ListBackupSnapshotsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBackupSnapshotsRequest.ProtoReflect.Descriptor instead.
+func (*ListBackupSnapshotsRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *ListBackupSnapshotsRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+type ListBackupSnapshotsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Snapshots     []*BackupSnapshot      `protobuf:"bytes,1,rep,name=snapshots,proto3" json:"snapshots,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListBackupSnapshotsResponse) Reset() {
+	*x = ListBackupSnapshotsResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListBackupSnapshotsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListBackupSnapshotsResponse) ProtoMessage() {}
+
+func (x *ListBackupSnapshotsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListBackupSnapshotsResponse.ProtoReflect.Descriptor instead.
+func (*ListBackupSnapshotsResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *ListBackupSnapshotsResponse) GetSnapshots() []*BackupSnapshot {
+	if x != nil {
+		return x.Snapshots
+	}
+	return nil
+}
+
+type GetBackupSnapshotRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBackupSnapshotRequest) Reset() {
+	*x = GetBackupSnapshotRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBackupSnapshotRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBackupSnapshotRequest) ProtoMessage() {}
+
+func (x *GetBackupSnapshotRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBackupSnapshotRequest.ProtoReflect.Descriptor instead.
+func (*GetBackupSnapshotRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *GetBackupSnapshotRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type GetBackupSnapshotResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Snapshot      *BackupSnapshot        `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Policy        *Policy                `protobuf:"bytes,2,opt,name=policy,proto3" json:"policy,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetBackupSnapshotResponse) Reset() {
+	*x = GetBackupSnapshotResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetBackupSnapshotResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetBackupSnapshotResponse) ProtoMessage() {}
+
+func (x *GetBackupSnapshotResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetBackupSnapshotResponse.ProtoReflect.Descriptor instead.
+func (*GetBackupSnapshotResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *GetBackupSnapshotResponse) GetSnapshot() *BackupSnapshot {
+	if x != nil {
+		return x.Snapshot
+	}
+	return nil
+}
+
+func (x *GetBackupSnapshotResponse) GetPolicy() *Policy {
+	if x != nil {
+		return x.Policy
+	}
+	return nil
+}
+
+type ValidateBackupSnapshotRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateBackupSnapshotRequest) Reset() {
+	*x = ValidateBackupSnapshotRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateBackupSnapshotRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateBackupSnapshotRequest) ProtoMessage() {}
+
+func (x *ValidateBackupSnapshotRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateBackupSnapshotRequest.ProtoReflect.Descriptor instead.
+func (*ValidateBackupSnapshotRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *ValidateBackupSnapshotRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type ValidateBackupSnapshotResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Snapshot      *BackupSnapshot        `protobuf:"bytes,1,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Validation    *ValidateResponse      `protobuf:"bytes,2,opt,name=validation,proto3" json:"validation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateBackupSnapshotResponse) Reset() {
+	*x = ValidateBackupSnapshotResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateBackupSnapshotResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateBackupSnapshotResponse) ProtoMessage() {}
+
+func (x *ValidateBackupSnapshotResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateBackupSnapshotResponse.ProtoReflect.Descriptor instead.
+func (*ValidateBackupSnapshotResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *ValidateBackupSnapshotResponse) GetSnapshot() *BackupSnapshot {
+	if x != nil {
+		return x.Snapshot
+	}
+	return nil
+}
+
+func (x *ValidateBackupSnapshotResponse) GetValidation() *ValidateResponse {
+	if x != nil {
+		return x.Validation
+	}
+	return nil
+}
+
+type PreviewBackupSnapshotRestoreRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Id    string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Required when stage_candidate is true; recorded in the candidate audit log.
+	Comment string `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
+	// If true, stage the snapshot into candidate after validation succeeds.
+	// This never applies engines or changes running policy.
+	StageCandidate bool `protobuf:"varint,3,opt,name=stage_candidate,json=stageCandidate,proto3" json:"stage_candidate,omitempty"`
+	// Optional optimistic-concurrency guard for the candidate workspace.
+	ExpectedCandidateRevision string `protobuf:"bytes,4,opt,name=expected_candidate_revision,json=expectedCandidateRevision,proto3" json:"expected_candidate_revision,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *PreviewBackupSnapshotRestoreRequest) Reset() {
+	*x = PreviewBackupSnapshotRestoreRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PreviewBackupSnapshotRestoreRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreviewBackupSnapshotRestoreRequest) ProtoMessage() {}
+
+func (x *PreviewBackupSnapshotRestoreRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreviewBackupSnapshotRestoreRequest.ProtoReflect.Descriptor instead.
+func (*PreviewBackupSnapshotRestoreRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *PreviewBackupSnapshotRestoreRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *PreviewBackupSnapshotRestoreRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *PreviewBackupSnapshotRestoreRequest) GetStageCandidate() bool {
+	if x != nil {
+		return x.StageCandidate
+	}
+	return false
+}
+
+func (x *PreviewBackupSnapshotRestoreRequest) GetExpectedCandidateRevision() string {
+	if x != nil {
+		return x.ExpectedCandidateRevision
+	}
+	return ""
+}
+
+type PreviewBackupSnapshotRestoreResponse struct {
+	state           protoimpl.MessageState      `protogen:"open.v1"`
+	JobId           string                      `protobuf:"bytes,1,opt,name=job_id,json=jobId,proto3" json:"job_id,omitempty"`
+	Snapshot        *BackupSnapshot             `protobuf:"bytes,2,opt,name=snapshot,proto3" json:"snapshot,omitempty"`
+	Validation      *ValidateResponse           `protobuf:"bytes,3,opt,name=validation,proto3" json:"validation,omitempty"`
+	Diff            *DiffPolicyResponse         `protobuf:"bytes,4,opt,name=diff,proto3" json:"diff,omitempty"`
+	StagedCandidate bool                        `protobuf:"varint,5,opt,name=staged_candidate,json=stagedCandidate,proto3" json:"staged_candidate,omitempty"`
+	CandidateStatus *GetCandidateStatusResponse `protobuf:"bytes,6,opt,name=candidate_status,json=candidateStatus,proto3" json:"candidate_status,omitempty"`
+	Detail          string                      `protobuf:"bytes,7,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) Reset() {
+	*x = PreviewBackupSnapshotRestoreResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PreviewBackupSnapshotRestoreResponse) ProtoMessage() {}
+
+func (x *PreviewBackupSnapshotRestoreResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PreviewBackupSnapshotRestoreResponse.ProtoReflect.Descriptor instead.
+func (*PreviewBackupSnapshotRestoreResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) GetJobId() string {
+	if x != nil {
+		return x.JobId
+	}
+	return ""
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) GetSnapshot() *BackupSnapshot {
+	if x != nil {
+		return x.Snapshot
+	}
+	return nil
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) GetValidation() *ValidateResponse {
+	if x != nil {
+		return x.Validation
+	}
+	return nil
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) GetDiff() *DiffPolicyResponse {
+	if x != nil {
+		return x.Diff
+	}
+	return nil
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) GetStagedCandidate() bool {
+	if x != nil {
+		return x.StagedCandidate
+	}
+	return false
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) GetCandidateStatus() *GetCandidateStatusResponse {
+	if x != nil {
+		return x.CandidateStatus
+	}
+	return nil
+}
+
+func (x *PreviewBackupSnapshotRestoreResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type BackupSnapshot struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Id                string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreatedAt         *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Actor             string                 `protobuf:"bytes,3,opt,name=actor,proto3" json:"actor,omitempty"`
+	ActorRole         string                 `protobuf:"bytes,4,opt,name=actor_role,json=actorRole,proto3" json:"actor_role,omitempty"`
+	AuthSource        string                 `protobuf:"bytes,5,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	Comment           string                 `protobuf:"bytes,6,opt,name=comment,proto3" json:"comment,omitempty"`
+	Source            string                 `protobuf:"bytes,7,opt,name=source,proto3" json:"source,omitempty"`
+	SourceVersion     uint64                 `protobuf:"varint,8,opt,name=source_version,json=sourceVersion,proto3" json:"source_version,omitempty"`
+	RunningVersion    uint64                 `protobuf:"varint,9,opt,name=running_version,json=runningVersion,proto3" json:"running_version,omitempty"`
+	CandidateRevision string                 `protobuf:"bytes,10,opt,name=candidate_revision,json=candidateRevision,proto3" json:"candidate_revision,omitempty"`
+	PolicySha256      string                 `protobuf:"bytes,11,opt,name=policy_sha256,json=policySha256,proto3" json:"policy_sha256,omitempty"`
+	PolicySizeBytes   uint64                 `protobuf:"varint,12,opt,name=policy_size_bytes,json=policySizeBytes,proto3" json:"policy_size_bytes,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *BackupSnapshot) Reset() {
+	*x = BackupSnapshot{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BackupSnapshot) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BackupSnapshot) ProtoMessage() {}
+
+func (x *BackupSnapshot) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BackupSnapshot.ProtoReflect.Descriptor instead.
+func (*BackupSnapshot) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *BackupSnapshot) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *BackupSnapshot) GetActor() string {
+	if x != nil {
+		return x.Actor
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetActorRole() string {
+	if x != nil {
+		return x.ActorRole
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetSourceVersion() uint64 {
+	if x != nil {
+		return x.SourceVersion
+	}
+	return 0
+}
+
+func (x *BackupSnapshot) GetRunningVersion() uint64 {
+	if x != nil {
+		return x.RunningVersion
+	}
+	return 0
+}
+
+func (x *BackupSnapshot) GetCandidateRevision() string {
+	if x != nil {
+		return x.CandidateRevision
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetPolicySha256() string {
+	if x != nil {
+		return x.PolicySha256
+	}
+	return ""
+}
+
+func (x *BackupSnapshot) GetPolicySizeBytes() uint64 {
+	if x != nil {
+		return x.PolicySizeBytes
+	}
+	return 0
+}
+
+type CommitRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required audit comment explaining why this live policy change is being
+	// applied.
+	Comment string `protobuf:"bytes,1,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required when validation reports CHANGE_RISK_HIGH impact. This is enforced
+	// by the PolicyService so direct API clients cannot bypass commit review.
+	AckRisk bool `protobuf:"varint,2,opt,name=ack_risk,json=ackRisk,proto3" json:"ack_risk,omitempty"`
+	// Required when the server reports runtime readiness warnings or production
+	// blockers before commit. This is enforced by the PolicyService when runtime
+	// readiness checks are configured, so direct API clients cannot bypass the
+	// same review required by the CLI and WebUI.
+	AckRuntime bool `protobuf:"varint,3,opt,name=ack_runtime,json=ackRuntime,proto3" json:"ack_runtime,omitempty"`
+	// Required approval record id. The approval must be unconsumed and bound to
+	// the current candidate_revision.
+	ApprovalId string `protobuf:"bytes,4,opt,name=approval_id,json=approvalId,proto3" json:"approval_id,omitempty"`
+	// Required for authenticated callers because commit activates live policy.
+	StepUpToken string `protobuf:"bytes,5,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	// Candidate revision/hash that the operator reviewed in validation, diff,
+	// runtime-readiness, and approval context before pressing commit. The server
+	// rejects commit when the shared candidate changed after that review.
+	ReviewedCandidateRevision string `protobuf:"bytes,6,opt,name=reviewed_candidate_revision,json=reviewedCandidateRevision,proto3" json:"reviewed_candidate_revision,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
 func (x *CommitRequest) Reset() {
 	*x = CommitRequest{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[6]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[48]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -375,7 +3727,7 @@ func (x *CommitRequest) String() string {
 func (*CommitRequest) ProtoMessage() {}
 
 func (x *CommitRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[6]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[48]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -388,7 +3740,7 @@ func (x *CommitRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommitRequest.ProtoReflect.Descriptor instead.
 func (*CommitRequest) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{6}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{48}
 }
 
 func (x *CommitRequest) GetComment() string {
@@ -398,16 +3750,55 @@ func (x *CommitRequest) GetComment() string {
 	return ""
 }
 
+func (x *CommitRequest) GetAckRisk() bool {
+	if x != nil {
+		return x.AckRisk
+	}
+	return false
+}
+
+func (x *CommitRequest) GetAckRuntime() bool {
+	if x != nil {
+		return x.AckRuntime
+	}
+	return false
+}
+
+func (x *CommitRequest) GetApprovalId() string {
+	if x != nil {
+		return x.ApprovalId
+	}
+	return ""
+}
+
+func (x *CommitRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+func (x *CommitRequest) GetReviewedCandidateRevision() string {
+	if x != nil {
+		return x.ReviewedCandidateRevision
+	}
+	return ""
+}
+
 type CommitResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Version       uint64                 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	state   protoimpl.MessageState `protogen:"open.v1"`
+	Version uint64                 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	// Running version before this commit.
+	PreviousVersion uint64 `protobuf:"varint,2,opt,name=previous_version,json=previousVersion,proto3" json:"previous_version,omitempty"`
+	// Metadata for the newly activated version, including artifact and LKG state.
+	VersionInfo   *VersionInfo `protobuf:"bytes,3,opt,name=version_info,json=versionInfo,proto3" json:"version_info,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *CommitResponse) Reset() {
 	*x = CommitResponse{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[7]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[49]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -419,7 +3810,7 @@ func (x *CommitResponse) String() string {
 func (*CommitResponse) ProtoMessage() {}
 
 func (x *CommitResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[7]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[49]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -432,7 +3823,7 @@ func (x *CommitResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CommitResponse.ProtoReflect.Descriptor instead.
 func (*CommitResponse) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{7}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{49}
 }
 
 func (x *CommitResponse) GetVersion() uint64 {
@@ -442,17 +3833,43 @@ func (x *CommitResponse) GetVersion() uint64 {
 	return 0
 }
 
+func (x *CommitResponse) GetPreviousVersion() uint64 {
+	if x != nil {
+		return x.PreviousVersion
+	}
+	return 0
+}
+
+func (x *CommitResponse) GetVersionInfo() *VersionInfo {
+	if x != nil {
+		return x.VersionInfo
+	}
+	return nil
+}
+
 type RollbackRequest struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Version to restore.
-	Version       uint64 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	Version uint64 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	// Required audit comment explaining why this historical policy is being
+	// re-applied.
+	Comment string `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required when rollback validation reports CHANGE_RISK_HIGH impact. This is
+	// enforced by the PolicyService so direct API clients cannot bypass review.
+	AckRisk bool `protobuf:"varint,3,opt,name=ack_risk,json=ackRisk,proto3" json:"ack_risk,omitempty"`
+	// Required when the server reports runtime readiness warnings or production
+	// blockers before rollback. This is enforced by the PolicyService when
+	// runtime readiness checks are configured.
+	AckRuntime bool `protobuf:"varint,4,opt,name=ack_runtime,json=ackRuntime,proto3" json:"ack_runtime,omitempty"`
+	// Required for authenticated callers because rollback activates live policy.
+	StepUpToken   string `protobuf:"bytes,5,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RollbackRequest) Reset() {
 	*x = RollbackRequest{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[8]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[50]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -464,7 +3881,7 @@ func (x *RollbackRequest) String() string {
 func (*RollbackRequest) ProtoMessage() {}
 
 func (x *RollbackRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[8]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[50]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -477,7 +3894,7 @@ func (x *RollbackRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RollbackRequest.ProtoReflect.Descriptor instead.
 func (*RollbackRequest) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{8}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{50}
 }
 
 func (x *RollbackRequest) GetVersion() uint64 {
@@ -487,17 +3904,49 @@ func (x *RollbackRequest) GetVersion() uint64 {
 	return 0
 }
 
+func (x *RollbackRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *RollbackRequest) GetAckRisk() bool {
+	if x != nil {
+		return x.AckRisk
+	}
+	return false
+}
+
+func (x *RollbackRequest) GetAckRuntime() bool {
+	if x != nil {
+		return x.AckRuntime
+	}
+	return false
+}
+
+func (x *RollbackRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
 type RollbackResponse struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// New version created by the rollback commit.
-	Version       uint64 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	Version uint64 `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	// Running version before this rollback commit.
+	PreviousVersion uint64 `protobuf:"varint,2,opt,name=previous_version,json=previousVersion,proto3" json:"previous_version,omitempty"`
+	// Metadata for the newly activated rollback version.
+	VersionInfo   *VersionInfo `protobuf:"bytes,3,opt,name=version_info,json=versionInfo,proto3" json:"version_info,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *RollbackResponse) Reset() {
 	*x = RollbackResponse{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[9]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[51]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -509,7 +3958,7 @@ func (x *RollbackResponse) String() string {
 func (*RollbackResponse) ProtoMessage() {}
 
 func (x *RollbackResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[9]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[51]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -522,7 +3971,7 @@ func (x *RollbackResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RollbackResponse.ProtoReflect.Descriptor instead.
 func (*RollbackResponse) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{9}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{51}
 }
 
 func (x *RollbackResponse) GetVersion() uint64 {
@@ -530,6 +3979,20 @@ func (x *RollbackResponse) GetVersion() uint64 {
 		return x.Version
 	}
 	return 0
+}
+
+func (x *RollbackResponse) GetPreviousVersion() uint64 {
+	if x != nil {
+		return x.PreviousVersion
+	}
+	return 0
+}
+
+func (x *RollbackResponse) GetVersionInfo() *VersionInfo {
+	if x != nil {
+		return x.VersionInfo
+	}
+	return nil
 }
 
 type ListVersionsRequest struct {
@@ -542,7 +4005,7 @@ type ListVersionsRequest struct {
 
 func (x *ListVersionsRequest) Reset() {
 	*x = ListVersionsRequest{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[10]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[52]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -554,7 +4017,7 @@ func (x *ListVersionsRequest) String() string {
 func (*ListVersionsRequest) ProtoMessage() {}
 
 func (x *ListVersionsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[10]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[52]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -567,7 +4030,7 @@ func (x *ListVersionsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListVersionsRequest.ProtoReflect.Descriptor instead.
 func (*ListVersionsRequest) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{10}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{52}
 }
 
 func (x *ListVersionsRequest) GetLimit() uint32 {
@@ -586,7 +4049,7 @@ type ListVersionsResponse struct {
 
 func (x *ListVersionsResponse) Reset() {
 	*x = ListVersionsResponse{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[11]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[53]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -598,7 +4061,7 @@ func (x *ListVersionsResponse) String() string {
 func (*ListVersionsResponse) ProtoMessage() {}
 
 func (x *ListVersionsResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[11]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[53]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -611,7 +4074,7 @@ func (x *ListVersionsResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListVersionsResponse.ProtoReflect.Descriptor instead.
 func (*ListVersionsResponse) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{11}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{53}
 }
 
 func (x *ListVersionsResponse) GetVersions() []*VersionInfo {
@@ -622,18 +4085,35 @@ func (x *ListVersionsResponse) GetVersions() []*VersionInfo {
 }
 
 type VersionInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Id            uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
-	CreatedAt     *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-	Actor         string                 `protobuf:"bytes,3,opt,name=actor,proto3" json:"actor,omitempty"`
-	Comment       string                 `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Id         uint64                 `protobuf:"varint,1,opt,name=id,proto3" json:"id,omitempty"`
+	CreatedAt  *timestamppb.Timestamp `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	Actor      string                 `protobuf:"bytes,3,opt,name=actor,proto3" json:"actor,omitempty"`
+	Comment    string                 `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	ActorRole  string                 `protobuf:"bytes,5,opt,name=actor_role,json=actorRole,proto3" json:"actor_role,omitempty"`
+	AuthSource string                 `protobuf:"bytes,6,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	// commit, rollback, or bootstrap for store-only seed versions.
+	Action string `protobuf:"bytes,7,opt,name=action,proto3" json:"action,omitempty"`
+	// prepared, active, apply_failed, activation_failed, or unknown.
+	State string `protobuf:"bytes,8,opt,name=state,proto3" json:"state,omitempty"`
+	// Stable SHA-256 over the ordered artifact digests in this version.
+	ArtifactSetSha256 string `protobuf:"bytes,9,opt,name=artifact_set_sha256,json=artifactSetSha256,proto3" json:"artifact_set_sha256,omitempty"`
+	// Per-engine rendered artifacts that were validated before apply.
+	Artifacts []*VersionArtifact `protobuf:"bytes,10,rep,name=artifacts,proto3" json:"artifacts,omitempty"`
+	// True when this version is the store's current last-known-good pointer.
+	LastKnownGood bool                   `protobuf:"varint,11,opt,name=last_known_good,json=lastKnownGood,proto3" json:"last_known_good,omitempty"`
+	ActivatedAt   *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=activated_at,json=activatedAt,proto3" json:"activated_at,omitempty"`
+	// Operator-visible recovery detail for prepared or failed versions.
+	StateDetail string `protobuf:"bytes,13,opt,name=state_detail,json=stateDetail,proto3" json:"state_detail,omitempty"`
+	// Historical source version for rollback-created versions.
+	SourceVersion uint64 `protobuf:"varint,14,opt,name=source_version,json=sourceVersion,proto3" json:"source_version,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *VersionInfo) Reset() {
 	*x = VersionInfo{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[12]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[54]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -645,7 +4125,7 @@ func (x *VersionInfo) String() string {
 func (*VersionInfo) ProtoMessage() {}
 
 func (x *VersionInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[12]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[54]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -658,7 +4138,7 @@ func (x *VersionInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use VersionInfo.ProtoReflect.Descriptor instead.
 func (*VersionInfo) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{12}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{54}
 }
 
 func (x *VersionInfo) GetId() uint64 {
@@ -689,16 +4169,168 @@ func (x *VersionInfo) GetComment() string {
 	return ""
 }
 
-type ListAuditEntriesRequest struct {
+func (x *VersionInfo) GetActorRole() string {
+	if x != nil {
+		return x.ActorRole
+	}
+	return ""
+}
+
+func (x *VersionInfo) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *VersionInfo) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *VersionInfo) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *VersionInfo) GetArtifactSetSha256() string {
+	if x != nil {
+		return x.ArtifactSetSha256
+	}
+	return ""
+}
+
+func (x *VersionInfo) GetArtifacts() []*VersionArtifact {
+	if x != nil {
+		return x.Artifacts
+	}
+	return nil
+}
+
+func (x *VersionInfo) GetLastKnownGood() bool {
+	if x != nil {
+		return x.LastKnownGood
+	}
+	return false
+}
+
+func (x *VersionInfo) GetActivatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.ActivatedAt
+	}
+	return nil
+}
+
+func (x *VersionInfo) GetStateDetail() string {
+	if x != nil {
+		return x.StateDetail
+	}
+	return ""
+}
+
+func (x *VersionInfo) GetSourceVersion() uint64 {
+	if x != nil {
+		return x.SourceVersion
+	}
+	return 0
+}
+
+type VersionArtifact struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Limit         uint32                 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	Engine        string                 `protobuf:"bytes,1,opt,name=engine,proto3" json:"engine,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	SizeBytes     uint64                 `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	Sha256        string                 `protobuf:"bytes,4,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VersionArtifact) Reset() {
+	*x = VersionArtifact{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VersionArtifact) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VersionArtifact) ProtoMessage() {}
+
+func (x *VersionArtifact) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VersionArtifact.ProtoReflect.Descriptor instead.
+func (*VersionArtifact) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{55}
+}
+
+func (x *VersionArtifact) GetEngine() string {
+	if x != nil {
+		return x.Engine
+	}
+	return ""
+}
+
+func (x *VersionArtifact) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *VersionArtifact) GetSizeBytes() uint64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+func (x *VersionArtifact) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+type ListAuditEntriesRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Maximum entries to return; 0 means server default (100).
+	Limit uint32 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Case-insensitive substring filter on actor name.
+	Actor string `protobuf:"bytes,2,opt,name=actor,proto3" json:"actor,omitempty"`
+	// Exact audit action filter, e.g. "commit" or "rollback-failed".
+	Action string `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
+	// Version created by an audit action, if any.
+	Version uint64 `protobuf:"varint,4,opt,name=version,proto3" json:"version,omitempty"`
+	// Include entries at or after this timestamp.
+	Since *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=since,proto3" json:"since,omitempty"`
+	// Include entries at or before this timestamp.
+	Until *timestamppb.Timestamp `protobuf:"bytes,6,opt,name=until,proto3" json:"until,omitempty"`
+	// Case-insensitive text search across actor, role, auth source, action,
+	// detail, and version.
+	Query         string `protobuf:"bytes,7,opt,name=query,proto3" json:"query,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *ListAuditEntriesRequest) Reset() {
 	*x = ListAuditEntriesRequest{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[13]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[56]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -710,7 +4342,7 @@ func (x *ListAuditEntriesRequest) String() string {
 func (*ListAuditEntriesRequest) ProtoMessage() {}
 
 func (x *ListAuditEntriesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[13]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[56]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -723,7 +4355,7 @@ func (x *ListAuditEntriesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditEntriesRequest.ProtoReflect.Descriptor instead.
 func (*ListAuditEntriesRequest) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{13}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{56}
 }
 
 func (x *ListAuditEntriesRequest) GetLimit() uint32 {
@@ -731,6 +4363,48 @@ func (x *ListAuditEntriesRequest) GetLimit() uint32 {
 		return x.Limit
 	}
 	return 0
+}
+
+func (x *ListAuditEntriesRequest) GetActor() string {
+	if x != nil {
+		return x.Actor
+	}
+	return ""
+}
+
+func (x *ListAuditEntriesRequest) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *ListAuditEntriesRequest) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *ListAuditEntriesRequest) GetSince() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Since
+	}
+	return nil
+}
+
+func (x *ListAuditEntriesRequest) GetUntil() *timestamppb.Timestamp {
+	if x != nil {
+		return x.Until
+	}
+	return nil
+}
+
+func (x *ListAuditEntriesRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
 }
 
 type ListAuditEntriesResponse struct {
@@ -742,7 +4416,7 @@ type ListAuditEntriesResponse struct {
 
 func (x *ListAuditEntriesResponse) Reset() {
 	*x = ListAuditEntriesResponse{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[14]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[57]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -754,7 +4428,7 @@ func (x *ListAuditEntriesResponse) String() string {
 func (*ListAuditEntriesResponse) ProtoMessage() {}
 
 func (x *ListAuditEntriesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[14]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[57]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -767,12 +4441,124 @@ func (x *ListAuditEntriesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ListAuditEntriesResponse.ProtoReflect.Descriptor instead.
 func (*ListAuditEntriesResponse) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{14}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{57}
 }
 
 func (x *ListAuditEntriesResponse) GetEntries() []*AuditEntry {
 	if x != nil {
 		return x.Entries
+	}
+	return nil
+}
+
+type VerifyAuditIntegrityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyAuditIntegrityRequest) Reset() {
+	*x = VerifyAuditIntegrityRequest{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyAuditIntegrityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyAuditIntegrityRequest) ProtoMessage() {}
+
+func (x *VerifyAuditIntegrityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyAuditIntegrityRequest.ProtoReflect.Descriptor instead.
+func (*VerifyAuditIntegrityRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{58}
+}
+
+type VerifyAuditIntegrityResponse struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Ok              bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	Detail          string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	EntryCount      uint32                 `protobuf:"varint,3,opt,name=entry_count,json=entryCount,proto3" json:"entry_count,omitempty"`
+	LatestEntryHash string                 `protobuf:"bytes,4,opt,name=latest_entry_hash,json=latestEntryHash,proto3" json:"latest_entry_hash,omitempty"`
+	CheckedAt       *timestamppb.Timestamp `protobuf:"bytes,5,opt,name=checked_at,json=checkedAt,proto3" json:"checked_at,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *VerifyAuditIntegrityResponse) Reset() {
+	*x = VerifyAuditIntegrityResponse{}
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyAuditIntegrityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyAuditIntegrityResponse) ProtoMessage() {}
+
+func (x *VerifyAuditIntegrityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyAuditIntegrityResponse.ProtoReflect.Descriptor instead.
+func (*VerifyAuditIntegrityResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *VerifyAuditIntegrityResponse) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+func (x *VerifyAuditIntegrityResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *VerifyAuditIntegrityResponse) GetEntryCount() uint32 {
+	if x != nil {
+		return x.EntryCount
+	}
+	return 0
+}
+
+func (x *VerifyAuditIntegrityResponse) GetLatestEntryHash() string {
+	if x != nil {
+		return x.LatestEntryHash
+	}
+	return ""
+}
+
+func (x *VerifyAuditIntegrityResponse) GetCheckedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CheckedAt
 	}
 	return nil
 }
@@ -786,14 +4572,20 @@ type AuditEntry struct {
 	Action string `protobuf:"bytes,4,opt,name=action,proto3" json:"action,omitempty"`
 	Detail string `protobuf:"bytes,5,opt,name=detail,proto3" json:"detail,omitempty"`
 	// Version created by this action, if any.
-	Version       uint64 `protobuf:"varint,6,opt,name=version,proto3" json:"version,omitempty"`
+	Version    uint64 `protobuf:"varint,6,opt,name=version,proto3" json:"version,omitempty"`
+	ActorRole  string `protobuf:"bytes,7,opt,name=actor_role,json=actorRole,proto3" json:"actor_role,omitempty"`
+	AuthSource string `protobuf:"bytes,8,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	// Previous entry hash in the tamper-evident audit chain. Empty for genesis.
+	PreviousHash string `protobuf:"bytes,9,opt,name=previous_hash,json=previousHash,proto3" json:"previous_hash,omitempty"`
+	// SHA-256 hash of this stable audit entry payload.
+	EntryHash     string `protobuf:"bytes,10,opt,name=entry_hash,json=entryHash,proto3" json:"entry_hash,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
 func (x *AuditEntry) Reset() {
 	*x = AuditEntry{}
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[15]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[60]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -805,7 +4597,7 @@ func (x *AuditEntry) String() string {
 func (*AuditEntry) ProtoMessage() {}
 
 func (x *AuditEntry) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_service_proto_msgTypes[15]
+	mi := &file_openngfw_v1_policy_service_proto_msgTypes[60]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -818,7 +4610,7 @@ func (x *AuditEntry) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuditEntry.ProtoReflect.Descriptor instead.
 func (*AuditEntry) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{15}
+	return file_openngfw_v1_policy_service_proto_rawDescGZIP(), []int{60}
 }
 
 func (x *AuditEntry) GetId() uint64 {
@@ -863,6 +4655,34 @@ func (x *AuditEntry) GetVersion() uint64 {
 	return 0
 }
 
+func (x *AuditEntry) GetActorRole() string {
+	if x != nil {
+		return x.ActorRole
+	}
+	return ""
+}
+
+func (x *AuditEntry) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *AuditEntry) GetPreviousHash() string {
+	if x != nil {
+		return x.PreviousHash
+	}
+	return ""
+}
+
+func (x *AuditEntry) GetEntryHash() string {
+	if x != nil {
+		return x.EntryHash
+	}
+	return ""
+}
+
 var File_openngfw_v1_policy_service_proto protoreflect.FileDescriptor
 
 const file_openngfw_v1_policy_service_proto_rawDesc = "" +
@@ -873,36 +4693,345 @@ const file_openngfw_v1_policy_service_proto_rawDesc = "" +
 	"\aversion\x18\x02 \x01(\x04R\aversion\"Z\n" +
 	"\x11GetPolicyResponse\x12+\n" +
 	"\x06policy\x18\x01 \x01(\v2\x13.openngfw.v1.PolicyR\x06policy\x12\x18\n" +
-	"\aversion\x18\x02 \x01(\x04R\aversion\"B\n" +
+	"\aversion\x18\x02 \x01(\x04R\aversion\"\x82\x01\n" +
 	"\x13SetCandidateRequest\x12+\n" +
-	"\x06policy\x18\x01 \x01(\v2\x13.openngfw.v1.PolicyR\x06policy\"\x16\n" +
-	"\x14SetCandidateResponse\"\x11\n" +
-	"\x0fValidateRequest\"@\n" +
+	"\x06policy\x18\x01 \x01(\v2\x13.openngfw.v1.PolicyR\x06policy\x12>\n" +
+	"\x1bexpected_candidate_revision\x18\x02 \x01(\tR\x19expectedCandidateRevision\"E\n" +
+	"\x14SetCandidateResponse\x12-\n" +
+	"\x12candidate_revision\x18\x01 \x01(\tR\x11candidateRevision\">\n" +
+	"\x0fValidateRequest\x12+\n" +
+	"\x06policy\x18\x01 \x01(\v2\x13.openngfw.v1.PolicyR\x06policy\"\xe9\x01\n" +
 	"\x10ValidateResponse\x12\x14\n" +
 	"\x05valid\x18\x01 \x01(\bR\x05valid\x12\x16\n" +
-	"\x06errors\x18\x02 \x03(\tR\x06errors\")\n" +
+	"\x06errors\x18\x02 \x03(\tR\x06errors\x121\n" +
+	"\x06impact\x18\x03 \x01(\v2\x19.openngfw.v1.ChangeImpactR\x06impact\x12:\n" +
+	"\bfindings\x18\x04 \x03(\v2\x1e.openngfw.v1.ValidationFindingR\bfindings\x128\n" +
+	"\vrender_plan\x18\x05 \x01(\v2\x17.openngfw.v1.RenderPlanR\n" +
+	"renderPlan\"\xe9\x01\n" +
+	"\x11ValidationFinding\x12;\n" +
+	"\bseverity\x18\x01 \x01(\x0e2\x1f.openngfw.v1.ValidationSeverityR\bseverity\x122\n" +
+	"\x05stage\x18\x02 \x01(\x0e2\x1c.openngfw.v1.ValidationStageR\x05stage\x12\x12\n" +
+	"\x04code\x18\x03 \x01(\tR\x04code\x12\x18\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\x12\x1d\n" +
+	"\n" +
+	"field_path\x18\x05 \x01(\tR\tfieldPath\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\"\x8f\x01\n" +
+	"\n" +
+	"RenderPlan\x129\n" +
+	"\tartifacts\x18\x01 \x03(\v2\x1b.openngfw.v1.RenderArtifactR\tartifacts\x12%\n" +
+	"\x0eartifact_count\x18\x02 \x01(\rR\rartifactCount\x12\x1f\n" +
+	"\vtotal_bytes\x18\x03 \x01(\x04R\n" +
+	"totalBytes\"[\n" +
+	"\x0eRenderArtifact\x12\x16\n" +
+	"\x06engine\x18\x01 \x01(\tR\x06engine\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x03 \x01(\x04R\tsizeBytes\"\x1b\n" +
+	"\x19GetCandidateStatusRequest\"\xc4\x02\n" +
+	"\x1aGetCandidateStatusResponse\x12#\n" +
+	"\rhas_candidate\x18\x01 \x01(\bR\fhasCandidate\x12\x14\n" +
+	"\x05dirty\x18\x02 \x01(\bR\x05dirty\x12'\n" +
+	"\x0frunning_version\x18\x03 \x01(\x04R\x0erunningVersion\x12!\n" +
+	"\fchange_count\x18\x04 \x01(\rR\vchangeCount\x12=\n" +
+	"\achanges\x18\x05 \x03(\v2#.openngfw.v1.CandidateChangeSummaryR\achanges\x121\n" +
+	"\x06impact\x18\x06 \x01(\v2\x19.openngfw.v1.ChangeImpactR\x06impact\x12-\n" +
+	"\x12candidate_revision\x18\a \x01(\tR\x11candidateRevision\"b\n" +
+	"\x13ListNatRulesRequest\x121\n" +
+	"\x06source\x18\x01 \x01(\x0e2\x19.openngfw.v1.PolicySourceR\x06source\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x04R\aversion\"\xc5\x01\n" +
+	"\x14ListNatRulesResponse\x125\n" +
+	"\n" +
+	"source_nat\x18\x01 \x03(\v2\x16.openngfw.v1.SourceNatR\tsourceNat\x12D\n" +
+	"\x0fdestination_nat\x18\x02 \x03(\v2\x1b.openngfw.v1.DestinationNatR\x0edestinationNat\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\x04R\aversion\x12\x16\n" +
+	"\x06source\x18\x04 \x01(\tR\x06source\"\xcf\x01\n" +
+	"\x1fUpsertCandidateSourceNatRequest\x12*\n" +
+	"\x04rule\x18\x01 \x01(\v2\x16.openngfw.v1.SourceNatR\x04rule\x12>\n" +
+	"\x1bexpected_candidate_revision\x18\x02 \x01(\tR\x19expectedCandidateRevision\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12\x0e\n" +
+	"\x02id\x18\x05 \x01(\tR\x02id\"\xd9\x01\n" +
+	"$UpsertCandidateDestinationNatRequest\x12/\n" +
+	"\x04rule\x18\x01 \x01(\v2\x1b.openngfw.v1.DestinationNatR\x04rule\x12>\n" +
+	"\x1bexpected_candidate_revision\x18\x02 \x01(\tR\x19expectedCandidateRevision\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12\x0e\n" +
+	"\x02id\x18\x05 \x01(\tR\x02id\"\xb7\x01\n" +
+	"\x1fDeleteCandidateSourceNatRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12>\n" +
+	"\x1bexpected_candidate_revision\x18\x02 \x01(\tR\x19expectedCandidateRevision\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12\x0e\n" +
+	"\x02id\x18\x05 \x01(\tR\x02id\"\xbc\x01\n" +
+	"$DeleteCandidateDestinationNatRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12>\n" +
+	"\x1bexpected_candidate_revision\x18\x02 \x01(\tR\x19expectedCandidateRevision\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12\x0e\n" +
+	"\x02id\x18\x05 \x01(\tR\x02id\"\xce\x02\n" +
+	" UpsertCandidateSourceNatResponse\x12\x16\n" +
+	"\x06action\x18\x01 \x01(\tR\x06action\x12\x19\n" +
+	"\bnat_type\x18\x02 \x01(\tR\anatType\x125\n" +
+	"\n" +
+	"source_nat\x18\x03 \x01(\v2\x16.openngfw.v1.SourceNatR\tsourceNat\x12=\n" +
+	"\n" +
+	"validation\x18\x04 \x01(\v2\x1d.openngfw.v1.ValidateResponseR\n" +
+	"validation\x12R\n" +
+	"\x10candidate_status\x18\x05 \x01(\v2'.openngfw.v1.GetCandidateStatusResponseR\x0fcandidateStatus\x12-\n" +
+	"\x12candidate_revision\x18\x06 \x01(\tR\x11candidateRevision\"\xce\x02\n" +
+	" DeleteCandidateSourceNatResponse\x12\x16\n" +
+	"\x06action\x18\x01 \x01(\tR\x06action\x12\x19\n" +
+	"\bnat_type\x18\x02 \x01(\tR\anatType\x125\n" +
+	"\n" +
+	"source_nat\x18\x03 \x01(\v2\x16.openngfw.v1.SourceNatR\tsourceNat\x12=\n" +
+	"\n" +
+	"validation\x18\x04 \x01(\v2\x1d.openngfw.v1.ValidateResponseR\n" +
+	"validation\x12R\n" +
+	"\x10candidate_status\x18\x05 \x01(\v2'.openngfw.v1.GetCandidateStatusResponseR\x0fcandidateStatus\x12-\n" +
+	"\x12candidate_revision\x18\x06 \x01(\tR\x11candidateRevision\"\xe2\x02\n" +
+	"%UpsertCandidateDestinationNatResponse\x12\x16\n" +
+	"\x06action\x18\x01 \x01(\tR\x06action\x12\x19\n" +
+	"\bnat_type\x18\x02 \x01(\tR\anatType\x12D\n" +
+	"\x0fdestination_nat\x18\x03 \x01(\v2\x1b.openngfw.v1.DestinationNatR\x0edestinationNat\x12=\n" +
+	"\n" +
+	"validation\x18\x04 \x01(\v2\x1d.openngfw.v1.ValidateResponseR\n" +
+	"validation\x12R\n" +
+	"\x10candidate_status\x18\x05 \x01(\v2'.openngfw.v1.GetCandidateStatusResponseR\x0fcandidateStatus\x12-\n" +
+	"\x12candidate_revision\x18\x06 \x01(\tR\x11candidateRevision\"\xe2\x02\n" +
+	"%DeleteCandidateDestinationNatResponse\x12\x16\n" +
+	"\x06action\x18\x01 \x01(\tR\x06action\x12\x19\n" +
+	"\bnat_type\x18\x02 \x01(\tR\anatType\x12D\n" +
+	"\x0fdestination_nat\x18\x03 \x01(\v2\x1b.openngfw.v1.DestinationNatR\x0edestinationNat\x12=\n" +
+	"\n" +
+	"validation\x18\x04 \x01(\v2\x1d.openngfw.v1.ValidateResponseR\n" +
+	"validation\x12R\n" +
+	"\x10candidate_status\x18\x05 \x01(\v2'.openngfw.v1.GetCandidateStatusResponseR\x0fcandidateStatus\x12-\n" +
+	"\x12candidate_revision\x18\x06 \x01(\tR\x11candidateRevision\"~\n" +
+	"\x16CandidateChangeSummary\x12\x18\n" +
+	"\asection\x18\x01 \x01(\tR\asection\x12\x14\n" +
+	"\x05added\x18\x02 \x01(\rR\x05added\x12\x1a\n" +
+	"\bmodified\x18\x03 \x01(\rR\bmodified\x12\x18\n" +
+	"\aremoved\x18\x04 \x01(\rR\aremoved\"\xb1\x01\n" +
+	"\x1bListObjectReferencesRequest\x121\n" +
+	"\x06source\x18\x01 \x01(\x0e2\x19.openngfw.v1.PolicySourceR\x06source\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x04R\aversion\x121\n" +
+	"\x04kind\x18\x03 \x01(\x0e2\x1d.openngfw.v1.PolicyObjectKindR\x04kind\x12\x12\n" +
+	"\x04name\x18\x04 \x01(\tR\x04name\"|\n" +
+	"\x1cListObjectReferencesResponse\x12B\n" +
+	"\n" +
+	"references\x18\x01 \x03(\v2\".openngfw.v1.PolicyObjectReferenceR\n" +
+	"references\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x04R\aversion\"\xbd\x01\n" +
+	"\x15PolicyObjectReference\x12\x1f\n" +
+	"\vobject_name\x18\x01 \x01(\tR\n" +
+	"objectName\x12\x12\n" +
+	"\x04area\x18\x02 \x01(\tR\x04area\x12\x12\n" +
+	"\x04item\x18\x03 \x01(\tR\x04item\x12\x14\n" +
+	"\x05index\x18\x04 \x01(\rR\x05index\x12\x14\n" +
+	"\x05field\x18\x05 \x01(\tR\x05field\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\x12\x17\n" +
+	"\aitem_id\x18\a \x01(\tR\x06itemId\"\x9e\x01\n" +
+	"\x19RenamePolicyObjectRequest\x121\n" +
+	"\x04kind\x18\x01 \x01(\x0e2\x1d.openngfw.v1.PolicyObjectKindR\x04kind\x12\x19\n" +
+	"\bold_name\x18\x02 \x01(\tR\aoldName\x12\x19\n" +
+	"\bnew_name\x18\x03 \x01(\tR\anewName\x12\x18\n" +
+	"\acomment\x18\x04 \x01(\tR\acomment\"\xd7\x02\n" +
+	"\x1aRenamePolicyObjectResponse\x121\n" +
+	"\x04kind\x18\x01 \x01(\x0e2\x1d.openngfw.v1.PolicyObjectKindR\x04kind\x12\x19\n" +
+	"\bold_name\x18\x02 \x01(\tR\aoldName\x12\x19\n" +
+	"\bnew_name\x18\x03 \x01(\tR\anewName\x12%\n" +
+	"\x0eobject_renamed\x18\x04 \x01(\bR\robjectRenamed\x12U\n" +
+	"\x14rewritten_references\x18\x05 \x03(\v2\".openngfw.v1.PolicyObjectReferenceR\x13rewrittenReferences\x12R\n" +
+	"\x10candidate_status\x18\x06 \x01(\v2'.openngfw.v1.GetCandidateStatusResponseR\x0fcandidateStatus\"\xc9\x01\n" +
+	"\x11DiffPolicyRequest\x12:\n" +
+	"\vfrom_source\x18\x01 \x01(\x0e2\x19.openngfw.v1.PolicySourceR\n" +
+	"fromSource\x12!\n" +
+	"\ffrom_version\x18\x02 \x01(\x04R\vfromVersion\x126\n" +
+	"\tto_source\x18\x03 \x01(\x0e2\x19.openngfw.v1.PolicySourceR\btoSource\x12\x1d\n" +
+	"\n" +
+	"to_version\x18\x04 \x01(\x04R\ttoVersion\"\xdd\x01\n" +
+	"\x12DiffPolicyResponse\x12\x1d\n" +
+	"\n" +
+	"from_label\x18\x01 \x01(\tR\tfromLabel\x12\x19\n" +
+	"\bto_label\x18\x02 \x01(\tR\atoLabel\x12!\n" +
+	"\ffrom_version\x18\x03 \x01(\x04R\vfromVersion\x12\x1d\n" +
+	"\n" +
+	"to_version\x18\x04 \x01(\x04R\ttoVersion\x12\x18\n" +
+	"\achanged\x18\x05 \x01(\bR\achanged\x121\n" +
+	"\x05lines\x18\x06 \x03(\v2\x1b.openngfw.v1.PolicyDiffLineR\x05lines\"Y\n" +
+	"\x0ePolicyDiffLine\x123\n" +
+	"\x04type\x18\x01 \x01(\x0e2\x1f.openngfw.v1.PolicyDiffLineTypeR\x04type\x12\x12\n" +
+	"\x04text\x18\x02 \x01(\tR\x04text\"p\n" +
+	"\fChangeImpact\x12+\n" +
+	"\x04risk\x18\x01 \x01(\x0e2\x17.openngfw.v1.ChangeRiskR\x04risk\x123\n" +
+	"\x05items\x18\x02 \x03(\v2\x1d.openngfw.v1.ChangeImpactItemR\x05items\"m\n" +
+	"\x10ChangeImpactItem\x12+\n" +
+	"\x04risk\x18\x01 \x01(\x0e2\x17.openngfw.v1.ChangeRiskR\x04risk\x12\x14\n" +
+	"\x05title\x18\x02 \x01(\tR\x05title\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\"\xa2\x01\n" +
+	"\x1bCreateChangeApprovalRequest\x12-\n" +
+	"\x12candidate_revision\x18\x01 \x01(\tR\x11candidateRevision\x12\x18\n" +
+	"\acomment\x18\x02 \x01(\tR\acomment\x12\x19\n" +
+	"\back_risk\x18\x03 \x01(\bR\aackRisk\x12\x1f\n" +
+	"\vack_runtime\x18\x04 \x01(\bR\n" +
+	"ackRuntime\"W\n" +
+	"\x1cCreateChangeApprovalResponse\x127\n" +
+	"\bapproval\x18\x01 \x01(\v2\x1b.openngfw.v1.ChangeApprovalR\bapproval\"\x8c\x01\n" +
+	"\x1aListChangeApprovalsRequest\x12-\n" +
+	"\x12candidate_revision\x18\x01 \x01(\tR\x11candidateRevision\x12)\n" +
+	"\x10include_consumed\x18\x02 \x01(\bR\x0fincludeConsumed\x12\x14\n" +
+	"\x05limit\x18\x03 \x01(\rR\x05limit\"X\n" +
+	"\x1bListChangeApprovalsResponse\x129\n" +
+	"\tapprovals\x18\x01 \x03(\v2\x1b.openngfw.v1.ChangeApprovalR\tapprovals\"\xbc\x04\n" +
+	"\x0eChangeApproval\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12-\n" +
+	"\x12candidate_revision\x18\x02 \x01(\tR\x11candidateRevision\x12\x14\n" +
+	"\x05actor\x18\x03 \x01(\tR\x05actor\x12\x1d\n" +
+	"\n" +
+	"actor_role\x18\x04 \x01(\tR\tactorRole\x12\x1f\n" +
+	"\vauth_source\x18\x05 \x01(\tR\n" +
+	"authSource\x12\x18\n" +
+	"\acomment\x18\x06 \x01(\tR\acomment\x12\x19\n" +
+	"\back_risk\x18\a \x01(\bR\aackRisk\x12\x1f\n" +
+	"\vack_runtime\x18\b \x01(\bR\n" +
+	"ackRuntime\x129\n" +
+	"\n" +
+	"created_at\x18\t \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x1a\n" +
+	"\bconsumed\x18\n" +
+	" \x01(\bR\bconsumed\x12)\n" +
+	"\x10consumed_version\x18\v \x01(\x04R\x0fconsumedVersion\x12;\n" +
+	"\vconsumed_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\n" +
+	"consumedAt\x12\x1f\n" +
+	"\vconsumed_by\x18\r \x01(\tR\n" +
+	"consumedBy\x12(\n" +
+	"\x10consumed_by_role\x18\x0e \x01(\tR\x0econsumedByRole\x125\n" +
+	"\x17consumed_by_auth_source\x18\x0f \x01(\tR\x14consumedByAuthSource\"\x84\x01\n" +
+	"\x1bCreateBackupSnapshotRequest\x121\n" +
+	"\x06source\x18\x01 \x01(\x0e2\x19.openngfw.v1.PolicySourceR\x06source\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\x04R\aversion\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\"W\n" +
+	"\x1cCreateBackupSnapshotResponse\x127\n" +
+	"\bsnapshot\x18\x01 \x01(\v2\x1b.openngfw.v1.BackupSnapshotR\bsnapshot\"2\n" +
+	"\x1aListBackupSnapshotsRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\rR\x05limit\"X\n" +
+	"\x1bListBackupSnapshotsResponse\x129\n" +
+	"\tsnapshots\x18\x01 \x03(\v2\x1b.openngfw.v1.BackupSnapshotR\tsnapshots\"*\n" +
+	"\x18GetBackupSnapshotRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x81\x01\n" +
+	"\x19GetBackupSnapshotResponse\x127\n" +
+	"\bsnapshot\x18\x01 \x01(\v2\x1b.openngfw.v1.BackupSnapshotR\bsnapshot\x12+\n" +
+	"\x06policy\x18\x02 \x01(\v2\x13.openngfw.v1.PolicyR\x06policy\"/\n" +
+	"\x1dValidateBackupSnapshotRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\x98\x01\n" +
+	"\x1eValidateBackupSnapshotResponse\x127\n" +
+	"\bsnapshot\x18\x01 \x01(\v2\x1b.openngfw.v1.BackupSnapshotR\bsnapshot\x12=\n" +
+	"\n" +
+	"validation\x18\x02 \x01(\v2\x1d.openngfw.v1.ValidateResponseR\n" +
+	"validation\"\xb8\x01\n" +
+	"#PreviewBackupSnapshotRestoreRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x18\n" +
+	"\acomment\x18\x02 \x01(\tR\acomment\x12'\n" +
+	"\x0fstage_candidate\x18\x03 \x01(\bR\x0estageCandidate\x12>\n" +
+	"\x1bexpected_candidate_revision\x18\x04 \x01(\tR\x19expectedCandidateRevision\"\x81\x03\n" +
+	"$PreviewBackupSnapshotRestoreResponse\x12\x15\n" +
+	"\x06job_id\x18\x01 \x01(\tR\x05jobId\x127\n" +
+	"\bsnapshot\x18\x02 \x01(\v2\x1b.openngfw.v1.BackupSnapshotR\bsnapshot\x12=\n" +
+	"\n" +
+	"validation\x18\x03 \x01(\v2\x1d.openngfw.v1.ValidateResponseR\n" +
+	"validation\x123\n" +
+	"\x04diff\x18\x04 \x01(\v2\x1f.openngfw.v1.DiffPolicyResponseR\x04diff\x12)\n" +
+	"\x10staged_candidate\x18\x05 \x01(\bR\x0fstagedCandidate\x12R\n" +
+	"\x10candidate_status\x18\x06 \x01(\v2'.openngfw.v1.GetCandidateStatusResponseR\x0fcandidateStatus\x12\x16\n" +
+	"\x06detail\x18\a \x01(\tR\x06detail\"\xb3\x03\n" +
+	"\x0eBackupSnapshot\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x129\n" +
+	"\n" +
+	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x14\n" +
+	"\x05actor\x18\x03 \x01(\tR\x05actor\x12\x1d\n" +
+	"\n" +
+	"actor_role\x18\x04 \x01(\tR\tactorRole\x12\x1f\n" +
+	"\vauth_source\x18\x05 \x01(\tR\n" +
+	"authSource\x12\x18\n" +
+	"\acomment\x18\x06 \x01(\tR\acomment\x12\x16\n" +
+	"\x06source\x18\a \x01(\tR\x06source\x12%\n" +
+	"\x0esource_version\x18\b \x01(\x04R\rsourceVersion\x12'\n" +
+	"\x0frunning_version\x18\t \x01(\x04R\x0erunningVersion\x12-\n" +
+	"\x12candidate_revision\x18\n" +
+	" \x01(\tR\x11candidateRevision\x12#\n" +
+	"\rpolicy_sha256\x18\v \x01(\tR\fpolicySha256\x12*\n" +
+	"\x11policy_size_bytes\x18\f \x01(\x04R\x0fpolicySizeBytes\"\xea\x01\n" +
 	"\rCommitRequest\x12\x18\n" +
-	"\acomment\x18\x01 \x01(\tR\acomment\"*\n" +
+	"\acomment\x18\x01 \x01(\tR\acomment\x12\x19\n" +
+	"\back_risk\x18\x02 \x01(\bR\aackRisk\x12\x1f\n" +
+	"\vack_runtime\x18\x03 \x01(\bR\n" +
+	"ackRuntime\x12\x1f\n" +
+	"\vapproval_id\x18\x04 \x01(\tR\n" +
+	"approvalId\x12\"\n" +
+	"\rstep_up_token\x18\x05 \x01(\tR\vstepUpToken\x12>\n" +
+	"\x1breviewed_candidate_revision\x18\x06 \x01(\tR\x19reviewedCandidateRevision\"\x92\x01\n" +
 	"\x0eCommitResponse\x12\x18\n" +
-	"\aversion\x18\x01 \x01(\x04R\aversion\"+\n" +
+	"\aversion\x18\x01 \x01(\x04R\aversion\x12)\n" +
+	"\x10previous_version\x18\x02 \x01(\x04R\x0fpreviousVersion\x12;\n" +
+	"\fversion_info\x18\x03 \x01(\v2\x18.openngfw.v1.VersionInfoR\vversionInfo\"\xa5\x01\n" +
 	"\x0fRollbackRequest\x12\x18\n" +
-	"\aversion\x18\x01 \x01(\x04R\aversion\",\n" +
+	"\aversion\x18\x01 \x01(\x04R\aversion\x12\x18\n" +
+	"\acomment\x18\x02 \x01(\tR\acomment\x12\x19\n" +
+	"\back_risk\x18\x03 \x01(\bR\aackRisk\x12\x1f\n" +
+	"\vack_runtime\x18\x04 \x01(\bR\n" +
+	"ackRuntime\x12\"\n" +
+	"\rstep_up_token\x18\x05 \x01(\tR\vstepUpToken\"\x94\x01\n" +
 	"\x10RollbackResponse\x12\x18\n" +
-	"\aversion\x18\x01 \x01(\x04R\aversion\"+\n" +
+	"\aversion\x18\x01 \x01(\x04R\aversion\x12)\n" +
+	"\x10previous_version\x18\x02 \x01(\x04R\x0fpreviousVersion\x12;\n" +
+	"\fversion_info\x18\x03 \x01(\v2\x18.openngfw.v1.VersionInfoR\vversionInfo\"+\n" +
 	"\x13ListVersionsRequest\x12\x14\n" +
 	"\x05limit\x18\x01 \x01(\rR\x05limit\"L\n" +
 	"\x14ListVersionsResponse\x124\n" +
-	"\bversions\x18\x01 \x03(\v2\x18.openngfw.v1.VersionInfoR\bversions\"\x88\x01\n" +
+	"\bversions\x18\x01 \x03(\v2\x18.openngfw.v1.VersionInfoR\bversions\"\x93\x04\n" +
 	"\vVersionInfo\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x129\n" +
 	"\n" +
 	"created_at\x18\x02 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x12\x14\n" +
 	"\x05actor\x18\x03 \x01(\tR\x05actor\x12\x18\n" +
-	"\acomment\x18\x04 \x01(\tR\acomment\"/\n" +
+	"\acomment\x18\x04 \x01(\tR\acomment\x12\x1d\n" +
+	"\n" +
+	"actor_role\x18\x05 \x01(\tR\tactorRole\x12\x1f\n" +
+	"\vauth_source\x18\x06 \x01(\tR\n" +
+	"authSource\x12\x16\n" +
+	"\x06action\x18\a \x01(\tR\x06action\x12\x14\n" +
+	"\x05state\x18\b \x01(\tR\x05state\x12.\n" +
+	"\x13artifact_set_sha256\x18\t \x01(\tR\x11artifactSetSha256\x12:\n" +
+	"\tartifacts\x18\n" +
+	" \x03(\v2\x1c.openngfw.v1.VersionArtifactR\tartifacts\x12&\n" +
+	"\x0flast_known_good\x18\v \x01(\bR\rlastKnownGood\x12=\n" +
+	"\factivated_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\vactivatedAt\x12!\n" +
+	"\fstate_detail\x18\r \x01(\tR\vstateDetail\x12%\n" +
+	"\x0esource_version\x18\x0e \x01(\x04R\rsourceVersion\"t\n" +
+	"\x0fVersionArtifact\x12\x16\n" +
+	"\x06engine\x18\x01 \x01(\tR\x06engine\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x03 \x01(\x04R\tsizeBytes\x12\x16\n" +
+	"\x06sha256\x18\x04 \x01(\tR\x06sha256\"\xf1\x01\n" +
 	"\x17ListAuditEntriesRequest\x12\x14\n" +
-	"\x05limit\x18\x01 \x01(\rR\x05limit\"M\n" +
+	"\x05limit\x18\x01 \x01(\rR\x05limit\x12\x14\n" +
+	"\x05actor\x18\x02 \x01(\tR\x05actor\x12\x16\n" +
+	"\x06action\x18\x03 \x01(\tR\x06action\x12\x18\n" +
+	"\aversion\x18\x04 \x01(\x04R\aversion\x120\n" +
+	"\x05since\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\x05since\x120\n" +
+	"\x05until\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\x05until\x12\x14\n" +
+	"\x05query\x18\a \x01(\tR\x05query\"M\n" +
 	"\x18ListAuditEntriesResponse\x121\n" +
-	"\aentries\x18\x01 \x03(\v2\x17.openngfw.v1.AuditEntryR\aentries\"\xac\x01\n" +
+	"\aentries\x18\x01 \x03(\v2\x17.openngfw.v1.AuditEntryR\aentries\"\x1d\n" +
+	"\x1bVerifyAuditIntegrityRequest\"\xce\x01\n" +
+	"\x1cVerifyAuditIntegrityResponse\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x1f\n" +
+	"\ventry_count\x18\x03 \x01(\rR\n" +
+	"entryCount\x12*\n" +
+	"\x11latest_entry_hash\x18\x04 \x01(\tR\x0flatestEntryHash\x129\n" +
+	"\n" +
+	"checked_at\x18\x05 \x01(\v2\x1a.google.protobuf.TimestampR\tcheckedAt\"\xb0\x02\n" +
 	"\n" +
 	"AuditEntry\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\x04R\x02id\x12.\n" +
@@ -910,22 +5039,79 @@ const file_openngfw_v1_policy_service_proto_rawDesc = "" +
 	"\x05actor\x18\x03 \x01(\tR\x05actor\x12\x16\n" +
 	"\x06action\x18\x04 \x01(\tR\x06action\x12\x16\n" +
 	"\x06detail\x18\x05 \x01(\tR\x06detail\x12\x18\n" +
-	"\aversion\x18\x06 \x01(\x04R\aversion*\x80\x01\n" +
+	"\aversion\x18\x06 \x01(\x04R\aversion\x12\x1d\n" +
+	"\n" +
+	"actor_role\x18\a \x01(\tR\tactorRole\x12\x1f\n" +
+	"\vauth_source\x18\b \x01(\tR\n" +
+	"authSource\x12#\n" +
+	"\rprevious_hash\x18\t \x01(\tR\fpreviousHash\x12\x1d\n" +
+	"\n" +
+	"entry_hash\x18\n" +
+	" \x01(\tR\tentryHash*\x80\x01\n" +
 	"\fPolicySource\x12\x1d\n" +
 	"\x19POLICY_SOURCE_UNSPECIFIED\x10\x00\x12\x19\n" +
 	"\x15POLICY_SOURCE_RUNNING\x10\x01\x12\x1b\n" +
 	"\x17POLICY_SOURCE_CANDIDATE\x10\x02\x12\x19\n" +
-	"\x15POLICY_SOURCE_VERSION\x10\x032\xe2\x05\n" +
+	"\x15POLICY_SOURCE_VERSION\x10\x03*\xb4\x02\n" +
+	"\x10PolicyObjectKind\x12\"\n" +
+	"\x1ePOLICY_OBJECT_KIND_UNSPECIFIED\x10\x00\x12\x1b\n" +
+	"\x17POLICY_OBJECT_KIND_ZONE\x10\x01\x12\x1e\n" +
+	"\x1aPOLICY_OBJECT_KIND_ADDRESS\x10\x02\x12\x1e\n" +
+	"\x1aPOLICY_OBJECT_KIND_SERVICE\x10\x03\x12\"\n" +
+	"\x1ePOLICY_OBJECT_KIND_APPLICATION\x10\x04\x12'\n" +
+	"#POLICY_OBJECT_KIND_SECURITY_PROFILE\x10\x05\x12\"\n" +
+	"\x1ePOLICY_OBJECT_KIND_QOS_PROFILE\x10\x06\x12.\n" +
+	"*POLICY_OBJECT_KIND_ZONE_PROTECTION_PROFILE\x10\a*\x9f\x01\n" +
+	"\x12PolicyDiffLineType\x12%\n" +
+	"!POLICY_DIFF_LINE_TYPE_UNSPECIFIED\x10\x00\x12!\n" +
+	"\x1dPOLICY_DIFF_LINE_TYPE_CONTEXT\x10\x01\x12\x1d\n" +
+	"\x19POLICY_DIFF_LINE_TYPE_ADD\x10\x02\x12 \n" +
+	"\x1cPOLICY_DIFF_LINE_TYPE_DELETE\x10\x03*\x97\x01\n" +
+	"\x12ValidationSeverity\x12#\n" +
+	"\x1fVALIDATION_SEVERITY_UNSPECIFIED\x10\x00\x12\x1d\n" +
+	"\x19VALIDATION_SEVERITY_ERROR\x10\x01\x12\x1f\n" +
+	"\x1bVALIDATION_SEVERITY_WARNING\x10\x02\x12\x1c\n" +
+	"\x18VALIDATION_SEVERITY_INFO\x10\x03*\xb6\x01\n" +
+	"\x0fValidationStage\x12 \n" +
+	"\x1cVALIDATION_STAGE_UNSPECIFIED\x10\x00\x12!\n" +
+	"\x1dVALIDATION_STAGE_POLICY_MODEL\x10\x01\x12\x1b\n" +
+	"\x17VALIDATION_STAGE_RENDER\x10\x02\x12$\n" +
+	" VALIDATION_STAGE_ENGINE_VALIDATE\x10\x03\x12\x1b\n" +
+	"\x17VALIDATION_STAGE_IMPACT\x10\x04*l\n" +
+	"\n" +
+	"ChangeRisk\x12\x1b\n" +
+	"\x17CHANGE_RISK_UNSPECIFIED\x10\x00\x12\x13\n" +
+	"\x0fCHANGE_RISK_LOW\x10\x01\x12\x16\n" +
+	"\x12CHANGE_RISK_MEDIUM\x10\x02\x12\x14\n" +
+	"\x10CHANGE_RISK_HIGH\x10\x032\xf3\x1a\n" +
 	"\rPolicyService\x12^\n" +
 	"\tGetPolicy\x12\x1d.openngfw.v1.GetPolicyRequest\x1a\x1e.openngfw.v1.GetPolicyResponse\"\x12\x82\xd3\xe4\x93\x02\f\x12\n" +
 	"/v1/policy\x12m\n" +
-	"\fSetCandidate\x12 .openngfw.v1.SetCandidateRequest\x1a!.openngfw.v1.SetCandidateResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\x1a\r/v1/candidate\x12g\n" +
-	"\bValidate\x12\x1c.openngfw.v1.ValidateRequest\x1a\x1d.openngfw.v1.ValidateResponse\"\x1e\x82\xd3\xe4\x93\x02\x18\"\x16/v1/candidate/validate\x12X\n" +
+	"\fSetCandidate\x12 .openngfw.v1.SetCandidateRequest\x1a!.openngfw.v1.SetCandidateResponse\"\x18\x82\xd3\xe4\x93\x02\x12:\x01*\x1a\r/v1/candidate\x12j\n" +
+	"\bValidate\x12\x1c.openngfw.v1.ValidateRequest\x1a\x1d.openngfw.v1.ValidateResponse\"!\x82\xd3\xe4\x93\x02\x1b:\x01*\"\x16/v1/candidate/validate\x12\x83\x01\n" +
+	"\x12GetCandidateStatus\x12&.openngfw.v1.GetCandidateStatusRequest\x1a'.openngfw.v1.GetCandidateStatusResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/candidate/status\x12k\n" +
+	"\fListNatRules\x12 .openngfw.v1.ListNatRulesRequest\x1a!.openngfw.v1.ListNatRulesResponse\"\x16\x82\xd3\xe4\x93\x02\x10\x12\x0e/v1/policy/nat\x12\xd2\x01\n" +
+	"\x18UpsertCandidateSourceNat\x12,.openngfw.v1.UpsertCandidateSourceNatRequest\x1a-.openngfw.v1.UpsertCandidateSourceNatResponse\"Y\x82\xd3\xe4\x93\x02S:\x01*Z(:\x01*\x1a#/v1/candidate/nat/source/by-id/{id}\x1a$/v1/candidate/nat/source/{rule.name}\x12\xc7\x01\n" +
+	"\x18DeleteCandidateSourceNat\x12,.openngfw.v1.DeleteCandidateSourceNatRequest\x1a-.openngfw.v1.DeleteCandidateSourceNatResponse\"N\x82\xd3\xe4\x93\x02HZ%*#/v1/candidate/nat/source/by-id/{id}*\x1f/v1/candidate/nat/source/{name}\x12\xeb\x01\n" +
+	"\x1dUpsertCandidateDestinationNat\x121.openngfw.v1.UpsertCandidateDestinationNatRequest\x1a2.openngfw.v1.UpsertCandidateDestinationNatResponse\"c\x82\xd3\xe4\x93\x02]:\x01*Z-:\x01*\x1a(/v1/candidate/nat/destination/by-id/{id}\x1a)/v1/candidate/nat/destination/{rule.name}\x12\xe0\x01\n" +
+	"\x1dDeleteCandidateDestinationNat\x121.openngfw.v1.DeleteCandidateDestinationNatRequest\x1a2.openngfw.v1.DeleteCandidateDestinationNatResponse\"X\x82\xd3\xe4\x93\x02RZ**(/v1/candidate/nat/destination/by-id/{id}*$/v1/candidate/nat/destination/{name}\x12\x91\x01\n" +
+	"\x14ListObjectReferences\x12(.openngfw.v1.ListObjectReferencesRequest\x1a).openngfw.v1.ListObjectReferencesResponse\"$\x82\xd3\xe4\x93\x02\x1e\x12\x1c/v1/policy/object-references\x12\x8d\x01\n" +
+	"\x12RenamePolicyObject\x12&.openngfw.v1.RenamePolicyObjectRequest\x1a'.openngfw.v1.RenamePolicyObjectResponse\"&\x82\xd3\xe4\x93\x02 :\x01*\"\x1b/v1/candidate/object-rename\x12f\n" +
+	"\n" +
+	"DiffPolicy\x12\x1e.openngfw.v1.DiffPolicyRequest\x1a\x1f.openngfw.v1.DiffPolicyResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/policy/diff\x12\x8c\x01\n" +
+	"\x14CreateChangeApproval\x12(.openngfw.v1.CreateChangeApprovalRequest\x1a).openngfw.v1.CreateChangeApprovalResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/change-approvals\x12\x86\x01\n" +
+	"\x13ListChangeApprovals\x12'.openngfw.v1.ListChangeApprovalsRequest\x1a(.openngfw.v1.ListChangeApprovalsResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/change-approvals\x12\x8c\x01\n" +
+	"\x14CreateBackupSnapshot\x12(.openngfw.v1.CreateBackupSnapshotRequest\x1a).openngfw.v1.CreateBackupSnapshotResponse\"\x1f\x82\xd3\xe4\x93\x02\x19:\x01*\"\x14/v1/backup/snapshots\x12\x86\x01\n" +
+	"\x13ListBackupSnapshots\x12'.openngfw.v1.ListBackupSnapshotsRequest\x1a(.openngfw.v1.ListBackupSnapshotsResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/backup/snapshots\x12\x85\x01\n" +
+	"\x11GetBackupSnapshot\x12%.openngfw.v1.GetBackupSnapshotRequest\x1a&.openngfw.v1.GetBackupSnapshotResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/backup/snapshots/{id}\x12\xa0\x01\n" +
+	"\x16ValidateBackupSnapshot\x12*.openngfw.v1.ValidateBackupSnapshotRequest\x1a+.openngfw.v1.ValidateBackupSnapshotResponse\"-\x82\xd3\xe4\x93\x02':\x01*\"\"/v1/backup/snapshots/{id}:validate\x12\xb9\x01\n" +
+	"\x1cPreviewBackupSnapshotRestore\x120.openngfw.v1.PreviewBackupSnapshotRestoreRequest\x1a1.openngfw.v1.PreviewBackupSnapshotRestoreResponse\"4\x82\xd3\xe4\x93\x02.:\x01*\")/v1/backup/snapshots/{id}:restore-preview\x12X\n" +
 	"\x06Commit\x12\x1a.openngfw.v1.CommitRequest\x1a\x1b.openngfw.v1.CommitResponse\"\x15\x82\xd3\xe4\x93\x02\x0f:\x01*\"\n" +
 	"/v1/commit\x12`\n" +
 	"\bRollback\x12\x1c.openngfw.v1.RollbackRequest\x1a\x1d.openngfw.v1.RollbackResponse\"\x17\x82\xd3\xe4\x93\x02\x11:\x01*\"\f/v1/rollback\x12i\n" +
 	"\fListVersions\x12 .openngfw.v1.ListVersionsRequest\x1a!.openngfw.v1.ListVersionsResponse\"\x14\x82\xd3\xe4\x93\x02\x0e\x12\f/v1/versions\x12r\n" +
-	"\x10ListAuditEntries\x12$.openngfw.v1.ListAuditEntriesRequest\x1a%.openngfw.v1.ListAuditEntriesResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/auditB\xb1\x01\n" +
+	"\x10ListAuditEntries\x12$.openngfw.v1.ListAuditEntriesRequest\x1a%.openngfw.v1.ListAuditEntriesResponse\"\x11\x82\xd3\xe4\x93\x02\v\x12\t/v1/audit\x12\x85\x01\n" +
+	"\x14VerifyAuditIntegrity\x12(.openngfw.v1.VerifyAuditIntegrityRequest\x1a).openngfw.v1.VerifyAuditIntegrityResponse\"\x18\x82\xd3\xe4\x93\x02\x12\x12\x10/v1/audit/verifyB\xb1\x01\n" +
 	"\x0fcom.openngfw.v1B\x12PolicyServiceProtoP\x01Z=github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1\xa2\x02\x03OXX\xaa\x02\vOpenngfw.V1\xca\x02\vOpenngfw\\V1\xe2\x02\x17Openngfw\\V1\\GPBMetadata\xea\x02\fOpenngfw::V1b\x06proto3"
 
 var (
@@ -940,56 +5126,205 @@ func file_openngfw_v1_policy_service_proto_rawDescGZIP() []byte {
 	return file_openngfw_v1_policy_service_proto_rawDescData
 }
 
-var file_openngfw_v1_policy_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_openngfw_v1_policy_service_proto_msgTypes = make([]protoimpl.MessageInfo, 16)
+var file_openngfw_v1_policy_service_proto_enumTypes = make([]protoimpl.EnumInfo, 6)
+var file_openngfw_v1_policy_service_proto_msgTypes = make([]protoimpl.MessageInfo, 61)
 var file_openngfw_v1_policy_service_proto_goTypes = []any{
-	(PolicySource)(0),                // 0: openngfw.v1.PolicySource
-	(*GetPolicyRequest)(nil),         // 1: openngfw.v1.GetPolicyRequest
-	(*GetPolicyResponse)(nil),        // 2: openngfw.v1.GetPolicyResponse
-	(*SetCandidateRequest)(nil),      // 3: openngfw.v1.SetCandidateRequest
-	(*SetCandidateResponse)(nil),     // 4: openngfw.v1.SetCandidateResponse
-	(*ValidateRequest)(nil),          // 5: openngfw.v1.ValidateRequest
-	(*ValidateResponse)(nil),         // 6: openngfw.v1.ValidateResponse
-	(*CommitRequest)(nil),            // 7: openngfw.v1.CommitRequest
-	(*CommitResponse)(nil),           // 8: openngfw.v1.CommitResponse
-	(*RollbackRequest)(nil),          // 9: openngfw.v1.RollbackRequest
-	(*RollbackResponse)(nil),         // 10: openngfw.v1.RollbackResponse
-	(*ListVersionsRequest)(nil),      // 11: openngfw.v1.ListVersionsRequest
-	(*ListVersionsResponse)(nil),     // 12: openngfw.v1.ListVersionsResponse
-	(*VersionInfo)(nil),              // 13: openngfw.v1.VersionInfo
-	(*ListAuditEntriesRequest)(nil),  // 14: openngfw.v1.ListAuditEntriesRequest
-	(*ListAuditEntriesResponse)(nil), // 15: openngfw.v1.ListAuditEntriesResponse
-	(*AuditEntry)(nil),               // 16: openngfw.v1.AuditEntry
-	(*Policy)(nil),                   // 17: openngfw.v1.Policy
-	(*timestamppb.Timestamp)(nil),    // 18: google.protobuf.Timestamp
+	(PolicySource)(0),                             // 0: openngfw.v1.PolicySource
+	(PolicyObjectKind)(0),                         // 1: openngfw.v1.PolicyObjectKind
+	(PolicyDiffLineType)(0),                       // 2: openngfw.v1.PolicyDiffLineType
+	(ValidationSeverity)(0),                       // 3: openngfw.v1.ValidationSeverity
+	(ValidationStage)(0),                          // 4: openngfw.v1.ValidationStage
+	(ChangeRisk)(0),                               // 5: openngfw.v1.ChangeRisk
+	(*GetPolicyRequest)(nil),                      // 6: openngfw.v1.GetPolicyRequest
+	(*GetPolicyResponse)(nil),                     // 7: openngfw.v1.GetPolicyResponse
+	(*SetCandidateRequest)(nil),                   // 8: openngfw.v1.SetCandidateRequest
+	(*SetCandidateResponse)(nil),                  // 9: openngfw.v1.SetCandidateResponse
+	(*ValidateRequest)(nil),                       // 10: openngfw.v1.ValidateRequest
+	(*ValidateResponse)(nil),                      // 11: openngfw.v1.ValidateResponse
+	(*ValidationFinding)(nil),                     // 12: openngfw.v1.ValidationFinding
+	(*RenderPlan)(nil),                            // 13: openngfw.v1.RenderPlan
+	(*RenderArtifact)(nil),                        // 14: openngfw.v1.RenderArtifact
+	(*GetCandidateStatusRequest)(nil),             // 15: openngfw.v1.GetCandidateStatusRequest
+	(*GetCandidateStatusResponse)(nil),            // 16: openngfw.v1.GetCandidateStatusResponse
+	(*ListNatRulesRequest)(nil),                   // 17: openngfw.v1.ListNatRulesRequest
+	(*ListNatRulesResponse)(nil),                  // 18: openngfw.v1.ListNatRulesResponse
+	(*UpsertCandidateSourceNatRequest)(nil),       // 19: openngfw.v1.UpsertCandidateSourceNatRequest
+	(*UpsertCandidateDestinationNatRequest)(nil),  // 20: openngfw.v1.UpsertCandidateDestinationNatRequest
+	(*DeleteCandidateSourceNatRequest)(nil),       // 21: openngfw.v1.DeleteCandidateSourceNatRequest
+	(*DeleteCandidateDestinationNatRequest)(nil),  // 22: openngfw.v1.DeleteCandidateDestinationNatRequest
+	(*UpsertCandidateSourceNatResponse)(nil),      // 23: openngfw.v1.UpsertCandidateSourceNatResponse
+	(*DeleteCandidateSourceNatResponse)(nil),      // 24: openngfw.v1.DeleteCandidateSourceNatResponse
+	(*UpsertCandidateDestinationNatResponse)(nil), // 25: openngfw.v1.UpsertCandidateDestinationNatResponse
+	(*DeleteCandidateDestinationNatResponse)(nil), // 26: openngfw.v1.DeleteCandidateDestinationNatResponse
+	(*CandidateChangeSummary)(nil),                // 27: openngfw.v1.CandidateChangeSummary
+	(*ListObjectReferencesRequest)(nil),           // 28: openngfw.v1.ListObjectReferencesRequest
+	(*ListObjectReferencesResponse)(nil),          // 29: openngfw.v1.ListObjectReferencesResponse
+	(*PolicyObjectReference)(nil),                 // 30: openngfw.v1.PolicyObjectReference
+	(*RenamePolicyObjectRequest)(nil),             // 31: openngfw.v1.RenamePolicyObjectRequest
+	(*RenamePolicyObjectResponse)(nil),            // 32: openngfw.v1.RenamePolicyObjectResponse
+	(*DiffPolicyRequest)(nil),                     // 33: openngfw.v1.DiffPolicyRequest
+	(*DiffPolicyResponse)(nil),                    // 34: openngfw.v1.DiffPolicyResponse
+	(*PolicyDiffLine)(nil),                        // 35: openngfw.v1.PolicyDiffLine
+	(*ChangeImpact)(nil),                          // 36: openngfw.v1.ChangeImpact
+	(*ChangeImpactItem)(nil),                      // 37: openngfw.v1.ChangeImpactItem
+	(*CreateChangeApprovalRequest)(nil),           // 38: openngfw.v1.CreateChangeApprovalRequest
+	(*CreateChangeApprovalResponse)(nil),          // 39: openngfw.v1.CreateChangeApprovalResponse
+	(*ListChangeApprovalsRequest)(nil),            // 40: openngfw.v1.ListChangeApprovalsRequest
+	(*ListChangeApprovalsResponse)(nil),           // 41: openngfw.v1.ListChangeApprovalsResponse
+	(*ChangeApproval)(nil),                        // 42: openngfw.v1.ChangeApproval
+	(*CreateBackupSnapshotRequest)(nil),           // 43: openngfw.v1.CreateBackupSnapshotRequest
+	(*CreateBackupSnapshotResponse)(nil),          // 44: openngfw.v1.CreateBackupSnapshotResponse
+	(*ListBackupSnapshotsRequest)(nil),            // 45: openngfw.v1.ListBackupSnapshotsRequest
+	(*ListBackupSnapshotsResponse)(nil),           // 46: openngfw.v1.ListBackupSnapshotsResponse
+	(*GetBackupSnapshotRequest)(nil),              // 47: openngfw.v1.GetBackupSnapshotRequest
+	(*GetBackupSnapshotResponse)(nil),             // 48: openngfw.v1.GetBackupSnapshotResponse
+	(*ValidateBackupSnapshotRequest)(nil),         // 49: openngfw.v1.ValidateBackupSnapshotRequest
+	(*ValidateBackupSnapshotResponse)(nil),        // 50: openngfw.v1.ValidateBackupSnapshotResponse
+	(*PreviewBackupSnapshotRestoreRequest)(nil),   // 51: openngfw.v1.PreviewBackupSnapshotRestoreRequest
+	(*PreviewBackupSnapshotRestoreResponse)(nil),  // 52: openngfw.v1.PreviewBackupSnapshotRestoreResponse
+	(*BackupSnapshot)(nil),                        // 53: openngfw.v1.BackupSnapshot
+	(*CommitRequest)(nil),                         // 54: openngfw.v1.CommitRequest
+	(*CommitResponse)(nil),                        // 55: openngfw.v1.CommitResponse
+	(*RollbackRequest)(nil),                       // 56: openngfw.v1.RollbackRequest
+	(*RollbackResponse)(nil),                      // 57: openngfw.v1.RollbackResponse
+	(*ListVersionsRequest)(nil),                   // 58: openngfw.v1.ListVersionsRequest
+	(*ListVersionsResponse)(nil),                  // 59: openngfw.v1.ListVersionsResponse
+	(*VersionInfo)(nil),                           // 60: openngfw.v1.VersionInfo
+	(*VersionArtifact)(nil),                       // 61: openngfw.v1.VersionArtifact
+	(*ListAuditEntriesRequest)(nil),               // 62: openngfw.v1.ListAuditEntriesRequest
+	(*ListAuditEntriesResponse)(nil),              // 63: openngfw.v1.ListAuditEntriesResponse
+	(*VerifyAuditIntegrityRequest)(nil),           // 64: openngfw.v1.VerifyAuditIntegrityRequest
+	(*VerifyAuditIntegrityResponse)(nil),          // 65: openngfw.v1.VerifyAuditIntegrityResponse
+	(*AuditEntry)(nil),                            // 66: openngfw.v1.AuditEntry
+	(*Policy)(nil),                                // 67: openngfw.v1.Policy
+	(*SourceNat)(nil),                             // 68: openngfw.v1.SourceNat
+	(*DestinationNat)(nil),                        // 69: openngfw.v1.DestinationNat
+	(*timestamppb.Timestamp)(nil),                 // 70: google.protobuf.Timestamp
 }
 var file_openngfw_v1_policy_service_proto_depIdxs = []int32{
 	0,  // 0: openngfw.v1.GetPolicyRequest.source:type_name -> openngfw.v1.PolicySource
-	17, // 1: openngfw.v1.GetPolicyResponse.policy:type_name -> openngfw.v1.Policy
-	17, // 2: openngfw.v1.SetCandidateRequest.policy:type_name -> openngfw.v1.Policy
-	13, // 3: openngfw.v1.ListVersionsResponse.versions:type_name -> openngfw.v1.VersionInfo
-	18, // 4: openngfw.v1.VersionInfo.created_at:type_name -> google.protobuf.Timestamp
-	16, // 5: openngfw.v1.ListAuditEntriesResponse.entries:type_name -> openngfw.v1.AuditEntry
-	18, // 6: openngfw.v1.AuditEntry.time:type_name -> google.protobuf.Timestamp
-	1,  // 7: openngfw.v1.PolicyService.GetPolicy:input_type -> openngfw.v1.GetPolicyRequest
-	3,  // 8: openngfw.v1.PolicyService.SetCandidate:input_type -> openngfw.v1.SetCandidateRequest
-	5,  // 9: openngfw.v1.PolicyService.Validate:input_type -> openngfw.v1.ValidateRequest
-	7,  // 10: openngfw.v1.PolicyService.Commit:input_type -> openngfw.v1.CommitRequest
-	9,  // 11: openngfw.v1.PolicyService.Rollback:input_type -> openngfw.v1.RollbackRequest
-	11, // 12: openngfw.v1.PolicyService.ListVersions:input_type -> openngfw.v1.ListVersionsRequest
-	14, // 13: openngfw.v1.PolicyService.ListAuditEntries:input_type -> openngfw.v1.ListAuditEntriesRequest
-	2,  // 14: openngfw.v1.PolicyService.GetPolicy:output_type -> openngfw.v1.GetPolicyResponse
-	4,  // 15: openngfw.v1.PolicyService.SetCandidate:output_type -> openngfw.v1.SetCandidateResponse
-	6,  // 16: openngfw.v1.PolicyService.Validate:output_type -> openngfw.v1.ValidateResponse
-	8,  // 17: openngfw.v1.PolicyService.Commit:output_type -> openngfw.v1.CommitResponse
-	10, // 18: openngfw.v1.PolicyService.Rollback:output_type -> openngfw.v1.RollbackResponse
-	12, // 19: openngfw.v1.PolicyService.ListVersions:output_type -> openngfw.v1.ListVersionsResponse
-	15, // 20: openngfw.v1.PolicyService.ListAuditEntries:output_type -> openngfw.v1.ListAuditEntriesResponse
-	14, // [14:21] is the sub-list for method output_type
-	7,  // [7:14] is the sub-list for method input_type
-	7,  // [7:7] is the sub-list for extension type_name
-	7,  // [7:7] is the sub-list for extension extendee
-	0,  // [0:7] is the sub-list for field type_name
+	67, // 1: openngfw.v1.GetPolicyResponse.policy:type_name -> openngfw.v1.Policy
+	67, // 2: openngfw.v1.SetCandidateRequest.policy:type_name -> openngfw.v1.Policy
+	67, // 3: openngfw.v1.ValidateRequest.policy:type_name -> openngfw.v1.Policy
+	36, // 4: openngfw.v1.ValidateResponse.impact:type_name -> openngfw.v1.ChangeImpact
+	12, // 5: openngfw.v1.ValidateResponse.findings:type_name -> openngfw.v1.ValidationFinding
+	13, // 6: openngfw.v1.ValidateResponse.render_plan:type_name -> openngfw.v1.RenderPlan
+	3,  // 7: openngfw.v1.ValidationFinding.severity:type_name -> openngfw.v1.ValidationSeverity
+	4,  // 8: openngfw.v1.ValidationFinding.stage:type_name -> openngfw.v1.ValidationStage
+	14, // 9: openngfw.v1.RenderPlan.artifacts:type_name -> openngfw.v1.RenderArtifact
+	27, // 10: openngfw.v1.GetCandidateStatusResponse.changes:type_name -> openngfw.v1.CandidateChangeSummary
+	36, // 11: openngfw.v1.GetCandidateStatusResponse.impact:type_name -> openngfw.v1.ChangeImpact
+	0,  // 12: openngfw.v1.ListNatRulesRequest.source:type_name -> openngfw.v1.PolicySource
+	68, // 13: openngfw.v1.ListNatRulesResponse.source_nat:type_name -> openngfw.v1.SourceNat
+	69, // 14: openngfw.v1.ListNatRulesResponse.destination_nat:type_name -> openngfw.v1.DestinationNat
+	68, // 15: openngfw.v1.UpsertCandidateSourceNatRequest.rule:type_name -> openngfw.v1.SourceNat
+	69, // 16: openngfw.v1.UpsertCandidateDestinationNatRequest.rule:type_name -> openngfw.v1.DestinationNat
+	68, // 17: openngfw.v1.UpsertCandidateSourceNatResponse.source_nat:type_name -> openngfw.v1.SourceNat
+	11, // 18: openngfw.v1.UpsertCandidateSourceNatResponse.validation:type_name -> openngfw.v1.ValidateResponse
+	16, // 19: openngfw.v1.UpsertCandidateSourceNatResponse.candidate_status:type_name -> openngfw.v1.GetCandidateStatusResponse
+	68, // 20: openngfw.v1.DeleteCandidateSourceNatResponse.source_nat:type_name -> openngfw.v1.SourceNat
+	11, // 21: openngfw.v1.DeleteCandidateSourceNatResponse.validation:type_name -> openngfw.v1.ValidateResponse
+	16, // 22: openngfw.v1.DeleteCandidateSourceNatResponse.candidate_status:type_name -> openngfw.v1.GetCandidateStatusResponse
+	69, // 23: openngfw.v1.UpsertCandidateDestinationNatResponse.destination_nat:type_name -> openngfw.v1.DestinationNat
+	11, // 24: openngfw.v1.UpsertCandidateDestinationNatResponse.validation:type_name -> openngfw.v1.ValidateResponse
+	16, // 25: openngfw.v1.UpsertCandidateDestinationNatResponse.candidate_status:type_name -> openngfw.v1.GetCandidateStatusResponse
+	69, // 26: openngfw.v1.DeleteCandidateDestinationNatResponse.destination_nat:type_name -> openngfw.v1.DestinationNat
+	11, // 27: openngfw.v1.DeleteCandidateDestinationNatResponse.validation:type_name -> openngfw.v1.ValidateResponse
+	16, // 28: openngfw.v1.DeleteCandidateDestinationNatResponse.candidate_status:type_name -> openngfw.v1.GetCandidateStatusResponse
+	0,  // 29: openngfw.v1.ListObjectReferencesRequest.source:type_name -> openngfw.v1.PolicySource
+	1,  // 30: openngfw.v1.ListObjectReferencesRequest.kind:type_name -> openngfw.v1.PolicyObjectKind
+	30, // 31: openngfw.v1.ListObjectReferencesResponse.references:type_name -> openngfw.v1.PolicyObjectReference
+	1,  // 32: openngfw.v1.RenamePolicyObjectRequest.kind:type_name -> openngfw.v1.PolicyObjectKind
+	1,  // 33: openngfw.v1.RenamePolicyObjectResponse.kind:type_name -> openngfw.v1.PolicyObjectKind
+	30, // 34: openngfw.v1.RenamePolicyObjectResponse.rewritten_references:type_name -> openngfw.v1.PolicyObjectReference
+	16, // 35: openngfw.v1.RenamePolicyObjectResponse.candidate_status:type_name -> openngfw.v1.GetCandidateStatusResponse
+	0,  // 36: openngfw.v1.DiffPolicyRequest.from_source:type_name -> openngfw.v1.PolicySource
+	0,  // 37: openngfw.v1.DiffPolicyRequest.to_source:type_name -> openngfw.v1.PolicySource
+	35, // 38: openngfw.v1.DiffPolicyResponse.lines:type_name -> openngfw.v1.PolicyDiffLine
+	2,  // 39: openngfw.v1.PolicyDiffLine.type:type_name -> openngfw.v1.PolicyDiffLineType
+	5,  // 40: openngfw.v1.ChangeImpact.risk:type_name -> openngfw.v1.ChangeRisk
+	37, // 41: openngfw.v1.ChangeImpact.items:type_name -> openngfw.v1.ChangeImpactItem
+	5,  // 42: openngfw.v1.ChangeImpactItem.risk:type_name -> openngfw.v1.ChangeRisk
+	42, // 43: openngfw.v1.CreateChangeApprovalResponse.approval:type_name -> openngfw.v1.ChangeApproval
+	42, // 44: openngfw.v1.ListChangeApprovalsResponse.approvals:type_name -> openngfw.v1.ChangeApproval
+	70, // 45: openngfw.v1.ChangeApproval.created_at:type_name -> google.protobuf.Timestamp
+	70, // 46: openngfw.v1.ChangeApproval.consumed_at:type_name -> google.protobuf.Timestamp
+	0,  // 47: openngfw.v1.CreateBackupSnapshotRequest.source:type_name -> openngfw.v1.PolicySource
+	53, // 48: openngfw.v1.CreateBackupSnapshotResponse.snapshot:type_name -> openngfw.v1.BackupSnapshot
+	53, // 49: openngfw.v1.ListBackupSnapshotsResponse.snapshots:type_name -> openngfw.v1.BackupSnapshot
+	53, // 50: openngfw.v1.GetBackupSnapshotResponse.snapshot:type_name -> openngfw.v1.BackupSnapshot
+	67, // 51: openngfw.v1.GetBackupSnapshotResponse.policy:type_name -> openngfw.v1.Policy
+	53, // 52: openngfw.v1.ValidateBackupSnapshotResponse.snapshot:type_name -> openngfw.v1.BackupSnapshot
+	11, // 53: openngfw.v1.ValidateBackupSnapshotResponse.validation:type_name -> openngfw.v1.ValidateResponse
+	53, // 54: openngfw.v1.PreviewBackupSnapshotRestoreResponse.snapshot:type_name -> openngfw.v1.BackupSnapshot
+	11, // 55: openngfw.v1.PreviewBackupSnapshotRestoreResponse.validation:type_name -> openngfw.v1.ValidateResponse
+	34, // 56: openngfw.v1.PreviewBackupSnapshotRestoreResponse.diff:type_name -> openngfw.v1.DiffPolicyResponse
+	16, // 57: openngfw.v1.PreviewBackupSnapshotRestoreResponse.candidate_status:type_name -> openngfw.v1.GetCandidateStatusResponse
+	70, // 58: openngfw.v1.BackupSnapshot.created_at:type_name -> google.protobuf.Timestamp
+	60, // 59: openngfw.v1.CommitResponse.version_info:type_name -> openngfw.v1.VersionInfo
+	60, // 60: openngfw.v1.RollbackResponse.version_info:type_name -> openngfw.v1.VersionInfo
+	60, // 61: openngfw.v1.ListVersionsResponse.versions:type_name -> openngfw.v1.VersionInfo
+	70, // 62: openngfw.v1.VersionInfo.created_at:type_name -> google.protobuf.Timestamp
+	61, // 63: openngfw.v1.VersionInfo.artifacts:type_name -> openngfw.v1.VersionArtifact
+	70, // 64: openngfw.v1.VersionInfo.activated_at:type_name -> google.protobuf.Timestamp
+	70, // 65: openngfw.v1.ListAuditEntriesRequest.since:type_name -> google.protobuf.Timestamp
+	70, // 66: openngfw.v1.ListAuditEntriesRequest.until:type_name -> google.protobuf.Timestamp
+	66, // 67: openngfw.v1.ListAuditEntriesResponse.entries:type_name -> openngfw.v1.AuditEntry
+	70, // 68: openngfw.v1.VerifyAuditIntegrityResponse.checked_at:type_name -> google.protobuf.Timestamp
+	70, // 69: openngfw.v1.AuditEntry.time:type_name -> google.protobuf.Timestamp
+	6,  // 70: openngfw.v1.PolicyService.GetPolicy:input_type -> openngfw.v1.GetPolicyRequest
+	8,  // 71: openngfw.v1.PolicyService.SetCandidate:input_type -> openngfw.v1.SetCandidateRequest
+	10, // 72: openngfw.v1.PolicyService.Validate:input_type -> openngfw.v1.ValidateRequest
+	15, // 73: openngfw.v1.PolicyService.GetCandidateStatus:input_type -> openngfw.v1.GetCandidateStatusRequest
+	17, // 74: openngfw.v1.PolicyService.ListNatRules:input_type -> openngfw.v1.ListNatRulesRequest
+	19, // 75: openngfw.v1.PolicyService.UpsertCandidateSourceNat:input_type -> openngfw.v1.UpsertCandidateSourceNatRequest
+	21, // 76: openngfw.v1.PolicyService.DeleteCandidateSourceNat:input_type -> openngfw.v1.DeleteCandidateSourceNatRequest
+	20, // 77: openngfw.v1.PolicyService.UpsertCandidateDestinationNat:input_type -> openngfw.v1.UpsertCandidateDestinationNatRequest
+	22, // 78: openngfw.v1.PolicyService.DeleteCandidateDestinationNat:input_type -> openngfw.v1.DeleteCandidateDestinationNatRequest
+	28, // 79: openngfw.v1.PolicyService.ListObjectReferences:input_type -> openngfw.v1.ListObjectReferencesRequest
+	31, // 80: openngfw.v1.PolicyService.RenamePolicyObject:input_type -> openngfw.v1.RenamePolicyObjectRequest
+	33, // 81: openngfw.v1.PolicyService.DiffPolicy:input_type -> openngfw.v1.DiffPolicyRequest
+	38, // 82: openngfw.v1.PolicyService.CreateChangeApproval:input_type -> openngfw.v1.CreateChangeApprovalRequest
+	40, // 83: openngfw.v1.PolicyService.ListChangeApprovals:input_type -> openngfw.v1.ListChangeApprovalsRequest
+	43, // 84: openngfw.v1.PolicyService.CreateBackupSnapshot:input_type -> openngfw.v1.CreateBackupSnapshotRequest
+	45, // 85: openngfw.v1.PolicyService.ListBackupSnapshots:input_type -> openngfw.v1.ListBackupSnapshotsRequest
+	47, // 86: openngfw.v1.PolicyService.GetBackupSnapshot:input_type -> openngfw.v1.GetBackupSnapshotRequest
+	49, // 87: openngfw.v1.PolicyService.ValidateBackupSnapshot:input_type -> openngfw.v1.ValidateBackupSnapshotRequest
+	51, // 88: openngfw.v1.PolicyService.PreviewBackupSnapshotRestore:input_type -> openngfw.v1.PreviewBackupSnapshotRestoreRequest
+	54, // 89: openngfw.v1.PolicyService.Commit:input_type -> openngfw.v1.CommitRequest
+	56, // 90: openngfw.v1.PolicyService.Rollback:input_type -> openngfw.v1.RollbackRequest
+	58, // 91: openngfw.v1.PolicyService.ListVersions:input_type -> openngfw.v1.ListVersionsRequest
+	62, // 92: openngfw.v1.PolicyService.ListAuditEntries:input_type -> openngfw.v1.ListAuditEntriesRequest
+	64, // 93: openngfw.v1.PolicyService.VerifyAuditIntegrity:input_type -> openngfw.v1.VerifyAuditIntegrityRequest
+	7,  // 94: openngfw.v1.PolicyService.GetPolicy:output_type -> openngfw.v1.GetPolicyResponse
+	9,  // 95: openngfw.v1.PolicyService.SetCandidate:output_type -> openngfw.v1.SetCandidateResponse
+	11, // 96: openngfw.v1.PolicyService.Validate:output_type -> openngfw.v1.ValidateResponse
+	16, // 97: openngfw.v1.PolicyService.GetCandidateStatus:output_type -> openngfw.v1.GetCandidateStatusResponse
+	18, // 98: openngfw.v1.PolicyService.ListNatRules:output_type -> openngfw.v1.ListNatRulesResponse
+	23, // 99: openngfw.v1.PolicyService.UpsertCandidateSourceNat:output_type -> openngfw.v1.UpsertCandidateSourceNatResponse
+	24, // 100: openngfw.v1.PolicyService.DeleteCandidateSourceNat:output_type -> openngfw.v1.DeleteCandidateSourceNatResponse
+	25, // 101: openngfw.v1.PolicyService.UpsertCandidateDestinationNat:output_type -> openngfw.v1.UpsertCandidateDestinationNatResponse
+	26, // 102: openngfw.v1.PolicyService.DeleteCandidateDestinationNat:output_type -> openngfw.v1.DeleteCandidateDestinationNatResponse
+	29, // 103: openngfw.v1.PolicyService.ListObjectReferences:output_type -> openngfw.v1.ListObjectReferencesResponse
+	32, // 104: openngfw.v1.PolicyService.RenamePolicyObject:output_type -> openngfw.v1.RenamePolicyObjectResponse
+	34, // 105: openngfw.v1.PolicyService.DiffPolicy:output_type -> openngfw.v1.DiffPolicyResponse
+	39, // 106: openngfw.v1.PolicyService.CreateChangeApproval:output_type -> openngfw.v1.CreateChangeApprovalResponse
+	41, // 107: openngfw.v1.PolicyService.ListChangeApprovals:output_type -> openngfw.v1.ListChangeApprovalsResponse
+	44, // 108: openngfw.v1.PolicyService.CreateBackupSnapshot:output_type -> openngfw.v1.CreateBackupSnapshotResponse
+	46, // 109: openngfw.v1.PolicyService.ListBackupSnapshots:output_type -> openngfw.v1.ListBackupSnapshotsResponse
+	48, // 110: openngfw.v1.PolicyService.GetBackupSnapshot:output_type -> openngfw.v1.GetBackupSnapshotResponse
+	50, // 111: openngfw.v1.PolicyService.ValidateBackupSnapshot:output_type -> openngfw.v1.ValidateBackupSnapshotResponse
+	52, // 112: openngfw.v1.PolicyService.PreviewBackupSnapshotRestore:output_type -> openngfw.v1.PreviewBackupSnapshotRestoreResponse
+	55, // 113: openngfw.v1.PolicyService.Commit:output_type -> openngfw.v1.CommitResponse
+	57, // 114: openngfw.v1.PolicyService.Rollback:output_type -> openngfw.v1.RollbackResponse
+	59, // 115: openngfw.v1.PolicyService.ListVersions:output_type -> openngfw.v1.ListVersionsResponse
+	63, // 116: openngfw.v1.PolicyService.ListAuditEntries:output_type -> openngfw.v1.ListAuditEntriesResponse
+	65, // 117: openngfw.v1.PolicyService.VerifyAuditIntegrity:output_type -> openngfw.v1.VerifyAuditIntegrityResponse
+	94, // [94:118] is the sub-list for method output_type
+	70, // [70:94] is the sub-list for method input_type
+	70, // [70:70] is the sub-list for extension type_name
+	70, // [70:70] is the sub-list for extension extendee
+	0,  // [0:70] is the sub-list for field type_name
 }
 
 func init() { file_openngfw_v1_policy_service_proto_init() }
@@ -1003,8 +5338,8 @@ func file_openngfw_v1_policy_service_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_openngfw_v1_policy_service_proto_rawDesc), len(file_openngfw_v1_policy_service_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   16,
+			NumEnums:      6,
+			NumMessages:   61,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

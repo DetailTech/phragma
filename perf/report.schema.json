@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://phragma.local/schemas/perf-report-v1.json",
+  "title": "Phragma Performance Report Summary",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "generated_at",
+    "profile",
+    "security_services",
+    "inspection_state",
+    "target",
+    "duration_seconds",
+    "parallel_streams",
+    "tcp_bits_per_second",
+    "tcp_gbps",
+    "tcp_retransmits",
+    "claim_scope"
+  ],
+  "properties": {
+    "schema_version": {
+      "enum": ["phragma.perf.v1", "openngfw.perf.v1"],
+      "description": "phragma.perf.v1 is canonical; openngfw.perf.v1 is accepted for legacy artifacts."
+    },
+    "generated_at": { "type": "string" },
+    "profile": { "type": "string" },
+    "security_services": { "type": "string" },
+    "inspection_state": {
+      "type": "string",
+      "description": "Prefer canonical values: fully-inspected, partially-inspected, bypassed-by-policy, bypassed-by-engine-health, failed-open, failed-closed, blocked-before-inspection, not-inspected."
+    },
+    "target": {
+      "type": "object",
+      "required": ["ip", "port"],
+      "properties": {
+        "ip": { "type": "string" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+      }
+    },
+    "duration_seconds": { "type": "integer", "minimum": 1 },
+    "parallel_streams": { "type": "integer", "minimum": 1 },
+    "tcp_bits_per_second": { "type": "number", "minimum": 0 },
+    "tcp_gbps": { "type": "number", "minimum": 0 },
+    "tcp_retransmits": { "type": "integer", "minimum": 0 },
+    "ping_avg_ms": { "type": ["number", "null"], "minimum": 0 },
+    "connection_churn": { "type": "object" },
+    "inspection_evidence": {
+      "type": "object",
+      "description": "Policy-aware IDS/IPS posture captured from active-load ngfwctl status. Inspected, bypassed, failed-open, and failed-closed claims should include this evidence.",
+      "required": [
+        "state",
+        "status_captured",
+        "inspection_state"
+      ],
+      "properties": {
+        "state": { "type": "string" },
+        "status_captured": { "type": "boolean" },
+        "inspection_state": { "type": "string" },
+        "engine_name": { "type": "string" },
+        "engine_mode": { "type": "string" },
+        "engine_state": { "type": "string" },
+        "failure_behavior": { "type": "string" },
+        "bypass_reason": { "type": "string" },
+        "degraded_behavior": { "type": "string" }
+      }
+    },
+    "host_tuning_evidence": {
+      "type": "object",
+      "description": "Kernel forwarding and conntrack sysctl readiness captured from active-load ngfwctl status. High-bandwidth and connection-rate claims should include this evidence.",
+      "required": [
+        "state",
+        "status_captured"
+      ],
+      "properties": {
+        "state": { "type": "string" },
+        "status_captured": { "type": "boolean" },
+        "profile": { "type": "string" },
+        "config_path": { "type": "string" }
+      }
+    },
+    "conntrack_evidence": {
+      "type": "object",
+      "description": "State-table capacity captured during the measured window. The OpenNGFW verifier warns when throughput or connection-rate artifacts omit this evidence, and strict release gates fail on that warning.",
+      "required": [
+        "state",
+        "status_captured",
+        "current_entries",
+        "max_entries",
+        "usage_percent"
+      ],
+      "properties": {
+        "state": { "type": "string" },
+        "status_captured": { "type": "boolean" },
+        "current_entries": { "type": "integer", "minimum": 0 },
+        "max_entries": { "type": "integer", "minimum": 0 },
+        "usage_percent": { "type": "number", "minimum": 0 },
+        "warning_percent": { "type": "number", "minimum": 0 },
+        "degraded_percent": { "type": "number", "minimum": 0 }
+      }
+    },
+    "flowtable_evidence": {
+      "type": "object",
+      "required": [
+        "host_state",
+        "runtime_state",
+        "status_captured",
+        "nft_ruleset_captured",
+        "flowtable_declared",
+        "offload_rule_present"
+      ],
+      "properties": {
+        "host_state": { "type": "string" },
+        "runtime_state": { "type": "string" },
+        "status_captured": { "type": "boolean" },
+        "nft_ruleset_captured": { "type": "boolean" },
+        "flowtable_declared": { "type": "boolean" },
+        "offload_rule_present": { "type": "boolean" }
+      }
+    },
+    "claim_scope": { "type": "string" }
+  }
+}

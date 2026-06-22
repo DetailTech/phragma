@@ -7,6 +7,12 @@ lint:
   ignore:
     # Vendored googleapis protos; not ours to lint.
     - api/proto/google
+  ignore_only:
+    # google.api.HttpBody is the grpc-gateway contract for binary pcap
+    # downloads, so this one RPC intentionally does not use a local response
+    # message name.
+    RPC_RESPONSE_STANDARD_NAME:
+      - api/proto/openngfw/v1/system.proto
 breaking:
   use:
     - FILE

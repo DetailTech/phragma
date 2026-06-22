@@ -1,4 +1,4 @@
-# Contributing to OpenNGFW
+# Contributing to Phragma
 
 Thanks for your interest! Start with [`docs/build-plan.md`](docs/build-plan.md)
 — it is the authoritative scope and architecture document — and

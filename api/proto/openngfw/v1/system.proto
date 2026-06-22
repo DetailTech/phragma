@@ -9,6 +9,12 @@ syntax = "proto3";
 package openngfw.v1;
 
 import "google/api/annotations.proto";
+import "google/api/httpbody.proto";
+import "google/protobuf/struct.proto";
+import "openngfw/v1/ids.proto";
+import "openngfw/v1/policy.proto";
+import "openngfw/v1/policy_service.proto";
+import "openngfw/v1/telemetry.proto";
 
 option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
 
@@ -17,6 +23,294 @@ service SystemService {
   // GetVersion reports the running controld build.
   rpc GetVersion(GetVersionRequest) returns (GetVersionResponse) {
     option (google.api.http) = {get: "/v1/system/version"};
+  }
+
+  // GetStatus reports the daemon's runtime posture and managed engine surface.
+  rpc GetStatus(GetStatusRequest) returns (GetStatusResponse) {
+    option (google.api.http) = {get: "/v1/system/status"};
+  }
+
+  // ProveNetworkPath samples server-side kernel route and passive VPN runtime
+  // evidence for one representative tunnel path. It is read-only and never
+  // sends probe traffic or accepts arbitrary command input.
+  rpc ProveNetworkPath(ProveNetworkPathRequest) returns (ProveNetworkPathResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/network-path:prove"
+      body: "*"
+    };
+  }
+
+  // GetTelemetryExportStatus reports the running policy telemetry export
+  // posture without sending test events, dialing remote sinks, or mutating the
+  // host. It is the passive server-side source for GUI/CLI evidence workflows.
+  rpc GetTelemetryExportStatus(GetTelemetryExportStatusRequest) returns (GetTelemetryExportStatusResponse) {
+    option (google.api.http) = {get: "/v1/system/telemetry/exports/status"};
+  }
+
+  // VerifyTelemetryExport emits one bounded synthetic JSON proof event to a
+  // configured running-policy telemetry export sink. It does not verify
+  // ClickHouse row delivery or receiver-side SIEM custody.
+  rpc VerifyTelemetryExport(VerifyTelemetryExportRequest) returns (VerifyTelemetryExportResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/telemetry/exports:verify"
+      body: "*"
+    };
+  }
+
+  // ListSystemLogs returns a bounded, redacted view of node-local appliance and
+  // engine log files from the configured OpenNGFW log root. Clients can filter
+  // but cannot choose filesystem paths.
+  rpc ListSystemLogs(ListSystemLogsRequest) returns (ListSystemLogsResponse) {
+    option (google.api.http) = {get: "/v1/system/logs"};
+  }
+
+  // CheckRuntimeReadiness evaluates the server-side runtime blockers that
+  // require explicit acknowledgement before commit or rollback. It is read-only
+  // and uses the same policy-aware readiness logic enforced by PolicyService
+  // live apply.
+  rpc CheckRuntimeReadiness(CheckRuntimeReadinessRequest) returns (CheckRuntimeReadinessResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/runtime-readiness:check"
+      body: "*"
+    };
+  }
+
+  // GetHighAvailabilityStatus reports the configured active/passive HA posture
+  // and policy recovery metadata. It is read-only.
+  rpc GetHighAvailabilityStatus(GetHighAvailabilityStatusRequest) returns (GetHighAvailabilityStatusResponse) {
+    option (google.api.http) = {get: "/v1/system/ha/status"};
+  }
+
+  // PullHighAvailabilityPolicy lets a passive node manually pull the active
+  // peer's running policy, validate it locally, and apply it through the same
+  // durable policy apply path used by commit and rollback.
+  rpc PullHighAvailabilityPolicy(PullHighAvailabilityPolicyRequest) returns (PullHighAvailabilityPolicyResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/ha/policy:pull"
+      body: "*"
+    };
+  }
+
+  // ActivateHighAvailabilityFailover marks a passive node active after the
+  // operator confirms manual failover. It persists only local control-plane HA
+  // state and audit evidence; transport cutover, peer fencing, and connection
+  // sync remain external controls until dedicated integrations are added.
+  rpc ActivateHighAvailabilityFailover(ActivateHighAvailabilityFailoverRequest) returns (ActivateHighAvailabilityFailoverResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/ha/failover:activate"
+      body: "*"
+    };
+  }
+
+  // GetReleaseAcceptanceStatus reports release-gate evidence state without
+  // mutating the host or assembling a release manifest.
+  rpc GetReleaseAcceptanceStatus(GetReleaseAcceptanceStatusRequest) returns (GetReleaseAcceptanceStatusResponse) {
+    option (google.api.http) = {get: "/v1/system/release-acceptance/status"};
+  }
+
+  // GetSupportBundle collects a redacted, read-only diagnostic bundle from the
+  // server side so GUI, CLI, and automation clients share one evidence shape.
+  rpc GetSupportBundle(GetSupportBundleRequest) returns (GetSupportBundleResponse) {
+    option (google.api.http) = {get: "/v1/system/support-bundle"};
+  }
+
+  // GetIdentity reports the current API actor and role.
+  rpc GetIdentity(GetIdentityRequest) returns (GetIdentityResponse) {
+    option (google.api.http) = {get: "/v1/system/identity"};
+  }
+
+  // CreateStepUpChallenge issues a short-lived one-time token for a named
+  // privileged action. This is a functional re-confirmation guardrail; real
+  // MFA/IdP-backed step-up remains production hardening.
+  rpc CreateStepUpChallenge(CreateStepUpChallengeRequest) returns (CreateStepUpChallengeResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/step-up"
+      body: "*"
+    };
+  }
+
+  // GetAccessAdministration reports RBAC and browser SSO posture for
+  // administrators. Inventory never serializes token, secret, or session
+  // material; local user create/rotate responses return generated tokens only
+  // once.
+  rpc GetAccessAdministration(GetAccessAdministrationRequest) returns (GetAccessAdministrationResponse) {
+    option (google.api.http) = {get: "/v1/system/access-administration"};
+  }
+
+  // RunOIDCPreflight verifies browser SSO readiness without changing IdP
+  // configuration or serializing client secrets, redirect URLs, cookies, or
+  // provider tokens.
+  rpc RunOIDCPreflight(RunOIDCPreflightRequest) returns (RunOIDCPreflightResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/oidc:preflight"
+      body: "*"
+    };
+  }
+
+  // GetOIDCProviderConfig reports the node-local browser SSO provider
+  // configuration without returning client secrets or secret file paths.
+  rpc GetOIDCProviderConfig(GetOIDCProviderConfigRequest) returns (GetOIDCProviderConfigResponse) {
+    option (google.api.http) = {get: "/v1/system/access-administration/oidc/config"};
+  }
+
+  // ValidateOIDCProviderConfig validates a proposed browser SSO provider
+  // configuration without changing the active runtime authenticator.
+  rpc ValidateOIDCProviderConfig(ValidateOIDCProviderConfigRequest) returns (ValidateOIDCProviderConfigResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/oidc/config:validate"
+      body: "*"
+    };
+  }
+
+  // SetOIDCProviderConfig writes the node-local browser SSO provider config,
+  // replaces the active runtime authenticator, and revokes existing OIDC
+  // browser sessions.
+  rpc SetOIDCProviderConfig(SetOIDCProviderConfigRequest) returns (SetOIDCProviderConfigResponse) {
+    option (google.api.http) = {
+      put: "/v1/system/access-administration/oidc/config"
+      body: "*"
+    };
+  }
+
+  // DisableOIDCProvider disables browser SSO provider configuration, clears the
+  // runtime authenticator, and revokes existing OIDC browser sessions.
+  rpc DisableOIDCProvider(DisableOIDCProviderRequest) returns (DisableOIDCProviderResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/oidc/config:disable"
+      body: "*"
+    };
+  }
+
+  // GetSAMLProviderConfig reports the node-local SAML browser SSO provider
+  // configuration without returning secret material.
+  rpc GetSAMLProviderConfig(GetSAMLProviderConfigRequest) returns (GetSAMLProviderConfigResponse) {
+    option (google.api.http) = {get: "/v1/system/access-administration/saml/config"};
+  }
+
+  // ValidateSAMLProviderConfig validates a proposed SAML browser SSO provider
+  // configuration without changing runtime login/session behavior.
+  rpc ValidateSAMLProviderConfig(ValidateSAMLProviderConfigRequest) returns (ValidateSAMLProviderConfigResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/saml/config:validate"
+      body: "*"
+    };
+  }
+
+  // SetSAMLProviderConfig writes and activates the node-local SAML browser SSO
+  // provider configuration through the audited runtime lifecycle.
+  rpc SetSAMLProviderConfig(SetSAMLProviderConfigRequest) returns (SetSAMLProviderConfigResponse) {
+    option (google.api.http) = {
+      put: "/v1/system/access-administration/saml/config"
+      body: "*"
+    };
+  }
+
+  // DisableSAMLProvider disables persisted SAML provider configuration.
+  rpc DisableSAMLProvider(DisableSAMLProviderRequest) returns (DisableSAMLProviderResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/saml/config:disable"
+      body: "*"
+    };
+  }
+
+  // CreateLocalUser adds an enabled local users-file entry and returns the
+  // generated bearer token once. The stored users file receives only a
+  // sha256:<digest> token_hash.
+  rpc CreateLocalUser(CreateLocalUserRequest) returns (CreateLocalUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/local-users"
+      body: "*"
+    };
+  }
+
+  // UpdateLocalUser changes local users-file metadata such as role. Token
+  // material is never accepted through this endpoint.
+  rpc UpdateLocalUser(UpdateLocalUserRequest) returns (UpdateLocalUserResponse) {
+    option (google.api.http) = {
+      patch: "/v1/system/access-administration/local-users/{name}"
+      body: "*"
+    };
+  }
+
+  // RotateLocalUserToken replaces one local user's token_hash and returns the
+  // generated bearer token once.
+  rpc RotateLocalUserToken(RotateLocalUserTokenRequest) returns (RotateLocalUserTokenResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/local-users/{name}:rotate-token"
+      body: "*"
+    };
+  }
+
+  // DisableLocalUser disables one local users-file entry while preserving an
+  // audit-visible inventory row.
+  rpc DisableLocalUser(DisableLocalUserRequest) returns (DisableLocalUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/local-users/{name}:disable"
+      body: "*"
+    };
+  }
+
+  // RevokeAccessSession invalidates one active browser SSO session by the
+  // non-secret session_id returned from GetAccessAdministration.
+  rpc RevokeAccessSession(RevokeAccessSessionRequest) returns (RevokeAccessSessionResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/access-administration/sessions/{session_id}:revoke"
+      body: "*"
+    };
+  }
+
+  // TuneHost previews, writes, or applies the OpenNGFW host sysctl profile.
+  // This is an explicit host mutation, separate from policy commit/rollback.
+  rpc TuneHost(TuneHostRequest) returns (TuneHostResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/tune"
+      body: "*"
+    };
+  }
+
+  // PlanPacketCapture validates capture scope and returns a bounded tcpdump
+  // command without mutating the host. This lets UI/CLI clients preview the
+  // exact diagnostic action before requesting an audited capture.
+  rpc PlanPacketCapture(PlanPacketCaptureRequest) returns (PlanPacketCaptureResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/packet-captures/plan"
+      body: "*"
+    };
+  }
+
+  // ListPacketCaptures returns recent completed pcap artifacts from the
+  // configured capture directory. It returns metadata and safe download links;
+  // pcap bytes are only returned by DownloadPacketCapture.
+  rpc ListPacketCaptures(ListPacketCapturesRequest) returns (ListPacketCapturesResponse) {
+    option (google.api.http) = {get: "/v1/system/packet-captures"};
+  }
+
+  // StartPacketCapture runs one bounded packet capture on the firewall host.
+  // It is a privileged diagnostic action: callers must acknowledge it, RBAC
+  // requires admin, and every attempt is written to the audit log.
+  rpc StartPacketCapture(StartPacketCaptureRequest) returns (StartPacketCaptureResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/packet-captures"
+      body: "*"
+    };
+  }
+
+  // DownloadPacketCapture returns one completed pcap artifact as binary
+  // application/vnd.tcpdump.pcap content. The id is the safe artifact_id
+  // returned by ListPacketCaptures or StartPacketCapture.
+  rpc DownloadPacketCapture(DownloadPacketCaptureRequest) returns (google.api.HttpBody) {
+    option (google.api.http) = {get: "/v1/system/packet-captures/{id}/download"};
+  }
+
+  // SetPacketCaptureRetention records non-destructive retention metadata for a
+  // completed pcap artifact. It updates only the artifact sidecar; lifecycle
+  // pruning, legal hold, custody, and tamper-proof retention remain separate
+  // hardening controls.
+  rpc SetPacketCaptureRetention(SetPacketCaptureRetentionRequest) returns (SetPacketCaptureRetentionResponse) {
+    option (google.api.http) = {
+      post: "/v1/system/packet-captures/{id}:set-retention"
+      body: "*"
+    };
   }
 }
 
@@ -29,4 +323,1434 @@ message GetVersionResponse {
   string commit = 2;
   // RFC 3339 build timestamp.
   string build_date = 3;
+}
+
+message GetStatusRequest {}
+
+message GetTelemetryExportStatusRequest {}
+
+message VerifyTelemetryExportRequest {
+  // Optional configured export name. Empty selects the first enabled export.
+  string export_name = 1;
+  // Optional configured export type when name is omitted.
+  TelemetryExportType type = 2;
+  // Optional configured target when name is omitted.
+  string target = 3;
+  // Operator-visible reason or ticket context for the synthetic proof event.
+  string reason = 4;
+  // Required acknowledgement because this writes/sends one synthetic telemetry
+  // event to a configured export sink.
+  bool ack_test_event = 5;
+}
+
+message VerifyTelemetryExportResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  // delivered, written, simulation, invalid, failed, or unavailable.
+  string state = 3;
+  string detail = 4;
+  uint64 running_policy_version = 5;
+  TelemetryExportProof proof = 6;
+  repeated string warnings = 7;
+}
+
+message TelemetryExportProof {
+  string proof_id = 1;
+  string export_name = 2;
+  TelemetryExportType type = 3;
+  string protocol = 4;
+  string target = 5;
+  uint64 bytes = 6;
+  string event_hash = 7;
+  string evidence = 8;
+}
+
+message ListSystemLogsRequest {
+  // Zero uses the server default. The server caps the value.
+  uint32 limit = 1;
+  // Source facet: system, engine, audit, dataplane, or all/empty.
+  string source = 2;
+  // Optional engine name such as suricata, vector, frr, wireguard, or nftables.
+  string engine = 3;
+  // Severity facet: debug, info, notice, warn, error, critical, or all/empty.
+  string severity = 4;
+  // Case-insensitive substring match after server-side redaction.
+  string query = 5;
+  // RFC 3339 lower bound when log lines carry parseable timestamps.
+  string since = 6;
+  // RFC 3339 upper bound when log lines carry parseable timestamps.
+  string until = 7;
+}
+
+message ListSystemLogsResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  repeated SystemLogEntry entries = 3;
+  SystemLogSummary summary = 4;
+}
+
+message SystemLogEntry {
+  string id = 1;
+  string timestamp = 2;
+  string source = 3;
+  string engine = 4;
+  string severity = 5;
+  string message = 6;
+  string facility = 7;
+  string file = 8;
+  uint32 line = 9;
+}
+
+message SystemLogSummary {
+  uint32 scanned_files = 1;
+  uint32 scanned_lines = 2;
+  uint32 matched_lines = 3;
+  bool truncated = 4;
+  repeated string sources = 5;
+  repeated string severities = 6;
+  repeated string engines = 7;
+  repeated string warnings = 8;
+}
+
+message GetTelemetryExportStatusResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  // disabled, configured, ready, degraded, or unknown.
+  string state = 3;
+  string detail = 4;
+  bool telemetry_enabled = 5;
+  uint64 running_policy_version = 6;
+  TelemetryVectorRuntimeStatus vector = 7;
+  TelemetryClickHouseSinkStatus clickhouse = 8;
+  repeated TelemetryExportSinkStatus exports = 9;
+  repeated StatusWarning warnings = 10;
+}
+
+message TelemetryVectorRuntimeStatus {
+  string state = 1;
+  string detail = 2;
+}
+
+message TelemetryClickHouseSinkStatus {
+  bool configured = 1;
+  string endpoint = 2;
+  string database = 3;
+  string events_table = 4;
+  string alerts_table = 5;
+  string evidence_state = 6;
+  string evidence_detail = 7;
+}
+
+message TelemetryExportSinkStatus {
+  string name = 1;
+  bool configured = 2;
+  TelemetryExportType type = 3;
+  string target = 4;
+  string protocol = 5;
+  string evidence_state = 6;
+  string evidence_detail = 7;
+  TelemetryLocalFileEvidence file = 8;
+}
+
+message TelemetryLocalFileEvidence {
+  string path = 1;
+  bool present = 2;
+  uint64 size_bytes = 3;
+  string modified_at = 4;
+  string error = 5;
+}
+
+message CheckRuntimeReadinessRequest {
+  // Policy that would become live if the reviewed action proceeds.
+  Policy target_policy = 1;
+  // Policy currently live before the reviewed action.
+  Policy running_policy = 2;
+  // Operator action being reviewed, usually "commit" or "rollback".
+  string operation = 3;
+}
+
+message CheckRuntimeReadinessResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  string operation = 3;
+  string label = 4;
+  string cls = 5;
+  bool requires_ack = 6;
+  string detail = 7;
+  repeated RuntimeReadinessItem items = 8;
+  repeated string warnings = 9;
+}
+
+message RuntimeReadinessItem {
+  string id = 1;
+  string level = 2;
+  string badge = 3;
+  string title = 4;
+  string detail = 5;
+  string href = 6;
+  string command = 7;
+}
+
+message GetHighAvailabilityStatusRequest {}
+
+message GetHighAvailabilityStatusResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  HighAvailabilityStatus status = 3;
+}
+
+message PullHighAvailabilityPolicyRequest {
+  // Required audit comment explaining why this passive node is pulling policy.
+  string comment = 1;
+  // Required acknowledgement that the operator intends to replace the local
+  // running policy from the active peer.
+  bool ack_pull = 2;
+  // Passed through to the normal policy apply path for high-risk changes.
+  bool ack_risk = 3;
+  // Passed through to the normal policy apply path for runtime readiness
+  // warnings.
+  bool ack_runtime = 4;
+}
+
+message PullHighAvailabilityPolicyResponse {
+  uint64 version = 1;
+  uint64 previous_version = 2;
+  VersionInfo version_info = 3;
+  HighAvailabilityStatus before = 4;
+  HighAvailabilityStatus after = 5;
+  uint64 peer_version = 6;
+  string peer_artifact_set_sha256 = 7;
+  string detail = 8;
+}
+
+message ActivateHighAvailabilityFailoverRequest {
+  // Required audit comment explaining why this passive node is being marked
+  // active.
+  string comment = 1;
+  // Required acknowledgement that this marks the local passive node active.
+  bool ack_failover = 2;
+  // Required acknowledgement that traffic/VIP/route cutover is external to
+  // this API call.
+  bool ack_external_cutover = 3;
+  // Required acknowledgement that peer fencing is external to this API call.
+  bool ack_external_fencing = 4;
+  // Required for authenticated callers because this is a privileged failover
+  // state transition.
+  string step_up_token = 5;
+}
+
+message ActivateHighAvailabilityFailoverResponse {
+  string schema_version = 1;
+  string activated_at = 2;
+  HighAvailabilityStatus before = 3;
+  HighAvailabilityStatus after = 4;
+  uint64 running_policy_version = 5;
+  uint64 last_known_good_version = 6;
+  string detail = 7;
+}
+
+message GetReleaseAcceptanceStatusRequest {}
+
+message GetSupportBundleRequest {
+  // Number of policy versions to include. Zero uses the server default.
+  uint32 version_limit = 1;
+  // Number of audit entries to include. Zero uses the server default.
+  uint32 audit_limit = 2;
+  // Number of alerts, flows, and sessions to include. Zero uses the server default.
+  uint32 event_limit = 3;
+}
+
+message GetSupportBundleResponse {
+  string schema_version = 1;
+  string collected_at = 2;
+  SupportBundleCollector collector = 3;
+  map<string, SupportBundleEndpoint> endpoints = 4;
+  SupportBundleSummary summary = 5;
+}
+
+message SupportBundleCollector {
+  string type = 1;
+  string name = 2;
+  string version = 3;
+}
+
+message SupportBundleEndpoint {
+  bool ok = 1;
+  google.protobuf.Struct data = 2;
+  string error = 3;
+}
+
+message SupportBundleSummary {
+  string runtime_version = 1;
+  string running_policy_version = 2;
+  string active_dataplane = 3;
+  string conntrack_state = 4;
+  double conntrack_usage_percent = 5;
+  uint64 conntrack_entries = 6;
+  uint64 conntrack_max_entries = 7;
+  string candidate_validation = 8;
+  string candidate_impact = 9;
+  bool candidate_has_candidate = 10;
+  bool candidate_dirty = 11;
+  uint64 candidate_running_version = 12;
+  uint32 candidate_change_count = 13;
+  string session_state = 14;
+  int32 session_count = 15;
+  int32 alert_count = 16;
+  int32 flow_count = 17;
+  int32 feed_count = 18;
+  int32 enabled_feeds = 19;
+  int32 content_package_count = 20;
+  int32 verified_content_packages = 21;
+  int32 content_package_blockers = 22;
+  string release_acceptance_state = 23;
+  bool release_acceptance_ready = 24;
+  bool release_acceptance_manifest_present = 25;
+  uint32 release_acceptance_missing = 26;
+  uint32 release_acceptance_invalid = 27;
+  uint32 release_acceptance_not_applicable = 28;
+  uint32 release_acceptance_todo = 29;
+  int32 release_acceptance_problems = 30;
+  int32 release_acceptance_next_actions = 31;
+  int32 release_acceptance_next_commands = 32;
+  string audit_integrity = 33;
+  uint32 audit_entry_count = 34;
+  string latest_audit_hash = 35;
+  int32 critical_warnings = 36;
+  int32 warnings = 37;
+  int32 blocked_engines = 38;
+  repeated string failed_endpoints = 39;
+  bool release_acceptance_recordability_ready = 40;
+  int32 release_acceptance_recordability_problems = 41;
+  int32 release_acceptance_dirty_source_paths = 42;
+  uint32 release_acceptance_truncated_dirty_source_count = 43;
+  string telemetry_export_state = 44;
+  bool telemetry_export_enabled = 45;
+  string telemetry_export_vector_state = 46;
+  int32 telemetry_export_sink_count = 47;
+  int32 telemetry_export_observed_sink_count = 48;
+  string telemetry_export_clickhouse_evidence = 49;
+  int32 telemetry_export_warnings = 50;
+}
+
+message GetReleaseAcceptanceStatusResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  string manifest_path = 3;
+  string evidence_dir = 4;
+  bool manifest_present = 5;
+  bool ready = 6;
+  string state = 7;
+  ReleaseAcceptanceStatusSummary summary = 8;
+  repeated string problems = 9;
+  repeated ReleaseAcceptanceCheckStatus checks = 10;
+  // Advisory checkout preflight for recording evidence from the current source
+  // tree. This is not release evidence and does not affect ready/check state.
+  ReleaseAcceptanceRecordabilityStatus recordability = 11;
+}
+
+message ReleaseAcceptanceStatusSummary {
+  uint32 passed = 1;
+  uint32 recorded = 2;
+  uint32 missing = 3;
+  uint32 invalid = 4;
+  uint32 not_applicable = 5;
+  uint32 todo = 6;
+}
+
+message ReleaseAcceptanceCheckStatus {
+  string name = 1;
+  string state = 2;
+  string artifact = 3;
+  string evidence_path = 4;
+  string ran_at = 5;
+  string detail = 6;
+  // Evidence command from the recorded artifact. Empty when evidence has not
+  // been recorded.
+  repeated string command = 7;
+  repeated string problems = 8;
+  // Human-readable remediation guidance for the current state. This is not
+  // evidence and must not be treated as proof that a check passed.
+  string next_action = 9;
+  // Copyable argv for the next evidence-recording step when one is safe to
+  // suggest. Placeholder arguments must be replaced before running.
+  repeated string next_command = 10;
+  string benchmark_summary = 11;
+}
+
+message ReleaseAcceptanceRecordabilityStatus {
+  // Mirrors releaseacceptance.RecordabilityStatus.
+  bool ready = 1;
+  string git_head = 2;
+  string record_commit = 3;
+  repeated string allowed_dirty_paths = 4;
+  repeated string dirty_source_paths = 5;
+  repeated string problems = 6;
+  // Deprecated compatibility field for existing support-bundle summaries.
+  // The status API now returns the full dirty_source_paths list.
+  uint32 truncated_dirty_source_count = 7 [deprecated = true];
+  repeated string stale_evidence_paths = 8;
+}
+
+message TuneHostRequest {
+  // "appliance" for the conservative baseline or "throughput" for
+  // high-bandwidth / high-connection-churn forwarding headroom.
+  string profile = 1;
+  // Write the persistent sysctl profile to sysctl_config_path.
+  bool write = 2;
+  // Apply exposed sysctl keys to the live kernel.
+  bool apply = 3;
+  // Required when write or apply is true.
+  bool ack_host_change = 4;
+}
+
+message TuneHostResponse {
+  string profile = 1;
+  string sysctl_config_path = 2;
+  string config_text = 3;
+  bool wrote_config = 4;
+  bool applied_live = 5;
+  repeated TuneHostResult results = 6;
+}
+
+message TuneHostResult {
+  string key = 1;
+  string value = 2;
+  string state = 3;
+  string detail = 4;
+}
+
+message PlanPacketCaptureRequest {
+  // Interface to capture on. Use "any" only when a specific ingress/egress
+  // interface is unknown.
+  string interface = 1;
+  Protocol protocol = 2;
+  string src_ip = 3;
+  uint32 src_port = 4;
+  string dest_ip = 5;
+  uint32 dest_port = 6;
+  // Bounded capture duration. Server clamps to the supported range.
+  uint32 duration_seconds = 7;
+  // Maximum packet count. Server clamps to the supported range.
+  uint32 packet_count = 8;
+  // Snap length in bytes. Server clamps to the supported range.
+  uint32 snaplen_bytes = 9;
+  // Human label used only for the output filename.
+  string label = 10;
+  // Optional telemetry flow identifier preserved with the capture metadata so
+  // Explain can correlate completed artifacts with EVE flow/alert evidence.
+  string flow_id = 11;
+}
+
+message StartPacketCaptureRequest {
+  // Interface to capture on. Use "any" only when a specific ingress/egress
+  // interface is unknown.
+  string interface = 1;
+  Protocol protocol = 2;
+  string src_ip = 3;
+  uint32 src_port = 4;
+  string dest_ip = 5;
+  uint32 dest_port = 6;
+  // Bounded capture duration. Server clamps to the supported range.
+  uint32 duration_seconds = 7;
+  // Maximum packet count. Server clamps to the supported range.
+  uint32 packet_count = 8;
+  // Snap length in bytes. Server clamps to the supported range.
+  uint32 snaplen_bytes = 9;
+  // Human label used only for the output filename.
+  string label = 10;
+  // Required by StartPacketCapture.
+  bool ack_capture = 11;
+  // Optional telemetry flow identifier preserved with the capture metadata so
+  // Explain can correlate completed artifacts with EVE flow/alert evidence.
+  string flow_id = 12;
+}
+
+message ListPacketCapturesRequest {
+  // Maximum artifacts to return. Zero uses the server default.
+  uint32 limit = 1;
+  // Optional telemetry flow identifier for returning only capture artifacts
+  // that were started or planned for that observed flow.
+  string flow_id = 2;
+}
+
+message ListPacketCapturesResponse {
+  repeated PacketCaptureJob captures = 1;
+  // Server capture directory used for artifact discovery.
+  string capture_dir = 2;
+}
+
+message DownloadPacketCaptureRequest {
+  // Safe capture artifact id, without path separators or extension.
+  string id = 1;
+}
+
+enum PacketCaptureRetentionState {
+  PACKET_CAPTURE_RETENTION_STATE_UNSPECIFIED = 0;
+  PACKET_CAPTURE_RETENTION_STATE_RETAINED = 1;
+  PACKET_CAPTURE_RETENTION_STATE_RELEASED = 2;
+}
+
+message PacketCaptureRetention {
+  PacketCaptureRetentionState state = 1;
+  // Server-normalized UTC RFC3339Nano timestamp required for retained
+  // artifacts and cleared for released artifacts.
+  string retain_until = 2;
+  // Bounded operator reason for the metadata update.
+  string retention_reason = 3;
+  // Optional incident/case label. It is not treated as a custody record.
+  string case_id = 4;
+  // Server timestamp for the last metadata update.
+  string updated_at = 5;
+  // Server actor name for the last metadata update.
+  string updated_by = 6;
+}
+
+message SetPacketCaptureRetentionRequest {
+  // Safe capture artifact id, without path separators or extension.
+  string id = 1;
+  PacketCaptureRetentionState state = 2;
+  // Required future UTC RFC3339 timestamp when state is RETAINED.
+  string retain_until = 3;
+  // Required bounded operator reason for the metadata update.
+  string retention_reason = 4;
+  // Optional incident/case label.
+  string case_id = 5;
+  // Required acknowledgement because this changes evidence metadata.
+  bool ack_retention_change = 6;
+}
+
+message SetPacketCaptureRetentionResponse {
+  PacketCaptureJob job = 1;
+}
+
+message PlanPacketCaptureResponse {
+  PacketCapturePlan plan = 1;
+}
+
+message PacketCapturePlan {
+  string interface = 1;
+  Protocol protocol = 2;
+  string src_ip = 3;
+  uint32 src_port = 4;
+  string dest_ip = 5;
+  uint32 dest_port = 6;
+  uint32 duration_seconds = 7;
+  uint32 packet_count = 8;
+  uint32 snaplen_bytes = 9;
+  string output_path = 10;
+  string bpf_filter = 11;
+  // Human-copyable command for local break-glass use.
+  string command = 12;
+  // Exact tcpdump argv executed by StartPacketCapture. The server applies the
+  // duration bound without going through a shell.
+  repeated string command_argv = 13;
+  repeated string warnings = 14;
+  // Optional telemetry flow identifier supplied by the operator.
+  string flow_id = 15;
+}
+
+message StartPacketCaptureResponse {
+  PacketCaptureJob job = 1;
+}
+
+message PacketCaptureJob {
+  string id = 1;
+  string state = 2;
+  string detail = 3;
+  PacketCapturePlan plan = 4;
+  string started_at = 5;
+  string completed_at = 6;
+  int32 exit_code = 7;
+  string stderr = 8;
+  uint64 bytes_written = 9;
+  // SHA-256 of the completed pcap file when the server can read it.
+  string sha256 = 10;
+  // Safe id used by DownloadPacketCapture. It is derived from the pcap
+  // filename and never contains path separators.
+  string artifact_id = 11;
+  // Relative REST path for downloading this capture artifact.
+  string download_path = 12;
+  // Safe pcap filename exposed to clients.
+  string filename = 13;
+  // Content type used by DownloadPacketCapture.
+  string media_type = 14;
+  // Non-destructive retention metadata stored in the sidecar only.
+  PacketCaptureRetention retention = 15;
+}
+
+message GetIdentityRequest {}
+
+message GetIdentityResponse {
+  string actor = 1;
+  string role = 2;
+  bool auth_enabled = 3;
+  string auth_source = 4;
+  repeated string capabilities = 5;
+}
+
+message CreateStepUpChallengeRequest {
+  // Stable privileged action id, for example commit, rollback,
+  // access-oidc-set, access-local-user-rotate-token, ha-failover-activate, or
+  // content-package-install.
+  string action = 1;
+  // Required acknowledgement because the returned token can authorize one
+  // high-risk mutation for the authenticated actor.
+  bool ack_step_up = 2;
+  // Optional operator-visible reason or ticket context.
+  string comment = 3;
+}
+
+message CreateStepUpChallengeResponse {
+  string token = 1;
+  string action = 2;
+  string actor = 3;
+  string auth_source = 4;
+  string issued_at = 5;
+  string expires_at = 6;
+  string detail = 7;
+  repeated string warnings = 8;
+}
+
+message GetAccessAdministrationRequest {}
+
+message RunOIDCPreflightRequest {}
+
+message RunOIDCPreflightResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  string state = 3;
+  string label = 4;
+  string detail = 5;
+  AccessAdministrationOidc oidc = 6;
+  repeated OIDCPreflightCheck checks = 7;
+  repeated string blockers = 8;
+  repeated string warnings = 9;
+  repeated string evidence = 10;
+}
+
+message OIDCPreflightCheck {
+  string id = 1;
+  string label = 2;
+  string state = 3;
+  string class = 4;
+  string detail = 5;
+  string evidence = 6;
+  string next_action = 7;
+}
+
+message GetOIDCProviderConfigRequest {}
+
+message GetOIDCProviderConfigResponse {
+  OIDCProviderConfig config = 1;
+  string detail = 2;
+}
+
+message ValidateOIDCProviderConfigRequest {
+  OIDCProviderConfig config = 1;
+}
+
+message ValidateOIDCProviderConfigResponse {
+  string state = 1;
+  string detail = 2;
+  repeated string blockers = 3;
+  repeated string warnings = 4;
+  OIDCProviderConfig normalized_config = 5;
+}
+
+message SetOIDCProviderConfigRequest {
+  OIDCProviderConfig config = 1;
+  // Required acknowledgement because this changes browser SSO access.
+  bool ack_oidc_change = 2;
+  // Required audit comment explaining why browser SSO is changing.
+  string comment = 3;
+  // Required for authenticated callers because this changes browser SSO access.
+  string step_up_token = 4;
+}
+
+message SetOIDCProviderConfigResponse {
+  OIDCProviderConfig config = 1;
+  AccessAdministrationOidc oidc = 2;
+  string detail = 3;
+  uint32 revoked_oidc_sessions = 4;
+}
+
+message DisableOIDCProviderRequest {
+  // Required acknowledgement because this disables browser SSO.
+  bool ack_disable_oidc = 1;
+  // Required audit comment explaining why browser SSO is being disabled.
+  string comment = 2;
+  // Required for authenticated callers because this disables browser SSO.
+  string step_up_token = 3;
+}
+
+message DisableOIDCProviderResponse {
+  bool disabled = 1;
+  string detail = 2;
+  uint32 revoked_oidc_sessions = 3;
+}
+
+message GetSAMLProviderConfigRequest {}
+
+message GetSAMLProviderConfigResponse {
+  SAMLProviderConfig config = 1;
+  string detail = 2;
+}
+
+message ValidateSAMLProviderConfigRequest {
+  SAMLProviderConfig config = 1;
+}
+
+message ValidateSAMLProviderConfigResponse {
+  string state = 1;
+  string detail = 2;
+  repeated string blockers = 3;
+  repeated string warnings = 4;
+  SAMLProviderConfig normalized_config = 5;
+}
+
+message SetSAMLProviderConfigRequest {
+  SAMLProviderConfig config = 1;
+  // Required acknowledgement because this changes browser SSO access posture.
+  bool ack_saml_change = 2;
+  // Required audit comment explaining why SAML provider posture is changing.
+  string comment = 3;
+  // Required for authenticated callers because this changes browser SSO access.
+  string step_up_token = 4;
+}
+
+message SetSAMLProviderConfigResponse {
+  SAMLProviderConfig config = 1;
+  AccessAdministrationSaml saml = 2;
+  string detail = 3;
+}
+
+message DisableSAMLProviderRequest {
+  // Required acknowledgement because this disables SAML browser SSO posture.
+  bool ack_disable_saml = 1;
+  // Required audit comment explaining why SAML provider posture is disabled.
+  string comment = 2;
+  // Required for authenticated callers because this disables browser SSO.
+  string step_up_token = 3;
+}
+
+message DisableSAMLProviderResponse {
+  bool disabled = 1;
+  string detail = 2;
+}
+
+message OIDCProviderConfig {
+  bool enabled = 1;
+  string issuer = 2;
+  string client_id = 3;
+  // Server-local client secret file reference accepted on set/validate
+  // requests. Inventory responses leave this empty and expose only
+  // client_secret_file_configured.
+  string client_secret_file = 4;
+  string redirect_url = 5;
+  string role_claim = 6;
+  string default_role = 7;
+  repeated string scopes = 8;
+  repeated string trusted_proxy_cidrs = 9;
+  uint64 session_ttl_seconds = 10;
+  uint32 max_sessions = 11;
+  // True when a server-local client secret file reference is configured. The
+  // path and secret bytes are never serialized through inventory responses.
+  bool client_secret_file_configured = 12;
+}
+
+message SAMLProviderConfig {
+  bool enabled = 1;
+  string metadata_url = 2;
+  string idp_entity_id = 3;
+  string sso_url = 4;
+  string sp_entity_id = 5;
+  string acs_url = 6;
+  string role_attribute = 7;
+  string default_role = 8;
+  string certificate_fingerprint = 9;
+  bool certificate_fingerprint_configured = 10;
+  repeated string trusted_proxy_cidrs = 11;
+  uint64 session_ttl_seconds = 12;
+  uint32 max_sessions = 13;
+}
+
+message GetAccessAdministrationResponse {
+  bool auth_enabled = 1;
+  repeated AccessAdministrationLocalUser local_users = 2;
+  AccessAdministrationOidc oidc = 3;
+  AccessAdministrationSessions sessions = 4;
+  AccessAdministrationBreakGlass break_glass = 5;
+  repeated string blockers = 6;
+  AccessAdministrationSaml saml = 7;
+}
+
+message AccessAdministrationLocalUser {
+  string name = 1;
+  string role = 2;
+  string auth_source = 3;
+  // Redacted token storage posture, for example "plaintext-token-redacted" or
+  // "prehashed-token-redacted"; never token bytes or configured digest values.
+  string token_material = 4;
+  // True when audited local-user mutation APIs can safely edit this inventory row.
+  // The users file remains the source of truth for local break-glass users.
+  bool editable = 5;
+  // Stable non-secret fingerprint of the inventory row for audit correlation.
+  string audit_hash = 6;
+  // False when the users-file entry is disabled and cannot authenticate.
+  bool enabled = 7;
+}
+
+message CreateLocalUserRequest {
+  string name = 1;
+  string role = 2;
+  // Required acknowledgement because this creates a new credential.
+  bool ack_local_user_change = 3;
+  // Required audit comment explaining why the credential is being created.
+  string comment = 4;
+  // Required for authenticated callers because this changes local access.
+  string step_up_token = 5;
+}
+
+message UpdateLocalUserRequest {
+  string name = 1;
+  string role = 2;
+  // Required acknowledgement because this changes local authorization.
+  bool ack_local_user_change = 3;
+  // Required audit comment explaining why the authorization is changing.
+  string comment = 4;
+  // Required for authenticated callers because this changes local access.
+  string step_up_token = 5;
+}
+
+message RotateLocalUserTokenRequest {
+  string name = 1;
+  // Required acknowledgement because the previous credential stops working.
+  bool ack_rotate_token = 2;
+  // Required audit comment explaining why the credential is being rotated.
+  string comment = 3;
+  // Required for authenticated callers because this rotates bearer access.
+  string step_up_token = 4;
+}
+
+message DisableLocalUserRequest {
+  string name = 1;
+  // Required acknowledgement because this can remove emergency access.
+  bool ack_disable_user = 2;
+  // Required audit comment explaining why the credential is being disabled.
+  string comment = 3;
+  // Required for authenticated callers because this changes local access.
+  string step_up_token = 4;
+}
+
+message CreateLocalUserResponse {
+  AccessAdministrationLocalUser user = 1;
+  // Generated bearer token returned only once. It is never persisted in API
+  // state and is not returned by inventory endpoints.
+  string one_time_token = 2;
+  string detail = 3;
+}
+
+message UpdateLocalUserResponse {
+  AccessAdministrationLocalUser user = 1;
+  string detail = 2;
+}
+
+message RotateLocalUserTokenResponse {
+  AccessAdministrationLocalUser user = 1;
+  // Generated bearer token returned only once. It is never persisted in API
+  // state and is not returned by inventory endpoints.
+  string one_time_token = 2;
+  string detail = 3;
+}
+
+message DisableLocalUserResponse {
+  AccessAdministrationLocalUser user = 1;
+  string detail = 2;
+}
+
+message AccessAdministrationOidc {
+  bool enabled = 1;
+  string issuer = 2;
+  string client_id = 3;
+  string role_claim = 4;
+  string default_role = 5;
+  bool cookie_secure = 6;
+  repeated string scopes = 7;
+  repeated string trusted_proxy_cidrs = 8;
+  uint64 session_ttl_seconds = 9;
+}
+
+message AccessAdministrationSaml {
+  bool enabled = 1;
+  string metadata_url = 2;
+  string idp_entity_id = 3;
+  string sso_url = 4;
+  string sp_entity_id = 5;
+  string acs_url = 6;
+  string role_attribute = 7;
+  string default_role = 8;
+  bool certificate_fingerprint_configured = 9;
+  bool runtime_available = 10;
+  string detail = 11;
+}
+
+message AccessAdministrationSessions {
+  uint32 oidc_active_sessions = 1;
+  uint32 oidc_max_sessions = 2;
+  bool session_revocation_available = 3;
+  string detail = 4;
+  repeated AccessAdministrationSession active_sessions = 5;
+}
+
+message AccessAdministrationSession {
+  // Stable non-secret fingerprint of the server-side session token.
+  string session_id = 1;
+  string actor = 2;
+  string role = 3;
+  string auth_source = 4;
+  string expires_at = 5;
+  uint64 seconds_until_expiry = 6;
+}
+
+message RevokeAccessSessionRequest {
+  string session_id = 1;
+  // Required acknowledgement because this forcibly signs out another browser.
+  bool ack_revoke_session = 2;
+}
+
+message RevokeAccessSessionResponse {
+  bool revoked = 1;
+  AccessAdministrationSession session = 2;
+  string detail = 3;
+}
+
+message AccessAdministrationBreakGlass {
+  string state = 1;
+  string detail = 2;
+  string next_action = 3;
+}
+
+message GetStatusResponse {
+  RuntimeStatus runtime = 1;
+  repeated EngineStatus engines = 2;
+  repeated SystemCapability capabilities = 3;
+  repeated StatusWarning warnings = 4;
+  DataplaneStatus dataplane = 5;
+  ManagementPlaneStatus management = 6;
+  HostResourceStatus host = 7;
+  // Policy-aware inspection readiness for the running policy and managed
+  // inspection engine. This is the canonical source for fail-open/fail-closed
+  // operator posture; clients should not infer it from raw engine state alone.
+  InspectionStatus inspection = 8;
+  VpnRuntimeStatus vpn = 9;
+  RoutingRuntimeStatus routing = 10;
+  HighAvailabilityStatus high_availability = 11;
+}
+
+message ProveNetworkPathRequest {
+  // Representative source IP for kernel route lookup.
+  string src_ip = 1;
+  // Representative destination IP for kernel route lookup.
+  string dest_ip = 2;
+  // Optional protocol label for operator context.
+  Protocol protocol = 3;
+  // Optional destination port for operator context.
+  uint32 dest_port = 4;
+  // Optional expected source interface. When set, the proof reports a warning
+  // if the kernel route lookup returns a different device.
+  string source_interface = 5;
+  // Optional tunnel reference for passive VPN runtime correlation.
+  NetworkPathTunnelRef tunnel = 6;
+  // Optional expected egress source IP after source-NAT/masquerade. Empty keeps
+  // the proof observational and reports only the kernel-selected preferred
+  // source, if the host exposes one.
+  string expected_masquerade_egress_ip = 7;
+}
+
+message NetworkPathTunnelRef {
+  // ipsec or wireguard.
+  string kind = 1;
+  // IPsec tunnel name or operator display label.
+  string name = 2;
+  // WireGuard interface name.
+  string interface = 3;
+  // WireGuard peer display name, if known by the caller.
+  string peer = 4;
+  // WireGuard peer public key, if known by the caller.
+  string peer_public_key = 5;
+}
+
+message ProveNetworkPathResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  // ready, degraded, unavailable, or unknown.
+  string state = 3;
+  string detail = 4;
+  uint64 running_policy_version = 5;
+  NetworkPathRouteProof route = 6;
+  NetworkPathVpnProof vpn = 7;
+  repeated string evidence = 8;
+  repeated string warnings = 9;
+  // Structured mismatch records for operators and automation. Warning strings
+  // are retained for compatibility with existing clients.
+  repeated NetworkPathMismatch mismatches = 10;
+  // Explicit proof boundaries. This passive proof does not send traffic,
+  // attest the remote peer, capture packets, or sign/retain custody records.
+  repeated string limitations = 11;
+  // Copyable handoff strings for operator shells and API clients.
+  string cli_handoff = 12;
+  string api_handoff = 13;
+}
+
+message NetworkPathRouteProof {
+  string state = 1;
+  string detail = 2;
+  string destination = 3;
+  string gateway = 4;
+  string dev = 5;
+  string preferred_source = 6;
+  string protocol = 7;
+  string table = 8;
+  string raw_redacted = 9;
+  // Additional route identity parsed from `ip -j route get` and
+  // `ip -j -d link show dev <route dev>` when available. Generated clients must
+  // run the proto/OpenAPI generation step before consuming these fields.
+  string route_type = 10;
+  string scope = 11;
+  repeated string flags = 12;
+  string source = 13;
+  uint32 interface_index = 14;
+  string interface_name = 15;
+  string interface_master = 16;
+  string interface_kind = 17;
+  string vrf = 18;
+  string interface_identity = 19;
+  NetworkPathFrrProof frr = 20;
+  NetworkPathMasqueradeProof masquerade = 21;
+}
+
+message NetworkPathFrrProof {
+  // observed, unavailable, not-configured, or unknown.
+  string state = 1;
+  string detail = 2;
+  string command = 3;
+  string route_family = 4;
+}
+
+message NetworkPathMasqueradeProof {
+  // observed, mismatch, unavailable, not-requested, or unknown.
+  string state = 1;
+  string detail = 2;
+  string requested_source = 3;
+  string observed_egress_source = 4;
+  string expected_egress_source = 5;
+}
+
+message NetworkPathVpnProof {
+  string kind = 1;
+  string state = 2;
+  string detail = 3;
+  string matched_tunnel = 4;
+  string interface = 5;
+  string peer = 6;
+  uint64 handshake_age_seconds = 7;
+  uint32 child_sa_count = 8;
+  uint32 installed_child_sa_count = 9;
+  string correlation = 10;
+}
+
+message NetworkPathMismatch {
+  // info, warning, or critical.
+  string severity = 1;
+  // route, vpn, input, or proof.
+  string subject = 2;
+  string detail = 3;
+}
+
+message HighAvailabilityStatus {
+  // standalone, planned, ready, degraded, or unknown.
+  string state = 1;
+  // standalone, active, passive, or unknown.
+  string role = 2;
+  // standalone or active-passive.
+  string mode = 3;
+  string node_id = 4;
+  string peer_id = 5;
+  string peer_address = 6;
+  uint64 running_policy_version = 7;
+  uint64 last_known_good_version = 8;
+  string last_known_good_state = 9;
+  string last_known_good_artifact_set_sha256 = 10;
+  HighAvailabilitySyncStatus sync = 11;
+  HighAvailabilityFailoverStatus failover = 12;
+  repeated string blockers = 13;
+  repeated StatusWarning warnings = 14;
+  string detail = 15;
+  HighAvailabilityReplicationStatus replication = 16;
+  HighAvailabilityFencingEvidenceStatus fencing_evidence = 17;
+  HighAvailabilityTransportEvidenceStatus transport_evidence = 18;
+  HighAvailabilityConntrackSyncStatus conntrack_sync = 19;
+}
+
+message HighAvailabilitySyncStatus {
+  string state = 1;
+  string detail = 2;
+  uint64 local_version = 3;
+  uint64 peer_version = 4;
+  string local_artifact_set_sha256 = 5;
+  string peer_artifact_set_sha256 = 6;
+  uint64 seconds_since_heartbeat = 7;
+}
+
+message HighAvailabilityReplicationStatus {
+  string state = 1;
+  bool enabled = 2;
+  string detail = 3;
+  string last_attempt_at = 4;
+  string last_success_at = 5;
+  string last_error = 6;
+  uint64 last_peer_version = 7;
+  uint64 last_local_version = 8;
+}
+
+message HighAvailabilityFailoverStatus {
+  string state = 1;
+  bool eligible = 2;
+  string detail = 3;
+  repeated string blockers = 4;
+}
+
+message HighAvailabilityFencingEvidenceStatus {
+  // not_recorded, acknowledged_external, recorded, or unavailable.
+  string state = 1;
+  string provider = 2;
+  string claim = 3;
+  string peer_id = 4;
+  string evidence_id = 5;
+  string observed_at = 6;
+  string detail = 7;
+}
+
+message HighAvailabilityTransportEvidenceStatus {
+  // not_configured, not_performed, promoted, degraded, or unavailable.
+  string state = 1;
+  string claim = 2;
+  string vip = 3;
+  string interface = 4;
+  repeated string routes = 5;
+  string garp_state = 6;
+  string garp_detail = 7;
+  string neighbor_state = 8;
+  string neighbor_detail = 9;
+  string observed_at = 10;
+  string detail = 11;
+}
+
+message HighAvailabilityConntrackSyncStatus {
+  // not_configured, not_performed, synced, degraded, or unavailable.
+  string state = 1;
+  string provider = 2;
+  string claim = 3;
+  string peer_id = 4;
+  string evidence_id = 5;
+  string observed_at = 6;
+  string detail = 7;
+}
+
+message RuntimeStatus {
+  string version = 1;
+  string commit = 2;
+  string build_date = 3;
+  string started_at = 4;
+  uint64 uptime_seconds = 5;
+  string grpc_listen = 6;
+  string http_listen = 7;
+  bool tls_enabled = 8;
+  bool auth_enabled = 9;
+  bool dry_run = 10;
+  string data_dir = 11;
+  string log_dir = 12;
+  uint32 inspection_workers = 13;
+  uint32 host_cpus = 14;
+  string active_dataplane = 15;
+}
+
+message EngineStatus {
+  string name = 1;
+  string role = 2;
+  string mode = 3;
+  string state = 4;
+  string detail = 5;
+}
+
+message SystemCapability {
+  string name = 1;
+  string state = 2;
+  string detail = 3;
+}
+
+message DataplaneStatus {
+  string active_dataplane = 1;
+  FlowtableStatus flowtable = 2;
+  KernelTuningStatus kernel_tuning = 3;
+  EbpfDataplaneStatus ebpf = 4;
+  // Aggregated nftables counters grouped by OpenNGFW rule/comment identity.
+  repeated DataplaneCounter counters = 5;
+  // Live Linux conntrack table capacity from /proc/sys/net/netfilter.
+  ConntrackTableStatus conntrack = 6;
+  // Running policy version active when counters and dataplane posture were
+  // sampled. Zero means no committed policy or version context unavailable.
+  uint64 running_policy_version = 7;
+}
+
+message DataplaneCounter {
+  // Raw nftables comment emitted by OpenNGFW, e.g. rule:lan-to-wan.
+  string comment = 1;
+  // Counter class derived from the comment prefix: rule, host-input, snat,
+  // dnat, intel, ips, network, flow-offload, default, or system.
+  string kind = 2;
+  // Human-readable policy/runtime object name derived from the comment.
+  string name = 3;
+  uint64 packets = 4;
+  uint64 bytes = 5;
+  // Durable forwarding-rule identity parsed from OpenNGFW renderer metadata
+  // when kind == "rule"; empty for legacy counters and non-forwarding counters.
+  string rule_id = 6;
+  // Durable policy-item identity parsed from OpenNGFW renderer metadata. For
+  // forwarding rules this matches rule_id; for non-forwarding counters it
+  // carries host-input, source NAT, or destination NAT item identity.
+  string item_id = 7;
+}
+
+message FlowtableStatus {
+  string host_state = 1;
+  string host_detail = 2;
+  string runtime_state = 3;
+  string runtime_detail = 4;
+  repeated string devices = 5;
+  uint64 packets = 6;
+  uint64 bytes = 7;
+  bool flowtable_declared = 8;
+  bool offload_rule_present = 9;
+}
+
+message ConntrackTableStatus {
+  string state = 1;
+  string detail = 2;
+  uint64 current_entries = 3;
+  uint64 max_entries = 4;
+  double usage_percent = 5;
+  double warning_threshold_percent = 6;
+  double degraded_threshold_percent = 7;
+}
+
+message VpnRuntimeStatus {
+  WireGuardRuntimeStatus wireguard = 1;
+  IpsecRuntimeStatus ipsec = 2;
+}
+
+message RoutingRuntimeStatus {
+  FrrRuntimeStatus frr = 1;
+}
+
+message FrrRuntimeStatus {
+  string state = 1;
+  string detail = 2;
+  repeated BgpNeighborRuntimeStatus bgp_neighbors = 3;
+  repeated OspfNeighborRuntimeStatus ospf_neighbors = 4;
+}
+
+message BgpNeighborRuntimeStatus {
+  string peer = 1;
+  uint32 remote_asn = 2;
+  string state = 3;
+  string uptime = 4;
+  uint64 prefixes_received = 5;
+  string detail = 6;
+}
+
+message OspfNeighborRuntimeStatus {
+  string neighbor_id = 1;
+  string address = 2;
+  string interface = 3;
+  string state = 4;
+  string dead_time = 5;
+  string detail = 6;
+}
+
+message WireGuardRuntimeStatus {
+  string state = 1;
+  string detail = 2;
+  repeated WireGuardInterfaceStatus interfaces = 3;
+}
+
+message WireGuardInterfaceStatus {
+  string name = 1;
+  string state = 2;
+  string detail = 3;
+  uint32 peer_count = 4;
+  uint32 active_peer_count = 5;
+  repeated WireGuardPeerStatus peers = 6;
+}
+
+message WireGuardPeerStatus {
+  string public_key = 1;
+  string endpoint = 2;
+  uint64 latest_handshake_unix_seconds = 3;
+  uint64 latest_handshake_age_seconds = 4;
+  uint64 rx_bytes = 5;
+  uint64 tx_bytes = 6;
+  string state = 7;
+  string detail = 8;
+}
+
+message IpsecRuntimeStatus {
+  string state = 1;
+  string detail = 2;
+  repeated IpsecTunnelRuntimeStatus tunnels = 3;
+}
+
+message IpsecTunnelRuntimeStatus {
+  string name = 1;
+  string state = 2;
+  string detail = 3;
+  string ike_state = 4;
+  uint32 child_sa_count = 5;
+  uint32 installed_child_sa_count = 6;
+}
+
+message KernelTuningStatus {
+  string state = 1;
+  string detail = 2;
+  string sysctl_config_path = 3;
+  repeated KernelTuningCheck checks = 4;
+}
+
+message KernelTuningCheck {
+  string name = 1;
+  string key = 2;
+  string current = 3;
+  string recommended = 4;
+  string state = 5;
+  string detail = 6;
+}
+
+message EbpfDataplaneStatus {
+  string state = 1;
+  string detail = 2;
+  // Host/tool/kernel prerequisites needed before any first-party eBPF dataplane
+  // can be compiled or inspected.
+  repeated EbpfProbe probes = 3;
+  // planned, ready, degraded, or active. This is attach readiness only; it is
+  // not proof that eBPF is the active dataplane.
+  string attach_state = 4;
+  string attach_detail = 5;
+  // Probe results for XDP/tc attachment prerequisites.
+  repeated EbpfProbe attach_probes = 6;
+  // planned or active. The v2-mixed implementation exposes plan-only renderer
+  // scaffolding while nftables remains the production renderer.
+  string renderer_state = 7;
+  string renderer_detail = 8;
+  repeated string supported_hooks = 9;
+  repeated string blockers = 10;
+  repeated EbpfAttachment attachments = 11;
+  repeated EbpfArtifact artifacts = 12;
+  string evidence_collected_at = 13;
+  string evidence_scope = 14;
+}
+
+message EbpfProbe {
+  string name = 1;
+  string key = 2;
+  string state = 3;
+  string detail = 4;
+}
+
+message EbpfAttachment {
+  string interface = 1;
+  string hook = 2;
+  string state = 3;
+  string program_id = 4;
+  string program_name = 5;
+  string pinned_path = 6;
+  string detail = 7;
+}
+
+message EbpfArtifact {
+  string name = 1;
+  string kind = 2;
+  string path = 3;
+  string sha256 = 4;
+  string state = 5;
+  string detail = 6;
+}
+
+message ManagementPlaneStatus {
+  bool tls_enabled = 1;
+  bool auth_enabled = 2;
+  bool rate_limit_enabled = 3;
+  uint32 rate_limit_requests_per_minute = 4;
+  uint32 rate_limit_burst = 5;
+  uint64 http_max_body_bytes = 6;
+  uint32 http_max_header_bytes = 7;
+  uint32 grpc_max_recv_bytes = 8;
+  uint32 grpc_max_send_bytes = 9;
+  string http_read_header_timeout = 10;
+  string http_read_timeout = 11;
+  string http_write_timeout = 12;
+  string http_idle_timeout = 13;
+  repeated string trusted_proxy_cidrs = 14;
+  string rate_limit_client_identity = 15;
+}
+
+message HostResourceStatus {
+  string state = 1;
+  string detail = 2;
+  uint32 cpu_count = 3;
+  double load1 = 4;
+  double load5 = 5;
+  double load15 = 6;
+  double load1_per_cpu = 7;
+  uint64 memory_total_bytes = 8;
+  uint64 memory_available_bytes = 9;
+  double memory_used_percent = 10;
+  repeated HostInterfaceCounter interfaces = 11;
+}
+
+message HostInterfaceCounter {
+  string name = 1;
+  string state = 2;
+  string detail = 3;
+  uint64 rx_bytes = 4;
+  uint64 tx_bytes = 5;
+  uint64 rx_packets = 6;
+  uint64 tx_packets = 7;
+  uint64 rx_errors = 8;
+  uint64 tx_errors = 9;
+  uint64 rx_drops = 10;
+  uint64 tx_drops = 11;
+}
+
+message InspectionStatus {
+  // ready, disabled, degraded, failed-open, failed-closed, or unknown.
+  string state = 1;
+  string detail = 2;
+  bool ids_enabled = 3;
+  IdsMode ids_mode = 4;
+  IdsFailureBehavior failure_behavior = 5;
+  string inspection_state = 6;
+  string engine_name = 7;
+  string engine_mode = 8;
+  string engine_state = 9;
+  bool engine_required = 10;
+  bool bypass_possible = 11;
+  string bypass_reason = 12;
+  string degraded_behavior = 13;
+}
+
+message StatusWarning {
+  string severity = 1;
+  string message = 2;
+  string action = 3;
 }

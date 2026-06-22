@@ -1,8 +1,6 @@
-// Package webui serves the read-first management UI (M5). It is a
-// static single page that consumes the REST gateway — strictly a client
-// of the canonical API, no server-side state. Policy *editing* in the
-// UI is a later step and must flow through candidate/commit like every
-// other client.
+// Package webui serves the embedded management UI. It is a static single page
+// that consumes the REST gateway as a client of the canonical API. Policy
+// editing flows through candidate/validate/commit like every other client.
 package webui
 
 import (

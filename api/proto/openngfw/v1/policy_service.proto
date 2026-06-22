@@ -28,9 +28,150 @@ service PolicyService {
   }
 
   // Validate checks the candidate (schema, references, renderability)
-  // without touching any engine.
+  // without touching any engine. If request.policy is supplied, that
+  // unstaged policy is validated instead; the stored candidate is unchanged.
   rpc Validate(ValidateRequest) returns (ValidateResponse) {
-    option (google.api.http) = {post: "/v1/candidate/validate"};
+    option (google.api.http) = {
+      post: "/v1/candidate/validate"
+      body: "*"
+    };
+  }
+
+  // GetCandidateStatus returns dirty-state, section-level change counts, and
+  // first-party impact metadata for the staged candidate. This is the read-only
+  // status source for GUI, CLI, and automation review surfaces.
+  rpc GetCandidateStatus(GetCandidateStatusRequest) returns (GetCandidateStatusResponse) {
+    option (google.api.http) = {get: "/v1/candidate/status"};
+  }
+
+  // ListNatRules returns source and destination NAT rules from the selected
+  // policy snapshot. This is read-only and never mutates candidate state.
+  rpc ListNatRules(ListNatRulesRequest) returns (ListNatRulesResponse) {
+    option (google.api.http) = {get: "/v1/policy/nat"};
+  }
+
+  // UpsertCandidateSourceNat adds or replaces one named source NAT rule in the
+  // candidate. Running policy is unchanged until the normal commit path.
+  rpc UpsertCandidateSourceNat(UpsertCandidateSourceNatRequest) returns (UpsertCandidateSourceNatResponse) {
+    option (google.api.http) = {
+      put: "/v1/candidate/nat/source/{rule.name}"
+      body: "*"
+      additional_bindings {
+        put: "/v1/candidate/nat/source/by-id/{id}"
+        body: "*"
+      }
+    };
+  }
+
+  // DeleteCandidateSourceNat removes one named source NAT rule from the
+  // candidate. Running policy is unchanged until the normal commit path.
+  rpc DeleteCandidateSourceNat(DeleteCandidateSourceNatRequest) returns (DeleteCandidateSourceNatResponse) {
+    option (google.api.http) = {
+      delete: "/v1/candidate/nat/source/{name}"
+      additional_bindings {delete: "/v1/candidate/nat/source/by-id/{id}"}
+    };
+  }
+
+  // UpsertCandidateDestinationNat adds or replaces one named destination NAT
+  // rule in the candidate. Running policy is unchanged until commit.
+  rpc UpsertCandidateDestinationNat(UpsertCandidateDestinationNatRequest) returns (UpsertCandidateDestinationNatResponse) {
+    option (google.api.http) = {
+      put: "/v1/candidate/nat/destination/{rule.name}"
+      body: "*"
+      additional_bindings {
+        put: "/v1/candidate/nat/destination/by-id/{id}"
+        body: "*"
+      }
+    };
+  }
+
+  // DeleteCandidateDestinationNat removes one named destination NAT rule from
+  // the candidate. Running policy is unchanged until commit.
+  rpc DeleteCandidateDestinationNat(DeleteCandidateDestinationNatRequest) returns (DeleteCandidateDestinationNatResponse) {
+    option (google.api.http) = {
+      delete: "/v1/candidate/nat/destination/{name}"
+      additional_bindings {delete: "/v1/candidate/nat/destination/by-id/{id}"}
+    };
+  }
+
+  // ListObjectReferences returns reverse references from the selected policy
+  // to named objects. This lets GUI, CLI, and automation prove the blast radius
+  // of changing or deleting an object through the public API.
+  rpc ListObjectReferences(ListObjectReferencesRequest) returns (ListObjectReferencesResponse) {
+    option (google.api.http) = {get: "/v1/policy/object-references"};
+  }
+
+  // RenamePolicyObject renames one reusable object in the candidate policy and
+  // rewrites every candidate reference to the new name. Running and historical
+  // policy snapshots are never mutated; operators must validate and commit the
+  // candidate through the normal lifecycle.
+  rpc RenamePolicyObject(RenamePolicyObjectRequest) returns (RenamePolicyObjectResponse) {
+    option (google.api.http) = {
+      post: "/v1/candidate/object-rename"
+      body: "*"
+    };
+  }
+
+  // DiffPolicy returns a stable typed line diff between two policy snapshots.
+  // It is the public API source for GUI, CLI, and automation change review.
+  rpc DiffPolicy(DiffPolicyRequest) returns (DiffPolicyResponse) {
+    option (google.api.http) = {get: "/v1/policy/diff"};
+  }
+
+  // CreateChangeApproval records an admin approval for the exact candidate
+  // revision under review. Commit consumes one matching approval before live
+  // engine apply so direct API clients cannot bypass governance.
+  rpc CreateChangeApproval(CreateChangeApprovalRequest) returns (CreateChangeApprovalResponse) {
+    option (google.api.http) = {
+      post: "/v1/change-approvals"
+      body: "*"
+    };
+  }
+
+  // ListChangeApprovals returns recent approval records for operator review.
+  rpc ListChangeApprovals(ListChangeApprovalsRequest) returns (ListChangeApprovalsResponse) {
+    option (google.api.http) = {get: "/v1/change-approvals"};
+  }
+
+  // CreateBackupSnapshot stores an appliance-owned policy snapshot in the
+  // server store. It is distinct from browser export; the snapshot remains
+  // available to server-side validation and restore preview APIs.
+  rpc CreateBackupSnapshot(CreateBackupSnapshotRequest) returns (CreateBackupSnapshotResponse) {
+    option (google.api.http) = {
+      post: "/v1/backup/snapshots"
+      body: "*"
+    };
+  }
+
+  // ListBackupSnapshots returns appliance-owned backup snapshot metadata,
+  // newest first.
+  rpc ListBackupSnapshots(ListBackupSnapshotsRequest) returns (ListBackupSnapshotsResponse) {
+    option (google.api.http) = {get: "/v1/backup/snapshots"};
+  }
+
+  // GetBackupSnapshot returns one appliance-owned backup snapshot and its
+  // policy payload for inspection/export.
+  rpc GetBackupSnapshot(GetBackupSnapshotRequest) returns (GetBackupSnapshotResponse) {
+    option (google.api.http) = {get: "/v1/backup/snapshots/{id}"};
+  }
+
+  // ValidateBackupSnapshot validates a stored snapshot without mutating
+  // candidate or running policy.
+  rpc ValidateBackupSnapshot(ValidateBackupSnapshotRequest) returns (ValidateBackupSnapshotResponse) {
+    option (google.api.http) = {
+      post: "/v1/backup/snapshots/{id}:validate"
+      body: "*"
+    };
+  }
+
+  // PreviewBackupSnapshotRestore builds a restore-job preview. When
+  // stage_candidate is true, the snapshot is staged as candidate only; live
+  // engines and running policy are unchanged until the normal commit path.
+  rpc PreviewBackupSnapshotRestore(PreviewBackupSnapshotRestoreRequest) returns (PreviewBackupSnapshotRestoreResponse) {
+    option (google.api.http) = {
+      post: "/v1/backup/snapshots/{id}:restore-preview"
+      body: "*"
+    };
   }
 
   // Commit validates the candidate, applies it to the engines
@@ -60,6 +201,11 @@ service PolicyService {
   rpc ListAuditEntries(ListAuditEntriesRequest) returns (ListAuditEntriesResponse) {
     option (google.api.http) = {get: "/v1/audit"};
   }
+
+  // VerifyAuditIntegrity validates the tamper-evident audit hash chain.
+  rpc VerifyAuditIntegrity(VerifyAuditIntegrityRequest) returns (VerifyAuditIntegrityResponse) {
+    option (google.api.http) = {get: "/v1/audit/verify"};
+  }
 }
 
 enum PolicySource {
@@ -67,6 +213,24 @@ enum PolicySource {
   POLICY_SOURCE_RUNNING = 1;
   POLICY_SOURCE_CANDIDATE = 2;
   POLICY_SOURCE_VERSION = 3;
+}
+
+enum PolicyObjectKind {
+  POLICY_OBJECT_KIND_UNSPECIFIED = 0;
+  POLICY_OBJECT_KIND_ZONE = 1;
+  POLICY_OBJECT_KIND_ADDRESS = 2;
+  POLICY_OBJECT_KIND_SERVICE = 3;
+  POLICY_OBJECT_KIND_APPLICATION = 4;
+  POLICY_OBJECT_KIND_SECURITY_PROFILE = 5;
+  POLICY_OBJECT_KIND_QOS_PROFILE = 6;
+  POLICY_OBJECT_KIND_ZONE_PROTECTION_PROFILE = 7;
+}
+
+enum PolicyDiffLineType {
+  POLICY_DIFF_LINE_TYPE_UNSPECIFIED = 0;
+  POLICY_DIFF_LINE_TYPE_CONTEXT = 1;
+  POLICY_DIFF_LINE_TYPE_ADD = 2;
+  POLICY_DIFF_LINE_TYPE_DELETE = 3;
 }
 
 message GetPolicyRequest {
@@ -83,33 +247,521 @@ message GetPolicyResponse {
 
 message SetCandidateRequest {
   Policy policy = 1;
+  // Optional optimistic-concurrency guard. When set, the server rejects the
+  // write unless it matches the current candidate_revision from
+  // GetCandidateStatusResponse.
+  string expected_candidate_revision = 2;
 }
 
-message SetCandidateResponse {}
+message SetCandidateResponse {
+  // Revision assigned to the stored candidate after the write succeeds.
+  string candidate_revision = 1;
+}
 
-message ValidateRequest {}
+message ValidateRequest {
+  // Optional unstaged policy to validate. Empty keeps the legacy behavior of
+  // validating the currently stored candidate.
+  Policy policy = 1;
+}
 
 message ValidateResponse {
   bool valid = 1;
   repeated string errors = 2;
+  // First-party impact summary comparing candidate to running policy.
+  // Clients should surface high-risk changes before commit.
+  ChangeImpact impact = 3;
+  // Structured validation, render, engine, and semantic findings. `errors`
+  // remains for compatibility; new clients should prefer findings.
+  repeated ValidationFinding findings = 4;
+  // Rendered engine artifact plan produced during validation. Empty when
+  // policy-model validation fails before render.
+  RenderPlan render_plan = 5;
+}
+
+enum ValidationSeverity {
+  VALIDATION_SEVERITY_UNSPECIFIED = 0;
+  VALIDATION_SEVERITY_ERROR = 1;
+  VALIDATION_SEVERITY_WARNING = 2;
+  VALIDATION_SEVERITY_INFO = 3;
+}
+
+enum ValidationStage {
+  VALIDATION_STAGE_UNSPECIFIED = 0;
+  VALIDATION_STAGE_POLICY_MODEL = 1;
+  VALIDATION_STAGE_RENDER = 2;
+  VALIDATION_STAGE_ENGINE_VALIDATE = 3;
+  VALIDATION_STAGE_IMPACT = 4;
+}
+
+message ValidationFinding {
+  ValidationSeverity severity = 1;
+  ValidationStage stage = 2;
+  // Stable machine-readable family, e.g. POLICY_VALIDATION_ERROR.
+  string code = 3;
+  // Operator-facing summary.
+  string message = 4;
+  // Optional policy path or generated artifact name when known.
+  string field_path = 5;
+  // Optional detail or remediation hint.
+  string detail = 6;
+}
+
+message RenderPlan {
+  repeated RenderArtifact artifacts = 1;
+  uint32 artifact_count = 2;
+  uint64 total_bytes = 3;
+}
+
+message RenderArtifact {
+  // Engine or subsystem name, matching the renderer/supervisor artifact key.
+  string engine = 1;
+  // Artifact key/name used by the local engine supervisor.
+  string name = 2;
+  uint64 size_bytes = 3;
+}
+
+message GetCandidateStatusRequest {}
+
+message GetCandidateStatusResponse {
+  // True when a candidate blob exists in the store, even if it currently
+  // matches running policy.
+  bool has_candidate = 1;
+  // True when candidate differs from the running policy.
+  bool dirty = 2;
+  // Current running policy version used as the comparison baseline.
+  uint64 running_version = 3;
+  // Total added + modified + removed items across section summaries.
+  uint32 change_count = 4;
+  // Section-level summaries suitable for candidate bars and automation.
+  repeated CandidateChangeSummary changes = 5;
+  // First-party impact summary comparing candidate to running policy.
+  ChangeImpact impact = 6;
+  // Optimistic-concurrency token for candidate writes. When no candidate blob
+  // exists, this is scoped to the running policy version so stale empty-state
+  // clients cannot overwrite a newer running baseline.
+  string candidate_revision = 7;
+}
+
+message ListNatRulesRequest {
+  // Target policy snapshot. Defaults to running when unspecified.
+  PolicySource source = 1;
+  // Version id; required when source == POLICY_SOURCE_VERSION.
+  uint64 version = 2;
+}
+
+message ListNatRulesResponse {
+  repeated SourceNat source_nat = 1;
+  repeated DestinationNat destination_nat = 2;
+  // Version the policy came from (0 for an uncommitted candidate).
+  uint64 version = 3;
+  // Human-readable source label for CLI/UI display.
+  string source = 4;
+}
+
+message UpsertCandidateSourceNatRequest {
+  SourceNat rule = 1;
+  // Required optimistic-concurrency guard from GetCandidateStatusResponse.
+  string expected_candidate_revision = 2;
+  // Operator audit comment. Either comment or reason must be supplied.
+  string comment = 3;
+  // Optional structured reason recorded alongside the audit comment.
+  string reason = 4;
+  // Optional durable rule ID resolver. When supplied, the server updates the
+  // existing source NAT rule with this ID and preserves that ID even when the
+  // operator renames the rule. Missing, duplicate, or unknown IDs are rejected;
+  // the server never falls back to name matching for by-ID requests.
+  string id = 5;
+}
+
+message UpsertCandidateDestinationNatRequest {
+  DestinationNat rule = 1;
+  // Required optimistic-concurrency guard from GetCandidateStatusResponse.
+  string expected_candidate_revision = 2;
+  // Operator audit comment. Either comment or reason must be supplied.
+  string comment = 3;
+  // Optional structured reason recorded alongside the audit comment.
+  string reason = 4;
+  // Optional durable rule ID resolver. When supplied, the server updates the
+  // existing destination NAT rule with this ID and preserves that ID even when
+  // the operator renames the rule. Missing, duplicate, or unknown IDs are
+  // rejected; the server never falls back to name matching for by-ID requests.
+  string id = 5;
+}
+
+message DeleteCandidateSourceNatRequest {
+  string name = 1;
+  // Required optimistic-concurrency guard from GetCandidateStatusResponse.
+  string expected_candidate_revision = 2;
+  // Operator audit comment. Either comment or reason must be supplied.
+  string comment = 3;
+  // Optional structured reason recorded alongside the audit comment.
+  string reason = 4;
+  // Optional durable rule ID resolver. When supplied, deletion is strictly by
+  // ID and never falls back to name matching.
+  string id = 5;
+}
+
+message DeleteCandidateDestinationNatRequest {
+  string name = 1;
+  // Required optimistic-concurrency guard from GetCandidateStatusResponse.
+  string expected_candidate_revision = 2;
+  // Operator audit comment. Either comment or reason must be supplied.
+  string comment = 3;
+  // Optional structured reason recorded alongside the audit comment.
+  string reason = 4;
+  // Optional durable rule ID resolver. When supplied, deletion is strictly by
+  // ID and never falls back to name matching.
+  string id = 5;
+}
+
+message UpsertCandidateSourceNatResponse {
+  // "added" or "updated".
+  string action = 1;
+  // "source".
+  string nat_type = 2;
+  SourceNat source_nat = 3;
+  // Validation result for the staged candidate that was stored.
+  ValidateResponse validation = 4;
+  // Candidate status after the mutation, including impact and new revision.
+  GetCandidateStatusResponse candidate_status = 5;
+  // Revision assigned to the stored candidate after the write succeeds.
+  string candidate_revision = 6;
+}
+
+message DeleteCandidateSourceNatResponse {
+  // "deleted".
+  string action = 1;
+  // "source".
+  string nat_type = 2;
+  SourceNat source_nat = 3;
+  // Validation result for the staged candidate that was stored.
+  ValidateResponse validation = 4;
+  // Candidate status after the mutation, including impact and new revision.
+  GetCandidateStatusResponse candidate_status = 5;
+  // Revision assigned to the stored candidate after the write succeeds.
+  string candidate_revision = 6;
+}
+
+message UpsertCandidateDestinationNatResponse {
+  // "added" or "updated".
+  string action = 1;
+  // "destination".
+  string nat_type = 2;
+  DestinationNat destination_nat = 3;
+  // Validation result for the staged candidate that was stored.
+  ValidateResponse validation = 4;
+  // Candidate status after the mutation, including impact and new revision.
+  GetCandidateStatusResponse candidate_status = 5;
+  // Revision assigned to the stored candidate after the write succeeds.
+  string candidate_revision = 6;
+}
+
+message DeleteCandidateDestinationNatResponse {
+  // "deleted".
+  string action = 1;
+  // "destination".
+  string nat_type = 2;
+  DestinationNat destination_nat = 3;
+  // Validation result for the staged candidate that was stored.
+  ValidateResponse validation = 4;
+  // Candidate status after the mutation, including impact and new revision.
+  GetCandidateStatusResponse candidate_status = 5;
+  // Revision assigned to the stored candidate after the write succeeds.
+  string candidate_revision = 6;
+}
+
+message CandidateChangeSummary {
+  string section = 1;
+  uint32 added = 2;
+  uint32 modified = 3;
+  uint32 removed = 4;
+}
+
+message ListObjectReferencesRequest {
+  // Policy snapshot to inspect. Defaults to running when unspecified.
+  PolicySource source = 1;
+  // Version id; required when source == POLICY_SOURCE_VERSION.
+  uint64 version = 2;
+  // Required object collection to scan.
+  PolicyObjectKind kind = 3;
+  // Optional object name. Empty returns references for every object of kind.
+  string name = 4;
+}
+
+message ListObjectReferencesResponse {
+  repeated PolicyObjectReference references = 1;
+  // Version the policy came from (0 for an uncommitted candidate).
+  uint64 version = 2;
+}
+
+message PolicyObjectReference {
+  // Referenced object name.
+  string object_name = 1;
+  // Human-readable policy area, e.g. "security rule" or "destination NAT".
+  string area = 2;
+  // Referencing item name, or a stable "#N" fallback.
+  string item = 3;
+  // Zero-based index of the referencing item in its policy list.
+  uint32 index = 4;
+  // Human-readable referenced field, e.g. "destination address".
+  string field = 5;
+  // Short operator-facing explanation of the policy coupling.
+  string detail = 6;
+  // Durable id of the referencing item when available. Security rules carry
+  // Rule.id here so API/UI callers can target by identity instead of position.
+  string item_id = 7;
+}
+
+message RenamePolicyObjectRequest {
+  // Required reusable object collection to mutate.
+  PolicyObjectKind kind = 1;
+  // Existing object name in the candidate policy.
+  string old_name = 2;
+  // Replacement object name. It must pass normal policy validation and must not
+  // already exist in the selected collection.
+  string new_name = 3;
+  // Optional operator reason recorded in the candidate audit log.
+  string comment = 4;
+}
+
+message RenamePolicyObjectResponse {
+  // Object kind that was renamed.
+  PolicyObjectKind kind = 1;
+  string old_name = 2;
+  string new_name = 3;
+  // True when the object definition name was changed.
+  bool object_renamed = 4;
+  // References that pointed to old_name before the mutation and were rewritten
+  // to new_name in the candidate policy.
+  repeated PolicyObjectReference rewritten_references = 5;
+  // Candidate workspace state after the mutation.
+  GetCandidateStatusResponse candidate_status = 6;
+}
+
+message DiffPolicyRequest {
+  // Baseline policy snapshot. Defaults to running when unspecified.
+  PolicySource from_source = 1;
+  // Version id; required when from_source == POLICY_SOURCE_VERSION.
+  uint64 from_version = 2;
+  // Target policy snapshot. Defaults to candidate when unspecified.
+  PolicySource to_source = 3;
+  // Version id; required when to_source == POLICY_SOURCE_VERSION.
+  uint64 to_version = 4;
+}
+
+message DiffPolicyResponse {
+  string from_label = 1;
+  string to_label = 2;
+  uint64 from_version = 3;
+  uint64 to_version = 4;
+  bool changed = 5;
+  repeated PolicyDiffLine lines = 6;
+}
+
+message PolicyDiffLine {
+  PolicyDiffLineType type = 1;
+  string text = 2;
+}
+
+enum ChangeRisk {
+  CHANGE_RISK_UNSPECIFIED = 0;
+  CHANGE_RISK_LOW = 1;
+  CHANGE_RISK_MEDIUM = 2;
+  CHANGE_RISK_HIGH = 3;
+}
+
+message ChangeImpact {
+  ChangeRisk risk = 1;
+  repeated ChangeImpactItem items = 2;
+}
+
+message ChangeImpactItem {
+  ChangeRisk risk = 1;
+  string title = 2;
+  string detail = 3;
+}
+
+message CreateChangeApprovalRequest {
+  // Required candidate_revision from GetCandidateStatusResponse. The approval
+  // is valid only for this exact candidate blob.
+  string candidate_revision = 1;
+  // Required approval rationale recorded in durable store and audit.
+  string comment = 2;
+  // Records that the approver reviewed high-risk impact. Commit still enforces
+  // its own ack_risk flag for the committing operator.
+  bool ack_risk = 3;
+  // Records that the approver reviewed runtime readiness warnings. Commit still
+  // enforces its own ack_runtime flag for the committing operator.
+  bool ack_runtime = 4;
+}
+
+message CreateChangeApprovalResponse {
+  ChangeApproval approval = 1;
+}
+
+message ListChangeApprovalsRequest {
+  // Optional candidate_revision filter.
+  string candidate_revision = 1;
+  // Include approvals already consumed by a commit intent.
+  bool include_consumed = 2;
+  // Maximum entries to return; 0 means server default (100).
+  uint32 limit = 3;
+}
+
+message ListChangeApprovalsResponse {
+  repeated ChangeApproval approvals = 1;
+}
+
+message ChangeApproval {
+  string id = 1;
+  string candidate_revision = 2;
+  string actor = 3;
+  string actor_role = 4;
+  string auth_source = 5;
+  string comment = 6;
+  bool ack_risk = 7;
+  bool ack_runtime = 8;
+  google.protobuf.Timestamp created_at = 9;
+  bool consumed = 10;
+  uint64 consumed_version = 11;
+  google.protobuf.Timestamp consumed_at = 12;
+  string consumed_by = 13;
+  string consumed_by_role = 14;
+  string consumed_by_auth_source = 15;
+}
+
+message CreateBackupSnapshotRequest {
+  // Snapshot source. Defaults to running. Candidate snapshots require an
+  // existing candidate. Version snapshots require version.
+  PolicySource source = 1;
+  // Required when source == POLICY_SOURCE_VERSION.
+  uint64 version = 2;
+  // Optional audit comment describing the recovery point.
+  string comment = 3;
+}
+
+message CreateBackupSnapshotResponse {
+  BackupSnapshot snapshot = 1;
+}
+
+message ListBackupSnapshotsRequest {
+  // Maximum entries to return; 0 means server default (100).
+  uint32 limit = 1;
+}
+
+message ListBackupSnapshotsResponse {
+  repeated BackupSnapshot snapshots = 1;
+}
+
+message GetBackupSnapshotRequest {
+  string id = 1;
+}
+
+message GetBackupSnapshotResponse {
+  BackupSnapshot snapshot = 1;
+  Policy policy = 2;
+}
+
+message ValidateBackupSnapshotRequest {
+  string id = 1;
+}
+
+message ValidateBackupSnapshotResponse {
+  BackupSnapshot snapshot = 1;
+  ValidateResponse validation = 2;
+}
+
+message PreviewBackupSnapshotRestoreRequest {
+  string id = 1;
+  // Required when stage_candidate is true; recorded in the candidate audit log.
+  string comment = 2;
+  // If true, stage the snapshot into candidate after validation succeeds.
+  // This never applies engines or changes running policy.
+  bool stage_candidate = 3;
+  // Optional optimistic-concurrency guard for the candidate workspace.
+  string expected_candidate_revision = 4;
+}
+
+message PreviewBackupSnapshotRestoreResponse {
+  string job_id = 1;
+  BackupSnapshot snapshot = 2;
+  ValidateResponse validation = 3;
+  DiffPolicyResponse diff = 4;
+  bool staged_candidate = 5;
+  GetCandidateStatusResponse candidate_status = 6;
+  string detail = 7;
+}
+
+message BackupSnapshot {
+  string id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  string actor = 3;
+  string actor_role = 4;
+  string auth_source = 5;
+  string comment = 6;
+  string source = 7;
+  uint64 source_version = 8;
+  uint64 running_version = 9;
+  string candidate_revision = 10;
+  string policy_sha256 = 11;
+  uint64 policy_size_bytes = 12;
 }
 
 message CommitRequest {
+  // Required audit comment explaining why this live policy change is being
+  // applied.
   string comment = 1;
+  // Required when validation reports CHANGE_RISK_HIGH impact. This is enforced
+  // by the PolicyService so direct API clients cannot bypass commit review.
+  bool ack_risk = 2;
+  // Required when the server reports runtime readiness warnings or production
+  // blockers before commit. This is enforced by the PolicyService when runtime
+  // readiness checks are configured, so direct API clients cannot bypass the
+  // same review required by the CLI and WebUI.
+  bool ack_runtime = 3;
+  // Required approval record id. The approval must be unconsumed and bound to
+  // the current candidate_revision.
+  string approval_id = 4;
+  // Required for authenticated callers because commit activates live policy.
+  string step_up_token = 5;
+  // Candidate revision/hash that the operator reviewed in validation, diff,
+  // runtime-readiness, and approval context before pressing commit. The server
+  // rejects commit when the shared candidate changed after that review.
+  string reviewed_candidate_revision = 6;
 }
 
 message CommitResponse {
   uint64 version = 1;
+  // Running version before this commit.
+  uint64 previous_version = 2;
+  // Metadata for the newly activated version, including artifact and LKG state.
+  VersionInfo version_info = 3;
 }
 
 message RollbackRequest {
   // Version to restore.
   uint64 version = 1;
+  // Required audit comment explaining why this historical policy is being
+  // re-applied.
+  string comment = 2;
+  // Required when rollback validation reports CHANGE_RISK_HIGH impact. This is
+  // enforced by the PolicyService so direct API clients cannot bypass review.
+  bool ack_risk = 3;
+  // Required when the server reports runtime readiness warnings or production
+  // blockers before rollback. This is enforced by the PolicyService when
+  // runtime readiness checks are configured.
+  bool ack_runtime = 4;
+  // Required for authenticated callers because rollback activates live policy.
+  string step_up_token = 5;
 }
 
 message RollbackResponse {
   // New version created by the rollback commit.
   uint64 version = 1;
+  // Running version before this rollback commit.
+  uint64 previous_version = 2;
+  // Metadata for the newly activated rollback version.
+  VersionInfo version_info = 3;
 }
 
 message ListVersionsRequest {
@@ -126,14 +778,62 @@ message VersionInfo {
   google.protobuf.Timestamp created_at = 2;
   string actor = 3;
   string comment = 4;
+  string actor_role = 5;
+  string auth_source = 6;
+  // commit, rollback, or bootstrap for store-only seed versions.
+  string action = 7;
+  // prepared, active, apply_failed, activation_failed, or unknown.
+  string state = 8;
+  // Stable SHA-256 over the ordered artifact digests in this version.
+  string artifact_set_sha256 = 9;
+  // Per-engine rendered artifacts that were validated before apply.
+  repeated VersionArtifact artifacts = 10;
+  // True when this version is the store's current last-known-good pointer.
+  bool last_known_good = 11;
+  google.protobuf.Timestamp activated_at = 12;
+  // Operator-visible recovery detail for prepared or failed versions.
+  string state_detail = 13;
+  // Historical source version for rollback-created versions.
+  uint64 source_version = 14;
+}
+
+message VersionArtifact {
+  string engine = 1;
+  string name = 2;
+  uint64 size_bytes = 3;
+  string sha256 = 4;
 }
 
 message ListAuditEntriesRequest {
+  // Maximum entries to return; 0 means server default (100).
   uint32 limit = 1;
+  // Case-insensitive substring filter on actor name.
+  string actor = 2;
+  // Exact audit action filter, e.g. "commit" or "rollback-failed".
+  string action = 3;
+  // Version created by an audit action, if any.
+  uint64 version = 4;
+  // Include entries at or after this timestamp.
+  google.protobuf.Timestamp since = 5;
+  // Include entries at or before this timestamp.
+  google.protobuf.Timestamp until = 6;
+  // Case-insensitive text search across actor, role, auth source, action,
+  // detail, and version.
+  string query = 7;
 }
 
 message ListAuditEntriesResponse {
   repeated AuditEntry entries = 1;
+}
+
+message VerifyAuditIntegrityRequest {}
+
+message VerifyAuditIntegrityResponse {
+  bool ok = 1;
+  string detail = 2;
+  uint32 entry_count = 3;
+  string latest_entry_hash = 4;
+  google.protobuf.Timestamp checked_at = 5;
 }
 
 message AuditEntry {
@@ -145,4 +845,10 @@ message AuditEntry {
   string detail = 5;
   // Version created by this action, if any.
   uint64 version = 6;
+  string actor_role = 7;
+  string auth_source = 8;
+  // Previous entry hash in the tamper-evident audit chain. Empty for genesis.
+  string previous_hash = 9;
+  // SHA-256 hash of this stable audit entry payload.
+  string entry_hash = 10;
 }

@@ -16,6 +16,16 @@ plugins:
   - local: protoc-gen-grpc-gateway
     out: api/gen
     opt: paths=source_relative
+  - local: protoc-gen-openapiv2
+    out: api/gen/openapi
+    opt:
+      - allow_merge=true
+      - merge_file_name=api-spec
+      - output_format=yaml
+      - openapi_configuration=api/openapi.yaml
+      - json_names_for_fields=true
+      - openapi_naming_strategy=fqn
+      - preserve_rpc_order=true
 inputs:
   - directory: api/proto
     exclude_paths:

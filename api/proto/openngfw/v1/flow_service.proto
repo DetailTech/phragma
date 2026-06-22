@@ -1,6 +1,5 @@
-// FlowService surfaces recent flows with app/protocol labels (M4
-// visibility). Labels come from the integrated inspection engine's
-// app-layer classification in the EVE stream.
+// FlowService surfaces recent flows with OpenNGFW App-ID labels plus the
+// engine-native app/protocol signal used as evidence.
 
 syntax = "proto3";
 
@@ -16,15 +15,114 @@ service FlowService {
   rpc ListFlows(ListFlowsRequest) returns (ListFlowsResponse) {
     option (google.api.http) = {get: "/v1/flows"};
   }
+
+  // ListSessions returns live conntrack sessions from the active Linux
+  // dataplane. This is current state, not historical telemetry.
+  rpc ListSessions(ListSessionsRequest) returns (ListSessionsResponse) {
+    option (google.api.http) = {get: "/v1/sessions"};
+  }
 }
 
 message ListFlowsRequest {
   // Maximum flows to return; 0 means server default (100).
   uint32 limit = 1;
+  // Exact source IP filter.
+  string src_ip = 2;
+  // Exact destination IP filter.
+  string dest_ip = 3;
+  // Exact IP filter matching either endpoint.
+  string ip = 4;
+  // Exact L4 protocol filter, case-insensitive, e.g. TCP, UDP, ICMP.
+  string protocol = 5;
+  // App filter matching canonical App-ID, app name, app category, or engine
+  // app-protocol evidence.
+  string app = 6;
+  // Port filter matching either source or destination port.
+  uint32 port = 7;
+  // Include flows at or after this timestamp.
+  google.protobuf.Timestamp since = 8;
+  // Include flows at or before this timestamp.
+  google.protobuf.Timestamp until = 9;
+  // Case-insensitive text search across endpoints, protocol, app fields, and
+  // App-ID evidence.
+  string query = 10;
+  // Exact engine/telemetry flow identifier for correlating flows with alerts
+  // and troubleshooting handoffs.
+  string flow_id = 11;
+  // Opaque cursor from a previous response for high-volume browsing.
+  string page_cursor = 12;
 }
 
 message ListFlowsResponse {
   repeated Flow flows = 1;
+  // Running policy version at query time. This is response context, not proof
+  // that every historical event was generated under this version.
+  uint64 running_policy_version = 2;
+  // Human-readable provenance note for clients that display log context.
+  string policy_context = 3;
+  // Opaque cursor to continue browsing matching flows, empty when exhausted.
+  string next_cursor = 4;
+  // True when another page is available for the same filters.
+  bool has_more = 5;
+  // Count of matching records in the current recent-tail view.
+  uint32 total_matches = 6;
+}
+
+message ListSessionsRequest {
+  // Maximum sessions to return; 0 means server default (100).
+  uint32 limit = 1;
+  // Exact original source IP filter.
+  string src_ip = 2;
+  // Exact original destination IP filter.
+  string dest_ip = 3;
+  // Exact IP filter matching either original or reply endpoint.
+  string ip = 4;
+  // Exact L4 protocol filter, case-insensitive, e.g. TCP, UDP, ICMP.
+  string protocol = 5;
+  // Port filter matching either original or reply ports.
+  uint32 port = 6;
+  // Conntrack state filter, case-insensitive, e.g. ESTABLISHED.
+  string state = 7;
+  // Case-insensitive search across endpoints, protocol, state, and raw record.
+  string query = 8;
+  // Opaque cursor from a previous response for high-volume browsing.
+  string page_cursor = 9;
+}
+
+message ListSessionsResponse {
+  // ready, degraded, or unavailable.
+  string state = 1;
+  string detail = 2;
+  repeated ConntrackSession sessions = 3;
+  // Running policy version at query time. Sessions are live kernel state, so
+  // this identifies the active policy context for the current snapshot.
+  uint64 running_policy_version = 4;
+  string policy_context = 5;
+  // Opaque cursor to continue browsing the current live-session snapshot.
+  string next_cursor = 6;
+  // True when another page is available for the same filters.
+  bool has_more = 7;
+  // Count of matching sessions in the current conntrack snapshot.
+  uint32 total_matches = 8;
+}
+
+message ConntrackSession {
+  string family = 1;
+  string protocol = 2;
+  string state = 3;
+  uint32 timeout_seconds = 4;
+  string src_ip = 5;
+  uint32 src_port = 6;
+  string dest_ip = 7;
+  uint32 dest_port = 8;
+  string reply_src_ip = 9;
+  uint32 reply_src_port = 10;
+  string reply_dest_ip = 11;
+  uint32 reply_dest_port = 12;
+  uint64 packets = 13;
+  uint64 bytes = 14;
+  bool assured = 15;
+  string raw = 16;
 }
 
 message Flow {
@@ -34,9 +132,26 @@ message Flow {
   string dest_ip = 4;
   uint32 dest_port = 5;
   string protocol = 6;
-  // Application-layer protocol label (e.g. http, tls, dns, ssh).
+  // Engine-native application-layer protocol signal, for example Suricata's
+  // app_proto. This is evidence, not the canonical App-ID product label.
   string app_protocol = 7;
   uint64 bytes_to_server = 8;
   uint64 bytes_to_client = 9;
   uint64 packets = 10;
+  // Canonical OpenNGFW App-ID label such as web-browsing, ssl, dns, or ssh.
+  string app_id = 11;
+  // Human-readable App-ID name.
+  string app_name = 12;
+  // OpenNGFW application category such as network-service or remote-access.
+  string app_category = 13;
+  // Confidence score 0-100 derived from evidence quality.
+  uint32 app_confidence = 14;
+  // Evidence behind app_id, including engine signals and fallback heuristics.
+  repeated string app_evidence = 15;
+  // Exact policy version stamped on the event by the telemetry pipeline. Zero
+  // means the event source did not include policy provenance.
+  uint64 policy_version = 16;
+  bool policy_version_known = 17;
+  // Stable engine/telemetry flow identifier when the event source provides one.
+  string flow_id = 18;
 }

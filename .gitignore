@@ -1,5 +1,18 @@
 # Build output and locally installed tools
 /bin/
+node_modules/
+.gocache/
+.go-cache/
+.gomodcache/
+.gopath/
+.cache/
+.npm-cache/
+.playwright-browsers/
+.tmp/
+.review/
+.review-data*/
+.review-logs*/
+perf/results/
 
 # Test and coverage artifacts
 *.out

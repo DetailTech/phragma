@@ -1,5 +1,5 @@
 // Telemetry pipeline configuration (M2): Vector ships Suricata EVE JSON
-// and system logs to ClickHouse.
+// and optional operator-defined event exports.
 
 syntax = "proto3";
 
@@ -13,4 +13,24 @@ message Telemetry {
   string clickhouse_url = 2;
   // Target database; default "openngfw".
   string database = 3;
+  // Additional event export sinks rendered into Vector. These sinks carry
+  // parsed EVE events and are explicit policy because export behavior changes
+  // operational evidence handling.
+  repeated TelemetryExport exports = 4;
+}
+
+message TelemetryExport {
+  string name = 1;
+  bool enabled = 2;
+  TelemetryExportType type = 3;
+  // Type-specific destination. JSON file exports must live under
+  // /var/log/openngfw/exports/. JSON TCP/UDP exports must be host:port.
+  string target = 4;
+}
+
+enum TelemetryExportType {
+  TELEMETRY_EXPORT_TYPE_UNSPECIFIED = 0;
+  TELEMETRY_EXPORT_TYPE_JSON_FILE = 1;
+  TELEMETRY_EXPORT_TYPE_JSON_TCP = 2;
+  TELEMETRY_EXPORT_TYPE_JSON_UDP = 3;
 }

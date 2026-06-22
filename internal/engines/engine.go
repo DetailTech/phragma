@@ -61,6 +61,11 @@ func (s *Supervisor) Apply(ctx context.Context, next, prev map[string][]byte) er
 		}
 		if err := e.Apply(ctx, cfg); err != nil {
 			err = fmt.Errorf("engine %s: apply failed: %w", e.Name(), err)
+			if prevCfg, ok := prev[e.Name()]; ok {
+				if rerr := e.Apply(ctx, prevCfg); rerr != nil {
+					err = fmt.Errorf("%w; RESTORE FAILED for engine %s: %v", err, e.Name(), rerr)
+				}
+			}
 			for i := len(applied) - 1; i >= 0; i-- {
 				prevCfg, ok := prev[applied[i].Name()]
 				if !ok {

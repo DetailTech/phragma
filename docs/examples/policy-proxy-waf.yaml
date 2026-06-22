@@ -1,0 +1,54 @@
+# Bounded L7 proxy / WAF / API gateway policy surface.
+# This renders an Envoy/Coraza-style proxy plan artifact during validation.
+# It does not activate traffic redirection or store TLS private-key material.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: app
+    interfaces: [eth1]
+addresses:
+  - name: app-net
+    cidr: 10.42.0.0/24
+services:
+  - name: https
+    protocol: PROTOCOL_TCP
+    ports:
+      - { start: 443 }
+rules:
+  - name: wan-to-proxy
+    from_zones: [wan]
+    to_zones: [app]
+    services: [https]
+    action: ACTION_ALLOW
+    log: true
+proxy:
+  waf_policies:
+    - name: corp-waf
+      mode: WAF_MODE_BLOCK
+      request_body_limit_kb: 128
+      audit_logging: true
+      redact_request_body: true
+      rule_sets:
+        - name: crs
+          version: 4.0.0
+          source: owasp-crs
+          sha256: aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+  virtual_services:
+    - name: admin-api
+      enabled: true
+      hostnames: [admin.example.com]
+      listener:
+        bind_address: 0.0.0.0
+        port: 443
+        tls: true
+        tls_secret_ref: vault://openngfw/admin-api
+      routes:
+        - name: api
+          path_prefix: /api
+          waf_policy: corp-waf
+          require_mtls_to_backend: true
+          strip_prefix: false
+          backends:
+            - name: api-1
+              url: https://api.internal
+              weight: 100

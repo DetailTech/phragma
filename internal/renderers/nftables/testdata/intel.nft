@@ -17,6 +17,8 @@ table inet openngfw {
 
 	chain input {
 		type filter hook input priority filter; policy accept;
+		iifname "lo" accept
+		ct state established,related accept
 		ct state invalid drop
 	}
 
@@ -28,7 +30,7 @@ table inet openngfw {
 		ip daddr @intel4 log prefix "ngfw:intel-block: " counter drop comment "intel-block-dst"
 		ip6 saddr @intel6 log prefix "ngfw:intel-block: " counter drop comment "intel-block-src6"
 		ip6 daddr @intel6 log prefix "ngfw:intel-block: " counter drop comment "intel-block-dst6"
-		iifname "eth1" oifname "eth0" counter accept comment "rule:lan-to-wan"
+		iifname "eth1" oifname "eth0" counter accept comment "rule:lan-to-wan id=rule-lan-to-wan-a7feb9a32169"
 		counter comment "default-drop"
 	}
 }

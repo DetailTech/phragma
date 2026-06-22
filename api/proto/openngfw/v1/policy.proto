@@ -31,6 +31,26 @@ message Policy {
   Vpn vpn = 10;
   Intel intel = 11;
   Network network = 12;
+  HostInput host_input = 13;
+  // Custom OpenNGFW App-ID definitions. These enrich flow classification,
+  // evidence, and the v1 deny-rule port-hint enforcement path.
+  repeated Application applications = 14;
+  // Reusable security inspection intents attached to rules. These are
+  // declarative policy objects; renderer/runtime enforcement is feature-
+  // specific and must not silently perform TLS interception.
+  repeated SecurityProfile security_profiles = 15;
+  // Bounded L7 virtual-service, WAF, and API gateway intent. This policy
+  // section renders an Envoy/Coraza-style deployment plan for review and
+  // readiness workflows; it does not activate a traffic proxy by itself.
+  Proxy proxy = 16;
+  // Reusable traffic shaping intent attached to forwarding rules. The current
+  // Linux renderer emits deterministic plan-only posture; live tc/nft proof
+  // remains production hardening.
+  repeated QosProfile qos_profiles = 17;
+  // Reusable zone-protection intent attached to zones. The current Linux
+  // renderer emits deterministic plan-only posture; live DoS enforcement and
+  // scale proof remain production hardening.
+  repeated ZoneProtectionProfile zone_protection_profiles = 18;
 }
 
 // Zone groups interfaces into a security zone. Rules match on zone pairs.
@@ -38,6 +58,7 @@ message Zone {
   string name = 1;
   repeated string interfaces = 2;
   string description = 3;
+  string zone_protection_profile = 4;
 }
 
 // Address is a named IPv4/IPv6 prefix (host addresses use /32 or /128).
@@ -53,6 +74,29 @@ message Service {
   Protocol protocol = 2;
   repeated PortRange ports = 3;
   string description = 4;
+}
+
+// Application is a first-party App-ID definition owned by OpenNGFW policy.
+// Engine-native labels are evidence aliases, not the product model.
+message Application {
+  // Canonical App-ID value, e.g. "corp-admin".
+  string name = 1;
+  // Human-readable name shown in API, CLI, and UI.
+  string display_name = 2;
+  // OpenNGFW category, e.g. "business-app" or "remote-access".
+  string category = 3;
+  // Engine-native labels such as Suricata app_proto or future nDPI names.
+  repeated string engine_signals = 4;
+  // Low-confidence fallback hints used only when no engine signal is present.
+  repeated ApplicationPort ports = 5;
+  string description = 6;
+}
+
+// ApplicationPort is a protocol/port matcher for custom App-ID fallback.
+message ApplicationPort {
+  // Only TCP and UDP are valid for App-ID port hints.
+  Protocol protocol = 1;
+  repeated PortRange ports = 2;
 }
 
 enum Protocol {
@@ -84,6 +128,150 @@ message Rule {
   bool log = 8;
   bool disabled = 9;
   string description = 10;
+  // Application references match OpenNGFW App-ID objects. The current dataplane
+  // expands referenced TCP/UDP port hints in nftables for allow/drop path
+  // control, and IDS/IPS Prevent fail-closed can render supported Suricata
+  // app-layer allow/drop controls with source/destination/port metadata scope.
+  // True proxy-grade L7 allow semantics, zone-aware Suricata controls, and full
+  // application taxonomy breadth remain hardening/follow-on work.
+  repeated string applications = 11;
+  // Operator-defined rule tags used for grouping, ownership, compliance,
+  // lifecycle, and GUI/API filtering. Tags are policy metadata; they do not
+  // change dataplane match semantics.
+  repeated string tags = 12;
+  // Reusable inspection/profile intents. Profiles with blocking intent on
+  // allow rules require inline IPS fail-closed; TLS decryption, URL category
+  // databases, and file-inspection engines remain separate integrations.
+  repeated string security_profiles = 13;
+  // Durable server-normalized policy identity for API/UI targeting, audit
+  // correlation, compiler IR, and renderer metadata. Names remain
+  // operator-facing labels and may be changed; id is stable for the life of
+  // the logical forwarding rule. Legacy or imported rules without IDs are
+  // backfilled by candidate/commit/validation server paths.
+  string id = 14;
+  // Optional bounded User-ID and device-posture policy context. This context
+  // is part of the OpenNGFW rule match model and ExplainFlow simulation
+  // surface; it does not by itself configure live directory, group freshness,
+  // MDM, or step-up authentication integrations.
+  RuleMatchContext match_context = 15;
+  // Optional reusable QoS/shaping intent for matching traffic. The v1 runtime
+  // exposes this as plan-only metadata until tc/nft field proof is complete.
+  string qos_profile = 16;
+}
+
+// RuleMatchContext constrains a rule by identity and endpoint posture labels.
+// Values are canonical OpenNGFW labels, not live provider records. Empty lists
+// mean that dimension is not constrained; when a dimension is present, a flow
+// explanation must supply at least one matching value for that dimension.
+message RuleMatchContext {
+  repeated string users = 1;
+  repeated string groups = 2;
+  repeated string devices = 3;
+  repeated string posture_labels = 4;
+}
+
+// SecurityProfile describes layered inspection intent that may be attached to
+// forwarding rules. It is intentionally declarative: TLS interception and CA
+// lifecycle are not enabled by adding a profile alone.
+message SecurityProfile {
+  string name = 1;
+  string description = 2;
+  TlsInspectionMode tls_inspection = 3;
+  repeated string url_categories = 4;
+  DnsSecurityMode dns_security = 5;
+  FileSecurityMode file_security = 6;
+}
+
+// QosProfile declares bounded shaping intent for rule-matched traffic. It does
+// not by itself certify Linux tc enforcement, queue discipline selection, HA
+// synchronization, or telemetry SLAs.
+message QosProfile {
+  string name = 1;
+  string description = 2;
+  uint64 max_bandwidth_kbps = 3;
+  uint64 guaranteed_bandwidth_kbps = 4;
+  QosPriority priority = 5;
+  // DSCP value 0-63. The default 0 means no marking intent.
+  uint32 dscp_mark = 6;
+  // Token-bucket burst intent in KiB. The default 0 lets the future runtime
+  // derive a bounded value from rate and interface posture.
+  uint32 burst_kbytes = 7;
+}
+
+enum QosPriority {
+  QOS_PRIORITY_UNSPECIFIED = 0;
+  QOS_PRIORITY_LOW = 1;
+  QOS_PRIORITY_MEDIUM = 2;
+  QOS_PRIORITY_HIGH = 3;
+  QOS_PRIORITY_CRITICAL = 4;
+}
+
+// ZoneProtectionProfile declares coarse DoS protection intent for traffic
+// entering a zone. Enforcement is intentionally plan-only in this slice.
+message ZoneProtectionProfile {
+  string name = 1;
+  string description = 2;
+  bool enabled = 3;
+  uint64 syn_flood_pps = 4;
+  uint64 udp_flood_pps = 5;
+  uint64 icmp_flood_pps = 6;
+  uint64 max_concurrent_connections = 7;
+  ZoneProtectionAction action = 8;
+  bool audit_log = 9;
+}
+
+enum ZoneProtectionAction {
+  ZONE_PROTECTION_ACTION_UNSPECIFIED = 0;
+  ZONE_PROTECTION_ACTION_ALERT = 1;
+  ZONE_PROTECTION_ACTION_DROP = 2;
+}
+
+enum TlsInspectionMode {
+  TLS_INSPECTION_MODE_UNSPECIFIED = 0;
+  // Metadata-only TLS handling uses observable handshake/certificate/SNI
+  // signals when available; it does not decrypt payloads.
+  TLS_INSPECTION_MODE_METADATA_ONLY = 1;
+  // Decryption intent is review-only until a human-supervised TLS broker and
+  // certificate lifecycle are configured outside this policy object.
+  TLS_INSPECTION_MODE_DECRYPTION_REQUIRED = 2;
+  TLS_INSPECTION_MODE_BYPASS = 3;
+}
+
+enum DnsSecurityMode {
+  DNS_SECURITY_MODE_UNSPECIFIED = 0;
+  DNS_SECURITY_MODE_LOG_ONLY = 1;
+  DNS_SECURITY_MODE_BLOCK_MALICIOUS = 2;
+}
+
+enum FileSecurityMode {
+  FILE_SECURITY_MODE_UNSPECIFIED = 0;
+  FILE_SECURITY_MODE_LOG_ONLY = 1;
+  FILE_SECURITY_MODE_BLOCK_EXECUTABLES = 2;
+  FILE_SECURITY_MODE_BLOCK_HIGH_RISK = 3;
+}
+
+// HostInput controls traffic destined to the firewall appliance itself.
+// It is separate from zone-pair forwarding rules so management-plane
+// hardening cannot accidentally change transit traffic behavior.
+message HostInput {
+  // ACTION_UNSPECIFIED keeps the legacy default of ACTION_ALLOW. Production
+  // policies should set ACTION_DENY and add explicit allow rules.
+  Action default_action = 1;
+  repeated HostInputRule rules = 2;
+}
+
+message HostInputRule {
+  string name = 1;
+  repeated string from_zones = 2;
+  repeated string source_addresses = 3;
+  repeated string services = 4;
+  Action action = 5;
+  bool log = 6;
+  bool disabled = 7;
+  string description = 8;
+  // Durable host-input identity used for custody, targeting, and dataplane
+  // attribution. Names remain operator-facing labels and can change.
+  string id = 9;
 }
 
 enum Action {
@@ -111,6 +299,9 @@ message SourceNat {
   bool masquerade = 4;
   // Address reference used as the translated source (SNAT to a fixed IP).
   string translated_address = 5;
+  // Durable source-NAT identity used for custody, targeting, and dataplane
+  // attribution. Names remain operator-facing labels and can change.
+  string id = 6;
 }
 
 // DestinationNat rewrites the destination of traffic arriving in from_zone.
@@ -126,6 +317,9 @@ message DestinationNat {
   string translated_address = 5;
   // Optional port rewrite; 0 keeps the original port.
   uint32 translated_port = 6;
+  // Durable destination-NAT identity used for custody, targeting, and dataplane
+  // attribution. Names remain operator-facing labels and can change.
+  string id = 7;
 }
 
 message StaticRoute {
@@ -136,4 +330,68 @@ message StaticRoute {
   // Optional egress interface.
   string interface = 3;
   uint32 metric = 4;
+}
+
+// Proxy contains bounded L7 reverse-proxy intent. It is intentionally separate
+// from L3/L4 forwarding rules so operators can review listener, WAF, and
+// backend posture before any active proxy rollout exists.
+message Proxy {
+  repeated VirtualService virtual_services = 1;
+  repeated WafPolicy waf_policies = 2;
+}
+
+message VirtualService {
+  string name = 1;
+  bool enabled = 2;
+  repeated string hostnames = 3;
+  ProxyListener listener = 4;
+  repeated ProxyRoute routes = 5;
+  string description = 6;
+}
+
+message ProxyListener {
+  string bind_address = 1;
+  uint32 port = 2;
+  bool tls = 3;
+  // Secret reference only. Certificate/private-key material is never stored in
+  // policy; production key custody remains an external hardening control.
+  string tls_secret_ref = 4;
+}
+
+message ProxyRoute {
+  string name = 1;
+  string path_prefix = 2;
+  repeated ProxyBackend backends = 3;
+  string waf_policy = 4;
+  bool require_mtls_to_backend = 5;
+  bool strip_prefix = 6;
+}
+
+message ProxyBackend {
+  string name = 1;
+  string url = 2;
+  uint32 weight = 3;
+}
+
+message WafPolicy {
+  string name = 1;
+  WafMode mode = 2;
+  repeated WafRuleSet rule_sets = 3;
+  uint32 request_body_limit_kb = 4;
+  bool audit_logging = 5;
+  bool redact_request_body = 6;
+  string description = 7;
+}
+
+enum WafMode {
+  WAF_MODE_UNSPECIFIED = 0;
+  WAF_MODE_DETECT = 1;
+  WAF_MODE_BLOCK = 2;
+}
+
+message WafRuleSet {
+  string name = 1;
+  string version = 2;
+  string source = 3;
+  string sha256 = 4;
 }

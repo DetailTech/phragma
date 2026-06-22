@@ -1,0 +1,35 @@
+{
+  "schema_version": "phragma.perf.v1",
+  "generated_at": "2026-06-17T05:00:00Z",
+  "profile": "ids-prevent-large-flow",
+  "security_services": "suricata-prevent",
+  "inspection_state": "fully-inspected",
+  "target": { "ip": "10.0.2.20", "port": 5201 },
+  "duration_seconds": 60,
+  "parallel_streams": 4,
+  "tcp_bits_per_second": 1000000000,
+  "tcp_gbps": 1.0,
+  "tcp_retransmits": 7,
+  "inspection_evidence": {
+    "state": "ready",
+    "status_captured": true,
+    "inspection_state": "fully-inspected",
+    "engine_name": "suricata",
+    "engine_mode": "managed",
+    "engine_state": "active",
+    "failure_behavior": "fail-closed"
+  },
+  "host_tuning_evidence": {
+    "state": "ready",
+    "status_captured": true,
+    "profile": "throughput"
+  },
+  "conntrack_evidence": {
+    "state": "ready",
+    "status_captured": true,
+    "current_entries": 25,
+    "max_entries": 1048576,
+    "usage_percent": 0.002
+  },
+  "claim_scope": "cloud benchmark with profile context, policy, service, inspection, instance, and NIC details"
+}

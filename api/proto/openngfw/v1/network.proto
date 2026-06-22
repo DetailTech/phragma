@@ -27,6 +27,11 @@ message Network {
   // reassembled super-packets. Applies only in IDS detect mode; has a
   // forwarding-throughput cost on those interfaces.
   bool manage_nic_offloads = 4;
+  // Enable nftables flowtable fast path for established forwarded flows.
+  // This is a throughput optimization for L3/L4 forwarding-only paths.
+  // It is rejected when IDS/IPS is enabled because offloaded packets can
+  // bypass packet inspection.
+  bool enable_flow_offload = 5;
 }
 
 message InterfaceMtu {

@@ -13,8 +13,19 @@ enum IdsMode {
   // Passive detection: Suricata sniffs interfaces via AF_PACKET.
   IDS_MODE_DETECT = 1;
   // Inline prevention: forwarded traffic is queued to Suricata via
-  // NFQUEUE (fail-open: if Suricata is down, traffic bypasses).
+  // NFQUEUE. failure_behavior defines whether queue failure bypasses or
+  // blocks traffic.
   IDS_MODE_PREVENT = 2;
+}
+
+enum IdsFailureBehavior {
+  IDS_FAILURE_BEHAVIOR_UNSPECIFIED = 0;
+  // If Suricata/NFQUEUE is unavailable, bypass inspection and continue
+  // policy evaluation. This preserves availability but is a visible bypass.
+  IDS_FAILURE_BEHAVIOR_FAIL_OPEN = 1;
+  // If Suricata/NFQUEUE is unavailable, hold/drop queued traffic. This
+  // preserves inspection guarantees at the cost of availability.
+  IDS_FAILURE_BEHAVIOR_FAIL_CLOSED = 2;
 }
 
 message Ids {
@@ -29,4 +40,37 @@ message Ids {
   repeated string rule_files = 5;
   // NFQUEUE number for prevent mode (default 0).
   uint32 queue_num = 6;
+  // Required when mode == IDS_MODE_PREVENT.
+  IdsFailureBehavior failure_behavior = 7;
+  // OpenNGFW-owned false-positive controls. These compile to native
+  // engine suppressions, but the policy model remains stable if the
+  // matching engine changes.
+  repeated IdsException exceptions = 8;
+}
+
+// IdsException suppresses one noisy threat signature globally or for a
+// source/destination address object. signature_id is the current v1
+// engine key; threat_id preserves OpenNGFW Threat-ID metadata for audit,
+// UI, and future content-package mapping.
+message IdsException {
+  string name = 1;
+  bool disabled = 2;
+  int64 signature_id = 3;
+  string threat_id = 4;
+  // Optional Address object restricting suppression to source scope.
+  string source_address = 5;
+  // Optional Address object restricting suppression to destination scope.
+  string destination_address = 6;
+  string description = 7;
+  // Optional operator metadata for review ownership and CAB traceability.
+  string owner = 8;
+  string ticket_id = 9;
+  // ISO-8601 calendar date (YYYY-MM-DD) when this exception should be reviewed.
+  string review_date = 10;
+  // ISO-8601 calendar date (YYYY-MM-DD) after which this exception is stale.
+  string expires_at = 11;
+  // SHA-256 of the representative packet capture used to justify the exception.
+  string pcap_sha256 = 12;
+  // Package-local regression evidence reference, e.g. evidence/fp-regression.json.
+  string regression_ref = 13;
 }

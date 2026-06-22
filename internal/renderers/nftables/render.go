@@ -39,29 +39,47 @@ func Render(ir *compiler.IR) ([]byte, error) {
 		b.WriteString("\tset intel4 {\n\t\ttype ipv4_addr\n\t\tflags interval\n\t}\n\n")
 		b.WriteString("\tset intel6 {\n\t\ttype ipv6_addr\n\t\tflags interval\n\t}\n\n")
 	}
+	if ir.Network != nil && len(ir.Network.FlowOffloadDevices) > 0 {
+		fmt.Fprintf(&b, "\tflowtable fastpath {\n\t\thook ingress priority 0; devices = { %s };\n\t}\n\n", deviceSet(ir.Network.FlowOffloadDevices))
+	}
 
-	// Host-input hardening is deliberately out of M1 scope (the v1 use
-	// case filters *forwarded* traffic; a drop-by-default input chain
-	// would lock operators out of management). Tracked for the M5 self-
-	// zone work.
 	b.WriteString("\tchain input {\n")
-	b.WriteString("\t\ttype filter hook input priority filter; policy accept;\n")
+	fmt.Fprintf(&b, "\t\ttype filter hook input priority filter; policy %s;\n", inputDefaultPolicy(ir.HostInputDefault))
+	b.WriteString("\t\tiifname \"lo\" accept\n")
+	b.WriteString("\t\tct state established,related accept\n")
 	b.WriteString("\t\tct state invalid drop\n")
+	for _, r := range ir.HostInputRules {
+		lines, err := ruleLinesWithComment(r, "host-input")
+		if err != nil {
+			return nil, err
+		}
+		for _, l := range lines {
+			b.WriteString("\t\t" + l + "\n")
+		}
+	}
+	if ir.HostInputDefault == compiler.ActionDeny {
+		b.WriteString("\t\tcounter comment \"default-input-drop\"\n")
+	}
 	b.WriteString("\t}\n\n")
 
 	b.WriteString("\tchain forward {\n")
 	b.WriteString("\t\ttype filter hook forward priority filter; policy drop;\n")
 	// Inline IPS: every forwarded packet visits Suricata via NFQUEUE
 	// before policy evaluation (stream reassembly needs the whole flow).
-	// "bypass" fails open if Suricata is not consuming the queue.
+	// "bypass" is present only for explicit fail-open policy. With more
+	// than one queue we add "fanout" so the kernel hashes flows across the
+	// queue range (one Suricata worker per queue) for multi-core throughput.
 	if ir.IDs != nil && ir.IDs.Prevent {
-		fmt.Fprintf(&b, "\t\tcounter queue flags bypass to %d comment \"ips-inspect\"\n", ir.IDs.QueueNum)
+		b.WriteString("\t\t" + queueStatement(ir.IDs) + "\n")
 	}
 	// MSS clamp sits before the established accept so both SYN and the
 	// returning SYN-ACK are rewritten (mixed-MTU paths: jumbo inside,
 	// 1500 outside, tunnels).
 	if ir.Network != nil && ir.Network.ClampMSS {
 		b.WriteString("\t\ttcp flags syn tcp option maxseg size set rt mtu counter comment \"mss-clamp\"\n")
+	}
+	if ir.Network != nil && len(ir.Network.FlowOffloadDevices) > 0 {
+		b.WriteString("\t\tct state established,related counter flow add @fastpath accept comment \"flow-offload\"\n")
 	}
 	b.WriteString("\t\tct state established,related accept\n")
 	b.WriteString("\t\tct state invalid drop\n")
@@ -72,7 +90,10 @@ func Render(ir *compiler.IR) ([]byte, error) {
 		b.WriteString("\t\tip6 daddr @intel6 log prefix \"ngfw:intel-block: \" counter drop comment \"intel-block-dst6\"\n")
 	}
 	for _, r := range ir.Rules {
-		lines, err := ruleLines(r)
+		if r.AppIDOnly {
+			continue
+		}
+		lines, err := ruleLinesWithComment(r, "rule")
 		if err != nil {
 			return nil, err
 		}
@@ -109,6 +130,29 @@ func Render(ir *compiler.IR) ([]byte, error) {
 	return []byte(b.String()), nil
 }
 
+func queueStatement(ids *compiler.IDsIR) string {
+	flags := []string{}
+	if ids.FailOpen {
+		flags = append(flags, "bypass")
+	}
+	queue := fmt.Sprintf("%d", ids.QueueNum)
+	if ids.QueueCount > 1 {
+		flags = append(flags, "fanout")
+		queue = fmt.Sprintf("%d-%d", ids.QueueNum, ids.QueueNum+ids.QueueCount-1)
+	}
+	if len(flags) == 0 {
+		return fmt.Sprintf("counter queue to %s comment \"ips-inspect\"", queue)
+	}
+	return fmt.Sprintf("counter queue flags %s to %s comment \"ips-inspect\"", strings.Join(flags, ","), queue)
+}
+
+func inputDefaultPolicy(action compiler.RuleAction) string {
+	if action == compiler.ActionDeny {
+		return "drop"
+	}
+	return "accept"
+}
+
 // family selects which address-family variant of a rule line to emit.
 type family int
 
@@ -120,7 +164,7 @@ const (
 
 // ruleLines expands one IR rule into nft statements: one line per
 // (address family × service match) combination that can apply.
-func ruleLines(r compiler.RuleIR) ([]string, error) {
+func ruleLinesWithComment(r compiler.RuleIR, commentPrefix string) ([]string, error) {
 	src4, src6 := splitFamily(r.SrcPrefixes)
 	dst4, dst6 := splitFamily(r.DstPrefixes)
 
@@ -177,10 +221,28 @@ func ruleLines(r compiler.RuleIR) ([]string, error) {
 			if m := serviceMatch(svc, fam); m != "" {
 				parts = append(parts, m)
 			}
+			if r.InspectionRequired && r.Action == compiler.ActionAllow {
+				inspectParts := append([]string{}, parts...)
+				inspectParts = append(inspectParts, "counter", fmt.Sprintf("comment %q", "profile-inspection:"+r.Name))
+				lines = append(lines, strings.Join(inspectParts, " "))
+			}
 			if r.Log {
 				parts = append(parts, fmt.Sprintf("log prefix %q", "ngfw:"+r.Name+": "))
 			}
-			parts = append(parts, "counter", verdict(r.Action), fmt.Sprintf("comment %q", "rule:"+r.Name))
+			comment := commentWithID(commentPrefix, r.Name, r.ID)
+			if len(r.Applications) > 0 {
+				comment += " app-id=" + strings.Join(r.Applications, ",")
+				if len(r.AppIDSignals) > 0 {
+					comment += " l7-signal=suricata"
+				}
+				if !r.AppIDOnly {
+					comment += " appid-path=port-hints"
+				}
+			}
+			if r.InspectionRequired && r.Action == compiler.ActionAllow {
+				comment += " inspection=ips-fail-closed"
+			}
+			parts = append(parts, "counter", verdict(r.Action), fmt.Sprintf("comment %q", comment))
 			lines = append(lines, strings.Join(parts, " "))
 		}
 	}
@@ -222,6 +284,14 @@ func ifaceMatch(key string, ifaces []string) string {
 		}
 		return fmt.Sprintf("%s { %s }", key, strings.Join(quoted, ", "))
 	}
+}
+
+func deviceSet(ifaces []string) string {
+	quoted := make([]string, len(ifaces))
+	for i, ifc := range ifaces {
+		quoted[i] = fmt.Sprintf("%q", ifc)
+	}
+	return strings.Join(quoted, ", ")
 }
 
 func prefixSet(prefixes []netip.Prefix) string {
@@ -317,7 +387,7 @@ func dnatLine(d compiler.DNATIR) (string, error) {
 	if d.TranslateTo.Is6() {
 		toKw = "ip6"
 	}
-	parts = append(parts, "counter", fmt.Sprintf("dnat %s to %s", toKw, target), fmt.Sprintf("comment %q", "dnat:"+d.Name))
+	parts = append(parts, "counter", fmt.Sprintf("dnat %s to %s", toKw, target), fmt.Sprintf("comment %q", commentWithID("dnat", d.Name, d.ID)))
 	return strings.Join(parts, " "), nil
 }
 
@@ -343,6 +413,14 @@ func snatLine(s compiler.SNATIR) string {
 		}
 		parts = append(parts, fmt.Sprintf("snat %s to %s", toKw, s.TranslateTo))
 	}
-	parts = append(parts, fmt.Sprintf("comment %q", "snat:"+s.Name))
+	parts = append(parts, fmt.Sprintf("comment %q", commentWithID("snat", s.Name, s.ID)))
 	return strings.Join(parts, " ")
+}
+
+func commentWithID(prefix, name, id string) string {
+	comment := prefix + ":" + name
+	if id != "" {
+		comment += " id=" + id
+	}
+	return comment
 }

@@ -14,12 +14,39 @@ ExecStart=/usr/local/bin/controld \
   --users-file /etc/openngfw/users.yaml
 Restart=on-failure
 RestartSec=2
+UMask=0077
 
-# controld renders configs and supervises engines; it needs root for
-# nftables/netlink. Hardening that still permits that:
+# controld is the firewall control plane: it applies nftables, routes,
+# WireGuard, netdev tuning, and root-owned FRR/strongSwan engine drop-ins.
+# Keep it root-run for those operations, but narrow root's filesystem view and
+# inherited capabilities to the expected single-node appliance surface.
 NoNewPrivileges=yes
-ProtectHome=yes
 PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadWritePaths=/var/lib/openngfw /var/log/openngfw /etc/openngfw
+# Optional engine config trees vary by distro. They stay writable only when
+# present so dynamic routing and IPsec orchestration can update native drop-ins.
+ReadWritePaths=-/etc/frr -/etc/swanctl -/etc/strongswan/swanctl
+StateDirectory=openngfw
+StateDirectoryMode=0700
+LogsDirectory=openngfw
+LogsDirectoryMode=0700
+ConfigurationDirectory=openngfw
+ConfigurationDirectoryMode=0700
+
+# Kernel/network operations need NET_ADMIN; Suricata AF_PACKET/NFQUEUE needs
+# NET_RAW. DAC override is retained narrowly so root can update package-owned
+# engine files such as /etc/frr/frr.conf and read operator-owned key snippets.
+CapabilityBoundingSet=CAP_NET_ADMIN CAP_NET_RAW CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH
+AmbientCapabilities=CAP_NET_ADMIN CAP_NET_RAW CAP_DAC_OVERRIDE CAP_DAC_READ_SEARCH
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6 AF_NETLINK AF_PACKET
+LockPersonality=yes
+# MemoryDenyWriteExecute=yes can break Suricata deployments using Hyperscan/JIT
+# pattern engines. Keep it explicit and revisit when engines have separate units.
+MemoryDenyWriteExecute=no
+RestrictRealtime=yes
+SystemCallArchitectures=native
 
 [Install]
 WantedBy=multi-user.target

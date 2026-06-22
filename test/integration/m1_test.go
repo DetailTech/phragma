@@ -49,6 +49,23 @@ func run(t *testing.T, name string, args ...string) string {
 
 func runQuiet(name string, args ...string) { _ = exec.Command(name, args...).Run() }
 
+func netcatListenLoop(port int, payload string) string {
+	body := fmt.Sprintf("printf %s | nc -l -p %d", shellQuote(payload+"\n"), port)
+	if netcatIsNcat() {
+		return "while true; do " + body + "; done"
+	}
+	return "while true; do " + body + " -q 0; done"
+}
+
+func netcatIsNcat() bool {
+	out, _ := exec.Command("nc", "-h").CombinedOutput()
+	return strings.Contains(string(out), "Ncat ")
+}
+
+func shellQuote(value string) string {
+	return "'" + strings.ReplaceAll(value, "'", "'\"'\"'") + "'"
+}
+
 func requireRoot(t *testing.T) {
 	t.Helper()
 	if os.Geteuid() != 0 {
@@ -65,6 +82,8 @@ func requireRoot(t *testing.T) {
 }
 
 func teardown() {
+	untrustFirewalldInterface("cveth0")
+	untrustFirewalldInterface("sveth0")
 	runQuiet("ip", "netns", "del", clientNS)
 	runQuiet("ip", "netns", "del", serverNS)
 	runQuiet("ip", "link", "del", "cveth0")
@@ -101,6 +120,8 @@ func setupTopology(t *testing.T) {
 	run(t, "ip", "netns", "exec", serverNS, "ip", "route", "add", "default", "via", fwServer)
 
 	run(t, "sysctl", "-w", "net.ipv4.ip_forward=1")
+	trustFirewalldInterface("cveth0")
+	trustFirewalldInterface("sveth0")
 
 	// Docker hosts (GitHub runners included) set the legacy iptables
 	// FORWARD policy to DROP. Every netfilter hook must accept a
@@ -110,12 +131,32 @@ func setupTopology(t *testing.T) {
 	runQuiet("iptables", "-I", "FORWARD", "1", "-d", "10.100.0.0/16", "-j", "ACCEPT")
 }
 
+func trustFirewalldInterface(name string) {
+	if _, err := exec.LookPath("firewall-cmd"); err != nil {
+		return
+	}
+	if exec.Command("firewall-cmd", "--state").Run() != nil {
+		return
+	}
+	runQuiet("firewall-cmd", "--zone=trusted", "--add-interface="+name)
+}
+
+func untrustFirewalldInterface(name string) {
+	if _, err := exec.LookPath("firewall-cmd"); err != nil {
+		return
+	}
+	if exec.Command("firewall-cmd", "--state").Run() != nil {
+		return
+	}
+	runQuiet("firewall-cmd", "--zone=trusted", "--remove-interface="+name)
+}
+
 // startEchoServer runs a TCP listener on serverIP:8080 inside the server
 // namespace for the duration of the test.
 func startEchoServer(t *testing.T) {
 	t.Helper()
 	cmd := exec.Command("ip", "netns", "exec", serverNS,
-		"sh", "-c", "while true; do echo pong | nc -l -p 8080 -q 0; done")
+		"sh", "-c", netcatListenLoop(8080, "pong"))
 	if err := cmd.Start(); err != nil {
 		t.Fatal(err)
 	}
@@ -180,7 +221,7 @@ func mustCommit(t *testing.T, srv *apiserver.PolicyServer, p *openngfwv1.Policy,
 	if _, err := srv.SetCandidate(ctx, &openngfwv1.SetCandidateRequest{Policy: p}); err != nil {
 		t.Fatal(err)
 	}
-	resp, err := srv.Commit(ctx, &openngfwv1.CommitRequest{Comment: comment})
+	resp, err := srv.Commit(ctx, &openngfwv1.CommitRequest{Comment: comment, AckRisk: true})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -257,14 +298,14 @@ func TestM1EndToEnd(t *testing.T) {
 	}
 
 	// 6. Rollback to the empty policy blocks traffic again…
-	if _, err := srv.Rollback(ctx, &openngfwv1.RollbackRequest{Version: emptyVersion}); err != nil {
+	if _, err := srv.Rollback(ctx, &openngfwv1.RollbackRequest{Version: emptyVersion, Comment: "restore empty policy", AckRisk: true}); err != nil {
 		t.Fatal(err)
 	}
 	if tcpReachable(serverIP, 8080) {
 		t.Fatal("rollback to empty policy did not block traffic")
 	}
 	// …and rollback forward to the allow version restores it.
-	if _, err := srv.Rollback(ctx, &openngfwv1.RollbackRequest{Version: allowVersion}); err != nil {
+	if _, err := srv.Rollback(ctx, &openngfwv1.RollbackRequest{Version: allowVersion, Comment: "restore allow policy", AckRisk: true}); err != nil {
 		t.Fatal(err)
 	}
 	if !tcpReachable(serverIP, 8080) {

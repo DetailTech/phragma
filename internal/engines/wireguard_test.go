@@ -1,6 +1,7 @@
 package engines
 
 import (
+	"context"
 	"os"
 	"strings"
 	"testing"
@@ -60,6 +61,46 @@ func TestParseWireguardErrors(t *testing.T) {
 	}
 }
 
+func TestWireguardApplyRemovesStalePeers(t *testing.T) {
+	dir := t.TempDir()
+	var calls []string
+	w := &Wireguard{
+		StateDir: dir,
+		run: func(_ context.Context, name string, args ...string) error {
+			calls = append(calls, name+" "+strings.Join(args, " "))
+			return nil
+		},
+		output: func(_ context.Context, name string, args ...string) ([]byte, error) {
+			calls = append(calls, name+" "+strings.Join(args, " "))
+			if name == "wg" && strings.Join(args, " ") == "show wg0 peers" {
+				return []byte("stale-key=\npubkey1=\n"), nil
+			}
+			return nil, nil
+		},
+	}
+	artifact := `interface wg0
+address 10.99.0.1/24
+private-key-file /tmp/wg0.key
+peer pubkey1=
+  allowed-ips 10.99.0.2/32
+`
+	if err := w.Apply(context.Background(), []byte(artifact)); err != nil {
+		t.Fatal(err)
+	}
+	if !hasCall(calls, "wg show wg0 peers") {
+		t.Fatalf("calls = %v, want current peer inventory", calls)
+	}
+	if !hasCall(calls, "wg set wg0 peer stale-key= remove") {
+		t.Fatalf("calls = %v, want stale peer removal", calls)
+	}
+	if hasCall(calls, "wg set wg0 peer pubkey1= remove") {
+		t.Fatalf("calls = %v, retained peer was removed", calls)
+	}
+	if !hasCall(calls, "wg set wg0 private-key /tmp/wg0.key peer pubkey1= allowed-ips 10.99.0.2/32") {
+		t.Fatalf("calls = %v, want desired peer set", calls)
+	}
+}
+
 func TestFRRParseDaemons(t *testing.T) {
 	cfg := []byte(ModeFRRHeader("bgpd,ospfd") + "frr defaults traditional\n")
 	got := parseDaemons(cfg)
@@ -69,6 +110,15 @@ func TestFRRParseDaemons(t *testing.T) {
 	if parseDaemons([]byte(ModeFRRHeader("none"))) != nil {
 		t.Fatal("none must parse as no daemons")
 	}
+}
+
+func hasCall(calls []string, want string) bool {
+	for _, call := range calls {
+		if call == want {
+			return true
+		}
+	}
+	return false
 }
 
 // ModeFRRHeader builds an FRR marker line for tests.

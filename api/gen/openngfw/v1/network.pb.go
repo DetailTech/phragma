@@ -45,6 +45,11 @@ type Network struct {
 	// reassembled super-packets. Applies only in IDS detect mode; has a
 	// forwarding-throughput cost on those interfaces.
 	ManageNicOffloads bool `protobuf:"varint,4,opt,name=manage_nic_offloads,json=manageNicOffloads,proto3" json:"manage_nic_offloads,omitempty"`
+	// Enable nftables flowtable fast path for established forwarded flows.
+	// This is a throughput optimization for L3/L4 forwarding-only paths.
+	// It is rejected when IDS/IPS is enabled because offloaded packets can
+	// bypass packet inspection.
+	EnableFlowOffload bool `protobuf:"varint,5,opt,name=enable_flow_offload,json=enableFlowOffload,proto3" json:"enable_flow_offload,omitempty"`
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -107,6 +112,13 @@ func (x *Network) GetManageNicOffloads() bool {
 	return false
 }
 
+func (x *Network) GetEnableFlowOffload() bool {
+	if x != nil {
+		return x.EnableFlowOffload
+	}
+	return false
+}
+
 type InterfaceMtu struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Interface     string                 `protobuf:"bytes,1,opt,name=interface,proto3" json:"interface,omitempty"`
@@ -163,12 +175,13 @@ var File_openngfw_v1_network_proto protoreflect.FileDescriptor
 
 const file_openngfw_v1_network_proto_rawDesc = "" +
 	"\n" +
-	"\x19openngfw/v1/network.proto\x12\vopenngfw.v1\"\xb8\x01\n" +
+	"\x19openngfw/v1/network.proto\x12\vopenngfw.v1\"\xe8\x01\n" +
 	"\aNetwork\x12\x10\n" +
 	"\x03mtu\x18\x01 \x01(\rR\x03mtu\x12@\n" +
 	"\x0einterface_mtus\x18\x02 \x03(\v2\x19.openngfw.v1.InterfaceMtuR\rinterfaceMtus\x12)\n" +
 	"\x11clamp_mss_to_pmtu\x18\x03 \x01(\bR\x0eclampMssToPmtu\x12.\n" +
-	"\x13manage_nic_offloads\x18\x04 \x01(\bR\x11manageNicOffloads\">\n" +
+	"\x13manage_nic_offloads\x18\x04 \x01(\bR\x11manageNicOffloads\x12.\n" +
+	"\x13enable_flow_offload\x18\x05 \x01(\bR\x11enableFlowOffload\">\n" +
 	"\fInterfaceMtu\x12\x1c\n" +
 	"\tinterface\x18\x01 \x01(\tR\tinterface\x12\x10\n" +
 	"\x03mtu\x18\x02 \x01(\rR\x03mtuB\xab\x01\n" +

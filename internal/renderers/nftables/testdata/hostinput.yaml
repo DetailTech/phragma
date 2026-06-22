@@ -1,0 +1,34 @@
+# Host-input hardening: management traffic to the firewall is denied by
+# default, with explicit allow/reject rules for appliance-local services.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1]
+addresses:
+  - name: admin-net
+    cidr: 10.10.0.0/24
+services:
+  - name: ssh
+    protocol: PROTOCOL_TCP
+    ports:
+      - { start: 22 }
+  - name: https
+    protocol: PROTOCOL_TCP
+    ports:
+      - { start: 443 }
+  - name: ping
+    protocol: PROTOCOL_ICMP
+host_input:
+  default_action: ACTION_DENY
+  rules:
+    - name: allow-lan-management
+      from_zones: [lan]
+      source_addresses: [admin-net]
+      services: [ssh, https]
+      action: ACTION_ALLOW
+      log: true
+    - name: reject-wan-ping
+      from_zones: [wan]
+      services: [ping]
+      action: ACTION_REJECT

@@ -1,13 +1,33 @@
 # Exercises every M1 feature: multi-interface zones, v4+v6 addresses,
-# multi-port services, log/reject/deny actions, disabled rules, SNAT
-# (masquerade + static), DNAT with port rewrite, and static routes.
+# multi-port services, App-ID objects, User-ID/device-posture context labels,
+# log/reject/deny actions, disabled rules, SNAT (masquerade + static), DNAT
+# with port rewrite, and static routes.
 zones:
   - name: wan
     interfaces: [eth0]
+    zone_protection_profile: internet-edge
   - name: lan
     interfaces: [eth1, eth2]
   - name: dmz
     interfaces: [eth3]
+qos_profiles:
+  - name: business-critical
+    description: Plan-only shaping intent for important outbound application traffic.
+    max_bandwidth_kbps: 50000
+    guaranteed_bandwidth_kbps: 10000
+    priority: QOS_PRIORITY_HIGH
+    dscp_mark: 46
+    burst_kbytes: 1024
+zone_protection_profiles:
+  - name: internet-edge
+    description: Plan-only DoS posture for the public ingress zone.
+    enabled: true
+    syn_flood_pps: 20000
+    udp_flood_pps: 50000
+    icmp_flood_pps: 10000
+    max_concurrent_connections: 1000000
+    action: ZONE_PROTECTION_ACTION_ALERT
+    audit_log: true
 addresses:
   - name: lan-net
     cidr: 10.10.0.0/24
@@ -34,17 +54,55 @@ services:
       - { start: 53 }
   - name: ping
     protocol: PROTOCOL_ICMP
+  - name: ssh
+    protocol: PROTOCOL_TCP
+    ports:
+      - { start: 22 }
+applications:
+  - name: corp-admin
+    display_name: Corporate Admin
+    category: business-app
+    engine_signals: [corp-admin]
+    ports:
+      - protocol: PROTOCOL_TCP
+        ports:
+          - { start: 8443 }
+host_input:
+  default_action: ACTION_DENY
+  rules:
+    - name: allow-lan-ssh
+      from_zones: [lan]
+      source_addresses: [lan-net]
+      services: [ssh]
+      action: ACTION_ALLOW
+      log: true
 rules:
   - name: block-bad-host
+    tags: [incident-response, env:prod]
     from_zones: [any]
     to_zones: [any]
     source_addresses: [blocked-host]
     action: ACTION_DENY
     log: true
+  - name: block-corp-admin
+    tags: [app-id, owner:secops]
+    from_zones: [lan]
+    to_zones: [wan]
+    source_addresses: [lan-net]
+    applications: [corp-admin]
+    qos_profile: business-critical
+    action: ACTION_DENY
+    log: true
   - name: lan-to-wan
+    tags: [baseline, env:prod]
     from_zones: [lan]
     to_zones: [wan]
     source_addresses: [lan-net, lan-net-v6]
+    match_context:
+      users: [alice@example.com]
+      groups: [idp/secops]
+      devices: [laptop-123]
+      posture_labels: [posture:edr-healthy]
     action: ACTION_ALLOW
   - name: wan-to-web
     from_zones: [wan]

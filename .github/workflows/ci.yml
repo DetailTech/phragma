@@ -16,6 +16,9 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
       - name: Build
         run: make build
       - name: Test
@@ -30,6 +33,33 @@ jobs:
         run: |
           ./bin/controld --version
           ./bin/ngfwctl version
+      - name: Check 10-minute install smoke harness
+        run: make e2e-install-check
+
+  rootless-release-gate:
+    runs-on: ubuntu-latest
+    env:
+      RELEASE_NO_PERFORMANCE_CLAIMS: "1"
+      PLAYWRIGHT_VERSION: "1.61.0"
+      WEBUI_SMOKE_REQUIRE_BROWSER: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install WebUI browser smoke dependencies
+        env:
+          NPM_CONFIG_CACHE: .npm-cache
+          npm_config_audit: "false"
+          npm_config_fund: "false"
+        run: |
+          npm install --no-save --no-package-lock "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+      - name: Run rootless release gate
+        run: make release-check-rootless RELEASE_NO_PERFORMANCE_CLAIMS="${RELEASE_NO_PERFORMANCE_CLAIMS}"
 
   integration:
     runs-on: ubuntu-latest
@@ -39,7 +69,7 @@ jobs:
         with:
           go-version-file: go.mod
       - name: Install engines
-        run: sudo apt-get update -q && sudo apt-get install -y -q nftables suricata frr netcat-openbsd
+        run: sudo apt-get update -q && sudo apt-get install -y -q nftables conntrack suricata frr netcat-openbsd
       - name: Build integration test binary
         run: go test -c -tags integration -o /tmp/openngfw-itest ./test/integration
       - name: Run real-engine integration tests (root)

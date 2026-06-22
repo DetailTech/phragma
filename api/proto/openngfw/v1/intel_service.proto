@@ -1,4 +1,5 @@
-// IntelService exposes the feed-license registry and blocklist state.
+// IntelService exposes the feed-license registry, blocklist state, and
+// Phragma content package verification posture.
 
 syntax = "proto3";
 
@@ -16,6 +17,64 @@ service IntelService {
     option (google.api.http) = {get: "/v1/intel/feeds"};
   }
 
+  // ListContentPackages returns local App-ID, Threat-ID, and threat-intel
+  // content package verification posture.
+  rpc ListContentPackages(ListContentPackagesRequest) returns (ListContentPackagesResponse) {
+    option (google.api.http) = {get: "/v1/intel/content/packages"};
+  }
+
+  // GetContentEvidence returns one bounded package-local JSON evidence
+  // artifact referenced by the installed content package readiness metadata.
+  rpc GetContentEvidence(GetContentEvidenceRequest) returns (GetContentEvidenceResponse) {
+    option (google.api.http) = {get: "/v1/intel/content/packages/{kind}/evidence/{evidence_type}"};
+  }
+
+  // GetContentCorpus returns typed, package-local regression corpus rows from
+  // a verified evidence artifact. It is the structured API used by the GUI and
+  // CLI for corpus browsing instead of forcing clients to parse evidence JSON.
+  rpc GetContentCorpus(GetContentCorpusRequest) returns (GetContentCorpusResponse) {
+    option (google.api.http) = {get: "/v1/intel/content/packages/{kind}/corpus"};
+  }
+
+  // PreviewContentPackage verifies a server-local package directory from the
+  // configured content import root without promoting files or writing audit
+  // entries. It returns the same sanitized package posture used for installed
+  // package status so operators can review blockers before install.
+  rpc PreviewContentPackage(PreviewContentPackageRequest) returns (PreviewContentPackageResponse) {
+    option (google.api.http) = {
+      post: "/v1/intel/content/packages/{kind}/preview"
+      body: "*"
+    };
+  }
+
+  // CompareContentPackage verifies a server-local package directory and
+  // returns installed-vs-candidate package posture plus regression corpus diff
+  // evidence without promoting files or writing audit entries.
+  rpc CompareContentPackage(CompareContentPackageRequest) returns (CompareContentPackageResponse) {
+    option (google.api.http) = {
+      post: "/v1/intel/content/packages/{kind}/compare"
+      body: "*"
+    };
+  }
+
+  // InstallContentPackage verifies a server-local content package directory
+  // and promotes it into the appliance content store.
+  rpc InstallContentPackage(InstallContentPackageRequest) returns (InstallContentPackageResponse) {
+    option (google.api.http) = {
+      post: "/v1/intel/content/packages/{kind}/install"
+      body: "*"
+    };
+  }
+
+  // RollbackContentPackage restores the latest verified backup for a package
+  // kind after a prior install or rollback.
+  rpc RollbackContentPackage(RollbackContentPackageRequest) returns (RollbackContentPackageResponse) {
+    option (google.api.http) = {
+      post: "/v1/intel/content/packages/{kind}/rollback"
+      body: "*"
+    };
+  }
+
   // RefreshFeeds fetches enabled feeds now and reprograms the
   // blocklist sets.
   rpc RefreshFeeds(RefreshFeedsRequest) returns (RefreshFeedsResponse) {
@@ -27,6 +86,214 @@ message ListFeedsRequest {}
 
 message ListFeedsResponse {
   repeated FeedInfo feeds = 1;
+}
+
+message ListContentPackagesRequest {}
+
+message ListContentPackagesResponse {
+  repeated ContentPackageInfo packages = 1;
+}
+
+message GetContentEvidenceRequest {
+  string kind = 1;
+  string evidence_type = 2;
+}
+
+message GetContentEvidenceResponse {
+  string kind = 1;
+  string package_state = 2;
+  string package_version = 3;
+  string manifest_sha256 = 4;
+  ContentEvidenceRef evidence = 5;
+  // JSON evidence payload. The server only returns bounded, valid JSON from
+  // package-local evidence/*.json files whose sha256 matches the manifest ref.
+  string content_json = 6;
+  uint32 bytes = 7;
+}
+
+message GetContentCorpusRequest {
+  string kind = 1;
+  // Defaults to the kind-specific corpus evidence type:
+  // app-regression-corpus, pcap-regression-corpus, or parser-tests.
+  string evidence_type = 2;
+  string query = 3;
+  string verdict = 4;
+  // Optional row cap. Zero uses the server default.
+  uint32 limit = 5;
+}
+
+message GetContentCorpusResponse {
+  string kind = 1;
+  string package_state = 2;
+  string package_version = 3;
+  string manifest_sha256 = 4;
+  ContentEvidenceRef evidence = 5;
+  string evidence_type = 6;
+  string status = 7;
+  uint32 sample_count = 8;
+  uint32 failed_samples = 9;
+  repeated string verdicts = 10;
+  repeated ContentCorpusSample samples = 11;
+  string summary = 12;
+}
+
+message PreviewContentPackageRequest {
+  string kind = 1;
+  // Server-local package directory under the configured content import root.
+  // Relative paths are resolved inside that import root; this is not a browser
+  // upload or operator-workstation path.
+  string source_path = 2;
+}
+
+message PreviewContentPackageResponse {
+  ContentPackageInfo package = 1;
+  string detail = 2;
+}
+
+message CompareContentPackageRequest {
+  string kind = 1;
+  // Server-local package directory under the configured content import root.
+  string source_path = 2;
+  // Optional corpus evidence type to compare. Empty uses the kind-specific
+  // default corpus evidence type.
+  string evidence_type = 3;
+}
+
+message CompareContentPackageResponse {
+  ContentPackageInfo current_package = 1;
+  ContentPackageInfo preview_package = 2;
+  ContentCorpusDiff corpus_diff = 3;
+  string detail = 4;
+}
+
+message InstallContentPackageRequest {
+  string kind = 1;
+  // Server-local package directory under the configured content import root.
+  // Relative paths are resolved inside that import root; this is not a browser
+  // upload or operator-workstation path. The directory must contain
+  // manifest.json and all files referenced by it.
+  string source_path = 2;
+  // Required for authenticated callers because package promotion changes live
+  // detection/classification content.
+  string step_up_token = 3;
+}
+
+message RollbackContentPackageRequest {
+  string kind = 1;
+  // Required acknowledgement because rollback replaces the installed content
+  // package with the latest verified backup.
+  bool ack_rollback = 2;
+  // Required for authenticated callers because package rollback changes live
+  // detection/classification content.
+  string step_up_token = 3;
+}
+
+message InstallContentPackageResponse {
+  ContentPackageInfo package = 1;
+  bool rollback_created = 2;
+  string rollback_path = 3;
+  string detail = 4;
+}
+
+message RollbackContentPackageResponse {
+  ContentPackageInfo package = 1;
+  bool rollback_created = 2;
+  // Backup created from the package that was active immediately before
+  // rollback, when available.
+  string rollback_path = 3;
+  string detail = 4;
+  // Verified rollback backup selected and restored by this operation.
+  string restored_rollback_path = 5;
+}
+
+message ContentPackageInfo {
+  // Stable package kind, e.g. "app-id", "threat-id", "intel-feeds".
+  string kind = 1;
+  string name = 2;
+  // local-only, incomplete, invalid, or verified.
+  string state = 3;
+  string version = 4;
+  string source = 5;
+  google.protobuf.Timestamp installed_at = 6;
+  string manifest_path = 7;
+  string manifest_sha256 = 8;
+  // missing, unsupported, invalid, or verified.
+  string signature_status = 9;
+  // missing, passed, failed, or package-defined status.
+  string regression_status = 10;
+  string rollout_state = 11;
+  bool rollback_available = 12;
+  repeated ContentProvenance provenance = 13;
+  repeated string blockers = 14;
+  string detail = 15;
+  // Production content readiness declared by the signed package and verified
+  // against the package evidence files.
+  ContentReadinessInfo content_readiness = 16;
+}
+
+message ContentProvenance {
+  string name = 1;
+  string url = 2;
+  string license = 3;
+}
+
+message ContentReadinessInfo {
+  string scope = 1;
+  bool production_content = 2;
+  bool production_ready = 3;
+  // missing, demo-only, incomplete, or passed.
+  string evidence_status = 4;
+  repeated ContentEvidenceRef evidence = 5;
+  repeated string required_production_evidence = 6;
+  repeated string blockers = 7;
+  // Operator-facing summary that distinguishes production-ready content from
+  // verified demo/lab packages.
+  string readiness_label = 8;
+  string readiness_detail = 9;
+}
+
+message ContentEvidenceRef {
+  string type = 1;
+  string artifact = 2;
+  string sha256 = 3;
+  string generated_at = 4;
+}
+
+message ContentCorpusSample {
+  string id = 1;
+  string pcap_sha256 = 2;
+  string expected = 3;
+  string observed = 4;
+  string expected_app = 5;
+  string observed_app = 6;
+  string signature_id = 7;
+  string verdict = 8;
+  string detail = 9;
+}
+
+message ContentCorpusSampleDiff {
+  string id = 1;
+  // added, removed, or changed.
+  string change = 2;
+  ContentCorpusSample current = 3;
+  ContentCorpusSample preview = 4;
+}
+
+message ContentCorpusDiff {
+  string kind = 1;
+  string evidence_type = 2;
+  string current_package_version = 3;
+  string preview_package_version = 4;
+  uint32 current_sample_count = 5;
+  uint32 preview_sample_count = 6;
+  uint32 current_failed_samples = 7;
+  uint32 preview_failed_samples = 8;
+  uint32 added = 9;
+  uint32 removed = 10;
+  uint32 changed = 11;
+  int32 failed_delta = 12;
+  repeated ContentCorpusSampleDiff sample_diffs = 13;
+  string summary = 14;
 }
 
 message FeedInfo {

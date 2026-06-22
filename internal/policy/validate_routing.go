@@ -5,9 +5,16 @@ import (
 	"fmt"
 	"net"
 	"net/netip"
+	"path/filepath"
 	"strings"
+	"unicode"
 
 	openngfwv1 "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1"
+)
+
+var (
+	ipsecSecretRoots  = []string{"/etc/phragma/secrets", "/etc/openngfw/secrets"}
+	wireguardKeyRoots = []string{"/etc/phragma/keys", "/etc/openngfw/keys"}
 )
 
 func (v *validator) checkRouting(r *openngfwv1.Routing) {
@@ -29,6 +36,9 @@ func (v *validator) checkRouting(r *openngfwv1.Routing) {
 			}
 			if n.GetRemoteAsn() == 0 {
 				v.errf("bgp neighbor %q: remote_asn must be set", n.GetAddress())
+			}
+			if hasControl(n.GetDescription()) {
+				v.errf("bgp neighbor %q: description must not contain control characters", n.GetAddress())
 			}
 		}
 		v.checkCIDRList("bgp announce_networks", bgp.GetAnnounceNetworks())
@@ -70,20 +80,22 @@ func (v *validator) checkVPN(vpn *openngfwv1.Vpn) {
 		if t.GetRemoteAddress() == "" {
 			v.errf("%s: remote_address is required", ctx)
 		}
+		v.checkConfigToken(ctx, "local_address", t.GetLocalAddress(), false)
+		v.checkConfigToken(ctx, "remote_address", t.GetRemoteAddress(), true)
+		v.checkConfigToken(ctx, "ike_proposal", t.GetIkeProposal(), false)
+		v.checkConfigToken(ctx, "esp_proposal", t.GetEspProposal(), false)
 		if len(t.GetLocalSubnets()) == 0 || len(t.GetRemoteSubnets()) == 0 {
 			v.errf("%s: local_subnets and remote_subnets are required", ctx)
 		}
 		v.checkCIDRList(ctx+" local_subnets", t.GetLocalSubnets())
 		v.checkCIDRList(ctx+" remote_subnets", t.GetRemoteSubnets())
-		if t.GetPskFile() == "" || !strings.HasPrefix(t.GetPskFile(), "/") {
-			v.errf("%s: psk_file must be an absolute path to a swanctl secrets snippet", ctx)
-		}
+		v.checkManagedFilePath(ctx, "psk_file", t.GetPskFile(), ipsecSecretRoots)
 	}
 
 	seenIf := map[string]bool{}
 	for _, w := range vpn.GetWireguardInterfaces() {
 		name := w.GetName()
-		if name == "" || len(name) > 15 || strings.ContainsAny(name, " /\t") {
+		if name == "" || len(name) > 15 || strings.ContainsAny(name, "/") || hasSpaceOrControl(name) {
 			v.errf("wireguard interface %q: invalid interface name", name)
 			continue
 		}
@@ -99,9 +111,7 @@ func (v *validator) checkVPN(vpn *openngfwv1.Vpn) {
 		if w.GetListenPort() > 65535 {
 			v.errf("%s: listen_port out of range", ctx)
 		}
-		if w.GetPrivateKeyFile() == "" || !strings.HasPrefix(w.GetPrivateKeyFile(), "/") {
-			v.errf("%s: private_key_file must be an absolute path", ctx)
-		}
+		v.checkManagedFilePath(ctx, "private_key_file", w.GetPrivateKeyFile(), wireguardKeyRoots)
 		for _, p := range w.GetPeers() {
 			pctx := fmt.Sprintf("%s peer %q", ctx, p.GetName())
 			if raw, err := base64.StdEncoding.DecodeString(p.GetPublicKey()); err != nil || len(raw) != 32 {
@@ -112,6 +122,9 @@ func (v *validator) checkVPN(vpn *openngfwv1.Vpn) {
 			}
 			v.checkCIDRList(pctx+" allowed_ips", p.GetAllowedIps())
 			if ep := p.GetEndpoint(); ep != "" {
+				if !v.checkConfigToken(pctx, "endpoint", ep, false) {
+					continue
+				}
 				if _, _, err := net.SplitHostPort(ep); err != nil {
 					v.errf("%s: endpoint %q must be host:port", pctx, ep)
 				}
@@ -129,4 +142,66 @@ func (v *validator) checkCIDRList(ctx string, cidrs []string) {
 			v.errf("%s: invalid CIDR %q", ctx, c)
 		}
 	}
+}
+
+func (v *validator) checkConfigToken(ctx, field, value string, required bool) bool {
+	if value == "" {
+		if required {
+			v.errf("%s: %s is required", ctx, field)
+		}
+		return !required
+	}
+	if hasSpaceOrControl(value) || strings.ContainsAny(value, "{}\"'`#;") {
+		v.errf("%s: %s contains characters unsafe for rendered engine config", ctx, field)
+		return false
+	}
+	return true
+}
+
+//nolint:unparam // The boolean result is useful for callers that may need to short-circuit future checks.
+func (v *validator) checkManagedFilePath(ctx, field, value string, roots []string) bool {
+	if value == "" {
+		v.errf("%s: %s must reference an operator-provisioned file", ctx, field)
+		return false
+	}
+	if hasSpaceOrControl(value) {
+		v.errf("%s: %s must not contain whitespace or control characters", ctx, field)
+		return false
+	}
+	if !filepath.IsAbs(value) {
+		v.errf("%s: %s must be an absolute path", ctx, field)
+		return false
+	}
+	clean := filepath.Clean(value)
+	if clean != value || hasParentComponent(value) {
+		v.errf("%s: %s must be normalized and must not contain path traversal", ctx, field)
+		return false
+	}
+	for _, root := range roots {
+		root = filepath.Clean(root)
+		if strings.HasPrefix(clean, root+string(filepath.Separator)) && len(clean) > len(root)+1 {
+			return true
+		}
+	}
+	v.errf("%s: %s must be under %s", ctx, field, strings.Join(roots, " or "))
+	return false
+}
+
+func hasParentComponent(path string) bool {
+	for _, part := range strings.Split(path, "/") {
+		if part == ".." {
+			return true
+		}
+	}
+	return false
+}
+
+func hasControl(s string) bool {
+	return strings.ContainsFunc(s, unicode.IsControl)
+}
+
+func hasSpaceOrControl(s string) bool {
+	return strings.ContainsFunc(s, func(r rune) bool {
+		return unicode.IsSpace(r) || unicode.IsControl(r)
+	})
 }

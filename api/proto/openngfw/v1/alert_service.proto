@@ -1,6 +1,6 @@
-// AlertService surfaces IDS/IPS detections (M2). It reads the local EVE
-// stream; long-term storage and analytics live in ClickHouse via the
-// telemetry pipeline.
+// AlertService surfaces IDS/IPS detections as OpenNGFW Threat-ID events plus
+// the engine-native Suricata alert fields used as evidence. Long-term storage
+// and analytics live in ClickHouse via the telemetry pipeline.
 
 syntax = "proto3";
 
@@ -21,10 +21,51 @@ service AlertService {
 message ListAlertsRequest {
   // Maximum alerts to return; 0 means server default (100).
   uint32 limit = 1;
+  // Exact source IP filter.
+  string src_ip = 2;
+  // Exact destination IP filter.
+  string dest_ip = 3;
+  // Exact IP filter matching either endpoint.
+  string ip = 4;
+  // Exact L4 protocol filter, case-insensitive, e.g. TCP, UDP, ICMP.
+  string protocol = 5;
+  // Suricata action filter, e.g. allowed or blocked.
+  string action = 6;
+  // Engine severity filter, where 1 is highest.
+  uint32 severity = 7;
+  // OpenNGFW severity filter: critical, high, medium, low, or info.
+  string threat_severity = 8;
+  // Suricata signature ID filter.
+  int64 signature_id = 9;
+  // Port filter matching either source or destination port.
+  uint32 port = 10;
+  // Include alerts at or after this timestamp.
+  google.protobuf.Timestamp since = 11;
+  // Include alerts at or before this timestamp.
+  google.protobuf.Timestamp until = 12;
+  // Case-insensitive text search across endpoints, protocol, signature,
+  // categories, Threat-ID fields, and evidence.
+  string query = 13;
+  // Exact engine/telemetry flow identifier for correlating IDS/IPS detections
+  // with flow telemetry and troubleshooting handoffs.
+  string flow_id = 14;
+  // Opaque cursor from a previous response for high-volume browsing.
+  string page_cursor = 15;
 }
 
 message ListAlertsResponse {
   repeated Alert alerts = 1;
+  // Running policy version at query time. This is response context, not proof
+  // that every historical event was generated under this version.
+  uint64 running_policy_version = 2;
+  // Human-readable provenance note for clients that display log context.
+  string policy_context = 3;
+  // Opaque cursor to continue browsing matching alerts, empty when exhausted.
+  string next_cursor = 4;
+  // True when another page is available for the same filters.
+  bool has_more = 5;
+  // Count of matching records in the current recent-tail view.
+  uint32 total_matches = 6;
 }
 
 message Alert {
@@ -41,4 +82,22 @@ message Alert {
   string protocol = 10;
   // Suricata action: "allowed" (detected) or "blocked" (prevented).
   string action = 11;
+  // Canonical OpenNGFW Threat-ID for this normalized event.
+  string threat_id = 12;
+  // Human-readable OpenNGFW threat name.
+  string threat_name = 13;
+  // OpenNGFW threat taxonomy category.
+  string threat_category = 14;
+  // OpenNGFW severity label: critical, high, medium, low, or info.
+  string threat_severity = 15;
+  // Confidence score 0-100 derived from signature metadata and engine action.
+  uint32 threat_confidence = 16;
+  // Evidence behind the normalized Threat-ID event.
+  repeated string threat_evidence = 17;
+  // Exact policy version stamped on the event by the telemetry pipeline. Zero
+  // means the event source did not include policy provenance.
+  uint64 policy_version = 18;
+  bool policy_version_known = 19;
+  // Stable engine/telemetry flow identifier when the event source provides one.
+  string flow_id = 20;
 }

@@ -1,0 +1,291 @@
+// AppIdService surfaces first-party Phragma App-ID review queues.
+// Engine-native labels remain evidence; the canonical app taxonomy belongs to
+// Phragma policy and content.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "openngfw/v1/policy.proto";
+import "openngfw/v1/policy_service.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service AppIdService {
+  // ListAppIdObservations returns grouped unknown, low-confidence, and
+  // conflicting App-ID observations derived from recent flow telemetry.
+  rpc ListAppIdObservations(ListAppIdObservationsRequest) returns (ListAppIdObservationsResponse) {
+    option (google.api.http) = {get: "/v1/app-id/observations"};
+  }
+
+  // StageAppIdObservation promotes one current observation into the candidate
+  // policy. It never applies runtime state; the normal validate, diff, commit,
+  // and rollback workflow remains authoritative.
+  rpc StageAppIdObservation(StageAppIdObservationRequest) returns (StageAppIdObservationResponse) {
+    option (google.api.http) = {
+      post: "/v1/app-id/observations/{queue_id}:stage"
+      body: "*"
+    };
+  }
+
+  // StageAppIdRegressionSample records one reviewed observation as draft
+  // App-ID regression-corpus input. It does not install or sign content.
+  rpc StageAppIdRegressionSample(StageAppIdRegressionSampleRequest) returns (StageAppIdRegressionSampleResponse) {
+    option (google.api.http) = {
+      post: "/v1/app-id/observations/{queue_id}:stage-regression-sample"
+      body: "*"
+    };
+  }
+
+  // CompareAppIdReplay builds a read-only App-ID lab replay/comparison report
+  // from a current observation, submitted observation, or corpus sample. It
+  // does not stage policy, append corpus rows, or claim production App-ID
+  // enforcement breadth.
+  rpc CompareAppIdReplay(CompareAppIdReplayRequest) returns (CompareAppIdReplayResponse) {
+    option (google.api.http) = {
+      post: "/v1/app-id/replay:compare"
+      body: "*"
+    };
+  }
+}
+
+enum AppIdObservationKind {
+  APP_ID_OBSERVATION_KIND_UNSPECIFIED = 0;
+  APP_ID_OBSERVATION_KIND_UNKNOWN = 1;
+  APP_ID_OBSERVATION_KIND_LOW_CONFIDENCE = 2;
+  APP_ID_OBSERVATION_KIND_CONFLICTING_EVIDENCE = 3;
+}
+
+enum AppIdObservationStageMode {
+  APP_ID_OBSERVATION_STAGE_MODE_UNSPECIFIED = 0;
+  // Stage only the suggested or overridden Application object.
+  APP_ID_OBSERVATION_STAGE_MODE_DEFINE_ONLY = 1;
+  // Stage the Application object plus a top candidate deny rule using current
+  // TCP/UDP port-hint enforcement. Requires confirm_drop.
+  APP_ID_OBSERVATION_STAGE_MODE_DEFINE_AND_DROP = 2;
+}
+
+message ListAppIdObservationsRequest {
+  // Maximum observations to return; 0 means server default (100).
+  uint32 limit = 1;
+  // Maximum recent flows to scan; 0 means server default (1000).
+  uint32 flow_limit = 2;
+  // Confidence below this value is queued for review; 0 means default (70).
+  uint32 confidence_threshold = 3;
+  // Include flows at or after this timestamp.
+  google.protobuf.Timestamp since = 4;
+  // Include flows at or before this timestamp.
+  google.protobuf.Timestamp until = 5;
+  // Case-insensitive text search across observation, evidence, and suggestion fields.
+  string query = 6;
+  // Optional observation reason filter.
+  AppIdObservationKind kind = 7;
+  // Optional engine signal filter, case-insensitive.
+  string engine_signal = 8;
+  // Optional L4 protocol filter, case-insensitive, e.g. TCP or UDP.
+  string protocol = 9;
+  // Optional destination-port filter.
+  uint32 port = 10;
+  // Opaque cursor from a previous response for high-volume browsing.
+  string page_cursor = 11;
+}
+
+message ListAppIdObservationsResponse {
+  repeated AppIdObservation observations = 1;
+  // Running policy version at query time. This is response context, not proof
+  // that every historical event was generated under this version.
+  uint64 running_policy_version = 2;
+  // Human-readable provenance note for clients that display log context.
+  string policy_context = 3;
+  // Number of flow records scanned before grouping observations.
+  uint32 scanned_flows = 4;
+  // Effective low-confidence threshold used for this response.
+  uint32 confidence_threshold = 5;
+  // App-ID content package active at query time. This is response context, not
+  // proof that every historical event was generated under this package.
+  string app_id_package_version = 6;
+  string app_id_package_manifest_sha256 = 7;
+  // Opaque cursor to continue browsing matching observations, empty when exhausted.
+  string next_cursor = 8;
+  // True when another page is available for the same filters.
+  bool has_more = 9;
+  // Count of matching grouped observations for the current filters.
+  uint32 total_matches = 10;
+}
+
+message AppIdObservation {
+  string queue_id = 1;
+  AppIdObservationKind kind = 2;
+  string app_id = 3;
+  string app_name = 4;
+  string app_category = 5;
+  uint32 app_confidence = 6;
+  // Engine-native signal value, for example Suricata app_proto.
+  string engine_signal = 7;
+  // Source of the engine-native signal, for example suricata.app_proto.
+  string engine_signal_source = 8;
+  string protocol = 9;
+  uint32 dest_port = 10;
+  uint64 count = 11;
+  google.protobuf.Timestamp first_seen = 12;
+  google.protobuf.Timestamp last_seen = 13;
+  uint64 bytes = 14;
+  uint64 packets = 15;
+  string sample_flow_id = 16;
+  string sample_src_ip = 17;
+  string sample_dest_ip = 18;
+  repeated string app_evidence = 19;
+  // Candidate Application object suggested from the grouped evidence. Clients
+  // must still stage, validate, and commit it through the policy API.
+  Application suggested_application = 20;
+  // Source port from the newest representative sample flow.
+  uint32 sample_src_port = 21;
+}
+
+message StageAppIdObservationRequest {
+  // Queue id from ListAppIdObservations. The server re-derives the queue item
+  // from current recent flow telemetry before staging.
+  string queue_id = 1;
+  AppIdObservationStageMode mode = 2;
+  // Required operator reason for audit and commit review.
+  string reason = 3;
+  // Required when mode is DEFINE_AND_DROP.
+  bool confirm_drop = 4;
+  // Optional reviewed Application replacement. Empty uses the observation's
+  // suggested_application.
+  Application application_override = 5;
+  // Maximum recent flows to scan while re-deriving queue_id; 0 means server
+  // default (1000).
+  uint32 flow_limit = 6;
+  // Low-confidence threshold used while re-deriving queue_id; 0 means default
+  // (70).
+  uint32 confidence_threshold = 7;
+  google.protobuf.Timestamp since = 8;
+  google.protobuf.Timestamp until = 9;
+}
+
+message StageAppIdObservationResponse {
+  AppIdObservation observation = 1;
+  Application application = 2;
+  bool application_reused = 3;
+  // Present only when mode is DEFINE_AND_DROP.
+  Rule rule = 4;
+  GetCandidateStatusResponse candidate_status = 5;
+  ValidateResponse validation = 6;
+  DiffPolicyResponse diff = 7;
+}
+
+message StageAppIdRegressionSampleRequest {
+  // Queue id from ListAppIdObservations. The server re-derives the queue item
+  // from current recent flow telemetry before appending the draft sample.
+  string queue_id = 1;
+  // Required operator reason for audit and package-builder review.
+  string reason = 2;
+  // Required SHA-256 of the bounded packet capture that preserves this sample.
+  string pcap_sha256 = 3;
+  // Optional expected App-ID override. Empty uses suggested_application.name,
+  // observed app_id, or engine_signal in that order.
+  string expected_app = 4;
+  // Optional observed App-ID override. Empty uses app_id, app_name, or
+  // engine_signal in that order.
+  string observed_app = 5;
+  uint32 flow_limit = 6;
+  uint32 confidence_threshold = 7;
+  google.protobuf.Timestamp since = 8;
+  google.protobuf.Timestamp until = 9;
+}
+
+message AppIdRegressionSample {
+  string schema_version = 1;
+  string sample_id = 2;
+  string queue_id = 3;
+  AppIdObservationKind observation_kind = 4;
+  string expected_app = 5;
+  string observed_app = 6;
+  string engine_signal = 7;
+  string engine_signal_source = 8;
+  string protocol = 9;
+  uint32 dest_port = 10;
+  string sample_flow_id = 11;
+  string sample_src_ip = 12;
+  uint32 sample_src_port = 13;
+  string sample_dest_ip = 14;
+  uint32 app_confidence = 15;
+  repeated string app_evidence = 16;
+  string pcap_sha256 = 17;
+  string reason = 18;
+  google.protobuf.Timestamp created_at = 19;
+  string app_id_package_version = 20;
+  string app_id_package_manifest_sha256 = 21;
+}
+
+message StageAppIdRegressionSampleResponse {
+  AppIdObservation observation = 1;
+  AppIdRegressionSample sample = 2;
+  // Relative draft artifact path under the configured content directory.
+  string draft_artifact = 3;
+  uint32 sample_count = 4;
+  string app_id_package_version = 5;
+  string app_id_package_manifest_sha256 = 6;
+  string detail = 7;
+}
+
+enum AppIdReplayVerdict {
+  APP_ID_REPLAY_VERDICT_UNSPECIFIED = 0;
+  APP_ID_REPLAY_VERDICT_MATCH = 1;
+  APP_ID_REPLAY_VERDICT_MISMATCH = 2;
+  APP_ID_REPLAY_VERDICT_NEEDS_EXPECTED_APP = 3;
+  APP_ID_REPLAY_VERDICT_NEEDS_EVIDENCE = 4;
+}
+
+message CompareAppIdReplayRequest {
+  // Queue id from ListAppIdObservations. When set, the server re-derives the
+  // current observation before comparing.
+  string queue_id = 1;
+  // Optional submitted observation, useful for lab replay tools that already
+  // have a grouped observation payload.
+  AppIdObservation observation = 2;
+  // Optional submitted corpus sample. This is compared in memory and is not
+  // appended to any corpus artifact.
+  AppIdRegressionSample corpus_sample = 3;
+  // Optional expected App-ID override. Empty uses corpus_sample.expected_app,
+  // observation.suggested_application.name, observation.app_id, or engine
+  // signal in that order.
+  string expected_app = 4;
+  uint32 flow_limit = 5;
+  uint32 confidence_threshold = 6;
+  google.protobuf.Timestamp since = 7;
+  google.protobuf.Timestamp until = 8;
+}
+
+message CompareAppIdReplayResponse {
+  AppIdReplayReport report = 1;
+  string app_id_package_version = 2;
+  string app_id_package_manifest_sha256 = 3;
+  string policy_context = 4;
+  string detail = 5;
+}
+
+message AppIdReplayReport {
+  string report_id = 1;
+  string source = 2;
+  string queue_id = 3;
+  string sample_id = 4;
+  string corpus_artifact = 5;
+  string pcap_sha256 = 6;
+  string observed_app = 7;
+  string expected_app = 8;
+  uint32 confidence = 9;
+  AppIdReplayVerdict verdict = 10;
+  repeated string mismatch_reasons = 11;
+  repeated string bounded_evidence = 12;
+  string recommended_next_action = 13;
+  string sample_flow_id = 14;
+  string engine_signal = 15;
+  string engine_signal_source = 16;
+  string protocol = 17;
+  uint32 dest_port = 18;
+  string comparison_scope = 19;
+}

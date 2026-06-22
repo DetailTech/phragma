@@ -7,6 +7,8 @@ delete table inet openngfw
 table inet openngfw {
 	chain input {
 		type filter hook input priority filter; policy accept;
+		iifname "lo" accept
+		ct state established,related accept
 		ct state invalid drop
 	}
 

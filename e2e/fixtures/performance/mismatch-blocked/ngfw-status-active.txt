@@ -1,0 +1,7 @@
+policy dataplane:
+  inspection:      IPS prevent
+  inspection ready:ready
+  inspection eng:  suricata managed/active
+  fail behavior:   fail-closed
+  kernel tuning:  ready
+  state table:    ready 25/1048576 entries (0.002%)

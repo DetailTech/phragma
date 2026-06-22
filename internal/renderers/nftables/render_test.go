@@ -102,8 +102,236 @@ func TestGoldensPassNftCheck(t *testing.T) {
 				if strings.Contains(string(out), "queue") && strings.Contains(string(out), "No such file or directory") {
 					t.Skipf("kernel lacks NFQUEUE support; cannot kernel-validate %s here", g)
 				}
+				if strings.Contains(string(out), "flowtable") && strings.Contains(string(out), "No such file or directory") {
+					t.Skipf("host lacks fixture flowtable devices; cannot kernel-validate %s here", g)
+				}
 				t.Fatalf("nft -c rejected %s: %v\n%s", g, err, out)
 			}
 		})
 	}
+}
+
+func TestForwardQueueFanout(t *testing.T) {
+	base := &compiler.IR{
+		Zones: []compiler.ZoneIR{{Name: "lan", Interfaces: []string{"eth0"}}},
+		IDs:   &compiler.IDsIR{Prevent: true, FailOpen: true, QueueNum: 2},
+	}
+	// Single queue keeps the simple form.
+	base.IDs.QueueCount = 1
+	got, err := Render(base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(got), "queue flags bypass to 2 ") {
+		t.Errorf("single-queue form missing:\n%s", got)
+	}
+	// Multiple queues fan out across the range.
+	base.IDs.QueueCount = 4
+	got, err = Render(base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(string(got), "queue flags bypass,fanout to 2-5 ") {
+		t.Errorf("fanout range missing:\n%s", got)
+	}
+}
+
+func TestForwardQueueFailClosed(t *testing.T) {
+	base := &compiler.IR{
+		Zones: []compiler.ZoneIR{{Name: "lan", Interfaces: []string{"eth0"}}},
+		IDs:   &compiler.IDsIR{Prevent: true, FailOpen: false, QueueNum: 2},
+	}
+	base.IDs.QueueCount = 1
+	got, err := Render(base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(got), "bypass") {
+		t.Fatalf("fail-closed queue must not include bypass:\n%s", got)
+	}
+	if !strings.Contains(string(got), "queue to 2 ") {
+		t.Errorf("fail-closed single queue form missing:\n%s", got)
+	}
+
+	base.IDs.QueueCount = 4
+	got, err = Render(base)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(string(got), "bypass") {
+		t.Fatalf("fail-closed fanout must not include bypass:\n%s", got)
+	}
+	if !strings.Contains(string(got), "queue flags fanout to 2-5 ") {
+		t.Errorf("fail-closed fanout range missing:\n%s", got)
+	}
+}
+
+func TestApplicationDenyRuleRendersPortHintMatches(t *testing.T) {
+	ir := &compiler.IR{Rules: []compiler.RuleIR{{
+		ID:           "rule-appid-001",
+		Name:         "block-corp-admin",
+		Applications: []string{"corp-admin"},
+		Services: []compiler.ServiceMatch{
+			{Protocol: compiler.ProtoTCP, Ports: []compiler.PortRange{{Start: 8443, End: 8443}}},
+			{Protocol: compiler.ProtoUDP, Ports: []compiler.PortRange{{Start: 5353, End: 5353}}},
+		},
+		Action: compiler.ActionDeny,
+		Log:    true,
+	}}}
+	got, err := Render(ir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ruleset := string(got)
+	for _, want := range []string{
+		`tcp dport 8443 log prefix "ngfw:block-corp-admin: " counter drop comment "rule:block-corp-admin id=rule-appid-001 app-id=corp-admin appid-path=port-hints"`,
+		`udp dport 5353 log prefix "ngfw:block-corp-admin: " counter drop comment "rule:block-corp-admin id=rule-appid-001 app-id=corp-admin appid-path=port-hints"`,
+	} {
+		if !strings.Contains(ruleset, want) {
+			t.Fatalf("missing %q in ruleset:\n%s", want, ruleset)
+		}
+	}
+}
+
+func TestSignalOnlyAppIDDenyRuleDoesNotRenderNftablesDrop(t *testing.T) {
+	ir := &compiler.IR{
+		IDs: &compiler.IDsIR{Prevent: true, FailOpen: false, QueueNum: 0},
+		Rules: []compiler.RuleIR{{
+			Name:         "block-corp-admin",
+			Applications: []string{"corp-admin"},
+			AppIDSignals: []compiler.AppIDSignalIR{{
+				Application: "corp-admin",
+				Signals:     []string{"http"},
+			}},
+			AppIDOnly: true,
+			Action:    compiler.ActionDeny,
+			Log:       true,
+		}},
+		AppIDDrops: []compiler.AppIDDropIR{{
+			RuleName:     "block-corp-admin",
+			Application:  "corp-admin",
+			EngineSignal: "http",
+			SID:          9200001,
+		}},
+	}
+	got, err := Render(ir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ruleset := string(got)
+	for _, notWant := range []string{
+		`tcp dport`,
+		`udp dport`,
+		`comment "rule:block-corp-admin"`,
+		`ngfw:block-corp-admin: `,
+	} {
+		if strings.Contains(ruleset, notWant) {
+			t.Fatalf("signal-only App-ID deny must be enforced by Suricata, not nftables %q:\n%s", notWant, ruleset)
+		}
+	}
+	if !strings.Contains(ruleset, `counter queue to 0 comment "ips-inspect"`) {
+		t.Fatalf("inline IPS queue missing from signal-only App-ID ruleset:\n%s", ruleset)
+	}
+}
+
+func TestProfileRequiredAllowRuleRendersInspectionEvidence(t *testing.T) {
+	ir := &compiler.IR{
+		IDs: &compiler.IDsIR{Prevent: true, FailOpen: false, QueueNum: 0},
+		Rules: []compiler.RuleIR{{
+			Name:               "allow-inspected-web",
+			ID:                 "rule-inspect-001",
+			SecurityProfiles:   []string{"block-malicious-dns"},
+			InspectionRequired: true,
+			Services: []compiler.ServiceMatch{{
+				Protocol: compiler.ProtoTCP,
+				Ports:    []compiler.PortRange{{Start: 443, End: 443}},
+			}},
+			Action: compiler.ActionAllow,
+		}},
+	}
+	got, err := Render(ir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ruleset := string(got)
+	for _, want := range []string{
+		`counter queue to 0 comment "ips-inspect"`,
+		`tcp dport 443 counter comment "profile-inspection:allow-inspected-web"`,
+		`tcp dport 443 counter accept comment "rule:allow-inspected-web id=rule-inspect-001 inspection=ips-fail-closed"`,
+	} {
+		if !strings.Contains(ruleset, want) {
+			t.Fatalf("missing %q in ruleset:\n%s", want, ruleset)
+		}
+	}
+}
+
+func TestHostInputDefaultDeny(t *testing.T) {
+	ir := &compiler.IR{
+		HostInputDefault: compiler.ActionDeny,
+		HostInputRules: []compiler.RuleIR{{
+			Name:       "allow-ssh",
+			ID:         "host-input-allow-ssh-001",
+			FromIfaces: []string{"eth1"},
+			Services: []compiler.ServiceMatch{{
+				Protocol: compiler.ProtoTCP,
+				Ports:    []compiler.PortRange{{Start: 22, End: 22}},
+			}},
+			Action: compiler.ActionAllow,
+		}},
+	}
+	got, err := Render(ir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ruleset := string(got)
+	for _, want := range []string{
+		"type filter hook input priority filter; policy drop;",
+		"iifname \"lo\" accept",
+		"ct state established,related accept",
+		"iifname \"eth1\" tcp dport 22 counter accept comment \"host-input:allow-ssh id=host-input-allow-ssh-001\"",
+		"counter comment \"default-input-drop\"",
+	} {
+		if !strings.Contains(ruleset, want) {
+			t.Fatalf("missing %q in ruleset:\n%s", want, ruleset)
+		}
+	}
+}
+
+func TestNATCommentsIncludeDurableIDs(t *testing.T) {
+	ir := &compiler.IR{
+		SNAT: []compiler.SNATIR{{
+			ID:         "snat-lan-masq-001",
+			Name:       "lan-masq",
+			OutIfaces:  []string{"eth0"},
+			SrcPrefix:  ptrPrefix(netip.MustParsePrefix("10.10.0.0/24")),
+			Masquerade: true,
+		}},
+		DNAT: []compiler.DNATIR{{
+			ID:          "dnat-web-001",
+			Name:        "web",
+			InIfaces:    []string{"eth0"},
+			Protocol:    compiler.ProtoTCP,
+			Ports:       []compiler.PortRange{{Start: 443, End: 443}},
+			MatchDst:    netip.MustParseAddr("203.0.113.10"),
+			TranslateTo: netip.MustParseAddr("10.20.0.80"),
+			ToPort:      8443,
+		}},
+	}
+	got, err := Render(ir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ruleset := string(got)
+	for _, want := range []string{
+		`comment "snat:lan-masq id=snat-lan-masq-001"`,
+		`comment "dnat:web id=dnat-web-001"`,
+	} {
+		if !strings.Contains(ruleset, want) {
+			t.Fatalf("missing %q in ruleset:\n%s", want, ruleset)
+		}
+	}
+}
+
+func ptrPrefix(p netip.Prefix) *netip.Prefix {
+	return &p
 }

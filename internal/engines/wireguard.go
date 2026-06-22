@@ -19,6 +19,8 @@ const WireguardName = "wireguard"
 type Wireguard struct {
 	// StateDir holds the managed-interfaces state file.
 	StateDir string
+	run      func(context.Context, string, ...string) error
+	output   func(context.Context, string, ...string) ([]byte, error)
 }
 
 // Name implements Engine.
@@ -113,6 +115,20 @@ func (w *Wireguard) Validate(_ context.Context, config []byte) error {
 
 func (w *Wireguard) statePath() string { return filepath.Join(w.StateDir, "wireguard.state") }
 
+func (w *Wireguard) runCmd(ctx context.Context, name string, args ...string) error {
+	if w.run != nil {
+		return w.run(ctx, name, args...)
+	}
+	return runCmd(ctx, name, args...)
+}
+
+func (w *Wireguard) commandOutput(ctx context.Context, name string, args ...string) ([]byte, error) {
+	if w.output != nil {
+		return w.output(ctx, name, args...)
+	}
+	return exec.CommandContext(ctx, name, args...).CombinedOutput()
+}
+
 // Apply reconciles kernel interfaces with the artifact.
 func (w *Wireguard) Apply(ctx context.Context, config []byte) error {
 	ifaces, err := parseWireguard(config)
@@ -135,7 +151,7 @@ func (w *Wireguard) Apply(ctx context.Context, config []byte) error {
 	prev, _ := os.ReadFile(w.statePath())
 	for _, name := range lines(prev) {
 		if !current[name] {
-			_ = runCmd(ctx, "ip", "link", "del", name)
+			_ = w.runCmd(ctx, "ip", "link", "del", name)
 		}
 	}
 	names := make([]string, 0, len(ifaces))
@@ -147,8 +163,11 @@ func (w *Wireguard) Apply(ctx context.Context, config []byte) error {
 
 func (w *Wireguard) applyInterface(ctx context.Context, ifc wgIface) error {
 	// Idempotent create: adding an existing link fails, which is fine.
-	_ = exec.CommandContext(ctx, "ip", "link", "add", ifc.name, "type", "wireguard").Run()
-	if err := runCmd(ctx, "ip", "addr", "replace", ifc.address, "dev", ifc.name); err != nil {
+	_ = w.runCmd(ctx, "ip", "link", "add", ifc.name, "type", "wireguard")
+	if err := w.runCmd(ctx, "ip", "addr", "replace", ifc.address, "dev", ifc.name); err != nil {
+		return err
+	}
+	if err := w.removeStalePeers(ctx, ifc); err != nil {
 		return err
 	}
 
@@ -165,8 +184,44 @@ func (w *Wireguard) applyInterface(ctx context.Context, ifc wgIface) error {
 			args = append(args, "persistent-keepalive", p.keepalive)
 		}
 	}
-	if err := runCmd(ctx, "wg", args...); err != nil {
+	if err := w.runCmd(ctx, "wg", args...); err != nil {
 		return err
 	}
-	return runCmd(ctx, "ip", "link", "set", ifc.name, "up")
+	return w.runCmd(ctx, "ip", "link", "set", ifc.name, "up")
+}
+
+func (w *Wireguard) removeStalePeers(ctx context.Context, ifc wgIface) error {
+	existing, err := w.existingPeers(ctx, ifc.name)
+	if err != nil {
+		return err
+	}
+	desired := map[string]bool{}
+	for _, peer := range ifc.peers {
+		if peer.publicKey != "" {
+			desired[peer.publicKey] = true
+		}
+	}
+	for publicKey := range existing {
+		if desired[publicKey] {
+			continue
+		}
+		if err := w.runCmd(ctx, "wg", "set", ifc.name, "peer", publicKey, "remove"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (w *Wireguard) existingPeers(ctx context.Context, name string) (map[string]bool, error) {
+	raw, err := w.commandOutput(ctx, "wg", "show", name, "peers")
+	if err != nil {
+		return nil, fmt.Errorf("wg show %s peers: %w: %s", name, err, raw)
+	}
+	peers := map[string]bool{}
+	for _, publicKey := range lines(raw) {
+		if publicKey != "" {
+			peers[publicKey] = true
+		}
+	}
+	return peers, nil
 }

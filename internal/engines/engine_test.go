@@ -11,6 +11,7 @@ import (
 type fakeEngine struct {
 	name        string
 	failApply   bool
+	mutateFail  bool
 	failRestore bool
 	applied     []string
 }
@@ -19,6 +20,9 @@ func (f *fakeEngine) Name() string                           { return f.name }
 func (f *fakeEngine) Validate(context.Context, []byte) error { return nil }
 func (f *fakeEngine) Apply(_ context.Context, cfg []byte) error {
 	if f.failApply && string(cfg) != "prev" {
+		if f.mutateFail {
+			f.applied = append(f.applied, string(cfg))
+		}
 		return errors.New("boom")
 	}
 	if f.failRestore && string(cfg) == "prev" {
@@ -37,6 +41,25 @@ func TestSupervisorApplyHappyPath(t *testing.T) {
 	}
 	if len(a.applied) != 1 || len(b.applied) != 1 {
 		t.Fatalf("applied: a=%v b=%v", a.applied, b.applied)
+	}
+}
+
+func TestSupervisorRestoresFailedEngineThatPartiallyMutated(t *testing.T) {
+	a := &fakeEngine{name: "a"}
+	b := &fakeEngine{name: "b", failApply: true, mutateFail: true}
+	sup := NewSupervisor(a, b)
+	next := map[string][]byte{"a": []byte("new"), "b": []byte("new")}
+	prev := map[string][]byte{"a": []byte("prev"), "b": []byte("prev")}
+
+	err := sup.Apply(context.Background(), next, prev)
+	if err == nil {
+		t.Fatal("expected apply error")
+	}
+	if len(b.applied) != 2 || b.applied[0] != "new" || b.applied[1] != "prev" {
+		t.Fatalf("failed engine b not restored after partial mutation: %v", b.applied)
+	}
+	if len(a.applied) != 2 || a.applied[1] != "prev" {
+		t.Fatalf("previous engine a not restored: %v", a.applied)
 	}
 }
 

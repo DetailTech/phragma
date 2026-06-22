@@ -11,6 +11,8 @@ import (
 // VectorName keys the vector.yaml artifact.
 const VectorName = "vector"
 
+const vectorConfigFileMode = 0o600
+
 // Vector supervises the Vector telemetry shipper.
 type Vector struct {
 	// Binary is the vector executable; defaults to "vector".
@@ -55,15 +57,29 @@ func (v *Vector) Apply(_ context.Context, config []byte) error {
 		v.proc.stop()
 		return nil
 	}
-	if err := os.MkdirAll(v.StateDir, 0o755); err != nil {
-		return err
-	}
-	cfgPath := filepath.Join(v.StateDir, "vector.yaml")
-	if err := os.WriteFile(cfgPath, config, 0o644); err != nil {
+	cfgPath, err := v.writeConfig(config)
+	if err != nil {
 		return err
 	}
 	return v.proc.restart(v.bin(), "--config", cfgPath)
 }
 
+func (v *Vector) writeConfig(config []byte) (string, error) {
+	if err := os.MkdirAll(v.StateDir, 0o755); err != nil {
+		return "", err
+	}
+	cfgPath := filepath.Join(v.StateDir, "vector.yaml")
+	if err := os.WriteFile(cfgPath, config, vectorConfigFileMode); err != nil {
+		return "", err
+	}
+	if err := os.Chmod(cfgPath, vectorConfigFileMode); err != nil {
+		return "", err
+	}
+	return cfgPath, nil
+}
+
 // Stop terminates a running Vector (daemon shutdown).
 func (v *Vector) Stop() { v.proc.stop() }
+
+// Status reports the supervised Vector child lifecycle.
+func (v *Vector) Status() ProcessStatus { return v.proc.Status() }

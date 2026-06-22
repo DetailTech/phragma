@@ -4,6 +4,21 @@
 #   - /etc/openngfw/secrets/site-b.conf  (swanctl snippet, e.g.
 #       secrets { ike-site-b { secret = "use-a-real-psk" } }            )
 #   - /etc/openngfw/keys/wg0.key         (wg genkey > wg0.key)
+#
+# Manual field-test example: release/m3-live-networking.sh validates
+# static-route live forwarding, local netns FRR BGP route programming, and
+# a local netns WireGuard handshake by default, not this external BGP
+# upstream, IPsec site-to-site, or external road-warrior peer path.
+#
+# Manual IPsec field evidence bundle before claiming validation:
+#   sudo swanctl --list-conns
+#   sudo swanctl --list-sas
+#   sudo swanctl --list-pols
+#   sudo ip xfrm state
+#   sudo ip xfrm policy
+#   ping -c 3 <remote-protected-ip>
+# Do not treat rendered swanctl.conf, secret-file existence, or
+# swanctl --load-all success as IPsec tunnel evidence by itself.
 zones:
   - name: wan
     interfaces: [eth0]

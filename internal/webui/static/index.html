@@ -1,109 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>OpenNGFW</title>
-<style>
-  :root { --bg:#0f172a; --panel:#1e293b; --text:#e2e8f0; --dim:#94a3b8; --acc:#38bdf8; --ok:#4ade80; --bad:#f87171; }
-  * { box-sizing: border-box; }
-  body { margin:0; font:14px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; background:var(--bg); color:var(--text); }
-  header { display:flex; align-items:center; gap:1rem; padding:.8rem 1.2rem; background:var(--panel); border-bottom:1px solid #334155; }
-  header h1 { font-size:1rem; margin:0; color:var(--acc); }
-  header .ver { color:var(--dim); font-size:.8rem; }
-  nav { display:flex; gap:.3rem; padding:.6rem 1.2rem 0; flex-wrap:wrap; }
-  nav button { background:none; border:1px solid #334155; border-bottom:none; color:var(--dim); padding:.4rem .9rem; cursor:pointer; border-radius:6px 6px 0 0; font:inherit; }
-  nav button.active { background:var(--panel); color:var(--text); }
-  main { padding:1rem 1.2rem; }
-  section { background:var(--panel); border:1px solid #334155; border-radius:0 8px 8px 8px; padding:1rem; }
-  table { width:100%; border-collapse:collapse; font-size:.85rem; }
-  th, td { text-align:left; padding:.35rem .6rem; border-bottom:1px solid #334155; vertical-align:top; }
-  th { color:var(--dim); font-weight:normal; }
-  pre { background:#0b1220; padding:1rem; border-radius:6px; overflow:auto; max-height:65vh; }
-  .err { color:var(--bad); }
-  .pill { padding:.05rem .5rem; border-radius:999px; font-size:.75rem; }
-  .pill.on { background:#14532d; color:var(--ok); }
-  .pill.off { background:#334155; color:var(--dim); }
-  #token { margin-left:auto; background:#0b1220; color:var(--text); border:1px solid #334155; border-radius:6px; padding:.3rem .6rem; width:18rem; font:inherit; }
-  .note { color:var(--dim); font-size:.8rem; margin-top:.6rem; }
-</style>
+<meta name="color-scheme" content="dark">
+<title>Phragma</title>
+<link rel="icon" href="assets/phragma-logomark.svg">
+<link rel="stylesheet" href="css/app.css">
 </head>
 <body>
-<header>
-  <h1>OpenNGFW</h1>
-  <span class="ver" id="version">…</span>
-  <input id="token" type="password" placeholder="API token (if auth enabled)">
-</header>
-<nav id="tabs"></nav>
-<main><section id="content">Loading…</section></main>
-<script>
-const tabs = {
-  Policy:   loadPolicy,
-  Versions: () => loadTable('/v1/versions', d => (d.versions||[]).map(v => [v.id, fmtTime(v.createdAt), v.actor, v.comment]), ['Version','Committed','Actor','Comment']),
-  Audit:    () => loadTable('/v1/audit', d => (d.entries||[]).map(e => [e.id, fmtTime(e.time), e.actor, e.action, e.detail, e.version||'']), ['#','Time','Actor','Action','Detail','Version']),
-  Alerts:   () => loadTable('/v1/alerts', d => (d.alerts||[]).map(a => [fmtTime(a.time), a.severity, a.action, a.srcIp+':'+(a.srcPort||0), a.destIp+':'+(a.destPort||0), a.signature]), ['Time','Sev','Action','Source','Destination','Signature']),
-  Flows:    () => loadTable('/v1/flows', d => (d.flows||[]).map(f => [fmtTime(f.time), f.appProtocol||'-', f.protocol, f.srcIp+':'+(f.srcPort||0), f.destIp+':'+(f.destPort||0), (f.bytesToServer||0)+'/'+(f.bytesToClient||0)]), ['Time','App','Proto','Source','Destination','Bytes ↑/↓']),
-  Intel:    loadIntel,
-};
+<a class="skip-link" href="#content">Skip to workspace</a>
+<div id="app" class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <span class="brand-name">
+        <img src="assets/phragma-wordmark.svg" alt="Phragma">
+      </span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+    <div class="sidebar-foot">
+      <button class="ghost-btn" id="palette-hint" type="button" title="Command palette" aria-label="Open command palette">
+        <span>Search</span><kbd>⌘K</kbd>
+      </button>
+      <div class="conn" id="conn"><span class="dot"></span><span id="conn-text">connecting…</span></div>
+    </div>
+  </aside>
+  <button class="sidebar-scrim" id="sidebar-scrim" type="button" aria-label="Close navigation menu" hidden></button>
 
-function fmtTime(t) { return t ? new Date(t).toLocaleString() : ''; }
-function authHeaders() {
-  const t = document.getElementById('token').value.trim();
-  return t ? { 'Authorization': 'Bearer ' + t } : {};
-}
-async function api(path) {
-  const r = await fetch(path, { headers: authHeaders() });
-  if (!r.ok) throw new Error(path + ': HTTP ' + r.status + ' ' + (await r.text()).slice(0, 200));
-  return r.json();
-}
-function show(html) { document.getElementById('content').innerHTML = html; }
-function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+  <div class="main">
+    <header class="topbar">
+      <button class="icon-btn" id="menu-toggle" type="button" title="Toggle menu" aria-label="Toggle menu">
+        <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      </button>
+      <div class="crumb" id="crumb">Dashboard</div>
+      <div class="topbar-spacer"></div>
+      <button class="search-btn" id="open-palette" type="button" title="Search and commands (Command K)" aria-label="Open search and command palette">
+        <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2" fill="none"/><path d="m20 20-3-3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <span>Jump to…</span><kbd>⌘K</kbd>
+      </button>
+      <button class="icon-btn" id="open-diagnostics" type="button" title="API diagnostic console (Command Shift P)" aria-label="Open API diagnostic console"></button>
+      <button class="icon-btn" id="open-automation" type="button" title="API / CLI context" aria-label="Open API and CLI context"></button>
+      <button class="icon-btn" id="theme-toggle" type="button" title="Toggle theme" aria-label="Toggle theme"></button>
+    </header>
 
-function renderTable(rows, headers) {
-  if (!rows.length) return '<p class="note">No entries.</p>';
-  return '<table><tr>' + headers.map(h => '<th>'+esc(h)+'</th>').join('') + '</tr>' +
-    rows.map(r => '<tr>' + r.map(c => '<td>'+esc(c)+'</td>').join('') + '</tr>').join('') + '</table>';
-}
-async function loadTable(path, mapper, headers) {
-  try { show(renderTable(mapper(await api(path)), headers)); }
-  catch (e) { show('<p class="err">'+esc(e.message)+'</p>'); }
-}
-async function loadPolicy() {
-  try {
-    const d = await api('/v1/policy');
-    show('<p class="note">Running policy (version ' + esc(d.version||0) + '). Read-only view; edit via ngfwctl or the API.</p>' +
-         '<pre>' + esc(JSON.stringify(d.policy, null, 2)) + '</pre>');
-  } catch (e) { show('<p class="err">'+esc(e.message)+'</p>'); }
-}
-async function loadIntel() {
-  try {
-    const d = await api('/v1/intel/feeds');
-    const rows = (d.feeds||[]).map(f => [
-      f.name,
-      f.enabled ? '<span class="pill on">enabled</span>' : '<span class="pill off">disabled</span>',
-      f.custom ? 'custom' : 'builtin',
-      f.allowsCommercialUse ? 'yes' : 'NO',
-      f.license, f.description,
-    ]);
-    if (!rows.length) { show('<p class="note">No feeds.</p>'); return; }
-    show('<table><tr><th>Feed</th><th>State</th><th>Kind</th><th>Commercial use</th><th>License</th><th>Description</th></tr>' +
-      rows.map(r => '<tr>' + r.map((c,i) => '<td>' + (i===1 ? c : esc(c)) + '</td>').join('') + '</tr>').join('') + '</table>' +
-      '<p class="note">License constraints are enforced at commit time by the feed registry.</p>');
-  } catch (e) { show('<p class="err">'+esc(e.message)+'</p>'); }
-}
+    <div class="candidate-bar" id="candidate-bar" hidden></div>
+    <div class="runtime-banner" id="runtime-banner" hidden></div>
 
-const nav = document.getElementById('tabs');
-Object.keys(tabs).forEach((name, i) => {
-  const b = document.createElement('button');
-  b.textContent = name;
-  b.onclick = () => { nav.querySelectorAll('button').forEach(x => x.classList.remove('active')); b.classList.add('active'); tabs[name](); };
-  if (i === 0) b.classList.add('active');
-  nav.appendChild(b);
-});
-api('/v1/system/version')
-  .then(d => document.getElementById('version').textContent = 'controld ' + d.version + ' (' + d.commit + ')')
-  .catch(() => document.getElementById('version').textContent = 'controld unreachable');
-loadPolicy();
-</script>
+    <main class="content" id="content" tabindex="-1"><div class="loading">Loading…</div></main>
+  </div>
+</div>
+
+<div class="drawer-scrim" id="drawer-scrim" hidden></div>
+<aside class="drawer" id="drawer" hidden></aside>
+
+<div class="palette-scrim" id="palette-scrim" hidden>
+  <div class="palette" role="dialog" aria-modal="true" aria-label="Command palette">
+    <input id="palette-input" type="text" autocomplete="off" spellcheck="false" role="combobox" aria-expanded="false" aria-controls="palette-results" aria-activedescendant="" placeholder="Search rules, objects, pages, actions…">
+    <div class="palette-results" id="palette-results" role="listbox"></div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<script type="module" src="js/app.js"></script>
 </body>
 </html>

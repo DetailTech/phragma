@@ -14,3 +14,4 @@ ids:
   enabled: true
   mode: IDS_MODE_PREVENT
   queue_num: 0
+  failure_behavior: IDS_FAILURE_BEHAVIOR_FAIL_OPEN

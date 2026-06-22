@@ -14,6 +14,7 @@ package openngfwv1
 
 import (
 	context "context"
+	httpbody "google.golang.org/genproto/googleapis/api/httpbody"
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
@@ -25,7 +26,41 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	SystemService_GetVersion_FullMethodName = "/openngfw.v1.SystemService/GetVersion"
+	SystemService_GetVersion_FullMethodName                       = "/openngfw.v1.SystemService/GetVersion"
+	SystemService_GetStatus_FullMethodName                        = "/openngfw.v1.SystemService/GetStatus"
+	SystemService_ProveNetworkPath_FullMethodName                 = "/openngfw.v1.SystemService/ProveNetworkPath"
+	SystemService_GetTelemetryExportStatus_FullMethodName         = "/openngfw.v1.SystemService/GetTelemetryExportStatus"
+	SystemService_VerifyTelemetryExport_FullMethodName            = "/openngfw.v1.SystemService/VerifyTelemetryExport"
+	SystemService_ListSystemLogs_FullMethodName                   = "/openngfw.v1.SystemService/ListSystemLogs"
+	SystemService_CheckRuntimeReadiness_FullMethodName            = "/openngfw.v1.SystemService/CheckRuntimeReadiness"
+	SystemService_GetHighAvailabilityStatus_FullMethodName        = "/openngfw.v1.SystemService/GetHighAvailabilityStatus"
+	SystemService_PullHighAvailabilityPolicy_FullMethodName       = "/openngfw.v1.SystemService/PullHighAvailabilityPolicy"
+	SystemService_ActivateHighAvailabilityFailover_FullMethodName = "/openngfw.v1.SystemService/ActivateHighAvailabilityFailover"
+	SystemService_GetReleaseAcceptanceStatus_FullMethodName       = "/openngfw.v1.SystemService/GetReleaseAcceptanceStatus"
+	SystemService_GetSupportBundle_FullMethodName                 = "/openngfw.v1.SystemService/GetSupportBundle"
+	SystemService_GetIdentity_FullMethodName                      = "/openngfw.v1.SystemService/GetIdentity"
+	SystemService_CreateStepUpChallenge_FullMethodName            = "/openngfw.v1.SystemService/CreateStepUpChallenge"
+	SystemService_GetAccessAdministration_FullMethodName          = "/openngfw.v1.SystemService/GetAccessAdministration"
+	SystemService_RunOIDCPreflight_FullMethodName                 = "/openngfw.v1.SystemService/RunOIDCPreflight"
+	SystemService_GetOIDCProviderConfig_FullMethodName            = "/openngfw.v1.SystemService/GetOIDCProviderConfig"
+	SystemService_ValidateOIDCProviderConfig_FullMethodName       = "/openngfw.v1.SystemService/ValidateOIDCProviderConfig"
+	SystemService_SetOIDCProviderConfig_FullMethodName            = "/openngfw.v1.SystemService/SetOIDCProviderConfig"
+	SystemService_DisableOIDCProvider_FullMethodName              = "/openngfw.v1.SystemService/DisableOIDCProvider"
+	SystemService_GetSAMLProviderConfig_FullMethodName            = "/openngfw.v1.SystemService/GetSAMLProviderConfig"
+	SystemService_ValidateSAMLProviderConfig_FullMethodName       = "/openngfw.v1.SystemService/ValidateSAMLProviderConfig"
+	SystemService_SetSAMLProviderConfig_FullMethodName            = "/openngfw.v1.SystemService/SetSAMLProviderConfig"
+	SystemService_DisableSAMLProvider_FullMethodName              = "/openngfw.v1.SystemService/DisableSAMLProvider"
+	SystemService_CreateLocalUser_FullMethodName                  = "/openngfw.v1.SystemService/CreateLocalUser"
+	SystemService_UpdateLocalUser_FullMethodName                  = "/openngfw.v1.SystemService/UpdateLocalUser"
+	SystemService_RotateLocalUserToken_FullMethodName             = "/openngfw.v1.SystemService/RotateLocalUserToken"
+	SystemService_DisableLocalUser_FullMethodName                 = "/openngfw.v1.SystemService/DisableLocalUser"
+	SystemService_RevokeAccessSession_FullMethodName              = "/openngfw.v1.SystemService/RevokeAccessSession"
+	SystemService_TuneHost_FullMethodName                         = "/openngfw.v1.SystemService/TuneHost"
+	SystemService_PlanPacketCapture_FullMethodName                = "/openngfw.v1.SystemService/PlanPacketCapture"
+	SystemService_ListPacketCaptures_FullMethodName               = "/openngfw.v1.SystemService/ListPacketCaptures"
+	SystemService_StartPacketCapture_FullMethodName               = "/openngfw.v1.SystemService/StartPacketCapture"
+	SystemService_DownloadPacketCapture_FullMethodName            = "/openngfw.v1.SystemService/DownloadPacketCapture"
+	SystemService_SetPacketCaptureRetention_FullMethodName        = "/openngfw.v1.SystemService/SetPacketCaptureRetention"
 )
 
 // SystemServiceClient is the client API for SystemService service.
@@ -36,6 +71,126 @@ const (
 type SystemServiceClient interface {
 	// GetVersion reports the running controld build.
 	GetVersion(ctx context.Context, in *GetVersionRequest, opts ...grpc.CallOption) (*GetVersionResponse, error)
+	// GetStatus reports the daemon's runtime posture and managed engine surface.
+	GetStatus(ctx context.Context, in *GetStatusRequest, opts ...grpc.CallOption) (*GetStatusResponse, error)
+	// ProveNetworkPath samples server-side kernel route and passive VPN runtime
+	// evidence for one representative tunnel path. It is read-only and never
+	// sends probe traffic or accepts arbitrary command input.
+	ProveNetworkPath(ctx context.Context, in *ProveNetworkPathRequest, opts ...grpc.CallOption) (*ProveNetworkPathResponse, error)
+	// GetTelemetryExportStatus reports the running policy telemetry export
+	// posture without sending test events, dialing remote sinks, or mutating the
+	// host. It is the passive server-side source for GUI/CLI evidence workflows.
+	GetTelemetryExportStatus(ctx context.Context, in *GetTelemetryExportStatusRequest, opts ...grpc.CallOption) (*GetTelemetryExportStatusResponse, error)
+	// VerifyTelemetryExport emits one bounded synthetic JSON proof event to a
+	// configured running-policy telemetry export sink. It does not verify
+	// ClickHouse row delivery or receiver-side SIEM custody.
+	VerifyTelemetryExport(ctx context.Context, in *VerifyTelemetryExportRequest, opts ...grpc.CallOption) (*VerifyTelemetryExportResponse, error)
+	// ListSystemLogs returns a bounded, redacted view of node-local appliance and
+	// engine log files from the configured OpenNGFW log root. Clients can filter
+	// but cannot choose filesystem paths.
+	ListSystemLogs(ctx context.Context, in *ListSystemLogsRequest, opts ...grpc.CallOption) (*ListSystemLogsResponse, error)
+	// CheckRuntimeReadiness evaluates the server-side runtime blockers that
+	// require explicit acknowledgement before commit or rollback. It is read-only
+	// and uses the same policy-aware readiness logic enforced by PolicyService
+	// live apply.
+	CheckRuntimeReadiness(ctx context.Context, in *CheckRuntimeReadinessRequest, opts ...grpc.CallOption) (*CheckRuntimeReadinessResponse, error)
+	// GetHighAvailabilityStatus reports the configured active/passive HA posture
+	// and policy recovery metadata. It is read-only.
+	GetHighAvailabilityStatus(ctx context.Context, in *GetHighAvailabilityStatusRequest, opts ...grpc.CallOption) (*GetHighAvailabilityStatusResponse, error)
+	// PullHighAvailabilityPolicy lets a passive node manually pull the active
+	// peer's running policy, validate it locally, and apply it through the same
+	// durable policy apply path used by commit and rollback.
+	PullHighAvailabilityPolicy(ctx context.Context, in *PullHighAvailabilityPolicyRequest, opts ...grpc.CallOption) (*PullHighAvailabilityPolicyResponse, error)
+	// ActivateHighAvailabilityFailover marks a passive node active after the
+	// operator confirms manual failover. It persists only local control-plane HA
+	// state and audit evidence; transport cutover, peer fencing, and connection
+	// sync remain external controls until dedicated integrations are added.
+	ActivateHighAvailabilityFailover(ctx context.Context, in *ActivateHighAvailabilityFailoverRequest, opts ...grpc.CallOption) (*ActivateHighAvailabilityFailoverResponse, error)
+	// GetReleaseAcceptanceStatus reports release-gate evidence state without
+	// mutating the host or assembling a release manifest.
+	GetReleaseAcceptanceStatus(ctx context.Context, in *GetReleaseAcceptanceStatusRequest, opts ...grpc.CallOption) (*GetReleaseAcceptanceStatusResponse, error)
+	// GetSupportBundle collects a redacted, read-only diagnostic bundle from the
+	// server side so GUI, CLI, and automation clients share one evidence shape.
+	GetSupportBundle(ctx context.Context, in *GetSupportBundleRequest, opts ...grpc.CallOption) (*GetSupportBundleResponse, error)
+	// GetIdentity reports the current API actor and role.
+	GetIdentity(ctx context.Context, in *GetIdentityRequest, opts ...grpc.CallOption) (*GetIdentityResponse, error)
+	// CreateStepUpChallenge issues a short-lived one-time token for a named
+	// privileged action. This is a functional re-confirmation guardrail; real
+	// MFA/IdP-backed step-up remains production hardening.
+	CreateStepUpChallenge(ctx context.Context, in *CreateStepUpChallengeRequest, opts ...grpc.CallOption) (*CreateStepUpChallengeResponse, error)
+	// GetAccessAdministration reports RBAC and browser SSO posture for
+	// administrators. Inventory never serializes token, secret, or session
+	// material; local user create/rotate responses return generated tokens only
+	// once.
+	GetAccessAdministration(ctx context.Context, in *GetAccessAdministrationRequest, opts ...grpc.CallOption) (*GetAccessAdministrationResponse, error)
+	// RunOIDCPreflight verifies browser SSO readiness without changing IdP
+	// configuration or serializing client secrets, redirect URLs, cookies, or
+	// provider tokens.
+	RunOIDCPreflight(ctx context.Context, in *RunOIDCPreflightRequest, opts ...grpc.CallOption) (*RunOIDCPreflightResponse, error)
+	// GetOIDCProviderConfig reports the node-local browser SSO provider
+	// configuration without returning client secrets or secret file paths.
+	GetOIDCProviderConfig(ctx context.Context, in *GetOIDCProviderConfigRequest, opts ...grpc.CallOption) (*GetOIDCProviderConfigResponse, error)
+	// ValidateOIDCProviderConfig validates a proposed browser SSO provider
+	// configuration without changing the active runtime authenticator.
+	ValidateOIDCProviderConfig(ctx context.Context, in *ValidateOIDCProviderConfigRequest, opts ...grpc.CallOption) (*ValidateOIDCProviderConfigResponse, error)
+	// SetOIDCProviderConfig writes the node-local browser SSO provider config,
+	// replaces the active runtime authenticator, and revokes existing OIDC
+	// browser sessions.
+	SetOIDCProviderConfig(ctx context.Context, in *SetOIDCProviderConfigRequest, opts ...grpc.CallOption) (*SetOIDCProviderConfigResponse, error)
+	// DisableOIDCProvider disables browser SSO provider configuration, clears the
+	// runtime authenticator, and revokes existing OIDC browser sessions.
+	DisableOIDCProvider(ctx context.Context, in *DisableOIDCProviderRequest, opts ...grpc.CallOption) (*DisableOIDCProviderResponse, error)
+	// GetSAMLProviderConfig reports the node-local SAML browser SSO provider
+	// configuration without returning secret material.
+	GetSAMLProviderConfig(ctx context.Context, in *GetSAMLProviderConfigRequest, opts ...grpc.CallOption) (*GetSAMLProviderConfigResponse, error)
+	// ValidateSAMLProviderConfig validates a proposed SAML browser SSO provider
+	// configuration without changing runtime login/session behavior.
+	ValidateSAMLProviderConfig(ctx context.Context, in *ValidateSAMLProviderConfigRequest, opts ...grpc.CallOption) (*ValidateSAMLProviderConfigResponse, error)
+	// SetSAMLProviderConfig writes and activates the node-local SAML browser SSO
+	// provider configuration through the audited runtime lifecycle.
+	SetSAMLProviderConfig(ctx context.Context, in *SetSAMLProviderConfigRequest, opts ...grpc.CallOption) (*SetSAMLProviderConfigResponse, error)
+	// DisableSAMLProvider disables persisted SAML provider configuration.
+	DisableSAMLProvider(ctx context.Context, in *DisableSAMLProviderRequest, opts ...grpc.CallOption) (*DisableSAMLProviderResponse, error)
+	// CreateLocalUser adds an enabled local users-file entry and returns the
+	// generated bearer token once. The stored users file receives only a
+	// sha256:<digest> token_hash.
+	CreateLocalUser(ctx context.Context, in *CreateLocalUserRequest, opts ...grpc.CallOption) (*CreateLocalUserResponse, error)
+	// UpdateLocalUser changes local users-file metadata such as role. Token
+	// material is never accepted through this endpoint.
+	UpdateLocalUser(ctx context.Context, in *UpdateLocalUserRequest, opts ...grpc.CallOption) (*UpdateLocalUserResponse, error)
+	// RotateLocalUserToken replaces one local user's token_hash and returns the
+	// generated bearer token once.
+	RotateLocalUserToken(ctx context.Context, in *RotateLocalUserTokenRequest, opts ...grpc.CallOption) (*RotateLocalUserTokenResponse, error)
+	// DisableLocalUser disables one local users-file entry while preserving an
+	// audit-visible inventory row.
+	DisableLocalUser(ctx context.Context, in *DisableLocalUserRequest, opts ...grpc.CallOption) (*DisableLocalUserResponse, error)
+	// RevokeAccessSession invalidates one active browser SSO session by the
+	// non-secret session_id returned from GetAccessAdministration.
+	RevokeAccessSession(ctx context.Context, in *RevokeAccessSessionRequest, opts ...grpc.CallOption) (*RevokeAccessSessionResponse, error)
+	// TuneHost previews, writes, or applies the OpenNGFW host sysctl profile.
+	// This is an explicit host mutation, separate from policy commit/rollback.
+	TuneHost(ctx context.Context, in *TuneHostRequest, opts ...grpc.CallOption) (*TuneHostResponse, error)
+	// PlanPacketCapture validates capture scope and returns a bounded tcpdump
+	// command without mutating the host. This lets UI/CLI clients preview the
+	// exact diagnostic action before requesting an audited capture.
+	PlanPacketCapture(ctx context.Context, in *PlanPacketCaptureRequest, opts ...grpc.CallOption) (*PlanPacketCaptureResponse, error)
+	// ListPacketCaptures returns recent completed pcap artifacts from the
+	// configured capture directory. It returns metadata and safe download links;
+	// pcap bytes are only returned by DownloadPacketCapture.
+	ListPacketCaptures(ctx context.Context, in *ListPacketCapturesRequest, opts ...grpc.CallOption) (*ListPacketCapturesResponse, error)
+	// StartPacketCapture runs one bounded packet capture on the firewall host.
+	// It is a privileged diagnostic action: callers must acknowledge it, RBAC
+	// requires admin, and every attempt is written to the audit log.
+	StartPacketCapture(ctx context.Context, in *StartPacketCaptureRequest, opts ...grpc.CallOption) (*StartPacketCaptureResponse, error)
+	// DownloadPacketCapture returns one completed pcap artifact as binary
+	// application/vnd.tcpdump.pcap content. The id is the safe artifact_id
+	// returned by ListPacketCaptures or StartPacketCapture.
+	DownloadPacketCapture(ctx context.Context, in *DownloadPacketCaptureRequest, opts ...grpc.CallOption) (*httpbody.HttpBody, error)
+	// SetPacketCaptureRetention records non-destructive retention metadata for a
+	// completed pcap artifact. It updates only the artifact sidecar; lifecycle
+	// pruning, legal hold, custody, and tamper-proof retention remain separate
+	// hardening controls.
+	SetPacketCaptureRetention(ctx context.Context, in *SetPacketCaptureRetentionRequest, opts ...grpc.CallOption) (*SetPacketCaptureRetentionResponse, error)
 }
 
 type systemServiceClient struct {
@@ -56,6 +211,346 @@ func (c *systemServiceClient) GetVersion(ctx context.Context, in *GetVersionRequ
 	return out, nil
 }
 
+func (c *systemServiceClient) GetStatus(ctx context.Context, in *GetStatusRequest, opts ...grpc.CallOption) (*GetStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetStatusResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) ProveNetworkPath(ctx context.Context, in *ProveNetworkPathRequest, opts ...grpc.CallOption) (*ProveNetworkPathResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProveNetworkPathResponse)
+	err := c.cc.Invoke(ctx, SystemService_ProveNetworkPath_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetTelemetryExportStatus(ctx context.Context, in *GetTelemetryExportStatusRequest, opts ...grpc.CallOption) (*GetTelemetryExportStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetTelemetryExportStatusResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetTelemetryExportStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) VerifyTelemetryExport(ctx context.Context, in *VerifyTelemetryExportRequest, opts ...grpc.CallOption) (*VerifyTelemetryExportResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifyTelemetryExportResponse)
+	err := c.cc.Invoke(ctx, SystemService_VerifyTelemetryExport_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) ListSystemLogs(ctx context.Context, in *ListSystemLogsRequest, opts ...grpc.CallOption) (*ListSystemLogsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListSystemLogsResponse)
+	err := c.cc.Invoke(ctx, SystemService_ListSystemLogs_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) CheckRuntimeReadiness(ctx context.Context, in *CheckRuntimeReadinessRequest, opts ...grpc.CallOption) (*CheckRuntimeReadinessResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CheckRuntimeReadinessResponse)
+	err := c.cc.Invoke(ctx, SystemService_CheckRuntimeReadiness_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetHighAvailabilityStatus(ctx context.Context, in *GetHighAvailabilityStatusRequest, opts ...grpc.CallOption) (*GetHighAvailabilityStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetHighAvailabilityStatusResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetHighAvailabilityStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) PullHighAvailabilityPolicy(ctx context.Context, in *PullHighAvailabilityPolicyRequest, opts ...grpc.CallOption) (*PullHighAvailabilityPolicyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PullHighAvailabilityPolicyResponse)
+	err := c.cc.Invoke(ctx, SystemService_PullHighAvailabilityPolicy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) ActivateHighAvailabilityFailover(ctx context.Context, in *ActivateHighAvailabilityFailoverRequest, opts ...grpc.CallOption) (*ActivateHighAvailabilityFailoverResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ActivateHighAvailabilityFailoverResponse)
+	err := c.cc.Invoke(ctx, SystemService_ActivateHighAvailabilityFailover_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetReleaseAcceptanceStatus(ctx context.Context, in *GetReleaseAcceptanceStatusRequest, opts ...grpc.CallOption) (*GetReleaseAcceptanceStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetReleaseAcceptanceStatusResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetReleaseAcceptanceStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetSupportBundle(ctx context.Context, in *GetSupportBundleRequest, opts ...grpc.CallOption) (*GetSupportBundleResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSupportBundleResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetSupportBundle_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetIdentity(ctx context.Context, in *GetIdentityRequest, opts ...grpc.CallOption) (*GetIdentityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetIdentityResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetIdentity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) CreateStepUpChallenge(ctx context.Context, in *CreateStepUpChallengeRequest, opts ...grpc.CallOption) (*CreateStepUpChallengeResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateStepUpChallengeResponse)
+	err := c.cc.Invoke(ctx, SystemService_CreateStepUpChallenge_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetAccessAdministration(ctx context.Context, in *GetAccessAdministrationRequest, opts ...grpc.CallOption) (*GetAccessAdministrationResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetAccessAdministrationResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetAccessAdministration_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) RunOIDCPreflight(ctx context.Context, in *RunOIDCPreflightRequest, opts ...grpc.CallOption) (*RunOIDCPreflightResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RunOIDCPreflightResponse)
+	err := c.cc.Invoke(ctx, SystemService_RunOIDCPreflight_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetOIDCProviderConfig(ctx context.Context, in *GetOIDCProviderConfigRequest, opts ...grpc.CallOption) (*GetOIDCProviderConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetOIDCProviderConfigResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetOIDCProviderConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) ValidateOIDCProviderConfig(ctx context.Context, in *ValidateOIDCProviderConfigRequest, opts ...grpc.CallOption) (*ValidateOIDCProviderConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateOIDCProviderConfigResponse)
+	err := c.cc.Invoke(ctx, SystemService_ValidateOIDCProviderConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) SetOIDCProviderConfig(ctx context.Context, in *SetOIDCProviderConfigRequest, opts ...grpc.CallOption) (*SetOIDCProviderConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetOIDCProviderConfigResponse)
+	err := c.cc.Invoke(ctx, SystemService_SetOIDCProviderConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) DisableOIDCProvider(ctx context.Context, in *DisableOIDCProviderRequest, opts ...grpc.CallOption) (*DisableOIDCProviderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DisableOIDCProviderResponse)
+	err := c.cc.Invoke(ctx, SystemService_DisableOIDCProvider_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) GetSAMLProviderConfig(ctx context.Context, in *GetSAMLProviderConfigRequest, opts ...grpc.CallOption) (*GetSAMLProviderConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetSAMLProviderConfigResponse)
+	err := c.cc.Invoke(ctx, SystemService_GetSAMLProviderConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) ValidateSAMLProviderConfig(ctx context.Context, in *ValidateSAMLProviderConfigRequest, opts ...grpc.CallOption) (*ValidateSAMLProviderConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateSAMLProviderConfigResponse)
+	err := c.cc.Invoke(ctx, SystemService_ValidateSAMLProviderConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) SetSAMLProviderConfig(ctx context.Context, in *SetSAMLProviderConfigRequest, opts ...grpc.CallOption) (*SetSAMLProviderConfigResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetSAMLProviderConfigResponse)
+	err := c.cc.Invoke(ctx, SystemService_SetSAMLProviderConfig_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) DisableSAMLProvider(ctx context.Context, in *DisableSAMLProviderRequest, opts ...grpc.CallOption) (*DisableSAMLProviderResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DisableSAMLProviderResponse)
+	err := c.cc.Invoke(ctx, SystemService_DisableSAMLProvider_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) CreateLocalUser(ctx context.Context, in *CreateLocalUserRequest, opts ...grpc.CallOption) (*CreateLocalUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateLocalUserResponse)
+	err := c.cc.Invoke(ctx, SystemService_CreateLocalUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) UpdateLocalUser(ctx context.Context, in *UpdateLocalUserRequest, opts ...grpc.CallOption) (*UpdateLocalUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpdateLocalUserResponse)
+	err := c.cc.Invoke(ctx, SystemService_UpdateLocalUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) RotateLocalUserToken(ctx context.Context, in *RotateLocalUserTokenRequest, opts ...grpc.CallOption) (*RotateLocalUserTokenResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RotateLocalUserTokenResponse)
+	err := c.cc.Invoke(ctx, SystemService_RotateLocalUserToken_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) DisableLocalUser(ctx context.Context, in *DisableLocalUserRequest, opts ...grpc.CallOption) (*DisableLocalUserResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DisableLocalUserResponse)
+	err := c.cc.Invoke(ctx, SystemService_DisableLocalUser_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) RevokeAccessSession(ctx context.Context, in *RevokeAccessSessionRequest, opts ...grpc.CallOption) (*RevokeAccessSessionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RevokeAccessSessionResponse)
+	err := c.cc.Invoke(ctx, SystemService_RevokeAccessSession_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) TuneHost(ctx context.Context, in *TuneHostRequest, opts ...grpc.CallOption) (*TuneHostResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TuneHostResponse)
+	err := c.cc.Invoke(ctx, SystemService_TuneHost_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) PlanPacketCapture(ctx context.Context, in *PlanPacketCaptureRequest, opts ...grpc.CallOption) (*PlanPacketCaptureResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PlanPacketCaptureResponse)
+	err := c.cc.Invoke(ctx, SystemService_PlanPacketCapture_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) ListPacketCaptures(ctx context.Context, in *ListPacketCapturesRequest, opts ...grpc.CallOption) (*ListPacketCapturesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListPacketCapturesResponse)
+	err := c.cc.Invoke(ctx, SystemService_ListPacketCaptures_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) StartPacketCapture(ctx context.Context, in *StartPacketCaptureRequest, opts ...grpc.CallOption) (*StartPacketCaptureResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(StartPacketCaptureResponse)
+	err := c.cc.Invoke(ctx, SystemService_StartPacketCapture_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) DownloadPacketCapture(ctx context.Context, in *DownloadPacketCaptureRequest, opts ...grpc.CallOption) (*httpbody.HttpBody, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(httpbody.HttpBody)
+	err := c.cc.Invoke(ctx, SystemService_DownloadPacketCapture_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *systemServiceClient) SetPacketCaptureRetention(ctx context.Context, in *SetPacketCaptureRetentionRequest, opts ...grpc.CallOption) (*SetPacketCaptureRetentionResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(SetPacketCaptureRetentionResponse)
+	err := c.cc.Invoke(ctx, SystemService_SetPacketCaptureRetention_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SystemServiceServer is the server API for SystemService service.
 // All implementations must embed UnimplementedSystemServiceServer
 // for forward compatibility.
@@ -64,6 +559,126 @@ func (c *systemServiceClient) GetVersion(ctx context.Context, in *GetVersionRequ
 type SystemServiceServer interface {
 	// GetVersion reports the running controld build.
 	GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error)
+	// GetStatus reports the daemon's runtime posture and managed engine surface.
+	GetStatus(context.Context, *GetStatusRequest) (*GetStatusResponse, error)
+	// ProveNetworkPath samples server-side kernel route and passive VPN runtime
+	// evidence for one representative tunnel path. It is read-only and never
+	// sends probe traffic or accepts arbitrary command input.
+	ProveNetworkPath(context.Context, *ProveNetworkPathRequest) (*ProveNetworkPathResponse, error)
+	// GetTelemetryExportStatus reports the running policy telemetry export
+	// posture without sending test events, dialing remote sinks, or mutating the
+	// host. It is the passive server-side source for GUI/CLI evidence workflows.
+	GetTelemetryExportStatus(context.Context, *GetTelemetryExportStatusRequest) (*GetTelemetryExportStatusResponse, error)
+	// VerifyTelemetryExport emits one bounded synthetic JSON proof event to a
+	// configured running-policy telemetry export sink. It does not verify
+	// ClickHouse row delivery or receiver-side SIEM custody.
+	VerifyTelemetryExport(context.Context, *VerifyTelemetryExportRequest) (*VerifyTelemetryExportResponse, error)
+	// ListSystemLogs returns a bounded, redacted view of node-local appliance and
+	// engine log files from the configured OpenNGFW log root. Clients can filter
+	// but cannot choose filesystem paths.
+	ListSystemLogs(context.Context, *ListSystemLogsRequest) (*ListSystemLogsResponse, error)
+	// CheckRuntimeReadiness evaluates the server-side runtime blockers that
+	// require explicit acknowledgement before commit or rollback. It is read-only
+	// and uses the same policy-aware readiness logic enforced by PolicyService
+	// live apply.
+	CheckRuntimeReadiness(context.Context, *CheckRuntimeReadinessRequest) (*CheckRuntimeReadinessResponse, error)
+	// GetHighAvailabilityStatus reports the configured active/passive HA posture
+	// and policy recovery metadata. It is read-only.
+	GetHighAvailabilityStatus(context.Context, *GetHighAvailabilityStatusRequest) (*GetHighAvailabilityStatusResponse, error)
+	// PullHighAvailabilityPolicy lets a passive node manually pull the active
+	// peer's running policy, validate it locally, and apply it through the same
+	// durable policy apply path used by commit and rollback.
+	PullHighAvailabilityPolicy(context.Context, *PullHighAvailabilityPolicyRequest) (*PullHighAvailabilityPolicyResponse, error)
+	// ActivateHighAvailabilityFailover marks a passive node active after the
+	// operator confirms manual failover. It persists only local control-plane HA
+	// state and audit evidence; transport cutover, peer fencing, and connection
+	// sync remain external controls until dedicated integrations are added.
+	ActivateHighAvailabilityFailover(context.Context, *ActivateHighAvailabilityFailoverRequest) (*ActivateHighAvailabilityFailoverResponse, error)
+	// GetReleaseAcceptanceStatus reports release-gate evidence state without
+	// mutating the host or assembling a release manifest.
+	GetReleaseAcceptanceStatus(context.Context, *GetReleaseAcceptanceStatusRequest) (*GetReleaseAcceptanceStatusResponse, error)
+	// GetSupportBundle collects a redacted, read-only diagnostic bundle from the
+	// server side so GUI, CLI, and automation clients share one evidence shape.
+	GetSupportBundle(context.Context, *GetSupportBundleRequest) (*GetSupportBundleResponse, error)
+	// GetIdentity reports the current API actor and role.
+	GetIdentity(context.Context, *GetIdentityRequest) (*GetIdentityResponse, error)
+	// CreateStepUpChallenge issues a short-lived one-time token for a named
+	// privileged action. This is a functional re-confirmation guardrail; real
+	// MFA/IdP-backed step-up remains production hardening.
+	CreateStepUpChallenge(context.Context, *CreateStepUpChallengeRequest) (*CreateStepUpChallengeResponse, error)
+	// GetAccessAdministration reports RBAC and browser SSO posture for
+	// administrators. Inventory never serializes token, secret, or session
+	// material; local user create/rotate responses return generated tokens only
+	// once.
+	GetAccessAdministration(context.Context, *GetAccessAdministrationRequest) (*GetAccessAdministrationResponse, error)
+	// RunOIDCPreflight verifies browser SSO readiness without changing IdP
+	// configuration or serializing client secrets, redirect URLs, cookies, or
+	// provider tokens.
+	RunOIDCPreflight(context.Context, *RunOIDCPreflightRequest) (*RunOIDCPreflightResponse, error)
+	// GetOIDCProviderConfig reports the node-local browser SSO provider
+	// configuration without returning client secrets or secret file paths.
+	GetOIDCProviderConfig(context.Context, *GetOIDCProviderConfigRequest) (*GetOIDCProviderConfigResponse, error)
+	// ValidateOIDCProviderConfig validates a proposed browser SSO provider
+	// configuration without changing the active runtime authenticator.
+	ValidateOIDCProviderConfig(context.Context, *ValidateOIDCProviderConfigRequest) (*ValidateOIDCProviderConfigResponse, error)
+	// SetOIDCProviderConfig writes the node-local browser SSO provider config,
+	// replaces the active runtime authenticator, and revokes existing OIDC
+	// browser sessions.
+	SetOIDCProviderConfig(context.Context, *SetOIDCProviderConfigRequest) (*SetOIDCProviderConfigResponse, error)
+	// DisableOIDCProvider disables browser SSO provider configuration, clears the
+	// runtime authenticator, and revokes existing OIDC browser sessions.
+	DisableOIDCProvider(context.Context, *DisableOIDCProviderRequest) (*DisableOIDCProviderResponse, error)
+	// GetSAMLProviderConfig reports the node-local SAML browser SSO provider
+	// configuration without returning secret material.
+	GetSAMLProviderConfig(context.Context, *GetSAMLProviderConfigRequest) (*GetSAMLProviderConfigResponse, error)
+	// ValidateSAMLProviderConfig validates a proposed SAML browser SSO provider
+	// configuration without changing runtime login/session behavior.
+	ValidateSAMLProviderConfig(context.Context, *ValidateSAMLProviderConfigRequest) (*ValidateSAMLProviderConfigResponse, error)
+	// SetSAMLProviderConfig writes and activates the node-local SAML browser SSO
+	// provider configuration through the audited runtime lifecycle.
+	SetSAMLProviderConfig(context.Context, *SetSAMLProviderConfigRequest) (*SetSAMLProviderConfigResponse, error)
+	// DisableSAMLProvider disables persisted SAML provider configuration.
+	DisableSAMLProvider(context.Context, *DisableSAMLProviderRequest) (*DisableSAMLProviderResponse, error)
+	// CreateLocalUser adds an enabled local users-file entry and returns the
+	// generated bearer token once. The stored users file receives only a
+	// sha256:<digest> token_hash.
+	CreateLocalUser(context.Context, *CreateLocalUserRequest) (*CreateLocalUserResponse, error)
+	// UpdateLocalUser changes local users-file metadata such as role. Token
+	// material is never accepted through this endpoint.
+	UpdateLocalUser(context.Context, *UpdateLocalUserRequest) (*UpdateLocalUserResponse, error)
+	// RotateLocalUserToken replaces one local user's token_hash and returns the
+	// generated bearer token once.
+	RotateLocalUserToken(context.Context, *RotateLocalUserTokenRequest) (*RotateLocalUserTokenResponse, error)
+	// DisableLocalUser disables one local users-file entry while preserving an
+	// audit-visible inventory row.
+	DisableLocalUser(context.Context, *DisableLocalUserRequest) (*DisableLocalUserResponse, error)
+	// RevokeAccessSession invalidates one active browser SSO session by the
+	// non-secret session_id returned from GetAccessAdministration.
+	RevokeAccessSession(context.Context, *RevokeAccessSessionRequest) (*RevokeAccessSessionResponse, error)
+	// TuneHost previews, writes, or applies the OpenNGFW host sysctl profile.
+	// This is an explicit host mutation, separate from policy commit/rollback.
+	TuneHost(context.Context, *TuneHostRequest) (*TuneHostResponse, error)
+	// PlanPacketCapture validates capture scope and returns a bounded tcpdump
+	// command without mutating the host. This lets UI/CLI clients preview the
+	// exact diagnostic action before requesting an audited capture.
+	PlanPacketCapture(context.Context, *PlanPacketCaptureRequest) (*PlanPacketCaptureResponse, error)
+	// ListPacketCaptures returns recent completed pcap artifacts from the
+	// configured capture directory. It returns metadata and safe download links;
+	// pcap bytes are only returned by DownloadPacketCapture.
+	ListPacketCaptures(context.Context, *ListPacketCapturesRequest) (*ListPacketCapturesResponse, error)
+	// StartPacketCapture runs one bounded packet capture on the firewall host.
+	// It is a privileged diagnostic action: callers must acknowledge it, RBAC
+	// requires admin, and every attempt is written to the audit log.
+	StartPacketCapture(context.Context, *StartPacketCaptureRequest) (*StartPacketCaptureResponse, error)
+	// DownloadPacketCapture returns one completed pcap artifact as binary
+	// application/vnd.tcpdump.pcap content. The id is the safe artifact_id
+	// returned by ListPacketCaptures or StartPacketCapture.
+	DownloadPacketCapture(context.Context, *DownloadPacketCaptureRequest) (*httpbody.HttpBody, error)
+	// SetPacketCaptureRetention records non-destructive retention metadata for a
+	// completed pcap artifact. It updates only the artifact sidecar; lifecycle
+	// pruning, legal hold, custody, and tamper-proof retention remain separate
+	// hardening controls.
+	SetPacketCaptureRetention(context.Context, *SetPacketCaptureRetentionRequest) (*SetPacketCaptureRetentionResponse, error)
 	mustEmbedUnimplementedSystemServiceServer()
 }
 
@@ -76,6 +691,108 @@ type UnimplementedSystemServiceServer struct{}
 
 func (UnimplementedSystemServiceServer) GetVersion(context.Context, *GetVersionRequest) (*GetVersionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVersion not implemented")
+}
+func (UnimplementedSystemServiceServer) GetStatus(context.Context, *GetStatusRequest) (*GetStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStatus not implemented")
+}
+func (UnimplementedSystemServiceServer) ProveNetworkPath(context.Context, *ProveNetworkPathRequest) (*ProveNetworkPathResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProveNetworkPath not implemented")
+}
+func (UnimplementedSystemServiceServer) GetTelemetryExportStatus(context.Context, *GetTelemetryExportStatusRequest) (*GetTelemetryExportStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTelemetryExportStatus not implemented")
+}
+func (UnimplementedSystemServiceServer) VerifyTelemetryExport(context.Context, *VerifyTelemetryExportRequest) (*VerifyTelemetryExportResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyTelemetryExport not implemented")
+}
+func (UnimplementedSystemServiceServer) ListSystemLogs(context.Context, *ListSystemLogsRequest) (*ListSystemLogsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListSystemLogs not implemented")
+}
+func (UnimplementedSystemServiceServer) CheckRuntimeReadiness(context.Context, *CheckRuntimeReadinessRequest) (*CheckRuntimeReadinessResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckRuntimeReadiness not implemented")
+}
+func (UnimplementedSystemServiceServer) GetHighAvailabilityStatus(context.Context, *GetHighAvailabilityStatusRequest) (*GetHighAvailabilityStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetHighAvailabilityStatus not implemented")
+}
+func (UnimplementedSystemServiceServer) PullHighAvailabilityPolicy(context.Context, *PullHighAvailabilityPolicyRequest) (*PullHighAvailabilityPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PullHighAvailabilityPolicy not implemented")
+}
+func (UnimplementedSystemServiceServer) ActivateHighAvailabilityFailover(context.Context, *ActivateHighAvailabilityFailoverRequest) (*ActivateHighAvailabilityFailoverResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ActivateHighAvailabilityFailover not implemented")
+}
+func (UnimplementedSystemServiceServer) GetReleaseAcceptanceStatus(context.Context, *GetReleaseAcceptanceStatusRequest) (*GetReleaseAcceptanceStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReleaseAcceptanceStatus not implemented")
+}
+func (UnimplementedSystemServiceServer) GetSupportBundle(context.Context, *GetSupportBundleRequest) (*GetSupportBundleResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSupportBundle not implemented")
+}
+func (UnimplementedSystemServiceServer) GetIdentity(context.Context, *GetIdentityRequest) (*GetIdentityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetIdentity not implemented")
+}
+func (UnimplementedSystemServiceServer) CreateStepUpChallenge(context.Context, *CreateStepUpChallengeRequest) (*CreateStepUpChallengeResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateStepUpChallenge not implemented")
+}
+func (UnimplementedSystemServiceServer) GetAccessAdministration(context.Context, *GetAccessAdministrationRequest) (*GetAccessAdministrationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAccessAdministration not implemented")
+}
+func (UnimplementedSystemServiceServer) RunOIDCPreflight(context.Context, *RunOIDCPreflightRequest) (*RunOIDCPreflightResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RunOIDCPreflight not implemented")
+}
+func (UnimplementedSystemServiceServer) GetOIDCProviderConfig(context.Context, *GetOIDCProviderConfigRequest) (*GetOIDCProviderConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetOIDCProviderConfig not implemented")
+}
+func (UnimplementedSystemServiceServer) ValidateOIDCProviderConfig(context.Context, *ValidateOIDCProviderConfigRequest) (*ValidateOIDCProviderConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateOIDCProviderConfig not implemented")
+}
+func (UnimplementedSystemServiceServer) SetOIDCProviderConfig(context.Context, *SetOIDCProviderConfigRequest) (*SetOIDCProviderConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetOIDCProviderConfig not implemented")
+}
+func (UnimplementedSystemServiceServer) DisableOIDCProvider(context.Context, *DisableOIDCProviderRequest) (*DisableOIDCProviderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableOIDCProvider not implemented")
+}
+func (UnimplementedSystemServiceServer) GetSAMLProviderConfig(context.Context, *GetSAMLProviderConfigRequest) (*GetSAMLProviderConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetSAMLProviderConfig not implemented")
+}
+func (UnimplementedSystemServiceServer) ValidateSAMLProviderConfig(context.Context, *ValidateSAMLProviderConfigRequest) (*ValidateSAMLProviderConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateSAMLProviderConfig not implemented")
+}
+func (UnimplementedSystemServiceServer) SetSAMLProviderConfig(context.Context, *SetSAMLProviderConfigRequest) (*SetSAMLProviderConfigResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetSAMLProviderConfig not implemented")
+}
+func (UnimplementedSystemServiceServer) DisableSAMLProvider(context.Context, *DisableSAMLProviderRequest) (*DisableSAMLProviderResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableSAMLProvider not implemented")
+}
+func (UnimplementedSystemServiceServer) CreateLocalUser(context.Context, *CreateLocalUserRequest) (*CreateLocalUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateLocalUser not implemented")
+}
+func (UnimplementedSystemServiceServer) UpdateLocalUser(context.Context, *UpdateLocalUserRequest) (*UpdateLocalUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateLocalUser not implemented")
+}
+func (UnimplementedSystemServiceServer) RotateLocalUserToken(context.Context, *RotateLocalUserTokenRequest) (*RotateLocalUserTokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RotateLocalUserToken not implemented")
+}
+func (UnimplementedSystemServiceServer) DisableLocalUser(context.Context, *DisableLocalUserRequest) (*DisableLocalUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DisableLocalUser not implemented")
+}
+func (UnimplementedSystemServiceServer) RevokeAccessSession(context.Context, *RevokeAccessSessionRequest) (*RevokeAccessSessionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevokeAccessSession not implemented")
+}
+func (UnimplementedSystemServiceServer) TuneHost(context.Context, *TuneHostRequest) (*TuneHostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TuneHost not implemented")
+}
+func (UnimplementedSystemServiceServer) PlanPacketCapture(context.Context, *PlanPacketCaptureRequest) (*PlanPacketCaptureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PlanPacketCapture not implemented")
+}
+func (UnimplementedSystemServiceServer) ListPacketCaptures(context.Context, *ListPacketCapturesRequest) (*ListPacketCapturesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListPacketCaptures not implemented")
+}
+func (UnimplementedSystemServiceServer) StartPacketCapture(context.Context, *StartPacketCaptureRequest) (*StartPacketCaptureResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method StartPacketCapture not implemented")
+}
+func (UnimplementedSystemServiceServer) DownloadPacketCapture(context.Context, *DownloadPacketCaptureRequest) (*httpbody.HttpBody, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DownloadPacketCapture not implemented")
+}
+func (UnimplementedSystemServiceServer) SetPacketCaptureRetention(context.Context, *SetPacketCaptureRetentionRequest) (*SetPacketCaptureRetentionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetPacketCaptureRetention not implemented")
 }
 func (UnimplementedSystemServiceServer) mustEmbedUnimplementedSystemServiceServer() {}
 func (UnimplementedSystemServiceServer) testEmbeddedByValue()                       {}
@@ -116,6 +833,618 @@ func _SystemService_GetVersion_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SystemService_GetStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetStatus(ctx, req.(*GetStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_ProveNetworkPath_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProveNetworkPathRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).ProveNetworkPath(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_ProveNetworkPath_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).ProveNetworkPath(ctx, req.(*ProveNetworkPathRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetTelemetryExportStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTelemetryExportStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetTelemetryExportStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetTelemetryExportStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetTelemetryExportStatus(ctx, req.(*GetTelemetryExportStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_VerifyTelemetryExport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyTelemetryExportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).VerifyTelemetryExport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_VerifyTelemetryExport_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).VerifyTelemetryExport(ctx, req.(*VerifyTelemetryExportRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_ListSystemLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListSystemLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).ListSystemLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_ListSystemLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).ListSystemLogs(ctx, req.(*ListSystemLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_CheckRuntimeReadiness_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CheckRuntimeReadinessRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).CheckRuntimeReadiness(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_CheckRuntimeReadiness_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).CheckRuntimeReadiness(ctx, req.(*CheckRuntimeReadinessRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetHighAvailabilityStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetHighAvailabilityStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetHighAvailabilityStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetHighAvailabilityStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetHighAvailabilityStatus(ctx, req.(*GetHighAvailabilityStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_PullHighAvailabilityPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PullHighAvailabilityPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).PullHighAvailabilityPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_PullHighAvailabilityPolicy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).PullHighAvailabilityPolicy(ctx, req.(*PullHighAvailabilityPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_ActivateHighAvailabilityFailover_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ActivateHighAvailabilityFailoverRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).ActivateHighAvailabilityFailover(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_ActivateHighAvailabilityFailover_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).ActivateHighAvailabilityFailover(ctx, req.(*ActivateHighAvailabilityFailoverRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetReleaseAcceptanceStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetReleaseAcceptanceStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetReleaseAcceptanceStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetReleaseAcceptanceStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetReleaseAcceptanceStatus(ctx, req.(*GetReleaseAcceptanceStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetSupportBundle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSupportBundleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetSupportBundle(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetSupportBundle_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetSupportBundle(ctx, req.(*GetSupportBundleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetIdentity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetIdentityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetIdentity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetIdentity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetIdentity(ctx, req.(*GetIdentityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_CreateStepUpChallenge_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateStepUpChallengeRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).CreateStepUpChallenge(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_CreateStepUpChallenge_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).CreateStepUpChallenge(ctx, req.(*CreateStepUpChallengeRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetAccessAdministration_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetAccessAdministrationRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetAccessAdministration(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetAccessAdministration_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetAccessAdministration(ctx, req.(*GetAccessAdministrationRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_RunOIDCPreflight_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RunOIDCPreflightRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).RunOIDCPreflight(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_RunOIDCPreflight_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).RunOIDCPreflight(ctx, req.(*RunOIDCPreflightRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetOIDCProviderConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetOIDCProviderConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetOIDCProviderConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetOIDCProviderConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetOIDCProviderConfig(ctx, req.(*GetOIDCProviderConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_ValidateOIDCProviderConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateOIDCProviderConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).ValidateOIDCProviderConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_ValidateOIDCProviderConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).ValidateOIDCProviderConfig(ctx, req.(*ValidateOIDCProviderConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_SetOIDCProviderConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetOIDCProviderConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).SetOIDCProviderConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_SetOIDCProviderConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).SetOIDCProviderConfig(ctx, req.(*SetOIDCProviderConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_DisableOIDCProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisableOIDCProviderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).DisableOIDCProvider(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_DisableOIDCProvider_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).DisableOIDCProvider(ctx, req.(*DisableOIDCProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_GetSAMLProviderConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSAMLProviderConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).GetSAMLProviderConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_GetSAMLProviderConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).GetSAMLProviderConfig(ctx, req.(*GetSAMLProviderConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_ValidateSAMLProviderConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateSAMLProviderConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).ValidateSAMLProviderConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_ValidateSAMLProviderConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).ValidateSAMLProviderConfig(ctx, req.(*ValidateSAMLProviderConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_SetSAMLProviderConfig_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetSAMLProviderConfigRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).SetSAMLProviderConfig(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_SetSAMLProviderConfig_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).SetSAMLProviderConfig(ctx, req.(*SetSAMLProviderConfigRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_DisableSAMLProvider_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisableSAMLProviderRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).DisableSAMLProvider(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_DisableSAMLProvider_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).DisableSAMLProvider(ctx, req.(*DisableSAMLProviderRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_CreateLocalUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateLocalUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).CreateLocalUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_CreateLocalUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).CreateLocalUser(ctx, req.(*CreateLocalUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_UpdateLocalUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpdateLocalUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).UpdateLocalUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_UpdateLocalUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).UpdateLocalUser(ctx, req.(*UpdateLocalUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_RotateLocalUserToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RotateLocalUserTokenRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).RotateLocalUserToken(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_RotateLocalUserToken_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).RotateLocalUserToken(ctx, req.(*RotateLocalUserTokenRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_DisableLocalUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DisableLocalUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).DisableLocalUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_DisableLocalUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).DisableLocalUser(ctx, req.(*DisableLocalUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_RevokeAccessSession_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RevokeAccessSessionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).RevokeAccessSession(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_RevokeAccessSession_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).RevokeAccessSession(ctx, req.(*RevokeAccessSessionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_TuneHost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TuneHostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).TuneHost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_TuneHost_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).TuneHost(ctx, req.(*TuneHostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_PlanPacketCapture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PlanPacketCaptureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).PlanPacketCapture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_PlanPacketCapture_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).PlanPacketCapture(ctx, req.(*PlanPacketCaptureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_ListPacketCaptures_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListPacketCapturesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).ListPacketCaptures(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_ListPacketCaptures_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).ListPacketCaptures(ctx, req.(*ListPacketCapturesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_StartPacketCapture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StartPacketCaptureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).StartPacketCapture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_StartPacketCapture_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).StartPacketCapture(ctx, req.(*StartPacketCaptureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_DownloadPacketCapture_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DownloadPacketCaptureRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).DownloadPacketCapture(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_DownloadPacketCapture_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).DownloadPacketCapture(ctx, req.(*DownloadPacketCaptureRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _SystemService_SetPacketCaptureRetention_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetPacketCaptureRetentionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SystemServiceServer).SetPacketCaptureRetention(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: SystemService_SetPacketCaptureRetention_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SystemServiceServer).SetPacketCaptureRetention(ctx, req.(*SetPacketCaptureRetentionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SystemService_ServiceDesc is the grpc.ServiceDesc for SystemService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -126,6 +1455,142 @@ var SystemService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVersion",
 			Handler:    _SystemService_GetVersion_Handler,
+		},
+		{
+			MethodName: "GetStatus",
+			Handler:    _SystemService_GetStatus_Handler,
+		},
+		{
+			MethodName: "ProveNetworkPath",
+			Handler:    _SystemService_ProveNetworkPath_Handler,
+		},
+		{
+			MethodName: "GetTelemetryExportStatus",
+			Handler:    _SystemService_GetTelemetryExportStatus_Handler,
+		},
+		{
+			MethodName: "VerifyTelemetryExport",
+			Handler:    _SystemService_VerifyTelemetryExport_Handler,
+		},
+		{
+			MethodName: "ListSystemLogs",
+			Handler:    _SystemService_ListSystemLogs_Handler,
+		},
+		{
+			MethodName: "CheckRuntimeReadiness",
+			Handler:    _SystemService_CheckRuntimeReadiness_Handler,
+		},
+		{
+			MethodName: "GetHighAvailabilityStatus",
+			Handler:    _SystemService_GetHighAvailabilityStatus_Handler,
+		},
+		{
+			MethodName: "PullHighAvailabilityPolicy",
+			Handler:    _SystemService_PullHighAvailabilityPolicy_Handler,
+		},
+		{
+			MethodName: "ActivateHighAvailabilityFailover",
+			Handler:    _SystemService_ActivateHighAvailabilityFailover_Handler,
+		},
+		{
+			MethodName: "GetReleaseAcceptanceStatus",
+			Handler:    _SystemService_GetReleaseAcceptanceStatus_Handler,
+		},
+		{
+			MethodName: "GetSupportBundle",
+			Handler:    _SystemService_GetSupportBundle_Handler,
+		},
+		{
+			MethodName: "GetIdentity",
+			Handler:    _SystemService_GetIdentity_Handler,
+		},
+		{
+			MethodName: "CreateStepUpChallenge",
+			Handler:    _SystemService_CreateStepUpChallenge_Handler,
+		},
+		{
+			MethodName: "GetAccessAdministration",
+			Handler:    _SystemService_GetAccessAdministration_Handler,
+		},
+		{
+			MethodName: "RunOIDCPreflight",
+			Handler:    _SystemService_RunOIDCPreflight_Handler,
+		},
+		{
+			MethodName: "GetOIDCProviderConfig",
+			Handler:    _SystemService_GetOIDCProviderConfig_Handler,
+		},
+		{
+			MethodName: "ValidateOIDCProviderConfig",
+			Handler:    _SystemService_ValidateOIDCProviderConfig_Handler,
+		},
+		{
+			MethodName: "SetOIDCProviderConfig",
+			Handler:    _SystemService_SetOIDCProviderConfig_Handler,
+		},
+		{
+			MethodName: "DisableOIDCProvider",
+			Handler:    _SystemService_DisableOIDCProvider_Handler,
+		},
+		{
+			MethodName: "GetSAMLProviderConfig",
+			Handler:    _SystemService_GetSAMLProviderConfig_Handler,
+		},
+		{
+			MethodName: "ValidateSAMLProviderConfig",
+			Handler:    _SystemService_ValidateSAMLProviderConfig_Handler,
+		},
+		{
+			MethodName: "SetSAMLProviderConfig",
+			Handler:    _SystemService_SetSAMLProviderConfig_Handler,
+		},
+		{
+			MethodName: "DisableSAMLProvider",
+			Handler:    _SystemService_DisableSAMLProvider_Handler,
+		},
+		{
+			MethodName: "CreateLocalUser",
+			Handler:    _SystemService_CreateLocalUser_Handler,
+		},
+		{
+			MethodName: "UpdateLocalUser",
+			Handler:    _SystemService_UpdateLocalUser_Handler,
+		},
+		{
+			MethodName: "RotateLocalUserToken",
+			Handler:    _SystemService_RotateLocalUserToken_Handler,
+		},
+		{
+			MethodName: "DisableLocalUser",
+			Handler:    _SystemService_DisableLocalUser_Handler,
+		},
+		{
+			MethodName: "RevokeAccessSession",
+			Handler:    _SystemService_RevokeAccessSession_Handler,
+		},
+		{
+			MethodName: "TuneHost",
+			Handler:    _SystemService_TuneHost_Handler,
+		},
+		{
+			MethodName: "PlanPacketCapture",
+			Handler:    _SystemService_PlanPacketCapture_Handler,
+		},
+		{
+			MethodName: "ListPacketCaptures",
+			Handler:    _SystemService_ListPacketCaptures_Handler,
+		},
+		{
+			MethodName: "StartPacketCapture",
+			Handler:    _SystemService_StartPacketCapture_Handler,
+		},
+		{
+			MethodName: "DownloadPacketCapture",
+			Handler:    _SystemService_DownloadPacketCapture_Handler,
+		},
+		{
+			MethodName: "SetPacketCaptureRetention",
+			Handler:    _SystemService_SetPacketCaptureRetention_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

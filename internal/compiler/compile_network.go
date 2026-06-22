@@ -52,8 +52,19 @@ func compileNetwork(p *openngfwv1.Policy, ids *IDsIR) *NetworkIR {
 	if net.GetManageNicOffloads() && ids != nil && !ids.Prevent {
 		out.OffloadOffIfaces = ids.Interfaces
 	}
+	if net.GetEnableFlowOffload() && ids == nil {
+		seen := map[string]bool{}
+		for _, z := range p.GetZones() {
+			for _, ifc := range z.GetInterfaces() {
+				if !seen[ifc] {
+					seen[ifc] = true
+					out.FlowOffloadDevices = append(out.FlowOffloadDevices, ifc)
+				}
+			}
+		}
+	}
 
-	if len(out.Links) == 0 && !out.ClampMSS && len(out.OffloadOffIfaces) == 0 {
+	if len(out.Links) == 0 && !out.ClampMSS && len(out.OffloadOffIfaces) == 0 && len(out.FlowOffloadDevices) == 0 {
 		return nil
 	}
 	return out

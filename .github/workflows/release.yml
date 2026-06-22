@@ -9,6 +9,11 @@ permissions:
   id-token: write # cosign keyless signing + provenance
   attestations: write # SLSA build provenance
 
+env:
+  RELEASE_NO_PERFORMANCE_CLAIMS: "1"
+  PLAYWRIGHT_VERSION: "1.61.0"
+  WEBUI_SMOKE_REQUIRE_BROWSER: "1"
+
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -17,6 +22,37 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version-file: go.mod
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install WebUI browser smoke dependencies
+        env:
+          NPM_CONFIG_CACHE: .npm-cache
+          npm_config_audit: "false"
+          npm_config_fund: "false"
+        run: |
+          npm install --no-save --no-package-lock "playwright@${PLAYWRIGHT_VERSION}"
+          npx playwright install --with-deps chromium
+
+      - name: Lint release sources
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.5.0
+
+      - name: Verify generated API code
+        run: make proto-verify
+
+      - name: Run rootless release gate
+        run: make release-check-rootless RELEASE_NO_PERFORMANCE_CLAIMS="${RELEASE_NO_PERFORMANCE_CLAIMS}"
+
+      - name: Report release acceptance status
+        run: make release-acceptance-status VERSION="${GITHUB_REF_NAME}" COMMIT="${GITHUB_SHA}" RELEASE_NO_PERFORMANCE_CLAIMS="${RELEASE_NO_PERFORMANCE_CLAIMS}"
+
+      - name: Verify release acceptance evidence
+        run: make release-acceptance-verify VERSION="${GITHUB_REF_NAME}" COMMIT="${GITHUB_SHA}" RELEASE_NO_PERFORMANCE_CLAIMS="${RELEASE_NO_PERFORMANCE_CLAIMS}"
+
+      - name: Check release evidence recordability
+        run: make release-recordability-check COMMIT="${GITHUB_SHA}"
 
       - name: Build release binaries
         run: |

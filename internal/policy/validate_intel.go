@@ -1,8 +1,6 @@
 package policy
 
 import (
-	"net/url"
-
 	openngfwv1 "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1"
 	"github.com/detailtech/oss-ngfw/internal/intel"
 )
@@ -40,9 +38,15 @@ func (v *validator) checkIntel(in *openngfwv1.Intel) {
 			continue
 		}
 		seen[cf.GetName()] = true
-		u, err := url.Parse(cf.GetUrl())
-		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
-			v.errf("intel: custom feed %q url must be http(s)", cf.GetName())
+		u, err := intel.ValidateFeedURL(cf.GetUrl())
+		if err != nil {
+			v.errf("intel: custom feed %q url %v", cf.GetName(), err)
+		} else {
+			for _, key := range telemetryRawQueryParamNames(u.RawQuery) {
+				if telemetrySensitiveQueryParam(key) {
+					v.errf("intel: custom feed %q url must not include sensitive query parameter %q; store feed credentials outside policy", cf.GetName(), key)
+				}
+			}
 		}
 	}
 	if iv := in.GetRefreshIntervalMinutes(); iv != 0 && iv < 5 {

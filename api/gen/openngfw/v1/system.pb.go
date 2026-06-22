@@ -14,8 +14,10 @@ package openngfwv1
 
 import (
 	_ "google.golang.org/genproto/googleapis/api/annotations"
+	httpbody "google.golang.org/genproto/googleapis/api/httpbody"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
+	structpb "google.golang.org/protobuf/types/known/structpb"
 	reflect "reflect"
 	sync "sync"
 	unsafe "unsafe"
@@ -27,6 +29,55 @@ const (
 	// Verify that runtime/protoimpl is sufficiently up-to-date.
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
+
+type PacketCaptureRetentionState int32
+
+const (
+	PacketCaptureRetentionState_PACKET_CAPTURE_RETENTION_STATE_UNSPECIFIED PacketCaptureRetentionState = 0
+	PacketCaptureRetentionState_PACKET_CAPTURE_RETENTION_STATE_RETAINED    PacketCaptureRetentionState = 1
+	PacketCaptureRetentionState_PACKET_CAPTURE_RETENTION_STATE_RELEASED    PacketCaptureRetentionState = 2
+)
+
+// Enum value maps for PacketCaptureRetentionState.
+var (
+	PacketCaptureRetentionState_name = map[int32]string{
+		0: "PACKET_CAPTURE_RETENTION_STATE_UNSPECIFIED",
+		1: "PACKET_CAPTURE_RETENTION_STATE_RETAINED",
+		2: "PACKET_CAPTURE_RETENTION_STATE_RELEASED",
+	}
+	PacketCaptureRetentionState_value = map[string]int32{
+		"PACKET_CAPTURE_RETENTION_STATE_UNSPECIFIED": 0,
+		"PACKET_CAPTURE_RETENTION_STATE_RETAINED":    1,
+		"PACKET_CAPTURE_RETENTION_STATE_RELEASED":    2,
+	}
+)
+
+func (x PacketCaptureRetentionState) Enum() *PacketCaptureRetentionState {
+	p := new(PacketCaptureRetentionState)
+	*p = x
+	return p
+}
+
+func (x PacketCaptureRetentionState) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (PacketCaptureRetentionState) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_system_proto_enumTypes[0].Descriptor()
+}
+
+func (PacketCaptureRetentionState) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_system_proto_enumTypes[0]
+}
+
+func (x PacketCaptureRetentionState) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use PacketCaptureRetentionState.Descriptor instead.
+func (PacketCaptureRetentionState) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{0}
+}
 
 type GetVersionRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -127,20 +178,12825 @@ func (x *GetVersionResponse) GetBuildDate() string {
 	return ""
 }
 
+type GetStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetStatusRequest) Reset() {
+	*x = GetStatusRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStatusRequest) ProtoMessage() {}
+
+func (x *GetStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetStatusRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{2}
+}
+
+type GetTelemetryExportStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetTelemetryExportStatusRequest) Reset() {
+	*x = GetTelemetryExportStatusRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTelemetryExportStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTelemetryExportStatusRequest) ProtoMessage() {}
+
+func (x *GetTelemetryExportStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTelemetryExportStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetTelemetryExportStatusRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{3}
+}
+
+type VerifyTelemetryExportRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Optional configured export name. Empty selects the first enabled export.
+	ExportName string `protobuf:"bytes,1,opt,name=export_name,json=exportName,proto3" json:"export_name,omitempty"`
+	// Optional configured export type when name is omitted.
+	Type TelemetryExportType `protobuf:"varint,2,opt,name=type,proto3,enum=openngfw.v1.TelemetryExportType" json:"type,omitempty"`
+	// Optional configured target when name is omitted.
+	Target string `protobuf:"bytes,3,opt,name=target,proto3" json:"target,omitempty"`
+	// Operator-visible reason or ticket context for the synthetic proof event.
+	Reason string `protobuf:"bytes,4,opt,name=reason,proto3" json:"reason,omitempty"`
+	// Required acknowledgement because this writes/sends one synthetic telemetry
+	// event to a configured export sink.
+	AckTestEvent  bool `protobuf:"varint,5,opt,name=ack_test_event,json=ackTestEvent,proto3" json:"ack_test_event,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VerifyTelemetryExportRequest) Reset() {
+	*x = VerifyTelemetryExportRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyTelemetryExportRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyTelemetryExportRequest) ProtoMessage() {}
+
+func (x *VerifyTelemetryExportRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyTelemetryExportRequest.ProtoReflect.Descriptor instead.
+func (*VerifyTelemetryExportRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *VerifyTelemetryExportRequest) GetExportName() string {
+	if x != nil {
+		return x.ExportName
+	}
+	return ""
+}
+
+func (x *VerifyTelemetryExportRequest) GetType() TelemetryExportType {
+	if x != nil {
+		return x.Type
+	}
+	return TelemetryExportType_TELEMETRY_EXPORT_TYPE_UNSPECIFIED
+}
+
+func (x *VerifyTelemetryExportRequest) GetTarget() string {
+	if x != nil {
+		return x.Target
+	}
+	return ""
+}
+
+func (x *VerifyTelemetryExportRequest) GetReason() string {
+	if x != nil {
+		return x.Reason
+	}
+	return ""
+}
+
+func (x *VerifyTelemetryExportRequest) GetAckTestEvent() bool {
+	if x != nil {
+		return x.AckTestEvent
+	}
+	return false
+}
+
+type VerifyTelemetryExportResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchemaVersion string                 `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt   string                 `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	// delivered, written, simulation, invalid, failed, or unavailable.
+	State                string                `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Detail               string                `protobuf:"bytes,4,opt,name=detail,proto3" json:"detail,omitempty"`
+	RunningPolicyVersion uint64                `protobuf:"varint,5,opt,name=running_policy_version,json=runningPolicyVersion,proto3" json:"running_policy_version,omitempty"`
+	Proof                *TelemetryExportProof `protobuf:"bytes,6,opt,name=proof,proto3" json:"proof,omitempty"`
+	Warnings             []string              `protobuf:"bytes,7,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *VerifyTelemetryExportResponse) Reset() {
+	*x = VerifyTelemetryExportResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VerifyTelemetryExportResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VerifyTelemetryExportResponse) ProtoMessage() {}
+
+func (x *VerifyTelemetryExportResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VerifyTelemetryExportResponse.ProtoReflect.Descriptor instead.
+func (*VerifyTelemetryExportResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *VerifyTelemetryExportResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *VerifyTelemetryExportResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *VerifyTelemetryExportResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *VerifyTelemetryExportResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *VerifyTelemetryExportResponse) GetRunningPolicyVersion() uint64 {
+	if x != nil {
+		return x.RunningPolicyVersion
+	}
+	return 0
+}
+
+func (x *VerifyTelemetryExportResponse) GetProof() *TelemetryExportProof {
+	if x != nil {
+		return x.Proof
+	}
+	return nil
+}
+
+func (x *VerifyTelemetryExportResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+type TelemetryExportProof struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProofId       string                 `protobuf:"bytes,1,opt,name=proof_id,json=proofId,proto3" json:"proof_id,omitempty"`
+	ExportName    string                 `protobuf:"bytes,2,opt,name=export_name,json=exportName,proto3" json:"export_name,omitempty"`
+	Type          TelemetryExportType    `protobuf:"varint,3,opt,name=type,proto3,enum=openngfw.v1.TelemetryExportType" json:"type,omitempty"`
+	Protocol      string                 `protobuf:"bytes,4,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	Target        string                 `protobuf:"bytes,5,opt,name=target,proto3" json:"target,omitempty"`
+	Bytes         uint64                 `protobuf:"varint,6,opt,name=bytes,proto3" json:"bytes,omitempty"`
+	EventHash     string                 `protobuf:"bytes,7,opt,name=event_hash,json=eventHash,proto3" json:"event_hash,omitempty"`
+	Evidence      string                 `protobuf:"bytes,8,opt,name=evidence,proto3" json:"evidence,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TelemetryExportProof) Reset() {
+	*x = TelemetryExportProof{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TelemetryExportProof) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TelemetryExportProof) ProtoMessage() {}
+
+func (x *TelemetryExportProof) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TelemetryExportProof.ProtoReflect.Descriptor instead.
+func (*TelemetryExportProof) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *TelemetryExportProof) GetProofId() string {
+	if x != nil {
+		return x.ProofId
+	}
+	return ""
+}
+
+func (x *TelemetryExportProof) GetExportName() string {
+	if x != nil {
+		return x.ExportName
+	}
+	return ""
+}
+
+func (x *TelemetryExportProof) GetType() TelemetryExportType {
+	if x != nil {
+		return x.Type
+	}
+	return TelemetryExportType_TELEMETRY_EXPORT_TYPE_UNSPECIFIED
+}
+
+func (x *TelemetryExportProof) GetProtocol() string {
+	if x != nil {
+		return x.Protocol
+	}
+	return ""
+}
+
+func (x *TelemetryExportProof) GetTarget() string {
+	if x != nil {
+		return x.Target
+	}
+	return ""
+}
+
+func (x *TelemetryExportProof) GetBytes() uint64 {
+	if x != nil {
+		return x.Bytes
+	}
+	return 0
+}
+
+func (x *TelemetryExportProof) GetEventHash() string {
+	if x != nil {
+		return x.EventHash
+	}
+	return ""
+}
+
+func (x *TelemetryExportProof) GetEvidence() string {
+	if x != nil {
+		return x.Evidence
+	}
+	return ""
+}
+
+type ListSystemLogsRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Zero uses the server default. The server caps the value.
+	Limit uint32 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Source facet: system, engine, audit, dataplane, or all/empty.
+	Source string `protobuf:"bytes,2,opt,name=source,proto3" json:"source,omitempty"`
+	// Optional engine name such as suricata, vector, frr, wireguard, or nftables.
+	Engine string `protobuf:"bytes,3,opt,name=engine,proto3" json:"engine,omitempty"`
+	// Severity facet: debug, info, notice, warn, error, critical, or all/empty.
+	Severity string `protobuf:"bytes,4,opt,name=severity,proto3" json:"severity,omitempty"`
+	// Case-insensitive substring match after server-side redaction.
+	Query string `protobuf:"bytes,5,opt,name=query,proto3" json:"query,omitempty"`
+	// RFC 3339 lower bound when log lines carry parseable timestamps.
+	Since string `protobuf:"bytes,6,opt,name=since,proto3" json:"since,omitempty"`
+	// RFC 3339 upper bound when log lines carry parseable timestamps.
+	Until         string `protobuf:"bytes,7,opt,name=until,proto3" json:"until,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSystemLogsRequest) Reset() {
+	*x = ListSystemLogsRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[7]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSystemLogsRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSystemLogsRequest) ProtoMessage() {}
+
+func (x *ListSystemLogsRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[7]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSystemLogsRequest.ProtoReflect.Descriptor instead.
+func (*ListSystemLogsRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{7}
+}
+
+func (x *ListSystemLogsRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListSystemLogsRequest) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *ListSystemLogsRequest) GetEngine() string {
+	if x != nil {
+		return x.Engine
+	}
+	return ""
+}
+
+func (x *ListSystemLogsRequest) GetSeverity() string {
+	if x != nil {
+		return x.Severity
+	}
+	return ""
+}
+
+func (x *ListSystemLogsRequest) GetQuery() string {
+	if x != nil {
+		return x.Query
+	}
+	return ""
+}
+
+func (x *ListSystemLogsRequest) GetSince() string {
+	if x != nil {
+		return x.Since
+	}
+	return ""
+}
+
+func (x *ListSystemLogsRequest) GetUntil() string {
+	if x != nil {
+		return x.Until
+	}
+	return ""
+}
+
+type ListSystemLogsResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchemaVersion string                 `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt   string                 `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	Entries       []*SystemLogEntry      `protobuf:"bytes,3,rep,name=entries,proto3" json:"entries,omitempty"`
+	Summary       *SystemLogSummary      `protobuf:"bytes,4,opt,name=summary,proto3" json:"summary,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListSystemLogsResponse) Reset() {
+	*x = ListSystemLogsResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListSystemLogsResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListSystemLogsResponse) ProtoMessage() {}
+
+func (x *ListSystemLogsResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListSystemLogsResponse.ProtoReflect.Descriptor instead.
+func (*ListSystemLogsResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *ListSystemLogsResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *ListSystemLogsResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *ListSystemLogsResponse) GetEntries() []*SystemLogEntry {
+	if x != nil {
+		return x.Entries
+	}
+	return nil
+}
+
+func (x *ListSystemLogsResponse) GetSummary() *SystemLogSummary {
+	if x != nil {
+		return x.Summary
+	}
+	return nil
+}
+
+type SystemLogEntry struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Timestamp     string                 `protobuf:"bytes,2,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
+	Source        string                 `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
+	Engine        string                 `protobuf:"bytes,4,opt,name=engine,proto3" json:"engine,omitempty"`
+	Severity      string                 `protobuf:"bytes,5,opt,name=severity,proto3" json:"severity,omitempty"`
+	Message       string                 `protobuf:"bytes,6,opt,name=message,proto3" json:"message,omitempty"`
+	Facility      string                 `protobuf:"bytes,7,opt,name=facility,proto3" json:"facility,omitempty"`
+	File          string                 `protobuf:"bytes,8,opt,name=file,proto3" json:"file,omitempty"`
+	Line          uint32                 `protobuf:"varint,9,opt,name=line,proto3" json:"line,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SystemLogEntry) Reset() {
+	*x = SystemLogEntry{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SystemLogEntry) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemLogEntry) ProtoMessage() {}
+
+func (x *SystemLogEntry) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemLogEntry.ProtoReflect.Descriptor instead.
+func (*SystemLogEntry) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SystemLogEntry) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetTimestamp() string {
+	if x != nil {
+		return x.Timestamp
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetEngine() string {
+	if x != nil {
+		return x.Engine
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetSeverity() string {
+	if x != nil {
+		return x.Severity
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetFacility() string {
+	if x != nil {
+		return x.Facility
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetFile() string {
+	if x != nil {
+		return x.File
+	}
+	return ""
+}
+
+func (x *SystemLogEntry) GetLine() uint32 {
+	if x != nil {
+		return x.Line
+	}
+	return 0
+}
+
+type SystemLogSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ScannedFiles  uint32                 `protobuf:"varint,1,opt,name=scanned_files,json=scannedFiles,proto3" json:"scanned_files,omitempty"`
+	ScannedLines  uint32                 `protobuf:"varint,2,opt,name=scanned_lines,json=scannedLines,proto3" json:"scanned_lines,omitempty"`
+	MatchedLines  uint32                 `protobuf:"varint,3,opt,name=matched_lines,json=matchedLines,proto3" json:"matched_lines,omitempty"`
+	Truncated     bool                   `protobuf:"varint,4,opt,name=truncated,proto3" json:"truncated,omitempty"`
+	Sources       []string               `protobuf:"bytes,5,rep,name=sources,proto3" json:"sources,omitempty"`
+	Severities    []string               `protobuf:"bytes,6,rep,name=severities,proto3" json:"severities,omitempty"`
+	Engines       []string               `protobuf:"bytes,7,rep,name=engines,proto3" json:"engines,omitempty"`
+	Warnings      []string               `protobuf:"bytes,8,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SystemLogSummary) Reset() {
+	*x = SystemLogSummary{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SystemLogSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemLogSummary) ProtoMessage() {}
+
+func (x *SystemLogSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemLogSummary.ProtoReflect.Descriptor instead.
+func (*SystemLogSummary) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *SystemLogSummary) GetScannedFiles() uint32 {
+	if x != nil {
+		return x.ScannedFiles
+	}
+	return 0
+}
+
+func (x *SystemLogSummary) GetScannedLines() uint32 {
+	if x != nil {
+		return x.ScannedLines
+	}
+	return 0
+}
+
+func (x *SystemLogSummary) GetMatchedLines() uint32 {
+	if x != nil {
+		return x.MatchedLines
+	}
+	return 0
+}
+
+func (x *SystemLogSummary) GetTruncated() bool {
+	if x != nil {
+		return x.Truncated
+	}
+	return false
+}
+
+func (x *SystemLogSummary) GetSources() []string {
+	if x != nil {
+		return x.Sources
+	}
+	return nil
+}
+
+func (x *SystemLogSummary) GetSeverities() []string {
+	if x != nil {
+		return x.Severities
+	}
+	return nil
+}
+
+func (x *SystemLogSummary) GetEngines() []string {
+	if x != nil {
+		return x.Engines
+	}
+	return nil
+}
+
+func (x *SystemLogSummary) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+type GetTelemetryExportStatusResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchemaVersion string                 `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt   string                 `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	// disabled, configured, ready, degraded, or unknown.
+	State                string                         `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Detail               string                         `protobuf:"bytes,4,opt,name=detail,proto3" json:"detail,omitempty"`
+	TelemetryEnabled     bool                           `protobuf:"varint,5,opt,name=telemetry_enabled,json=telemetryEnabled,proto3" json:"telemetry_enabled,omitempty"`
+	RunningPolicyVersion uint64                         `protobuf:"varint,6,opt,name=running_policy_version,json=runningPolicyVersion,proto3" json:"running_policy_version,omitempty"`
+	Vector               *TelemetryVectorRuntimeStatus  `protobuf:"bytes,7,opt,name=vector,proto3" json:"vector,omitempty"`
+	Clickhouse           *TelemetryClickHouseSinkStatus `protobuf:"bytes,8,opt,name=clickhouse,proto3" json:"clickhouse,omitempty"`
+	Exports              []*TelemetryExportSinkStatus   `protobuf:"bytes,9,rep,name=exports,proto3" json:"exports,omitempty"`
+	Warnings             []*StatusWarning               `protobuf:"bytes,10,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *GetTelemetryExportStatusResponse) Reset() {
+	*x = GetTelemetryExportStatusResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetTelemetryExportStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetTelemetryExportStatusResponse) ProtoMessage() {}
+
+func (x *GetTelemetryExportStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetTelemetryExportStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetTelemetryExportStatusResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *GetTelemetryExportStatusResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *GetTelemetryExportStatusResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *GetTelemetryExportStatusResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *GetTelemetryExportStatusResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *GetTelemetryExportStatusResponse) GetTelemetryEnabled() bool {
+	if x != nil {
+		return x.TelemetryEnabled
+	}
+	return false
+}
+
+func (x *GetTelemetryExportStatusResponse) GetRunningPolicyVersion() uint64 {
+	if x != nil {
+		return x.RunningPolicyVersion
+	}
+	return 0
+}
+
+func (x *GetTelemetryExportStatusResponse) GetVector() *TelemetryVectorRuntimeStatus {
+	if x != nil {
+		return x.Vector
+	}
+	return nil
+}
+
+func (x *GetTelemetryExportStatusResponse) GetClickhouse() *TelemetryClickHouseSinkStatus {
+	if x != nil {
+		return x.Clickhouse
+	}
+	return nil
+}
+
+func (x *GetTelemetryExportStatusResponse) GetExports() []*TelemetryExportSinkStatus {
+	if x != nil {
+		return x.Exports
+	}
+	return nil
+}
+
+func (x *GetTelemetryExportStatusResponse) GetWarnings() []*StatusWarning {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+type TelemetryVectorRuntimeStatus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	State         string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TelemetryVectorRuntimeStatus) Reset() {
+	*x = TelemetryVectorRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TelemetryVectorRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TelemetryVectorRuntimeStatus) ProtoMessage() {}
+
+func (x *TelemetryVectorRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TelemetryVectorRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*TelemetryVectorRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *TelemetryVectorRuntimeStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *TelemetryVectorRuntimeStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type TelemetryClickHouseSinkStatus struct {
+	state          protoimpl.MessageState `protogen:"open.v1"`
+	Configured     bool                   `protobuf:"varint,1,opt,name=configured,proto3" json:"configured,omitempty"`
+	Endpoint       string                 `protobuf:"bytes,2,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	Database       string                 `protobuf:"bytes,3,opt,name=database,proto3" json:"database,omitempty"`
+	EventsTable    string                 `protobuf:"bytes,4,opt,name=events_table,json=eventsTable,proto3" json:"events_table,omitempty"`
+	AlertsTable    string                 `protobuf:"bytes,5,opt,name=alerts_table,json=alertsTable,proto3" json:"alerts_table,omitempty"`
+	EvidenceState  string                 `protobuf:"bytes,6,opt,name=evidence_state,json=evidenceState,proto3" json:"evidence_state,omitempty"`
+	EvidenceDetail string                 `protobuf:"bytes,7,opt,name=evidence_detail,json=evidenceDetail,proto3" json:"evidence_detail,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *TelemetryClickHouseSinkStatus) Reset() {
+	*x = TelemetryClickHouseSinkStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TelemetryClickHouseSinkStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TelemetryClickHouseSinkStatus) ProtoMessage() {}
+
+func (x *TelemetryClickHouseSinkStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TelemetryClickHouseSinkStatus.ProtoReflect.Descriptor instead.
+func (*TelemetryClickHouseSinkStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *TelemetryClickHouseSinkStatus) GetConfigured() bool {
+	if x != nil {
+		return x.Configured
+	}
+	return false
+}
+
+func (x *TelemetryClickHouseSinkStatus) GetEndpoint() string {
+	if x != nil {
+		return x.Endpoint
+	}
+	return ""
+}
+
+func (x *TelemetryClickHouseSinkStatus) GetDatabase() string {
+	if x != nil {
+		return x.Database
+	}
+	return ""
+}
+
+func (x *TelemetryClickHouseSinkStatus) GetEventsTable() string {
+	if x != nil {
+		return x.EventsTable
+	}
+	return ""
+}
+
+func (x *TelemetryClickHouseSinkStatus) GetAlertsTable() string {
+	if x != nil {
+		return x.AlertsTable
+	}
+	return ""
+}
+
+func (x *TelemetryClickHouseSinkStatus) GetEvidenceState() string {
+	if x != nil {
+		return x.EvidenceState
+	}
+	return ""
+}
+
+func (x *TelemetryClickHouseSinkStatus) GetEvidenceDetail() string {
+	if x != nil {
+		return x.EvidenceDetail
+	}
+	return ""
+}
+
+type TelemetryExportSinkStatus struct {
+	state          protoimpl.MessageState      `protogen:"open.v1"`
+	Name           string                      `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Configured     bool                        `protobuf:"varint,2,opt,name=configured,proto3" json:"configured,omitempty"`
+	Type           TelemetryExportType         `protobuf:"varint,3,opt,name=type,proto3,enum=openngfw.v1.TelemetryExportType" json:"type,omitempty"`
+	Target         string                      `protobuf:"bytes,4,opt,name=target,proto3" json:"target,omitempty"`
+	Protocol       string                      `protobuf:"bytes,5,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	EvidenceState  string                      `protobuf:"bytes,6,opt,name=evidence_state,json=evidenceState,proto3" json:"evidence_state,omitempty"`
+	EvidenceDetail string                      `protobuf:"bytes,7,opt,name=evidence_detail,json=evidenceDetail,proto3" json:"evidence_detail,omitempty"`
+	File           *TelemetryLocalFileEvidence `protobuf:"bytes,8,opt,name=file,proto3" json:"file,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *TelemetryExportSinkStatus) Reset() {
+	*x = TelemetryExportSinkStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[14]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TelemetryExportSinkStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TelemetryExportSinkStatus) ProtoMessage() {}
+
+func (x *TelemetryExportSinkStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[14]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TelemetryExportSinkStatus.ProtoReflect.Descriptor instead.
+func (*TelemetryExportSinkStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *TelemetryExportSinkStatus) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *TelemetryExportSinkStatus) GetConfigured() bool {
+	if x != nil {
+		return x.Configured
+	}
+	return false
+}
+
+func (x *TelemetryExportSinkStatus) GetType() TelemetryExportType {
+	if x != nil {
+		return x.Type
+	}
+	return TelemetryExportType_TELEMETRY_EXPORT_TYPE_UNSPECIFIED
+}
+
+func (x *TelemetryExportSinkStatus) GetTarget() string {
+	if x != nil {
+		return x.Target
+	}
+	return ""
+}
+
+func (x *TelemetryExportSinkStatus) GetProtocol() string {
+	if x != nil {
+		return x.Protocol
+	}
+	return ""
+}
+
+func (x *TelemetryExportSinkStatus) GetEvidenceState() string {
+	if x != nil {
+		return x.EvidenceState
+	}
+	return ""
+}
+
+func (x *TelemetryExportSinkStatus) GetEvidenceDetail() string {
+	if x != nil {
+		return x.EvidenceDetail
+	}
+	return ""
+}
+
+func (x *TelemetryExportSinkStatus) GetFile() *TelemetryLocalFileEvidence {
+	if x != nil {
+		return x.File
+	}
+	return nil
+}
+
+type TelemetryLocalFileEvidence struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Path          string                 `protobuf:"bytes,1,opt,name=path,proto3" json:"path,omitempty"`
+	Present       bool                   `protobuf:"varint,2,opt,name=present,proto3" json:"present,omitempty"`
+	SizeBytes     uint64                 `protobuf:"varint,3,opt,name=size_bytes,json=sizeBytes,proto3" json:"size_bytes,omitempty"`
+	ModifiedAt    string                 `protobuf:"bytes,4,opt,name=modified_at,json=modifiedAt,proto3" json:"modified_at,omitempty"`
+	Error         string                 `protobuf:"bytes,5,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TelemetryLocalFileEvidence) Reset() {
+	*x = TelemetryLocalFileEvidence{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[15]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TelemetryLocalFileEvidence) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TelemetryLocalFileEvidence) ProtoMessage() {}
+
+func (x *TelemetryLocalFileEvidence) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[15]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TelemetryLocalFileEvidence.ProtoReflect.Descriptor instead.
+func (*TelemetryLocalFileEvidence) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *TelemetryLocalFileEvidence) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *TelemetryLocalFileEvidence) GetPresent() bool {
+	if x != nil {
+		return x.Present
+	}
+	return false
+}
+
+func (x *TelemetryLocalFileEvidence) GetSizeBytes() uint64 {
+	if x != nil {
+		return x.SizeBytes
+	}
+	return 0
+}
+
+func (x *TelemetryLocalFileEvidence) GetModifiedAt() string {
+	if x != nil {
+		return x.ModifiedAt
+	}
+	return ""
+}
+
+func (x *TelemetryLocalFileEvidence) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type CheckRuntimeReadinessRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Policy that would become live if the reviewed action proceeds.
+	TargetPolicy *Policy `protobuf:"bytes,1,opt,name=target_policy,json=targetPolicy,proto3" json:"target_policy,omitempty"`
+	// Policy currently live before the reviewed action.
+	RunningPolicy *Policy `protobuf:"bytes,2,opt,name=running_policy,json=runningPolicy,proto3" json:"running_policy,omitempty"`
+	// Operator action being reviewed, usually "commit" or "rollback".
+	Operation     string `protobuf:"bytes,3,opt,name=operation,proto3" json:"operation,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckRuntimeReadinessRequest) Reset() {
+	*x = CheckRuntimeReadinessRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[16]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckRuntimeReadinessRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckRuntimeReadinessRequest) ProtoMessage() {}
+
+func (x *CheckRuntimeReadinessRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[16]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckRuntimeReadinessRequest.ProtoReflect.Descriptor instead.
+func (*CheckRuntimeReadinessRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *CheckRuntimeReadinessRequest) GetTargetPolicy() *Policy {
+	if x != nil {
+		return x.TargetPolicy
+	}
+	return nil
+}
+
+func (x *CheckRuntimeReadinessRequest) GetRunningPolicy() *Policy {
+	if x != nil {
+		return x.RunningPolicy
+	}
+	return nil
+}
+
+func (x *CheckRuntimeReadinessRequest) GetOperation() string {
+	if x != nil {
+		return x.Operation
+	}
+	return ""
+}
+
+type CheckRuntimeReadinessResponse struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	SchemaVersion string                  `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt   string                  `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	Operation     string                  `protobuf:"bytes,3,opt,name=operation,proto3" json:"operation,omitempty"`
+	Label         string                  `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	Cls           string                  `protobuf:"bytes,5,opt,name=cls,proto3" json:"cls,omitempty"`
+	RequiresAck   bool                    `protobuf:"varint,6,opt,name=requires_ack,json=requiresAck,proto3" json:"requires_ack,omitempty"`
+	Detail        string                  `protobuf:"bytes,7,opt,name=detail,proto3" json:"detail,omitempty"`
+	Items         []*RuntimeReadinessItem `protobuf:"bytes,8,rep,name=items,proto3" json:"items,omitempty"`
+	Warnings      []string                `protobuf:"bytes,9,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CheckRuntimeReadinessResponse) Reset() {
+	*x = CheckRuntimeReadinessResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CheckRuntimeReadinessResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CheckRuntimeReadinessResponse) ProtoMessage() {}
+
+func (x *CheckRuntimeReadinessResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CheckRuntimeReadinessResponse.ProtoReflect.Descriptor instead.
+func (*CheckRuntimeReadinessResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *CheckRuntimeReadinessResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *CheckRuntimeReadinessResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *CheckRuntimeReadinessResponse) GetOperation() string {
+	if x != nil {
+		return x.Operation
+	}
+	return ""
+}
+
+func (x *CheckRuntimeReadinessResponse) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *CheckRuntimeReadinessResponse) GetCls() string {
+	if x != nil {
+		return x.Cls
+	}
+	return ""
+}
+
+func (x *CheckRuntimeReadinessResponse) GetRequiresAck() bool {
+	if x != nil {
+		return x.RequiresAck
+	}
+	return false
+}
+
+func (x *CheckRuntimeReadinessResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *CheckRuntimeReadinessResponse) GetItems() []*RuntimeReadinessItem {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
+func (x *CheckRuntimeReadinessResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+type RuntimeReadinessItem struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Level         string                 `protobuf:"bytes,2,opt,name=level,proto3" json:"level,omitempty"`
+	Badge         string                 `protobuf:"bytes,3,opt,name=badge,proto3" json:"badge,omitempty"`
+	Title         string                 `protobuf:"bytes,4,opt,name=title,proto3" json:"title,omitempty"`
+	Detail        string                 `protobuf:"bytes,5,opt,name=detail,proto3" json:"detail,omitempty"`
+	Href          string                 `protobuf:"bytes,6,opt,name=href,proto3" json:"href,omitempty"`
+	Command       string                 `protobuf:"bytes,7,opt,name=command,proto3" json:"command,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RuntimeReadinessItem) Reset() {
+	*x = RuntimeReadinessItem{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuntimeReadinessItem) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuntimeReadinessItem) ProtoMessage() {}
+
+func (x *RuntimeReadinessItem) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuntimeReadinessItem.ProtoReflect.Descriptor instead.
+func (*RuntimeReadinessItem) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *RuntimeReadinessItem) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *RuntimeReadinessItem) GetLevel() string {
+	if x != nil {
+		return x.Level
+	}
+	return ""
+}
+
+func (x *RuntimeReadinessItem) GetBadge() string {
+	if x != nil {
+		return x.Badge
+	}
+	return ""
+}
+
+func (x *RuntimeReadinessItem) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *RuntimeReadinessItem) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *RuntimeReadinessItem) GetHref() string {
+	if x != nil {
+		return x.Href
+	}
+	return ""
+}
+
+func (x *RuntimeReadinessItem) GetCommand() string {
+	if x != nil {
+		return x.Command
+	}
+	return ""
+}
+
+type GetHighAvailabilityStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHighAvailabilityStatusRequest) Reset() {
+	*x = GetHighAvailabilityStatusRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHighAvailabilityStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHighAvailabilityStatusRequest) ProtoMessage() {}
+
+func (x *GetHighAvailabilityStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHighAvailabilityStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetHighAvailabilityStatusRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{19}
+}
+
+type GetHighAvailabilityStatusResponse struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	SchemaVersion string                  `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt   string                  `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	Status        *HighAvailabilityStatus `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetHighAvailabilityStatusResponse) Reset() {
+	*x = GetHighAvailabilityStatusResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetHighAvailabilityStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetHighAvailabilityStatusResponse) ProtoMessage() {}
+
+func (x *GetHighAvailabilityStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetHighAvailabilityStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetHighAvailabilityStatusResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *GetHighAvailabilityStatusResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *GetHighAvailabilityStatusResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *GetHighAvailabilityStatusResponse) GetStatus() *HighAvailabilityStatus {
+	if x != nil {
+		return x.Status
+	}
+	return nil
+}
+
+type PullHighAvailabilityPolicyRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required audit comment explaining why this passive node is pulling policy.
+	Comment string `protobuf:"bytes,1,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required acknowledgement that the operator intends to replace the local
+	// running policy from the active peer.
+	AckPull bool `protobuf:"varint,2,opt,name=ack_pull,json=ackPull,proto3" json:"ack_pull,omitempty"`
+	// Passed through to the normal policy apply path for high-risk changes.
+	AckRisk bool `protobuf:"varint,3,opt,name=ack_risk,json=ackRisk,proto3" json:"ack_risk,omitempty"`
+	// Passed through to the normal policy apply path for runtime readiness
+	// warnings.
+	AckRuntime    bool `protobuf:"varint,4,opt,name=ack_runtime,json=ackRuntime,proto3" json:"ack_runtime,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PullHighAvailabilityPolicyRequest) Reset() {
+	*x = PullHighAvailabilityPolicyRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PullHighAvailabilityPolicyRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PullHighAvailabilityPolicyRequest) ProtoMessage() {}
+
+func (x *PullHighAvailabilityPolicyRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PullHighAvailabilityPolicyRequest.ProtoReflect.Descriptor instead.
+func (*PullHighAvailabilityPolicyRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *PullHighAvailabilityPolicyRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *PullHighAvailabilityPolicyRequest) GetAckPull() bool {
+	if x != nil {
+		return x.AckPull
+	}
+	return false
+}
+
+func (x *PullHighAvailabilityPolicyRequest) GetAckRisk() bool {
+	if x != nil {
+		return x.AckRisk
+	}
+	return false
+}
+
+func (x *PullHighAvailabilityPolicyRequest) GetAckRuntime() bool {
+	if x != nil {
+		return x.AckRuntime
+	}
+	return false
+}
+
+type PullHighAvailabilityPolicyResponse struct {
+	state                 protoimpl.MessageState  `protogen:"open.v1"`
+	Version               uint64                  `protobuf:"varint,1,opt,name=version,proto3" json:"version,omitempty"`
+	PreviousVersion       uint64                  `protobuf:"varint,2,opt,name=previous_version,json=previousVersion,proto3" json:"previous_version,omitempty"`
+	VersionInfo           *VersionInfo            `protobuf:"bytes,3,opt,name=version_info,json=versionInfo,proto3" json:"version_info,omitempty"`
+	Before                *HighAvailabilityStatus `protobuf:"bytes,4,opt,name=before,proto3" json:"before,omitempty"`
+	After                 *HighAvailabilityStatus `protobuf:"bytes,5,opt,name=after,proto3" json:"after,omitempty"`
+	PeerVersion           uint64                  `protobuf:"varint,6,opt,name=peer_version,json=peerVersion,proto3" json:"peer_version,omitempty"`
+	PeerArtifactSetSha256 string                  `protobuf:"bytes,7,opt,name=peer_artifact_set_sha256,json=peerArtifactSetSha256,proto3" json:"peer_artifact_set_sha256,omitempty"`
+	Detail                string                  `protobuf:"bytes,8,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *PullHighAvailabilityPolicyResponse) Reset() {
+	*x = PullHighAvailabilityPolicyResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PullHighAvailabilityPolicyResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PullHighAvailabilityPolicyResponse) ProtoMessage() {}
+
+func (x *PullHighAvailabilityPolicyResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PullHighAvailabilityPolicyResponse.ProtoReflect.Descriptor instead.
+func (*PullHighAvailabilityPolicyResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetVersion() uint64 {
+	if x != nil {
+		return x.Version
+	}
+	return 0
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetPreviousVersion() uint64 {
+	if x != nil {
+		return x.PreviousVersion
+	}
+	return 0
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetVersionInfo() *VersionInfo {
+	if x != nil {
+		return x.VersionInfo
+	}
+	return nil
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetBefore() *HighAvailabilityStatus {
+	if x != nil {
+		return x.Before
+	}
+	return nil
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetAfter() *HighAvailabilityStatus {
+	if x != nil {
+		return x.After
+	}
+	return nil
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetPeerVersion() uint64 {
+	if x != nil {
+		return x.PeerVersion
+	}
+	return 0
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetPeerArtifactSetSha256() string {
+	if x != nil {
+		return x.PeerArtifactSetSha256
+	}
+	return ""
+}
+
+func (x *PullHighAvailabilityPolicyResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type ActivateHighAvailabilityFailoverRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required audit comment explaining why this passive node is being marked
+	// active.
+	Comment string `protobuf:"bytes,1,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required acknowledgement that this marks the local passive node active.
+	AckFailover bool `protobuf:"varint,2,opt,name=ack_failover,json=ackFailover,proto3" json:"ack_failover,omitempty"`
+	// Required acknowledgement that traffic/VIP/route cutover is external to
+	// this API call.
+	AckExternalCutover bool `protobuf:"varint,3,opt,name=ack_external_cutover,json=ackExternalCutover,proto3" json:"ack_external_cutover,omitempty"`
+	// Required acknowledgement that peer fencing is external to this API call.
+	AckExternalFencing bool `protobuf:"varint,4,opt,name=ack_external_fencing,json=ackExternalFencing,proto3" json:"ack_external_fencing,omitempty"`
+	// Required for authenticated callers because this is a privileged failover
+	// state transition.
+	StepUpToken   string `protobuf:"bytes,5,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ActivateHighAvailabilityFailoverRequest) Reset() {
+	*x = ActivateHighAvailabilityFailoverRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ActivateHighAvailabilityFailoverRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ActivateHighAvailabilityFailoverRequest) ProtoMessage() {}
+
+func (x *ActivateHighAvailabilityFailoverRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ActivateHighAvailabilityFailoverRequest.ProtoReflect.Descriptor instead.
+func (*ActivateHighAvailabilityFailoverRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *ActivateHighAvailabilityFailoverRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *ActivateHighAvailabilityFailoverRequest) GetAckFailover() bool {
+	if x != nil {
+		return x.AckFailover
+	}
+	return false
+}
+
+func (x *ActivateHighAvailabilityFailoverRequest) GetAckExternalCutover() bool {
+	if x != nil {
+		return x.AckExternalCutover
+	}
+	return false
+}
+
+func (x *ActivateHighAvailabilityFailoverRequest) GetAckExternalFencing() bool {
+	if x != nil {
+		return x.AckExternalFencing
+	}
+	return false
+}
+
+func (x *ActivateHighAvailabilityFailoverRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type ActivateHighAvailabilityFailoverResponse struct {
+	state                protoimpl.MessageState  `protogen:"open.v1"`
+	SchemaVersion        string                  `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	ActivatedAt          string                  `protobuf:"bytes,2,opt,name=activated_at,json=activatedAt,proto3" json:"activated_at,omitempty"`
+	Before               *HighAvailabilityStatus `protobuf:"bytes,3,opt,name=before,proto3" json:"before,omitempty"`
+	After                *HighAvailabilityStatus `protobuf:"bytes,4,opt,name=after,proto3" json:"after,omitempty"`
+	RunningPolicyVersion uint64                  `protobuf:"varint,5,opt,name=running_policy_version,json=runningPolicyVersion,proto3" json:"running_policy_version,omitempty"`
+	LastKnownGoodVersion uint64                  `protobuf:"varint,6,opt,name=last_known_good_version,json=lastKnownGoodVersion,proto3" json:"last_known_good_version,omitempty"`
+	Detail               string                  `protobuf:"bytes,7,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) Reset() {
+	*x = ActivateHighAvailabilityFailoverResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ActivateHighAvailabilityFailoverResponse) ProtoMessage() {}
+
+func (x *ActivateHighAvailabilityFailoverResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ActivateHighAvailabilityFailoverResponse.ProtoReflect.Descriptor instead.
+func (*ActivateHighAvailabilityFailoverResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) GetActivatedAt() string {
+	if x != nil {
+		return x.ActivatedAt
+	}
+	return ""
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) GetBefore() *HighAvailabilityStatus {
+	if x != nil {
+		return x.Before
+	}
+	return nil
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) GetAfter() *HighAvailabilityStatus {
+	if x != nil {
+		return x.After
+	}
+	return nil
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) GetRunningPolicyVersion() uint64 {
+	if x != nil {
+		return x.RunningPolicyVersion
+	}
+	return 0
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) GetLastKnownGoodVersion() uint64 {
+	if x != nil {
+		return x.LastKnownGoodVersion
+	}
+	return 0
+}
+
+func (x *ActivateHighAvailabilityFailoverResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type GetReleaseAcceptanceStatusRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReleaseAcceptanceStatusRequest) Reset() {
+	*x = GetReleaseAcceptanceStatusRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[25]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReleaseAcceptanceStatusRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReleaseAcceptanceStatusRequest) ProtoMessage() {}
+
+func (x *GetReleaseAcceptanceStatusRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[25]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReleaseAcceptanceStatusRequest.ProtoReflect.Descriptor instead.
+func (*GetReleaseAcceptanceStatusRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{25}
+}
+
+type GetSupportBundleRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Number of policy versions to include. Zero uses the server default.
+	VersionLimit uint32 `protobuf:"varint,1,opt,name=version_limit,json=versionLimit,proto3" json:"version_limit,omitempty"`
+	// Number of audit entries to include. Zero uses the server default.
+	AuditLimit uint32 `protobuf:"varint,2,opt,name=audit_limit,json=auditLimit,proto3" json:"audit_limit,omitempty"`
+	// Number of alerts, flows, and sessions to include. Zero uses the server default.
+	EventLimit    uint32 `protobuf:"varint,3,opt,name=event_limit,json=eventLimit,proto3" json:"event_limit,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSupportBundleRequest) Reset() {
+	*x = GetSupportBundleRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[26]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSupportBundleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSupportBundleRequest) ProtoMessage() {}
+
+func (x *GetSupportBundleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[26]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSupportBundleRequest.ProtoReflect.Descriptor instead.
+func (*GetSupportBundleRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{26}
+}
+
+func (x *GetSupportBundleRequest) GetVersionLimit() uint32 {
+	if x != nil {
+		return x.VersionLimit
+	}
+	return 0
+}
+
+func (x *GetSupportBundleRequest) GetAuditLimit() uint32 {
+	if x != nil {
+		return x.AuditLimit
+	}
+	return 0
+}
+
+func (x *GetSupportBundleRequest) GetEventLimit() uint32 {
+	if x != nil {
+		return x.EventLimit
+	}
+	return 0
+}
+
+type GetSupportBundleResponse struct {
+	state         protoimpl.MessageState            `protogen:"open.v1"`
+	SchemaVersion string                            `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	CollectedAt   string                            `protobuf:"bytes,2,opt,name=collected_at,json=collectedAt,proto3" json:"collected_at,omitempty"`
+	Collector     *SupportBundleCollector           `protobuf:"bytes,3,opt,name=collector,proto3" json:"collector,omitempty"`
+	Endpoints     map[string]*SupportBundleEndpoint `protobuf:"bytes,4,rep,name=endpoints,proto3" json:"endpoints,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
+	Summary       *SupportBundleSummary             `protobuf:"bytes,5,opt,name=summary,proto3" json:"summary,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSupportBundleResponse) Reset() {
+	*x = GetSupportBundleResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[27]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSupportBundleResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSupportBundleResponse) ProtoMessage() {}
+
+func (x *GetSupportBundleResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[27]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSupportBundleResponse.ProtoReflect.Descriptor instead.
+func (*GetSupportBundleResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{27}
+}
+
+func (x *GetSupportBundleResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *GetSupportBundleResponse) GetCollectedAt() string {
+	if x != nil {
+		return x.CollectedAt
+	}
+	return ""
+}
+
+func (x *GetSupportBundleResponse) GetCollector() *SupportBundleCollector {
+	if x != nil {
+		return x.Collector
+	}
+	return nil
+}
+
+func (x *GetSupportBundleResponse) GetEndpoints() map[string]*SupportBundleEndpoint {
+	if x != nil {
+		return x.Endpoints
+	}
+	return nil
+}
+
+func (x *GetSupportBundleResponse) GetSummary() *SupportBundleSummary {
+	if x != nil {
+		return x.Summary
+	}
+	return nil
+}
+
+type SupportBundleCollector struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Type          string                 `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	Version       string                 `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SupportBundleCollector) Reset() {
+	*x = SupportBundleCollector{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[28]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SupportBundleCollector) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SupportBundleCollector) ProtoMessage() {}
+
+func (x *SupportBundleCollector) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[28]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SupportBundleCollector.ProtoReflect.Descriptor instead.
+func (*SupportBundleCollector) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{28}
+}
+
+func (x *SupportBundleCollector) GetType() string {
+	if x != nil {
+		return x.Type
+	}
+	return ""
+}
+
+func (x *SupportBundleCollector) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SupportBundleCollector) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+type SupportBundleEndpoint struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Ok            bool                   `protobuf:"varint,1,opt,name=ok,proto3" json:"ok,omitempty"`
+	Data          *structpb.Struct       `protobuf:"bytes,2,opt,name=data,proto3" json:"data,omitempty"`
+	Error         string                 `protobuf:"bytes,3,opt,name=error,proto3" json:"error,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SupportBundleEndpoint) Reset() {
+	*x = SupportBundleEndpoint{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[29]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SupportBundleEndpoint) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SupportBundleEndpoint) ProtoMessage() {}
+
+func (x *SupportBundleEndpoint) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[29]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SupportBundleEndpoint.ProtoReflect.Descriptor instead.
+func (*SupportBundleEndpoint) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{29}
+}
+
+func (x *SupportBundleEndpoint) GetOk() bool {
+	if x != nil {
+		return x.Ok
+	}
+	return false
+}
+
+func (x *SupportBundleEndpoint) GetData() *structpb.Struct {
+	if x != nil {
+		return x.Data
+	}
+	return nil
+}
+
+func (x *SupportBundleEndpoint) GetError() string {
+	if x != nil {
+		return x.Error
+	}
+	return ""
+}
+
+type SupportBundleSummary struct {
+	state                                      protoimpl.MessageState `protogen:"open.v1"`
+	RuntimeVersion                             string                 `protobuf:"bytes,1,opt,name=runtime_version,json=runtimeVersion,proto3" json:"runtime_version,omitempty"`
+	RunningPolicyVersion                       string                 `protobuf:"bytes,2,opt,name=running_policy_version,json=runningPolicyVersion,proto3" json:"running_policy_version,omitempty"`
+	ActiveDataplane                            string                 `protobuf:"bytes,3,opt,name=active_dataplane,json=activeDataplane,proto3" json:"active_dataplane,omitempty"`
+	ConntrackState                             string                 `protobuf:"bytes,4,opt,name=conntrack_state,json=conntrackState,proto3" json:"conntrack_state,omitempty"`
+	ConntrackUsagePercent                      float64                `protobuf:"fixed64,5,opt,name=conntrack_usage_percent,json=conntrackUsagePercent,proto3" json:"conntrack_usage_percent,omitempty"`
+	ConntrackEntries                           uint64                 `protobuf:"varint,6,opt,name=conntrack_entries,json=conntrackEntries,proto3" json:"conntrack_entries,omitempty"`
+	ConntrackMaxEntries                        uint64                 `protobuf:"varint,7,opt,name=conntrack_max_entries,json=conntrackMaxEntries,proto3" json:"conntrack_max_entries,omitempty"`
+	CandidateValidation                        string                 `protobuf:"bytes,8,opt,name=candidate_validation,json=candidateValidation,proto3" json:"candidate_validation,omitempty"`
+	CandidateImpact                            string                 `protobuf:"bytes,9,opt,name=candidate_impact,json=candidateImpact,proto3" json:"candidate_impact,omitempty"`
+	CandidateHasCandidate                      bool                   `protobuf:"varint,10,opt,name=candidate_has_candidate,json=candidateHasCandidate,proto3" json:"candidate_has_candidate,omitempty"`
+	CandidateDirty                             bool                   `protobuf:"varint,11,opt,name=candidate_dirty,json=candidateDirty,proto3" json:"candidate_dirty,omitempty"`
+	CandidateRunningVersion                    uint64                 `protobuf:"varint,12,opt,name=candidate_running_version,json=candidateRunningVersion,proto3" json:"candidate_running_version,omitempty"`
+	CandidateChangeCount                       uint32                 `protobuf:"varint,13,opt,name=candidate_change_count,json=candidateChangeCount,proto3" json:"candidate_change_count,omitempty"`
+	SessionState                               string                 `protobuf:"bytes,14,opt,name=session_state,json=sessionState,proto3" json:"session_state,omitempty"`
+	SessionCount                               int32                  `protobuf:"varint,15,opt,name=session_count,json=sessionCount,proto3" json:"session_count,omitempty"`
+	AlertCount                                 int32                  `protobuf:"varint,16,opt,name=alert_count,json=alertCount,proto3" json:"alert_count,omitempty"`
+	FlowCount                                  int32                  `protobuf:"varint,17,opt,name=flow_count,json=flowCount,proto3" json:"flow_count,omitempty"`
+	FeedCount                                  int32                  `protobuf:"varint,18,opt,name=feed_count,json=feedCount,proto3" json:"feed_count,omitempty"`
+	EnabledFeeds                               int32                  `protobuf:"varint,19,opt,name=enabled_feeds,json=enabledFeeds,proto3" json:"enabled_feeds,omitempty"`
+	ContentPackageCount                        int32                  `protobuf:"varint,20,opt,name=content_package_count,json=contentPackageCount,proto3" json:"content_package_count,omitempty"`
+	VerifiedContentPackages                    int32                  `protobuf:"varint,21,opt,name=verified_content_packages,json=verifiedContentPackages,proto3" json:"verified_content_packages,omitempty"`
+	ContentPackageBlockers                     int32                  `protobuf:"varint,22,opt,name=content_package_blockers,json=contentPackageBlockers,proto3" json:"content_package_blockers,omitempty"`
+	ReleaseAcceptanceState                     string                 `protobuf:"bytes,23,opt,name=release_acceptance_state,json=releaseAcceptanceState,proto3" json:"release_acceptance_state,omitempty"`
+	ReleaseAcceptanceReady                     bool                   `protobuf:"varint,24,opt,name=release_acceptance_ready,json=releaseAcceptanceReady,proto3" json:"release_acceptance_ready,omitempty"`
+	ReleaseAcceptanceManifestPresent           bool                   `protobuf:"varint,25,opt,name=release_acceptance_manifest_present,json=releaseAcceptanceManifestPresent,proto3" json:"release_acceptance_manifest_present,omitempty"`
+	ReleaseAcceptanceMissing                   uint32                 `protobuf:"varint,26,opt,name=release_acceptance_missing,json=releaseAcceptanceMissing,proto3" json:"release_acceptance_missing,omitempty"`
+	ReleaseAcceptanceInvalid                   uint32                 `protobuf:"varint,27,opt,name=release_acceptance_invalid,json=releaseAcceptanceInvalid,proto3" json:"release_acceptance_invalid,omitempty"`
+	ReleaseAcceptanceNotApplicable             uint32                 `protobuf:"varint,28,opt,name=release_acceptance_not_applicable,json=releaseAcceptanceNotApplicable,proto3" json:"release_acceptance_not_applicable,omitempty"`
+	ReleaseAcceptanceTodo                      uint32                 `protobuf:"varint,29,opt,name=release_acceptance_todo,json=releaseAcceptanceTodo,proto3" json:"release_acceptance_todo,omitempty"`
+	ReleaseAcceptanceProblems                  int32                  `protobuf:"varint,30,opt,name=release_acceptance_problems,json=releaseAcceptanceProblems,proto3" json:"release_acceptance_problems,omitempty"`
+	ReleaseAcceptanceNextActions               int32                  `protobuf:"varint,31,opt,name=release_acceptance_next_actions,json=releaseAcceptanceNextActions,proto3" json:"release_acceptance_next_actions,omitempty"`
+	ReleaseAcceptanceNextCommands              int32                  `protobuf:"varint,32,opt,name=release_acceptance_next_commands,json=releaseAcceptanceNextCommands,proto3" json:"release_acceptance_next_commands,omitempty"`
+	AuditIntegrity                             string                 `protobuf:"bytes,33,opt,name=audit_integrity,json=auditIntegrity,proto3" json:"audit_integrity,omitempty"`
+	AuditEntryCount                            uint32                 `protobuf:"varint,34,opt,name=audit_entry_count,json=auditEntryCount,proto3" json:"audit_entry_count,omitempty"`
+	LatestAuditHash                            string                 `protobuf:"bytes,35,opt,name=latest_audit_hash,json=latestAuditHash,proto3" json:"latest_audit_hash,omitempty"`
+	CriticalWarnings                           int32                  `protobuf:"varint,36,opt,name=critical_warnings,json=criticalWarnings,proto3" json:"critical_warnings,omitempty"`
+	Warnings                                   int32                  `protobuf:"varint,37,opt,name=warnings,proto3" json:"warnings,omitempty"`
+	BlockedEngines                             int32                  `protobuf:"varint,38,opt,name=blocked_engines,json=blockedEngines,proto3" json:"blocked_engines,omitempty"`
+	FailedEndpoints                            []string               `protobuf:"bytes,39,rep,name=failed_endpoints,json=failedEndpoints,proto3" json:"failed_endpoints,omitempty"`
+	ReleaseAcceptanceRecordabilityReady        bool                   `protobuf:"varint,40,opt,name=release_acceptance_recordability_ready,json=releaseAcceptanceRecordabilityReady,proto3" json:"release_acceptance_recordability_ready,omitempty"`
+	ReleaseAcceptanceRecordabilityProblems     int32                  `protobuf:"varint,41,opt,name=release_acceptance_recordability_problems,json=releaseAcceptanceRecordabilityProblems,proto3" json:"release_acceptance_recordability_problems,omitempty"`
+	ReleaseAcceptanceDirtySourcePaths          int32                  `protobuf:"varint,42,opt,name=release_acceptance_dirty_source_paths,json=releaseAcceptanceDirtySourcePaths,proto3" json:"release_acceptance_dirty_source_paths,omitempty"`
+	ReleaseAcceptanceTruncatedDirtySourceCount uint32                 `protobuf:"varint,43,opt,name=release_acceptance_truncated_dirty_source_count,json=releaseAcceptanceTruncatedDirtySourceCount,proto3" json:"release_acceptance_truncated_dirty_source_count,omitempty"`
+	TelemetryExportState                       string                 `protobuf:"bytes,44,opt,name=telemetry_export_state,json=telemetryExportState,proto3" json:"telemetry_export_state,omitempty"`
+	TelemetryExportEnabled                     bool                   `protobuf:"varint,45,opt,name=telemetry_export_enabled,json=telemetryExportEnabled,proto3" json:"telemetry_export_enabled,omitempty"`
+	TelemetryExportVectorState                 string                 `protobuf:"bytes,46,opt,name=telemetry_export_vector_state,json=telemetryExportVectorState,proto3" json:"telemetry_export_vector_state,omitempty"`
+	TelemetryExportSinkCount                   int32                  `protobuf:"varint,47,opt,name=telemetry_export_sink_count,json=telemetryExportSinkCount,proto3" json:"telemetry_export_sink_count,omitempty"`
+	TelemetryExportObservedSinkCount           int32                  `protobuf:"varint,48,opt,name=telemetry_export_observed_sink_count,json=telemetryExportObservedSinkCount,proto3" json:"telemetry_export_observed_sink_count,omitempty"`
+	TelemetryExportClickhouseEvidence          string                 `protobuf:"bytes,49,opt,name=telemetry_export_clickhouse_evidence,json=telemetryExportClickhouseEvidence,proto3" json:"telemetry_export_clickhouse_evidence,omitempty"`
+	TelemetryExportWarnings                    int32                  `protobuf:"varint,50,opt,name=telemetry_export_warnings,json=telemetryExportWarnings,proto3" json:"telemetry_export_warnings,omitempty"`
+	unknownFields                              protoimpl.UnknownFields
+	sizeCache                                  protoimpl.SizeCache
+}
+
+func (x *SupportBundleSummary) Reset() {
+	*x = SupportBundleSummary{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[30]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SupportBundleSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SupportBundleSummary) ProtoMessage() {}
+
+func (x *SupportBundleSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[30]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SupportBundleSummary.ProtoReflect.Descriptor instead.
+func (*SupportBundleSummary) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{30}
+}
+
+func (x *SupportBundleSummary) GetRuntimeVersion() string {
+	if x != nil {
+		return x.RuntimeVersion
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetRunningPolicyVersion() string {
+	if x != nil {
+		return x.RunningPolicyVersion
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetActiveDataplane() string {
+	if x != nil {
+		return x.ActiveDataplane
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetConntrackState() string {
+	if x != nil {
+		return x.ConntrackState
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetConntrackUsagePercent() float64 {
+	if x != nil {
+		return x.ConntrackUsagePercent
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetConntrackEntries() uint64 {
+	if x != nil {
+		return x.ConntrackEntries
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetConntrackMaxEntries() uint64 {
+	if x != nil {
+		return x.ConntrackMaxEntries
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetCandidateValidation() string {
+	if x != nil {
+		return x.CandidateValidation
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetCandidateImpact() string {
+	if x != nil {
+		return x.CandidateImpact
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetCandidateHasCandidate() bool {
+	if x != nil {
+		return x.CandidateHasCandidate
+	}
+	return false
+}
+
+func (x *SupportBundleSummary) GetCandidateDirty() bool {
+	if x != nil {
+		return x.CandidateDirty
+	}
+	return false
+}
+
+func (x *SupportBundleSummary) GetCandidateRunningVersion() uint64 {
+	if x != nil {
+		return x.CandidateRunningVersion
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetCandidateChangeCount() uint32 {
+	if x != nil {
+		return x.CandidateChangeCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetSessionState() string {
+	if x != nil {
+		return x.SessionState
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetSessionCount() int32 {
+	if x != nil {
+		return x.SessionCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetAlertCount() int32 {
+	if x != nil {
+		return x.AlertCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetFlowCount() int32 {
+	if x != nil {
+		return x.FlowCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetFeedCount() int32 {
+	if x != nil {
+		return x.FeedCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetEnabledFeeds() int32 {
+	if x != nil {
+		return x.EnabledFeeds
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetContentPackageCount() int32 {
+	if x != nil {
+		return x.ContentPackageCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetVerifiedContentPackages() int32 {
+	if x != nil {
+		return x.VerifiedContentPackages
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetContentPackageBlockers() int32 {
+	if x != nil {
+		return x.ContentPackageBlockers
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceState() string {
+	if x != nil {
+		return x.ReleaseAcceptanceState
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceReady() bool {
+	if x != nil {
+		return x.ReleaseAcceptanceReady
+	}
+	return false
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceManifestPresent() bool {
+	if x != nil {
+		return x.ReleaseAcceptanceManifestPresent
+	}
+	return false
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceMissing() uint32 {
+	if x != nil {
+		return x.ReleaseAcceptanceMissing
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceInvalid() uint32 {
+	if x != nil {
+		return x.ReleaseAcceptanceInvalid
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceNotApplicable() uint32 {
+	if x != nil {
+		return x.ReleaseAcceptanceNotApplicable
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceTodo() uint32 {
+	if x != nil {
+		return x.ReleaseAcceptanceTodo
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceProblems() int32 {
+	if x != nil {
+		return x.ReleaseAcceptanceProblems
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceNextActions() int32 {
+	if x != nil {
+		return x.ReleaseAcceptanceNextActions
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceNextCommands() int32 {
+	if x != nil {
+		return x.ReleaseAcceptanceNextCommands
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetAuditIntegrity() string {
+	if x != nil {
+		return x.AuditIntegrity
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetAuditEntryCount() uint32 {
+	if x != nil {
+		return x.AuditEntryCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetLatestAuditHash() string {
+	if x != nil {
+		return x.LatestAuditHash
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetCriticalWarnings() int32 {
+	if x != nil {
+		return x.CriticalWarnings
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetWarnings() int32 {
+	if x != nil {
+		return x.Warnings
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetBlockedEngines() int32 {
+	if x != nil {
+		return x.BlockedEngines
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetFailedEndpoints() []string {
+	if x != nil {
+		return x.FailedEndpoints
+	}
+	return nil
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceRecordabilityReady() bool {
+	if x != nil {
+		return x.ReleaseAcceptanceRecordabilityReady
+	}
+	return false
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceRecordabilityProblems() int32 {
+	if x != nil {
+		return x.ReleaseAcceptanceRecordabilityProblems
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceDirtySourcePaths() int32 {
+	if x != nil {
+		return x.ReleaseAcceptanceDirtySourcePaths
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetReleaseAcceptanceTruncatedDirtySourceCount() uint32 {
+	if x != nil {
+		return x.ReleaseAcceptanceTruncatedDirtySourceCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetTelemetryExportState() string {
+	if x != nil {
+		return x.TelemetryExportState
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetTelemetryExportEnabled() bool {
+	if x != nil {
+		return x.TelemetryExportEnabled
+	}
+	return false
+}
+
+func (x *SupportBundleSummary) GetTelemetryExportVectorState() string {
+	if x != nil {
+		return x.TelemetryExportVectorState
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetTelemetryExportSinkCount() int32 {
+	if x != nil {
+		return x.TelemetryExportSinkCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetTelemetryExportObservedSinkCount() int32 {
+	if x != nil {
+		return x.TelemetryExportObservedSinkCount
+	}
+	return 0
+}
+
+func (x *SupportBundleSummary) GetTelemetryExportClickhouseEvidence() string {
+	if x != nil {
+		return x.TelemetryExportClickhouseEvidence
+	}
+	return ""
+}
+
+func (x *SupportBundleSummary) GetTelemetryExportWarnings() int32 {
+	if x != nil {
+		return x.TelemetryExportWarnings
+	}
+	return 0
+}
+
+type GetReleaseAcceptanceStatusResponse struct {
+	state           protoimpl.MessageState          `protogen:"open.v1"`
+	SchemaVersion   string                          `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt     string                          `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	ManifestPath    string                          `protobuf:"bytes,3,opt,name=manifest_path,json=manifestPath,proto3" json:"manifest_path,omitempty"`
+	EvidenceDir     string                          `protobuf:"bytes,4,opt,name=evidence_dir,json=evidenceDir,proto3" json:"evidence_dir,omitempty"`
+	ManifestPresent bool                            `protobuf:"varint,5,opt,name=manifest_present,json=manifestPresent,proto3" json:"manifest_present,omitempty"`
+	Ready           bool                            `protobuf:"varint,6,opt,name=ready,proto3" json:"ready,omitempty"`
+	State           string                          `protobuf:"bytes,7,opt,name=state,proto3" json:"state,omitempty"`
+	Summary         *ReleaseAcceptanceStatusSummary `protobuf:"bytes,8,opt,name=summary,proto3" json:"summary,omitempty"`
+	Problems        []string                        `protobuf:"bytes,9,rep,name=problems,proto3" json:"problems,omitempty"`
+	Checks          []*ReleaseAcceptanceCheckStatus `protobuf:"bytes,10,rep,name=checks,proto3" json:"checks,omitempty"`
+	// Advisory checkout preflight for recording evidence from the current source
+	// tree. This is not release evidence and does not affect ready/check state.
+	Recordability *ReleaseAcceptanceRecordabilityStatus `protobuf:"bytes,11,opt,name=recordability,proto3" json:"recordability,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) Reset() {
+	*x = GetReleaseAcceptanceStatusResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[31]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetReleaseAcceptanceStatusResponse) ProtoMessage() {}
+
+func (x *GetReleaseAcceptanceStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[31]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetReleaseAcceptanceStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetReleaseAcceptanceStatusResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{31}
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetManifestPath() string {
+	if x != nil {
+		return x.ManifestPath
+	}
+	return ""
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetEvidenceDir() string {
+	if x != nil {
+		return x.EvidenceDir
+	}
+	return ""
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetManifestPresent() bool {
+	if x != nil {
+		return x.ManifestPresent
+	}
+	return false
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetReady() bool {
+	if x != nil {
+		return x.Ready
+	}
+	return false
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetSummary() *ReleaseAcceptanceStatusSummary {
+	if x != nil {
+		return x.Summary
+	}
+	return nil
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetProblems() []string {
+	if x != nil {
+		return x.Problems
+	}
+	return nil
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetChecks() []*ReleaseAcceptanceCheckStatus {
+	if x != nil {
+		return x.Checks
+	}
+	return nil
+}
+
+func (x *GetReleaseAcceptanceStatusResponse) GetRecordability() *ReleaseAcceptanceRecordabilityStatus {
+	if x != nil {
+		return x.Recordability
+	}
+	return nil
+}
+
+type ReleaseAcceptanceStatusSummary struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Passed        uint32                 `protobuf:"varint,1,opt,name=passed,proto3" json:"passed,omitempty"`
+	Recorded      uint32                 `protobuf:"varint,2,opt,name=recorded,proto3" json:"recorded,omitempty"`
+	Missing       uint32                 `protobuf:"varint,3,opt,name=missing,proto3" json:"missing,omitempty"`
+	Invalid       uint32                 `protobuf:"varint,4,opt,name=invalid,proto3" json:"invalid,omitempty"`
+	NotApplicable uint32                 `protobuf:"varint,5,opt,name=not_applicable,json=notApplicable,proto3" json:"not_applicable,omitempty"`
+	Todo          uint32                 `protobuf:"varint,6,opt,name=todo,proto3" json:"todo,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ReleaseAcceptanceStatusSummary) Reset() {
+	*x = ReleaseAcceptanceStatusSummary{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[32]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReleaseAcceptanceStatusSummary) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReleaseAcceptanceStatusSummary) ProtoMessage() {}
+
+func (x *ReleaseAcceptanceStatusSummary) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[32]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReleaseAcceptanceStatusSummary.ProtoReflect.Descriptor instead.
+func (*ReleaseAcceptanceStatusSummary) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{32}
+}
+
+func (x *ReleaseAcceptanceStatusSummary) GetPassed() uint32 {
+	if x != nil {
+		return x.Passed
+	}
+	return 0
+}
+
+func (x *ReleaseAcceptanceStatusSummary) GetRecorded() uint32 {
+	if x != nil {
+		return x.Recorded
+	}
+	return 0
+}
+
+func (x *ReleaseAcceptanceStatusSummary) GetMissing() uint32 {
+	if x != nil {
+		return x.Missing
+	}
+	return 0
+}
+
+func (x *ReleaseAcceptanceStatusSummary) GetInvalid() uint32 {
+	if x != nil {
+		return x.Invalid
+	}
+	return 0
+}
+
+func (x *ReleaseAcceptanceStatusSummary) GetNotApplicable() uint32 {
+	if x != nil {
+		return x.NotApplicable
+	}
+	return 0
+}
+
+func (x *ReleaseAcceptanceStatusSummary) GetTodo() uint32 {
+	if x != nil {
+		return x.Todo
+	}
+	return 0
+}
+
+type ReleaseAcceptanceCheckStatus struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Name         string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	State        string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Artifact     string                 `protobuf:"bytes,3,opt,name=artifact,proto3" json:"artifact,omitempty"`
+	EvidencePath string                 `protobuf:"bytes,4,opt,name=evidence_path,json=evidencePath,proto3" json:"evidence_path,omitempty"`
+	RanAt        string                 `protobuf:"bytes,5,opt,name=ran_at,json=ranAt,proto3" json:"ran_at,omitempty"`
+	Detail       string                 `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
+	// Evidence command from the recorded artifact. Empty when evidence has not
+	// been recorded.
+	Command  []string `protobuf:"bytes,7,rep,name=command,proto3" json:"command,omitempty"`
+	Problems []string `protobuf:"bytes,8,rep,name=problems,proto3" json:"problems,omitempty"`
+	// Human-readable remediation guidance for the current state. This is not
+	// evidence and must not be treated as proof that a check passed.
+	NextAction string `protobuf:"bytes,9,opt,name=next_action,json=nextAction,proto3" json:"next_action,omitempty"`
+	// Copyable argv for the next evidence-recording step when one is safe to
+	// suggest. Placeholder arguments must be replaced before running.
+	NextCommand      []string `protobuf:"bytes,10,rep,name=next_command,json=nextCommand,proto3" json:"next_command,omitempty"`
+	BenchmarkSummary string   `protobuf:"bytes,11,opt,name=benchmark_summary,json=benchmarkSummary,proto3" json:"benchmark_summary,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ReleaseAcceptanceCheckStatus) Reset() {
+	*x = ReleaseAcceptanceCheckStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[33]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReleaseAcceptanceCheckStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReleaseAcceptanceCheckStatus) ProtoMessage() {}
+
+func (x *ReleaseAcceptanceCheckStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[33]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReleaseAcceptanceCheckStatus.ProtoReflect.Descriptor instead.
+func (*ReleaseAcceptanceCheckStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{33}
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetArtifact() string {
+	if x != nil {
+		return x.Artifact
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetEvidencePath() string {
+	if x != nil {
+		return x.EvidencePath
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetRanAt() string {
+	if x != nil {
+		return x.RanAt
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetCommand() []string {
+	if x != nil {
+		return x.Command
+	}
+	return nil
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetProblems() []string {
+	if x != nil {
+		return x.Problems
+	}
+	return nil
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetNextAction() string {
+	if x != nil {
+		return x.NextAction
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetNextCommand() []string {
+	if x != nil {
+		return x.NextCommand
+	}
+	return nil
+}
+
+func (x *ReleaseAcceptanceCheckStatus) GetBenchmarkSummary() string {
+	if x != nil {
+		return x.BenchmarkSummary
+	}
+	return ""
+}
+
+type ReleaseAcceptanceRecordabilityStatus struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Mirrors releaseacceptance.RecordabilityStatus.
+	Ready             bool     `protobuf:"varint,1,opt,name=ready,proto3" json:"ready,omitempty"`
+	GitHead           string   `protobuf:"bytes,2,opt,name=git_head,json=gitHead,proto3" json:"git_head,omitempty"`
+	RecordCommit      string   `protobuf:"bytes,3,opt,name=record_commit,json=recordCommit,proto3" json:"record_commit,omitempty"`
+	AllowedDirtyPaths []string `protobuf:"bytes,4,rep,name=allowed_dirty_paths,json=allowedDirtyPaths,proto3" json:"allowed_dirty_paths,omitempty"`
+	DirtySourcePaths  []string `protobuf:"bytes,5,rep,name=dirty_source_paths,json=dirtySourcePaths,proto3" json:"dirty_source_paths,omitempty"`
+	Problems          []string `protobuf:"bytes,6,rep,name=problems,proto3" json:"problems,omitempty"`
+	// Deprecated compatibility field for existing support-bundle summaries.
+	// The status API now returns the full dirty_source_paths list.
+	//
+	// Deprecated: Marked as deprecated in openngfw/v1/system.proto.
+	TruncatedDirtySourceCount uint32   `protobuf:"varint,7,opt,name=truncated_dirty_source_count,json=truncatedDirtySourceCount,proto3" json:"truncated_dirty_source_count,omitempty"`
+	StaleEvidencePaths        []string `protobuf:"bytes,8,rep,name=stale_evidence_paths,json=staleEvidencePaths,proto3" json:"stale_evidence_paths,omitempty"`
+	unknownFields             protoimpl.UnknownFields
+	sizeCache                 protoimpl.SizeCache
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) Reset() {
+	*x = ReleaseAcceptanceRecordabilityStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[34]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ReleaseAcceptanceRecordabilityStatus) ProtoMessage() {}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[34]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ReleaseAcceptanceRecordabilityStatus.ProtoReflect.Descriptor instead.
+func (*ReleaseAcceptanceRecordabilityStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{34}
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) GetReady() bool {
+	if x != nil {
+		return x.Ready
+	}
+	return false
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) GetGitHead() string {
+	if x != nil {
+		return x.GitHead
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) GetRecordCommit() string {
+	if x != nil {
+		return x.RecordCommit
+	}
+	return ""
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) GetAllowedDirtyPaths() []string {
+	if x != nil {
+		return x.AllowedDirtyPaths
+	}
+	return nil
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) GetDirtySourcePaths() []string {
+	if x != nil {
+		return x.DirtySourcePaths
+	}
+	return nil
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) GetProblems() []string {
+	if x != nil {
+		return x.Problems
+	}
+	return nil
+}
+
+// Deprecated: Marked as deprecated in openngfw/v1/system.proto.
+func (x *ReleaseAcceptanceRecordabilityStatus) GetTruncatedDirtySourceCount() uint32 {
+	if x != nil {
+		return x.TruncatedDirtySourceCount
+	}
+	return 0
+}
+
+func (x *ReleaseAcceptanceRecordabilityStatus) GetStaleEvidencePaths() []string {
+	if x != nil {
+		return x.StaleEvidencePaths
+	}
+	return nil
+}
+
+type TuneHostRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// "appliance" for the conservative baseline or "throughput" for
+	// high-bandwidth / high-connection-churn forwarding headroom.
+	Profile string `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	// Write the persistent sysctl profile to sysctl_config_path.
+	Write bool `protobuf:"varint,2,opt,name=write,proto3" json:"write,omitempty"`
+	// Apply exposed sysctl keys to the live kernel.
+	Apply bool `protobuf:"varint,3,opt,name=apply,proto3" json:"apply,omitempty"`
+	// Required when write or apply is true.
+	AckHostChange bool `protobuf:"varint,4,opt,name=ack_host_change,json=ackHostChange,proto3" json:"ack_host_change,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TuneHostRequest) Reset() {
+	*x = TuneHostRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[35]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TuneHostRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TuneHostRequest) ProtoMessage() {}
+
+func (x *TuneHostRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[35]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TuneHostRequest.ProtoReflect.Descriptor instead.
+func (*TuneHostRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{35}
+}
+
+func (x *TuneHostRequest) GetProfile() string {
+	if x != nil {
+		return x.Profile
+	}
+	return ""
+}
+
+func (x *TuneHostRequest) GetWrite() bool {
+	if x != nil {
+		return x.Write
+	}
+	return false
+}
+
+func (x *TuneHostRequest) GetApply() bool {
+	if x != nil {
+		return x.Apply
+	}
+	return false
+}
+
+func (x *TuneHostRequest) GetAckHostChange() bool {
+	if x != nil {
+		return x.AckHostChange
+	}
+	return false
+}
+
+type TuneHostResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Profile          string                 `protobuf:"bytes,1,opt,name=profile,proto3" json:"profile,omitempty"`
+	SysctlConfigPath string                 `protobuf:"bytes,2,opt,name=sysctl_config_path,json=sysctlConfigPath,proto3" json:"sysctl_config_path,omitempty"`
+	ConfigText       string                 `protobuf:"bytes,3,opt,name=config_text,json=configText,proto3" json:"config_text,omitempty"`
+	WroteConfig      bool                   `protobuf:"varint,4,opt,name=wrote_config,json=wroteConfig,proto3" json:"wrote_config,omitempty"`
+	AppliedLive      bool                   `protobuf:"varint,5,opt,name=applied_live,json=appliedLive,proto3" json:"applied_live,omitempty"`
+	Results          []*TuneHostResult      `protobuf:"bytes,6,rep,name=results,proto3" json:"results,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *TuneHostResponse) Reset() {
+	*x = TuneHostResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[36]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TuneHostResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TuneHostResponse) ProtoMessage() {}
+
+func (x *TuneHostResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[36]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TuneHostResponse.ProtoReflect.Descriptor instead.
+func (*TuneHostResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{36}
+}
+
+func (x *TuneHostResponse) GetProfile() string {
+	if x != nil {
+		return x.Profile
+	}
+	return ""
+}
+
+func (x *TuneHostResponse) GetSysctlConfigPath() string {
+	if x != nil {
+		return x.SysctlConfigPath
+	}
+	return ""
+}
+
+func (x *TuneHostResponse) GetConfigText() string {
+	if x != nil {
+		return x.ConfigText
+	}
+	return ""
+}
+
+func (x *TuneHostResponse) GetWroteConfig() bool {
+	if x != nil {
+		return x.WroteConfig
+	}
+	return false
+}
+
+func (x *TuneHostResponse) GetAppliedLive() bool {
+	if x != nil {
+		return x.AppliedLive
+	}
+	return false
+}
+
+func (x *TuneHostResponse) GetResults() []*TuneHostResult {
+	if x != nil {
+		return x.Results
+	}
+	return nil
+}
+
+type TuneHostResult struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Key           string                 `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Value         string                 `protobuf:"bytes,2,opt,name=value,proto3" json:"value,omitempty"`
+	State         string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,4,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TuneHostResult) Reset() {
+	*x = TuneHostResult{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[37]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TuneHostResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TuneHostResult) ProtoMessage() {}
+
+func (x *TuneHostResult) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[37]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TuneHostResult.ProtoReflect.Descriptor instead.
+func (*TuneHostResult) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{37}
+}
+
+func (x *TuneHostResult) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *TuneHostResult) GetValue() string {
+	if x != nil {
+		return x.Value
+	}
+	return ""
+}
+
+func (x *TuneHostResult) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *TuneHostResult) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type PlanPacketCaptureRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Interface to capture on. Use "any" only when a specific ingress/egress
+	// interface is unknown.
+	Interface string   `protobuf:"bytes,1,opt,name=interface,proto3" json:"interface,omitempty"`
+	Protocol  Protocol `protobuf:"varint,2,opt,name=protocol,proto3,enum=openngfw.v1.Protocol" json:"protocol,omitempty"`
+	SrcIp     string   `protobuf:"bytes,3,opt,name=src_ip,json=srcIp,proto3" json:"src_ip,omitempty"`
+	SrcPort   uint32   `protobuf:"varint,4,opt,name=src_port,json=srcPort,proto3" json:"src_port,omitempty"`
+	DestIp    string   `protobuf:"bytes,5,opt,name=dest_ip,json=destIp,proto3" json:"dest_ip,omitempty"`
+	DestPort  uint32   `protobuf:"varint,6,opt,name=dest_port,json=destPort,proto3" json:"dest_port,omitempty"`
+	// Bounded capture duration. Server clamps to the supported range.
+	DurationSeconds uint32 `protobuf:"varint,7,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
+	// Maximum packet count. Server clamps to the supported range.
+	PacketCount uint32 `protobuf:"varint,8,opt,name=packet_count,json=packetCount,proto3" json:"packet_count,omitempty"`
+	// Snap length in bytes. Server clamps to the supported range.
+	SnaplenBytes uint32 `protobuf:"varint,9,opt,name=snaplen_bytes,json=snaplenBytes,proto3" json:"snaplen_bytes,omitempty"`
+	// Human label used only for the output filename.
+	Label string `protobuf:"bytes,10,opt,name=label,proto3" json:"label,omitempty"`
+	// Optional telemetry flow identifier preserved with the capture metadata so
+	// Explain can correlate completed artifacts with EVE flow/alert evidence.
+	FlowId        string `protobuf:"bytes,11,opt,name=flow_id,json=flowId,proto3" json:"flow_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlanPacketCaptureRequest) Reset() {
+	*x = PlanPacketCaptureRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[38]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlanPacketCaptureRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlanPacketCaptureRequest) ProtoMessage() {}
+
+func (x *PlanPacketCaptureRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[38]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlanPacketCaptureRequest.ProtoReflect.Descriptor instead.
+func (*PlanPacketCaptureRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{38}
+}
+
+func (x *PlanPacketCaptureRequest) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *PlanPacketCaptureRequest) GetProtocol() Protocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return Protocol_PROTOCOL_UNSPECIFIED
+}
+
+func (x *PlanPacketCaptureRequest) GetSrcIp() string {
+	if x != nil {
+		return x.SrcIp
+	}
+	return ""
+}
+
+func (x *PlanPacketCaptureRequest) GetSrcPort() uint32 {
+	if x != nil {
+		return x.SrcPort
+	}
+	return 0
+}
+
+func (x *PlanPacketCaptureRequest) GetDestIp() string {
+	if x != nil {
+		return x.DestIp
+	}
+	return ""
+}
+
+func (x *PlanPacketCaptureRequest) GetDestPort() uint32 {
+	if x != nil {
+		return x.DestPort
+	}
+	return 0
+}
+
+func (x *PlanPacketCaptureRequest) GetDurationSeconds() uint32 {
+	if x != nil {
+		return x.DurationSeconds
+	}
+	return 0
+}
+
+func (x *PlanPacketCaptureRequest) GetPacketCount() uint32 {
+	if x != nil {
+		return x.PacketCount
+	}
+	return 0
+}
+
+func (x *PlanPacketCaptureRequest) GetSnaplenBytes() uint32 {
+	if x != nil {
+		return x.SnaplenBytes
+	}
+	return 0
+}
+
+func (x *PlanPacketCaptureRequest) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *PlanPacketCaptureRequest) GetFlowId() string {
+	if x != nil {
+		return x.FlowId
+	}
+	return ""
+}
+
+type StartPacketCaptureRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Interface to capture on. Use "any" only when a specific ingress/egress
+	// interface is unknown.
+	Interface string   `protobuf:"bytes,1,opt,name=interface,proto3" json:"interface,omitempty"`
+	Protocol  Protocol `protobuf:"varint,2,opt,name=protocol,proto3,enum=openngfw.v1.Protocol" json:"protocol,omitempty"`
+	SrcIp     string   `protobuf:"bytes,3,opt,name=src_ip,json=srcIp,proto3" json:"src_ip,omitempty"`
+	SrcPort   uint32   `protobuf:"varint,4,opt,name=src_port,json=srcPort,proto3" json:"src_port,omitempty"`
+	DestIp    string   `protobuf:"bytes,5,opt,name=dest_ip,json=destIp,proto3" json:"dest_ip,omitempty"`
+	DestPort  uint32   `protobuf:"varint,6,opt,name=dest_port,json=destPort,proto3" json:"dest_port,omitempty"`
+	// Bounded capture duration. Server clamps to the supported range.
+	DurationSeconds uint32 `protobuf:"varint,7,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
+	// Maximum packet count. Server clamps to the supported range.
+	PacketCount uint32 `protobuf:"varint,8,opt,name=packet_count,json=packetCount,proto3" json:"packet_count,omitempty"`
+	// Snap length in bytes. Server clamps to the supported range.
+	SnaplenBytes uint32 `protobuf:"varint,9,opt,name=snaplen_bytes,json=snaplenBytes,proto3" json:"snaplen_bytes,omitempty"`
+	// Human label used only for the output filename.
+	Label string `protobuf:"bytes,10,opt,name=label,proto3" json:"label,omitempty"`
+	// Required by StartPacketCapture.
+	AckCapture bool `protobuf:"varint,11,opt,name=ack_capture,json=ackCapture,proto3" json:"ack_capture,omitempty"`
+	// Optional telemetry flow identifier preserved with the capture metadata so
+	// Explain can correlate completed artifacts with EVE flow/alert evidence.
+	FlowId        string `protobuf:"bytes,12,opt,name=flow_id,json=flowId,proto3" json:"flow_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartPacketCaptureRequest) Reset() {
+	*x = StartPacketCaptureRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[39]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartPacketCaptureRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartPacketCaptureRequest) ProtoMessage() {}
+
+func (x *StartPacketCaptureRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[39]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StartPacketCaptureRequest.ProtoReflect.Descriptor instead.
+func (*StartPacketCaptureRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{39}
+}
+
+func (x *StartPacketCaptureRequest) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *StartPacketCaptureRequest) GetProtocol() Protocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return Protocol_PROTOCOL_UNSPECIFIED
+}
+
+func (x *StartPacketCaptureRequest) GetSrcIp() string {
+	if x != nil {
+		return x.SrcIp
+	}
+	return ""
+}
+
+func (x *StartPacketCaptureRequest) GetSrcPort() uint32 {
+	if x != nil {
+		return x.SrcPort
+	}
+	return 0
+}
+
+func (x *StartPacketCaptureRequest) GetDestIp() string {
+	if x != nil {
+		return x.DestIp
+	}
+	return ""
+}
+
+func (x *StartPacketCaptureRequest) GetDestPort() uint32 {
+	if x != nil {
+		return x.DestPort
+	}
+	return 0
+}
+
+func (x *StartPacketCaptureRequest) GetDurationSeconds() uint32 {
+	if x != nil {
+		return x.DurationSeconds
+	}
+	return 0
+}
+
+func (x *StartPacketCaptureRequest) GetPacketCount() uint32 {
+	if x != nil {
+		return x.PacketCount
+	}
+	return 0
+}
+
+func (x *StartPacketCaptureRequest) GetSnaplenBytes() uint32 {
+	if x != nil {
+		return x.SnaplenBytes
+	}
+	return 0
+}
+
+func (x *StartPacketCaptureRequest) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *StartPacketCaptureRequest) GetAckCapture() bool {
+	if x != nil {
+		return x.AckCapture
+	}
+	return false
+}
+
+func (x *StartPacketCaptureRequest) GetFlowId() string {
+	if x != nil {
+		return x.FlowId
+	}
+	return ""
+}
+
+type ListPacketCapturesRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Maximum artifacts to return. Zero uses the server default.
+	Limit uint32 `protobuf:"varint,1,opt,name=limit,proto3" json:"limit,omitempty"`
+	// Optional telemetry flow identifier for returning only capture artifacts
+	// that were started or planned for that observed flow.
+	FlowId        string `protobuf:"bytes,2,opt,name=flow_id,json=flowId,proto3" json:"flow_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPacketCapturesRequest) Reset() {
+	*x = ListPacketCapturesRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[40]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPacketCapturesRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPacketCapturesRequest) ProtoMessage() {}
+
+func (x *ListPacketCapturesRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[40]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPacketCapturesRequest.ProtoReflect.Descriptor instead.
+func (*ListPacketCapturesRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{40}
+}
+
+func (x *ListPacketCapturesRequest) GetLimit() uint32 {
+	if x != nil {
+		return x.Limit
+	}
+	return 0
+}
+
+func (x *ListPacketCapturesRequest) GetFlowId() string {
+	if x != nil {
+		return x.FlowId
+	}
+	return ""
+}
+
+type ListPacketCapturesResponse struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Captures []*PacketCaptureJob    `protobuf:"bytes,1,rep,name=captures,proto3" json:"captures,omitempty"`
+	// Server capture directory used for artifact discovery.
+	CaptureDir    string `protobuf:"bytes,2,opt,name=capture_dir,json=captureDir,proto3" json:"capture_dir,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ListPacketCapturesResponse) Reset() {
+	*x = ListPacketCapturesResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[41]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ListPacketCapturesResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ListPacketCapturesResponse) ProtoMessage() {}
+
+func (x *ListPacketCapturesResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[41]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ListPacketCapturesResponse.ProtoReflect.Descriptor instead.
+func (*ListPacketCapturesResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{41}
+}
+
+func (x *ListPacketCapturesResponse) GetCaptures() []*PacketCaptureJob {
+	if x != nil {
+		return x.Captures
+	}
+	return nil
+}
+
+func (x *ListPacketCapturesResponse) GetCaptureDir() string {
+	if x != nil {
+		return x.CaptureDir
+	}
+	return ""
+}
+
+type DownloadPacketCaptureRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Safe capture artifact id, without path separators or extension.
+	Id            string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DownloadPacketCaptureRequest) Reset() {
+	*x = DownloadPacketCaptureRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[42]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DownloadPacketCaptureRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DownloadPacketCaptureRequest) ProtoMessage() {}
+
+func (x *DownloadPacketCaptureRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[42]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DownloadPacketCaptureRequest.ProtoReflect.Descriptor instead.
+func (*DownloadPacketCaptureRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{42}
+}
+
+func (x *DownloadPacketCaptureRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+type PacketCaptureRetention struct {
+	state protoimpl.MessageState      `protogen:"open.v1"`
+	State PacketCaptureRetentionState `protobuf:"varint,1,opt,name=state,proto3,enum=openngfw.v1.PacketCaptureRetentionState" json:"state,omitempty"`
+	// Server-normalized UTC RFC3339Nano timestamp required for retained
+	// artifacts and cleared for released artifacts.
+	RetainUntil string `protobuf:"bytes,2,opt,name=retain_until,json=retainUntil,proto3" json:"retain_until,omitempty"`
+	// Bounded operator reason for the metadata update.
+	RetentionReason string `protobuf:"bytes,3,opt,name=retention_reason,json=retentionReason,proto3" json:"retention_reason,omitempty"`
+	// Optional incident/case label. It is not treated as a custody record.
+	CaseId string `protobuf:"bytes,4,opt,name=case_id,json=caseId,proto3" json:"case_id,omitempty"`
+	// Server timestamp for the last metadata update.
+	UpdatedAt string `protobuf:"bytes,5,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
+	// Server actor name for the last metadata update.
+	UpdatedBy     string `protobuf:"bytes,6,opt,name=updated_by,json=updatedBy,proto3" json:"updated_by,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PacketCaptureRetention) Reset() {
+	*x = PacketCaptureRetention{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[43]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PacketCaptureRetention) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PacketCaptureRetention) ProtoMessage() {}
+
+func (x *PacketCaptureRetention) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[43]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PacketCaptureRetention.ProtoReflect.Descriptor instead.
+func (*PacketCaptureRetention) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{43}
+}
+
+func (x *PacketCaptureRetention) GetState() PacketCaptureRetentionState {
+	if x != nil {
+		return x.State
+	}
+	return PacketCaptureRetentionState_PACKET_CAPTURE_RETENTION_STATE_UNSPECIFIED
+}
+
+func (x *PacketCaptureRetention) GetRetainUntil() string {
+	if x != nil {
+		return x.RetainUntil
+	}
+	return ""
+}
+
+func (x *PacketCaptureRetention) GetRetentionReason() string {
+	if x != nil {
+		return x.RetentionReason
+	}
+	return ""
+}
+
+func (x *PacketCaptureRetention) GetCaseId() string {
+	if x != nil {
+		return x.CaseId
+	}
+	return ""
+}
+
+func (x *PacketCaptureRetention) GetUpdatedAt() string {
+	if x != nil {
+		return x.UpdatedAt
+	}
+	return ""
+}
+
+func (x *PacketCaptureRetention) GetUpdatedBy() string {
+	if x != nil {
+		return x.UpdatedBy
+	}
+	return ""
+}
+
+type SetPacketCaptureRetentionRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Safe capture artifact id, without path separators or extension.
+	Id    string                      `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	State PacketCaptureRetentionState `protobuf:"varint,2,opt,name=state,proto3,enum=openngfw.v1.PacketCaptureRetentionState" json:"state,omitempty"`
+	// Required future UTC RFC3339 timestamp when state is RETAINED.
+	RetainUntil string `protobuf:"bytes,3,opt,name=retain_until,json=retainUntil,proto3" json:"retain_until,omitempty"`
+	// Required bounded operator reason for the metadata update.
+	RetentionReason string `protobuf:"bytes,4,opt,name=retention_reason,json=retentionReason,proto3" json:"retention_reason,omitempty"`
+	// Optional incident/case label.
+	CaseId string `protobuf:"bytes,5,opt,name=case_id,json=caseId,proto3" json:"case_id,omitempty"`
+	// Required acknowledgement because this changes evidence metadata.
+	AckRetentionChange bool `protobuf:"varint,6,opt,name=ack_retention_change,json=ackRetentionChange,proto3" json:"ack_retention_change,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *SetPacketCaptureRetentionRequest) Reset() {
+	*x = SetPacketCaptureRetentionRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[44]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetPacketCaptureRetentionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetPacketCaptureRetentionRequest) ProtoMessage() {}
+
+func (x *SetPacketCaptureRetentionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[44]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetPacketCaptureRetentionRequest.ProtoReflect.Descriptor instead.
+func (*SetPacketCaptureRetentionRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{44}
+}
+
+func (x *SetPacketCaptureRetentionRequest) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *SetPacketCaptureRetentionRequest) GetState() PacketCaptureRetentionState {
+	if x != nil {
+		return x.State
+	}
+	return PacketCaptureRetentionState_PACKET_CAPTURE_RETENTION_STATE_UNSPECIFIED
+}
+
+func (x *SetPacketCaptureRetentionRequest) GetRetainUntil() string {
+	if x != nil {
+		return x.RetainUntil
+	}
+	return ""
+}
+
+func (x *SetPacketCaptureRetentionRequest) GetRetentionReason() string {
+	if x != nil {
+		return x.RetentionReason
+	}
+	return ""
+}
+
+func (x *SetPacketCaptureRetentionRequest) GetCaseId() string {
+	if x != nil {
+		return x.CaseId
+	}
+	return ""
+}
+
+func (x *SetPacketCaptureRetentionRequest) GetAckRetentionChange() bool {
+	if x != nil {
+		return x.AckRetentionChange
+	}
+	return false
+}
+
+type SetPacketCaptureRetentionResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Job           *PacketCaptureJob      `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetPacketCaptureRetentionResponse) Reset() {
+	*x = SetPacketCaptureRetentionResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[45]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetPacketCaptureRetentionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetPacketCaptureRetentionResponse) ProtoMessage() {}
+
+func (x *SetPacketCaptureRetentionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[45]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetPacketCaptureRetentionResponse.ProtoReflect.Descriptor instead.
+func (*SetPacketCaptureRetentionResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{45}
+}
+
+func (x *SetPacketCaptureRetentionResponse) GetJob() *PacketCaptureJob {
+	if x != nil {
+		return x.Job
+	}
+	return nil
+}
+
+type PlanPacketCaptureResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Plan          *PacketCapturePlan     `protobuf:"bytes,1,opt,name=plan,proto3" json:"plan,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PlanPacketCaptureResponse) Reset() {
+	*x = PlanPacketCaptureResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[46]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PlanPacketCaptureResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PlanPacketCaptureResponse) ProtoMessage() {}
+
+func (x *PlanPacketCaptureResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[46]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PlanPacketCaptureResponse.ProtoReflect.Descriptor instead.
+func (*PlanPacketCaptureResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{46}
+}
+
+func (x *PlanPacketCaptureResponse) GetPlan() *PacketCapturePlan {
+	if x != nil {
+		return x.Plan
+	}
+	return nil
+}
+
+type PacketCapturePlan struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Interface       string                 `protobuf:"bytes,1,opt,name=interface,proto3" json:"interface,omitempty"`
+	Protocol        Protocol               `protobuf:"varint,2,opt,name=protocol,proto3,enum=openngfw.v1.Protocol" json:"protocol,omitempty"`
+	SrcIp           string                 `protobuf:"bytes,3,opt,name=src_ip,json=srcIp,proto3" json:"src_ip,omitempty"`
+	SrcPort         uint32                 `protobuf:"varint,4,opt,name=src_port,json=srcPort,proto3" json:"src_port,omitempty"`
+	DestIp          string                 `protobuf:"bytes,5,opt,name=dest_ip,json=destIp,proto3" json:"dest_ip,omitempty"`
+	DestPort        uint32                 `protobuf:"varint,6,opt,name=dest_port,json=destPort,proto3" json:"dest_port,omitempty"`
+	DurationSeconds uint32                 `protobuf:"varint,7,opt,name=duration_seconds,json=durationSeconds,proto3" json:"duration_seconds,omitempty"`
+	PacketCount     uint32                 `protobuf:"varint,8,opt,name=packet_count,json=packetCount,proto3" json:"packet_count,omitempty"`
+	SnaplenBytes    uint32                 `protobuf:"varint,9,opt,name=snaplen_bytes,json=snaplenBytes,proto3" json:"snaplen_bytes,omitempty"`
+	OutputPath      string                 `protobuf:"bytes,10,opt,name=output_path,json=outputPath,proto3" json:"output_path,omitempty"`
+	BpfFilter       string                 `protobuf:"bytes,11,opt,name=bpf_filter,json=bpfFilter,proto3" json:"bpf_filter,omitempty"`
+	// Human-copyable command for local break-glass use.
+	Command string `protobuf:"bytes,12,opt,name=command,proto3" json:"command,omitempty"`
+	// Exact tcpdump argv executed by StartPacketCapture. The server applies the
+	// duration bound without going through a shell.
+	CommandArgv []string `protobuf:"bytes,13,rep,name=command_argv,json=commandArgv,proto3" json:"command_argv,omitempty"`
+	Warnings    []string `protobuf:"bytes,14,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	// Optional telemetry flow identifier supplied by the operator.
+	FlowId        string `protobuf:"bytes,15,opt,name=flow_id,json=flowId,proto3" json:"flow_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PacketCapturePlan) Reset() {
+	*x = PacketCapturePlan{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[47]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PacketCapturePlan) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PacketCapturePlan) ProtoMessage() {}
+
+func (x *PacketCapturePlan) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[47]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PacketCapturePlan.ProtoReflect.Descriptor instead.
+func (*PacketCapturePlan) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{47}
+}
+
+func (x *PacketCapturePlan) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *PacketCapturePlan) GetProtocol() Protocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return Protocol_PROTOCOL_UNSPECIFIED
+}
+
+func (x *PacketCapturePlan) GetSrcIp() string {
+	if x != nil {
+		return x.SrcIp
+	}
+	return ""
+}
+
+func (x *PacketCapturePlan) GetSrcPort() uint32 {
+	if x != nil {
+		return x.SrcPort
+	}
+	return 0
+}
+
+func (x *PacketCapturePlan) GetDestIp() string {
+	if x != nil {
+		return x.DestIp
+	}
+	return ""
+}
+
+func (x *PacketCapturePlan) GetDestPort() uint32 {
+	if x != nil {
+		return x.DestPort
+	}
+	return 0
+}
+
+func (x *PacketCapturePlan) GetDurationSeconds() uint32 {
+	if x != nil {
+		return x.DurationSeconds
+	}
+	return 0
+}
+
+func (x *PacketCapturePlan) GetPacketCount() uint32 {
+	if x != nil {
+		return x.PacketCount
+	}
+	return 0
+}
+
+func (x *PacketCapturePlan) GetSnaplenBytes() uint32 {
+	if x != nil {
+		return x.SnaplenBytes
+	}
+	return 0
+}
+
+func (x *PacketCapturePlan) GetOutputPath() string {
+	if x != nil {
+		return x.OutputPath
+	}
+	return ""
+}
+
+func (x *PacketCapturePlan) GetBpfFilter() string {
+	if x != nil {
+		return x.BpfFilter
+	}
+	return ""
+}
+
+func (x *PacketCapturePlan) GetCommand() string {
+	if x != nil {
+		return x.Command
+	}
+	return ""
+}
+
+func (x *PacketCapturePlan) GetCommandArgv() []string {
+	if x != nil {
+		return x.CommandArgv
+	}
+	return nil
+}
+
+func (x *PacketCapturePlan) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *PacketCapturePlan) GetFlowId() string {
+	if x != nil {
+		return x.FlowId
+	}
+	return ""
+}
+
+type StartPacketCaptureResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Job           *PacketCaptureJob      `protobuf:"bytes,1,opt,name=job,proto3" json:"job,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StartPacketCaptureResponse) Reset() {
+	*x = StartPacketCaptureResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[48]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StartPacketCaptureResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StartPacketCaptureResponse) ProtoMessage() {}
+
+func (x *StartPacketCaptureResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[48]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StartPacketCaptureResponse.ProtoReflect.Descriptor instead.
+func (*StartPacketCaptureResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{48}
+}
+
+func (x *StartPacketCaptureResponse) GetJob() *PacketCaptureJob {
+	if x != nil {
+		return x.Job
+	}
+	return nil
+}
+
+type PacketCaptureJob struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Id           string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	State        string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Detail       string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	Plan         *PacketCapturePlan     `protobuf:"bytes,4,opt,name=plan,proto3" json:"plan,omitempty"`
+	StartedAt    string                 `protobuf:"bytes,5,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
+	CompletedAt  string                 `protobuf:"bytes,6,opt,name=completed_at,json=completedAt,proto3" json:"completed_at,omitempty"`
+	ExitCode     int32                  `protobuf:"varint,7,opt,name=exit_code,json=exitCode,proto3" json:"exit_code,omitempty"`
+	Stderr       string                 `protobuf:"bytes,8,opt,name=stderr,proto3" json:"stderr,omitempty"`
+	BytesWritten uint64                 `protobuf:"varint,9,opt,name=bytes_written,json=bytesWritten,proto3" json:"bytes_written,omitempty"`
+	// SHA-256 of the completed pcap file when the server can read it.
+	Sha256 string `protobuf:"bytes,10,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	// Safe id used by DownloadPacketCapture. It is derived from the pcap
+	// filename and never contains path separators.
+	ArtifactId string `protobuf:"bytes,11,opt,name=artifact_id,json=artifactId,proto3" json:"artifact_id,omitempty"`
+	// Relative REST path for downloading this capture artifact.
+	DownloadPath string `protobuf:"bytes,12,opt,name=download_path,json=downloadPath,proto3" json:"download_path,omitempty"`
+	// Safe pcap filename exposed to clients.
+	Filename string `protobuf:"bytes,13,opt,name=filename,proto3" json:"filename,omitempty"`
+	// Content type used by DownloadPacketCapture.
+	MediaType string `protobuf:"bytes,14,opt,name=media_type,json=mediaType,proto3" json:"media_type,omitempty"`
+	// Non-destructive retention metadata stored in the sidecar only.
+	Retention     *PacketCaptureRetention `protobuf:"bytes,15,opt,name=retention,proto3" json:"retention,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *PacketCaptureJob) Reset() {
+	*x = PacketCaptureJob{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[49]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *PacketCaptureJob) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*PacketCaptureJob) ProtoMessage() {}
+
+func (x *PacketCaptureJob) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[49]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use PacketCaptureJob.ProtoReflect.Descriptor instead.
+func (*PacketCaptureJob) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{49}
+}
+
+func (x *PacketCaptureJob) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetPlan() *PacketCapturePlan {
+	if x != nil {
+		return x.Plan
+	}
+	return nil
+}
+
+func (x *PacketCaptureJob) GetStartedAt() string {
+	if x != nil {
+		return x.StartedAt
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetCompletedAt() string {
+	if x != nil {
+		return x.CompletedAt
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetExitCode() int32 {
+	if x != nil {
+		return x.ExitCode
+	}
+	return 0
+}
+
+func (x *PacketCaptureJob) GetStderr() string {
+	if x != nil {
+		return x.Stderr
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetBytesWritten() uint64 {
+	if x != nil {
+		return x.BytesWritten
+	}
+	return 0
+}
+
+func (x *PacketCaptureJob) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetArtifactId() string {
+	if x != nil {
+		return x.ArtifactId
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetDownloadPath() string {
+	if x != nil {
+		return x.DownloadPath
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetMediaType() string {
+	if x != nil {
+		return x.MediaType
+	}
+	return ""
+}
+
+func (x *PacketCaptureJob) GetRetention() *PacketCaptureRetention {
+	if x != nil {
+		return x.Retention
+	}
+	return nil
+}
+
+type GetIdentityRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetIdentityRequest) Reset() {
+	*x = GetIdentityRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[50]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetIdentityRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetIdentityRequest) ProtoMessage() {}
+
+func (x *GetIdentityRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[50]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetIdentityRequest.ProtoReflect.Descriptor instead.
+func (*GetIdentityRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{50}
+}
+
+type GetIdentityResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Actor         string                 `protobuf:"bytes,1,opt,name=actor,proto3" json:"actor,omitempty"`
+	Role          string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	AuthEnabled   bool                   `protobuf:"varint,3,opt,name=auth_enabled,json=authEnabled,proto3" json:"auth_enabled,omitempty"`
+	AuthSource    string                 `protobuf:"bytes,4,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	Capabilities  []string               `protobuf:"bytes,5,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetIdentityResponse) Reset() {
+	*x = GetIdentityResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[51]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetIdentityResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetIdentityResponse) ProtoMessage() {}
+
+func (x *GetIdentityResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[51]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetIdentityResponse.ProtoReflect.Descriptor instead.
+func (*GetIdentityResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{51}
+}
+
+func (x *GetIdentityResponse) GetActor() string {
+	if x != nil {
+		return x.Actor
+	}
+	return ""
+}
+
+func (x *GetIdentityResponse) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *GetIdentityResponse) GetAuthEnabled() bool {
+	if x != nil {
+		return x.AuthEnabled
+	}
+	return false
+}
+
+func (x *GetIdentityResponse) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *GetIdentityResponse) GetCapabilities() []string {
+	if x != nil {
+		return x.Capabilities
+	}
+	return nil
+}
+
+type CreateStepUpChallengeRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Stable privileged action id, for example commit, rollback,
+	// access-oidc-set, access-local-user-rotate-token, ha-failover-activate, or
+	// content-package-install.
+	Action string `protobuf:"bytes,1,opt,name=action,proto3" json:"action,omitempty"`
+	// Required acknowledgement because the returned token can authorize one
+	// high-risk mutation for the authenticated actor.
+	AckStepUp bool `protobuf:"varint,2,opt,name=ack_step_up,json=ackStepUp,proto3" json:"ack_step_up,omitempty"`
+	// Optional operator-visible reason or ticket context.
+	Comment       string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateStepUpChallengeRequest) Reset() {
+	*x = CreateStepUpChallengeRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[52]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateStepUpChallengeRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateStepUpChallengeRequest) ProtoMessage() {}
+
+func (x *CreateStepUpChallengeRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[52]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateStepUpChallengeRequest.ProtoReflect.Descriptor instead.
+func (*CreateStepUpChallengeRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{52}
+}
+
+func (x *CreateStepUpChallengeRequest) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeRequest) GetAckStepUp() bool {
+	if x != nil {
+		return x.AckStepUp
+	}
+	return false
+}
+
+func (x *CreateStepUpChallengeRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+type CreateStepUpChallengeResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Token         string                 `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	Action        string                 `protobuf:"bytes,2,opt,name=action,proto3" json:"action,omitempty"`
+	Actor         string                 `protobuf:"bytes,3,opt,name=actor,proto3" json:"actor,omitempty"`
+	AuthSource    string                 `protobuf:"bytes,4,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	IssuedAt      string                 `protobuf:"bytes,5,opt,name=issued_at,json=issuedAt,proto3" json:"issued_at,omitempty"`
+	ExpiresAt     string                 `protobuf:"bytes,6,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	Detail        string                 `protobuf:"bytes,7,opt,name=detail,proto3" json:"detail,omitempty"`
+	Warnings      []string               `protobuf:"bytes,8,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateStepUpChallengeResponse) Reset() {
+	*x = CreateStepUpChallengeResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[53]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateStepUpChallengeResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateStepUpChallengeResponse) ProtoMessage() {}
+
+func (x *CreateStepUpChallengeResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[53]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateStepUpChallengeResponse.ProtoReflect.Descriptor instead.
+func (*CreateStepUpChallengeResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{53}
+}
+
+func (x *CreateStepUpChallengeResponse) GetToken() string {
+	if x != nil {
+		return x.Token
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeResponse) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeResponse) GetActor() string {
+	if x != nil {
+		return x.Actor
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeResponse) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeResponse) GetIssuedAt() string {
+	if x != nil {
+		return x.IssuedAt
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeResponse) GetExpiresAt() string {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *CreateStepUpChallengeResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+type GetAccessAdministrationRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAccessAdministrationRequest) Reset() {
+	*x = GetAccessAdministrationRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[54]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAccessAdministrationRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAccessAdministrationRequest) ProtoMessage() {}
+
+func (x *GetAccessAdministrationRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[54]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAccessAdministrationRequest.ProtoReflect.Descriptor instead.
+func (*GetAccessAdministrationRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{54}
+}
+
+type RunOIDCPreflightRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RunOIDCPreflightRequest) Reset() {
+	*x = RunOIDCPreflightRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[55]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RunOIDCPreflightRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RunOIDCPreflightRequest) ProtoMessage() {}
+
+func (x *RunOIDCPreflightRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[55]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RunOIDCPreflightRequest.ProtoReflect.Descriptor instead.
+func (*RunOIDCPreflightRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{55}
+}
+
+type RunOIDCPreflightResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	SchemaVersion string                    `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt   string                    `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	State         string                    `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Label         string                    `protobuf:"bytes,4,opt,name=label,proto3" json:"label,omitempty"`
+	Detail        string                    `protobuf:"bytes,5,opt,name=detail,proto3" json:"detail,omitempty"`
+	Oidc          *AccessAdministrationOidc `protobuf:"bytes,6,opt,name=oidc,proto3" json:"oidc,omitempty"`
+	Checks        []*OIDCPreflightCheck     `protobuf:"bytes,7,rep,name=checks,proto3" json:"checks,omitempty"`
+	Blockers      []string                  `protobuf:"bytes,8,rep,name=blockers,proto3" json:"blockers,omitempty"`
+	Warnings      []string                  `protobuf:"bytes,9,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	Evidence      []string                  `protobuf:"bytes,10,rep,name=evidence,proto3" json:"evidence,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RunOIDCPreflightResponse) Reset() {
+	*x = RunOIDCPreflightResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[56]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RunOIDCPreflightResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RunOIDCPreflightResponse) ProtoMessage() {}
+
+func (x *RunOIDCPreflightResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[56]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RunOIDCPreflightResponse.ProtoReflect.Descriptor instead.
+func (*RunOIDCPreflightResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{56}
+}
+
+func (x *RunOIDCPreflightResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *RunOIDCPreflightResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *RunOIDCPreflightResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *RunOIDCPreflightResponse) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *RunOIDCPreflightResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *RunOIDCPreflightResponse) GetOidc() *AccessAdministrationOidc {
+	if x != nil {
+		return x.Oidc
+	}
+	return nil
+}
+
+func (x *RunOIDCPreflightResponse) GetChecks() []*OIDCPreflightCheck {
+	if x != nil {
+		return x.Checks
+	}
+	return nil
+}
+
+func (x *RunOIDCPreflightResponse) GetBlockers() []string {
+	if x != nil {
+		return x.Blockers
+	}
+	return nil
+}
+
+func (x *RunOIDCPreflightResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *RunOIDCPreflightResponse) GetEvidence() []string {
+	if x != nil {
+		return x.Evidence
+	}
+	return nil
+}
+
+type OIDCPreflightCheck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Id            string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Label         string                 `protobuf:"bytes,2,opt,name=label,proto3" json:"label,omitempty"`
+	State         string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Class         string                 `protobuf:"bytes,4,opt,name=class,proto3" json:"class,omitempty"`
+	Detail        string                 `protobuf:"bytes,5,opt,name=detail,proto3" json:"detail,omitempty"`
+	Evidence      string                 `protobuf:"bytes,6,opt,name=evidence,proto3" json:"evidence,omitempty"`
+	NextAction    string                 `protobuf:"bytes,7,opt,name=next_action,json=nextAction,proto3" json:"next_action,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OIDCPreflightCheck) Reset() {
+	*x = OIDCPreflightCheck{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[57]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OIDCPreflightCheck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OIDCPreflightCheck) ProtoMessage() {}
+
+func (x *OIDCPreflightCheck) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[57]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OIDCPreflightCheck.ProtoReflect.Descriptor instead.
+func (*OIDCPreflightCheck) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{57}
+}
+
+func (x *OIDCPreflightCheck) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *OIDCPreflightCheck) GetLabel() string {
+	if x != nil {
+		return x.Label
+	}
+	return ""
+}
+
+func (x *OIDCPreflightCheck) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *OIDCPreflightCheck) GetClass() string {
+	if x != nil {
+		return x.Class
+	}
+	return ""
+}
+
+func (x *OIDCPreflightCheck) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *OIDCPreflightCheck) GetEvidence() string {
+	if x != nil {
+		return x.Evidence
+	}
+	return ""
+}
+
+func (x *OIDCPreflightCheck) GetNextAction() string {
+	if x != nil {
+		return x.NextAction
+	}
+	return ""
+}
+
+type GetOIDCProviderConfigRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOIDCProviderConfigRequest) Reset() {
+	*x = GetOIDCProviderConfigRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[58]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOIDCProviderConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOIDCProviderConfigRequest) ProtoMessage() {}
+
+func (x *GetOIDCProviderConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[58]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOIDCProviderConfigRequest.ProtoReflect.Descriptor instead.
+func (*GetOIDCProviderConfigRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{58}
+}
+
+type GetOIDCProviderConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *OIDCProviderConfig    `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Detail        string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetOIDCProviderConfigResponse) Reset() {
+	*x = GetOIDCProviderConfigResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[59]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetOIDCProviderConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetOIDCProviderConfigResponse) ProtoMessage() {}
+
+func (x *GetOIDCProviderConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[59]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetOIDCProviderConfigResponse.ProtoReflect.Descriptor instead.
+func (*GetOIDCProviderConfigResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{59}
+}
+
+func (x *GetOIDCProviderConfigResponse) GetConfig() *OIDCProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+func (x *GetOIDCProviderConfigResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type ValidateOIDCProviderConfigRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *OIDCProviderConfig    `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateOIDCProviderConfigRequest) Reset() {
+	*x = ValidateOIDCProviderConfigRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[60]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateOIDCProviderConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateOIDCProviderConfigRequest) ProtoMessage() {}
+
+func (x *ValidateOIDCProviderConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[60]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateOIDCProviderConfigRequest.ProtoReflect.Descriptor instead.
+func (*ValidateOIDCProviderConfigRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{60}
+}
+
+func (x *ValidateOIDCProviderConfigRequest) GetConfig() *OIDCProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type ValidateOIDCProviderConfigResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	State            string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail           string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	Blockers         []string               `protobuf:"bytes,3,rep,name=blockers,proto3" json:"blockers,omitempty"`
+	Warnings         []string               `protobuf:"bytes,4,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	NormalizedConfig *OIDCProviderConfig    `protobuf:"bytes,5,opt,name=normalized_config,json=normalizedConfig,proto3" json:"normalized_config,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ValidateOIDCProviderConfigResponse) Reset() {
+	*x = ValidateOIDCProviderConfigResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[61]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateOIDCProviderConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateOIDCProviderConfigResponse) ProtoMessage() {}
+
+func (x *ValidateOIDCProviderConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[61]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateOIDCProviderConfigResponse.ProtoReflect.Descriptor instead.
+func (*ValidateOIDCProviderConfigResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{61}
+}
+
+func (x *ValidateOIDCProviderConfigResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ValidateOIDCProviderConfigResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *ValidateOIDCProviderConfigResponse) GetBlockers() []string {
+	if x != nil {
+		return x.Blockers
+	}
+	return nil
+}
+
+func (x *ValidateOIDCProviderConfigResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *ValidateOIDCProviderConfigResponse) GetNormalizedConfig() *OIDCProviderConfig {
+	if x != nil {
+		return x.NormalizedConfig
+	}
+	return nil
+}
+
+type SetOIDCProviderConfigRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Config *OIDCProviderConfig    `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	// Required acknowledgement because this changes browser SSO access.
+	AckOidcChange bool `protobuf:"varint,2,opt,name=ack_oidc_change,json=ackOidcChange,proto3" json:"ack_oidc_change,omitempty"`
+	// Required audit comment explaining why browser SSO is changing.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this changes browser SSO access.
+	StepUpToken   string `protobuf:"bytes,4,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetOIDCProviderConfigRequest) Reset() {
+	*x = SetOIDCProviderConfigRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[62]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetOIDCProviderConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetOIDCProviderConfigRequest) ProtoMessage() {}
+
+func (x *SetOIDCProviderConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[62]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetOIDCProviderConfigRequest.ProtoReflect.Descriptor instead.
+func (*SetOIDCProviderConfigRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{62}
+}
+
+func (x *SetOIDCProviderConfigRequest) GetConfig() *OIDCProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+func (x *SetOIDCProviderConfigRequest) GetAckOidcChange() bool {
+	if x != nil {
+		return x.AckOidcChange
+	}
+	return false
+}
+
+func (x *SetOIDCProviderConfigRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *SetOIDCProviderConfigRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type SetOIDCProviderConfigResponse struct {
+	state               protoimpl.MessageState    `protogen:"open.v1"`
+	Config              *OIDCProviderConfig       `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Oidc                *AccessAdministrationOidc `protobuf:"bytes,2,opt,name=oidc,proto3" json:"oidc,omitempty"`
+	Detail              string                    `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	RevokedOidcSessions uint32                    `protobuf:"varint,4,opt,name=revoked_oidc_sessions,json=revokedOidcSessions,proto3" json:"revoked_oidc_sessions,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *SetOIDCProviderConfigResponse) Reset() {
+	*x = SetOIDCProviderConfigResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[63]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetOIDCProviderConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetOIDCProviderConfigResponse) ProtoMessage() {}
+
+func (x *SetOIDCProviderConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[63]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetOIDCProviderConfigResponse.ProtoReflect.Descriptor instead.
+func (*SetOIDCProviderConfigResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{63}
+}
+
+func (x *SetOIDCProviderConfigResponse) GetConfig() *OIDCProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+func (x *SetOIDCProviderConfigResponse) GetOidc() *AccessAdministrationOidc {
+	if x != nil {
+		return x.Oidc
+	}
+	return nil
+}
+
+func (x *SetOIDCProviderConfigResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *SetOIDCProviderConfigResponse) GetRevokedOidcSessions() uint32 {
+	if x != nil {
+		return x.RevokedOidcSessions
+	}
+	return 0
+}
+
+type DisableOIDCProviderRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required acknowledgement because this disables browser SSO.
+	AckDisableOidc bool `protobuf:"varint,1,opt,name=ack_disable_oidc,json=ackDisableOidc,proto3" json:"ack_disable_oidc,omitempty"`
+	// Required audit comment explaining why browser SSO is being disabled.
+	Comment string `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this disables browser SSO.
+	StepUpToken   string `protobuf:"bytes,3,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DisableOIDCProviderRequest) Reset() {
+	*x = DisableOIDCProviderRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[64]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DisableOIDCProviderRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisableOIDCProviderRequest) ProtoMessage() {}
+
+func (x *DisableOIDCProviderRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[64]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisableOIDCProviderRequest.ProtoReflect.Descriptor instead.
+func (*DisableOIDCProviderRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{64}
+}
+
+func (x *DisableOIDCProviderRequest) GetAckDisableOidc() bool {
+	if x != nil {
+		return x.AckDisableOidc
+	}
+	return false
+}
+
+func (x *DisableOIDCProviderRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *DisableOIDCProviderRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type DisableOIDCProviderResponse struct {
+	state               protoimpl.MessageState `protogen:"open.v1"`
+	Disabled            bool                   `protobuf:"varint,1,opt,name=disabled,proto3" json:"disabled,omitempty"`
+	Detail              string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	RevokedOidcSessions uint32                 `protobuf:"varint,3,opt,name=revoked_oidc_sessions,json=revokedOidcSessions,proto3" json:"revoked_oidc_sessions,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *DisableOIDCProviderResponse) Reset() {
+	*x = DisableOIDCProviderResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[65]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DisableOIDCProviderResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisableOIDCProviderResponse) ProtoMessage() {}
+
+func (x *DisableOIDCProviderResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[65]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisableOIDCProviderResponse.ProtoReflect.Descriptor instead.
+func (*DisableOIDCProviderResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{65}
+}
+
+func (x *DisableOIDCProviderResponse) GetDisabled() bool {
+	if x != nil {
+		return x.Disabled
+	}
+	return false
+}
+
+func (x *DisableOIDCProviderResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *DisableOIDCProviderResponse) GetRevokedOidcSessions() uint32 {
+	if x != nil {
+		return x.RevokedOidcSessions
+	}
+	return 0
+}
+
+type GetSAMLProviderConfigRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSAMLProviderConfigRequest) Reset() {
+	*x = GetSAMLProviderConfigRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[66]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSAMLProviderConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSAMLProviderConfigRequest) ProtoMessage() {}
+
+func (x *GetSAMLProviderConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[66]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSAMLProviderConfigRequest.ProtoReflect.Descriptor instead.
+func (*GetSAMLProviderConfigRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{66}
+}
+
+type GetSAMLProviderConfigResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *SAMLProviderConfig    `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Detail        string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetSAMLProviderConfigResponse) Reset() {
+	*x = GetSAMLProviderConfigResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[67]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetSAMLProviderConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetSAMLProviderConfigResponse) ProtoMessage() {}
+
+func (x *GetSAMLProviderConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[67]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetSAMLProviderConfigResponse.ProtoReflect.Descriptor instead.
+func (*GetSAMLProviderConfigResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{67}
+}
+
+func (x *GetSAMLProviderConfigResponse) GetConfig() *SAMLProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+func (x *GetSAMLProviderConfigResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type ValidateSAMLProviderConfigRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Config        *SAMLProviderConfig    `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ValidateSAMLProviderConfigRequest) Reset() {
+	*x = ValidateSAMLProviderConfigRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[68]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateSAMLProviderConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateSAMLProviderConfigRequest) ProtoMessage() {}
+
+func (x *ValidateSAMLProviderConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[68]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateSAMLProviderConfigRequest.ProtoReflect.Descriptor instead.
+func (*ValidateSAMLProviderConfigRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{68}
+}
+
+func (x *ValidateSAMLProviderConfigRequest) GetConfig() *SAMLProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+type ValidateSAMLProviderConfigResponse struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	State            string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail           string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	Blockers         []string               `protobuf:"bytes,3,rep,name=blockers,proto3" json:"blockers,omitempty"`
+	Warnings         []string               `protobuf:"bytes,4,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	NormalizedConfig *SAMLProviderConfig    `protobuf:"bytes,5,opt,name=normalized_config,json=normalizedConfig,proto3" json:"normalized_config,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *ValidateSAMLProviderConfigResponse) Reset() {
+	*x = ValidateSAMLProviderConfigResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[69]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ValidateSAMLProviderConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ValidateSAMLProviderConfigResponse) ProtoMessage() {}
+
+func (x *ValidateSAMLProviderConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[69]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ValidateSAMLProviderConfigResponse.ProtoReflect.Descriptor instead.
+func (*ValidateSAMLProviderConfigResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{69}
+}
+
+func (x *ValidateSAMLProviderConfigResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ValidateSAMLProviderConfigResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *ValidateSAMLProviderConfigResponse) GetBlockers() []string {
+	if x != nil {
+		return x.Blockers
+	}
+	return nil
+}
+
+func (x *ValidateSAMLProviderConfigResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *ValidateSAMLProviderConfigResponse) GetNormalizedConfig() *SAMLProviderConfig {
+	if x != nil {
+		return x.NormalizedConfig
+	}
+	return nil
+}
+
+type SetSAMLProviderConfigRequest struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	Config *SAMLProviderConfig    `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	// Required acknowledgement because this changes browser SSO access posture.
+	AckSamlChange bool `protobuf:"varint,2,opt,name=ack_saml_change,json=ackSamlChange,proto3" json:"ack_saml_change,omitempty"`
+	// Required audit comment explaining why SAML provider posture is changing.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this changes browser SSO access.
+	StepUpToken   string `protobuf:"bytes,4,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetSAMLProviderConfigRequest) Reset() {
+	*x = SetSAMLProviderConfigRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[70]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetSAMLProviderConfigRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetSAMLProviderConfigRequest) ProtoMessage() {}
+
+func (x *SetSAMLProviderConfigRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[70]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetSAMLProviderConfigRequest.ProtoReflect.Descriptor instead.
+func (*SetSAMLProviderConfigRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{70}
+}
+
+func (x *SetSAMLProviderConfigRequest) GetConfig() *SAMLProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+func (x *SetSAMLProviderConfigRequest) GetAckSamlChange() bool {
+	if x != nil {
+		return x.AckSamlChange
+	}
+	return false
+}
+
+func (x *SetSAMLProviderConfigRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *SetSAMLProviderConfigRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type SetSAMLProviderConfigResponse struct {
+	state         protoimpl.MessageState    `protogen:"open.v1"`
+	Config        *SAMLProviderConfig       `protobuf:"bytes,1,opt,name=config,proto3" json:"config,omitempty"`
+	Saml          *AccessAdministrationSaml `protobuf:"bytes,2,opt,name=saml,proto3" json:"saml,omitempty"`
+	Detail        string                    `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SetSAMLProviderConfigResponse) Reset() {
+	*x = SetSAMLProviderConfigResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[71]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SetSAMLProviderConfigResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SetSAMLProviderConfigResponse) ProtoMessage() {}
+
+func (x *SetSAMLProviderConfigResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[71]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SetSAMLProviderConfigResponse.ProtoReflect.Descriptor instead.
+func (*SetSAMLProviderConfigResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{71}
+}
+
+func (x *SetSAMLProviderConfigResponse) GetConfig() *SAMLProviderConfig {
+	if x != nil {
+		return x.Config
+	}
+	return nil
+}
+
+func (x *SetSAMLProviderConfigResponse) GetSaml() *AccessAdministrationSaml {
+	if x != nil {
+		return x.Saml
+	}
+	return nil
+}
+
+func (x *SetSAMLProviderConfigResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type DisableSAMLProviderRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Required acknowledgement because this disables SAML browser SSO posture.
+	AckDisableSaml bool `protobuf:"varint,1,opt,name=ack_disable_saml,json=ackDisableSaml,proto3" json:"ack_disable_saml,omitempty"`
+	// Required audit comment explaining why SAML provider posture is disabled.
+	Comment string `protobuf:"bytes,2,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this disables browser SSO.
+	StepUpToken   string `protobuf:"bytes,3,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DisableSAMLProviderRequest) Reset() {
+	*x = DisableSAMLProviderRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[72]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DisableSAMLProviderRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisableSAMLProviderRequest) ProtoMessage() {}
+
+func (x *DisableSAMLProviderRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[72]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisableSAMLProviderRequest.ProtoReflect.Descriptor instead.
+func (*DisableSAMLProviderRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{72}
+}
+
+func (x *DisableSAMLProviderRequest) GetAckDisableSaml() bool {
+	if x != nil {
+		return x.AckDisableSaml
+	}
+	return false
+}
+
+func (x *DisableSAMLProviderRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *DisableSAMLProviderRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type DisableSAMLProviderResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Disabled      bool                   `protobuf:"varint,1,opt,name=disabled,proto3" json:"disabled,omitempty"`
+	Detail        string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DisableSAMLProviderResponse) Reset() {
+	*x = DisableSAMLProviderResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[73]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DisableSAMLProviderResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisableSAMLProviderResponse) ProtoMessage() {}
+
+func (x *DisableSAMLProviderResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[73]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisableSAMLProviderResponse.ProtoReflect.Descriptor instead.
+func (*DisableSAMLProviderResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{73}
+}
+
+func (x *DisableSAMLProviderResponse) GetDisabled() bool {
+	if x != nil {
+		return x.Disabled
+	}
+	return false
+}
+
+func (x *DisableSAMLProviderResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type OIDCProviderConfig struct {
+	state    protoimpl.MessageState `protogen:"open.v1"`
+	Enabled  bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Issuer   string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	ClientId string                 `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	// Server-local client secret file reference accepted on set/validate
+	// requests. Inventory responses leave this empty and expose only
+	// client_secret_file_configured.
+	ClientSecretFile  string   `protobuf:"bytes,4,opt,name=client_secret_file,json=clientSecretFile,proto3" json:"client_secret_file,omitempty"`
+	RedirectUrl       string   `protobuf:"bytes,5,opt,name=redirect_url,json=redirectUrl,proto3" json:"redirect_url,omitempty"`
+	RoleClaim         string   `protobuf:"bytes,6,opt,name=role_claim,json=roleClaim,proto3" json:"role_claim,omitempty"`
+	DefaultRole       string   `protobuf:"bytes,7,opt,name=default_role,json=defaultRole,proto3" json:"default_role,omitempty"`
+	Scopes            []string `protobuf:"bytes,8,rep,name=scopes,proto3" json:"scopes,omitempty"`
+	TrustedProxyCidrs []string `protobuf:"bytes,9,rep,name=trusted_proxy_cidrs,json=trustedProxyCidrs,proto3" json:"trusted_proxy_cidrs,omitempty"`
+	SessionTtlSeconds uint64   `protobuf:"varint,10,opt,name=session_ttl_seconds,json=sessionTtlSeconds,proto3" json:"session_ttl_seconds,omitempty"`
+	MaxSessions       uint32   `protobuf:"varint,11,opt,name=max_sessions,json=maxSessions,proto3" json:"max_sessions,omitempty"`
+	// True when a server-local client secret file reference is configured. The
+	// path and secret bytes are never serialized through inventory responses.
+	ClientSecretFileConfigured bool `protobuf:"varint,12,opt,name=client_secret_file_configured,json=clientSecretFileConfigured,proto3" json:"client_secret_file_configured,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *OIDCProviderConfig) Reset() {
+	*x = OIDCProviderConfig{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[74]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OIDCProviderConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OIDCProviderConfig) ProtoMessage() {}
+
+func (x *OIDCProviderConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[74]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OIDCProviderConfig.ProtoReflect.Descriptor instead.
+func (*OIDCProviderConfig) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{74}
+}
+
+func (x *OIDCProviderConfig) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *OIDCProviderConfig) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+func (x *OIDCProviderConfig) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *OIDCProviderConfig) GetClientSecretFile() string {
+	if x != nil {
+		return x.ClientSecretFile
+	}
+	return ""
+}
+
+func (x *OIDCProviderConfig) GetRedirectUrl() string {
+	if x != nil {
+		return x.RedirectUrl
+	}
+	return ""
+}
+
+func (x *OIDCProviderConfig) GetRoleClaim() string {
+	if x != nil {
+		return x.RoleClaim
+	}
+	return ""
+}
+
+func (x *OIDCProviderConfig) GetDefaultRole() string {
+	if x != nil {
+		return x.DefaultRole
+	}
+	return ""
+}
+
+func (x *OIDCProviderConfig) GetScopes() []string {
+	if x != nil {
+		return x.Scopes
+	}
+	return nil
+}
+
+func (x *OIDCProviderConfig) GetTrustedProxyCidrs() []string {
+	if x != nil {
+		return x.TrustedProxyCidrs
+	}
+	return nil
+}
+
+func (x *OIDCProviderConfig) GetSessionTtlSeconds() uint64 {
+	if x != nil {
+		return x.SessionTtlSeconds
+	}
+	return 0
+}
+
+func (x *OIDCProviderConfig) GetMaxSessions() uint32 {
+	if x != nil {
+		return x.MaxSessions
+	}
+	return 0
+}
+
+func (x *OIDCProviderConfig) GetClientSecretFileConfigured() bool {
+	if x != nil {
+		return x.ClientSecretFileConfigured
+	}
+	return false
+}
+
+type SAMLProviderConfig struct {
+	state                            protoimpl.MessageState `protogen:"open.v1"`
+	Enabled                          bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	MetadataUrl                      string                 `protobuf:"bytes,2,opt,name=metadata_url,json=metadataUrl,proto3" json:"metadata_url,omitempty"`
+	IdpEntityId                      string                 `protobuf:"bytes,3,opt,name=idp_entity_id,json=idpEntityId,proto3" json:"idp_entity_id,omitempty"`
+	SsoUrl                           string                 `protobuf:"bytes,4,opt,name=sso_url,json=ssoUrl,proto3" json:"sso_url,omitempty"`
+	SpEntityId                       string                 `protobuf:"bytes,5,opt,name=sp_entity_id,json=spEntityId,proto3" json:"sp_entity_id,omitempty"`
+	AcsUrl                           string                 `protobuf:"bytes,6,opt,name=acs_url,json=acsUrl,proto3" json:"acs_url,omitempty"`
+	RoleAttribute                    string                 `protobuf:"bytes,7,opt,name=role_attribute,json=roleAttribute,proto3" json:"role_attribute,omitempty"`
+	DefaultRole                      string                 `protobuf:"bytes,8,opt,name=default_role,json=defaultRole,proto3" json:"default_role,omitempty"`
+	CertificateFingerprint           string                 `protobuf:"bytes,9,opt,name=certificate_fingerprint,json=certificateFingerprint,proto3" json:"certificate_fingerprint,omitempty"`
+	CertificateFingerprintConfigured bool                   `protobuf:"varint,10,opt,name=certificate_fingerprint_configured,json=certificateFingerprintConfigured,proto3" json:"certificate_fingerprint_configured,omitempty"`
+	TrustedProxyCidrs                []string               `protobuf:"bytes,11,rep,name=trusted_proxy_cidrs,json=trustedProxyCidrs,proto3" json:"trusted_proxy_cidrs,omitempty"`
+	SessionTtlSeconds                uint64                 `protobuf:"varint,12,opt,name=session_ttl_seconds,json=sessionTtlSeconds,proto3" json:"session_ttl_seconds,omitempty"`
+	MaxSessions                      uint32                 `protobuf:"varint,13,opt,name=max_sessions,json=maxSessions,proto3" json:"max_sessions,omitempty"`
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
+}
+
+func (x *SAMLProviderConfig) Reset() {
+	*x = SAMLProviderConfig{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[75]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SAMLProviderConfig) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SAMLProviderConfig) ProtoMessage() {}
+
+func (x *SAMLProviderConfig) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[75]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SAMLProviderConfig.ProtoReflect.Descriptor instead.
+func (*SAMLProviderConfig) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{75}
+}
+
+func (x *SAMLProviderConfig) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *SAMLProviderConfig) GetMetadataUrl() string {
+	if x != nil {
+		return x.MetadataUrl
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetIdpEntityId() string {
+	if x != nil {
+		return x.IdpEntityId
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetSsoUrl() string {
+	if x != nil {
+		return x.SsoUrl
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetSpEntityId() string {
+	if x != nil {
+		return x.SpEntityId
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetAcsUrl() string {
+	if x != nil {
+		return x.AcsUrl
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetRoleAttribute() string {
+	if x != nil {
+		return x.RoleAttribute
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetDefaultRole() string {
+	if x != nil {
+		return x.DefaultRole
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetCertificateFingerprint() string {
+	if x != nil {
+		return x.CertificateFingerprint
+	}
+	return ""
+}
+
+func (x *SAMLProviderConfig) GetCertificateFingerprintConfigured() bool {
+	if x != nil {
+		return x.CertificateFingerprintConfigured
+	}
+	return false
+}
+
+func (x *SAMLProviderConfig) GetTrustedProxyCidrs() []string {
+	if x != nil {
+		return x.TrustedProxyCidrs
+	}
+	return nil
+}
+
+func (x *SAMLProviderConfig) GetSessionTtlSeconds() uint64 {
+	if x != nil {
+		return x.SessionTtlSeconds
+	}
+	return 0
+}
+
+func (x *SAMLProviderConfig) GetMaxSessions() uint32 {
+	if x != nil {
+		return x.MaxSessions
+	}
+	return 0
+}
+
+type GetAccessAdministrationResponse struct {
+	state         protoimpl.MessageState           `protogen:"open.v1"`
+	AuthEnabled   bool                             `protobuf:"varint,1,opt,name=auth_enabled,json=authEnabled,proto3" json:"auth_enabled,omitempty"`
+	LocalUsers    []*AccessAdministrationLocalUser `protobuf:"bytes,2,rep,name=local_users,json=localUsers,proto3" json:"local_users,omitempty"`
+	Oidc          *AccessAdministrationOidc        `protobuf:"bytes,3,opt,name=oidc,proto3" json:"oidc,omitempty"`
+	Sessions      *AccessAdministrationSessions    `protobuf:"bytes,4,opt,name=sessions,proto3" json:"sessions,omitempty"`
+	BreakGlass    *AccessAdministrationBreakGlass  `protobuf:"bytes,5,opt,name=break_glass,json=breakGlass,proto3" json:"break_glass,omitempty"`
+	Blockers      []string                         `protobuf:"bytes,6,rep,name=blockers,proto3" json:"blockers,omitempty"`
+	Saml          *AccessAdministrationSaml        `protobuf:"bytes,7,opt,name=saml,proto3" json:"saml,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *GetAccessAdministrationResponse) Reset() {
+	*x = GetAccessAdministrationResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[76]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetAccessAdministrationResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetAccessAdministrationResponse) ProtoMessage() {}
+
+func (x *GetAccessAdministrationResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[76]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetAccessAdministrationResponse.ProtoReflect.Descriptor instead.
+func (*GetAccessAdministrationResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{76}
+}
+
+func (x *GetAccessAdministrationResponse) GetAuthEnabled() bool {
+	if x != nil {
+		return x.AuthEnabled
+	}
+	return false
+}
+
+func (x *GetAccessAdministrationResponse) GetLocalUsers() []*AccessAdministrationLocalUser {
+	if x != nil {
+		return x.LocalUsers
+	}
+	return nil
+}
+
+func (x *GetAccessAdministrationResponse) GetOidc() *AccessAdministrationOidc {
+	if x != nil {
+		return x.Oidc
+	}
+	return nil
+}
+
+func (x *GetAccessAdministrationResponse) GetSessions() *AccessAdministrationSessions {
+	if x != nil {
+		return x.Sessions
+	}
+	return nil
+}
+
+func (x *GetAccessAdministrationResponse) GetBreakGlass() *AccessAdministrationBreakGlass {
+	if x != nil {
+		return x.BreakGlass
+	}
+	return nil
+}
+
+func (x *GetAccessAdministrationResponse) GetBlockers() []string {
+	if x != nil {
+		return x.Blockers
+	}
+	return nil
+}
+
+func (x *GetAccessAdministrationResponse) GetSaml() *AccessAdministrationSaml {
+	if x != nil {
+		return x.Saml
+	}
+	return nil
+}
+
+type AccessAdministrationLocalUser struct {
+	state      protoimpl.MessageState `protogen:"open.v1"`
+	Name       string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Role       string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	AuthSource string                 `protobuf:"bytes,3,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	// Redacted token storage posture, for example "plaintext-token-redacted" or
+	// "prehashed-token-redacted"; never token bytes or configured digest values.
+	TokenMaterial string `protobuf:"bytes,4,opt,name=token_material,json=tokenMaterial,proto3" json:"token_material,omitempty"`
+	// True when audited local-user mutation APIs can safely edit this inventory row.
+	// The users file remains the source of truth for local break-glass users.
+	Editable bool `protobuf:"varint,5,opt,name=editable,proto3" json:"editable,omitempty"`
+	// Stable non-secret fingerprint of the inventory row for audit correlation.
+	AuditHash string `protobuf:"bytes,6,opt,name=audit_hash,json=auditHash,proto3" json:"audit_hash,omitempty"`
+	// False when the users-file entry is disabled and cannot authenticate.
+	Enabled       bool `protobuf:"varint,7,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AccessAdministrationLocalUser) Reset() {
+	*x = AccessAdministrationLocalUser{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[77]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessAdministrationLocalUser) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessAdministrationLocalUser) ProtoMessage() {}
+
+func (x *AccessAdministrationLocalUser) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[77]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessAdministrationLocalUser.ProtoReflect.Descriptor instead.
+func (*AccessAdministrationLocalUser) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{77}
+}
+
+func (x *AccessAdministrationLocalUser) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *AccessAdministrationLocalUser) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *AccessAdministrationLocalUser) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *AccessAdministrationLocalUser) GetTokenMaterial() string {
+	if x != nil {
+		return x.TokenMaterial
+	}
+	return ""
+}
+
+func (x *AccessAdministrationLocalUser) GetEditable() bool {
+	if x != nil {
+		return x.Editable
+	}
+	return false
+}
+
+func (x *AccessAdministrationLocalUser) GetAuditHash() string {
+	if x != nil {
+		return x.AuditHash
+	}
+	return ""
+}
+
+func (x *AccessAdministrationLocalUser) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+type CreateLocalUserRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Role  string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	// Required acknowledgement because this creates a new credential.
+	AckLocalUserChange bool `protobuf:"varint,3,opt,name=ack_local_user_change,json=ackLocalUserChange,proto3" json:"ack_local_user_change,omitempty"`
+	// Required audit comment explaining why the credential is being created.
+	Comment string `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this changes local access.
+	StepUpToken   string `protobuf:"bytes,5,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateLocalUserRequest) Reset() {
+	*x = CreateLocalUserRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[78]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLocalUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLocalUserRequest) ProtoMessage() {}
+
+func (x *CreateLocalUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[78]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLocalUserRequest.ProtoReflect.Descriptor instead.
+func (*CreateLocalUserRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{78}
+}
+
+func (x *CreateLocalUserRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *CreateLocalUserRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *CreateLocalUserRequest) GetAckLocalUserChange() bool {
+	if x != nil {
+		return x.AckLocalUserChange
+	}
+	return false
+}
+
+func (x *CreateLocalUserRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *CreateLocalUserRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type UpdateLocalUserRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Role  string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	// Required acknowledgement because this changes local authorization.
+	AckLocalUserChange bool `protobuf:"varint,3,opt,name=ack_local_user_change,json=ackLocalUserChange,proto3" json:"ack_local_user_change,omitempty"`
+	// Required audit comment explaining why the authorization is changing.
+	Comment string `protobuf:"bytes,4,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this changes local access.
+	StepUpToken   string `protobuf:"bytes,5,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateLocalUserRequest) Reset() {
+	*x = UpdateLocalUserRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[79]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateLocalUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateLocalUserRequest) ProtoMessage() {}
+
+func (x *UpdateLocalUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[79]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateLocalUserRequest.ProtoReflect.Descriptor instead.
+func (*UpdateLocalUserRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{79}
+}
+
+func (x *UpdateLocalUserRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *UpdateLocalUserRequest) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *UpdateLocalUserRequest) GetAckLocalUserChange() bool {
+	if x != nil {
+		return x.AckLocalUserChange
+	}
+	return false
+}
+
+func (x *UpdateLocalUserRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *UpdateLocalUserRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type RotateLocalUserTokenRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Required acknowledgement because the previous credential stops working.
+	AckRotateToken bool `protobuf:"varint,2,opt,name=ack_rotate_token,json=ackRotateToken,proto3" json:"ack_rotate_token,omitempty"`
+	// Required audit comment explaining why the credential is being rotated.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this rotates bearer access.
+	StepUpToken   string `protobuf:"bytes,4,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RotateLocalUserTokenRequest) Reset() {
+	*x = RotateLocalUserTokenRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[80]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RotateLocalUserTokenRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RotateLocalUserTokenRequest) ProtoMessage() {}
+
+func (x *RotateLocalUserTokenRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[80]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RotateLocalUserTokenRequest.ProtoReflect.Descriptor instead.
+func (*RotateLocalUserTokenRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{80}
+}
+
+func (x *RotateLocalUserTokenRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *RotateLocalUserTokenRequest) GetAckRotateToken() bool {
+	if x != nil {
+		return x.AckRotateToken
+	}
+	return false
+}
+
+func (x *RotateLocalUserTokenRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *RotateLocalUserTokenRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type DisableLocalUserRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	Name  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Required acknowledgement because this can remove emergency access.
+	AckDisableUser bool `protobuf:"varint,2,opt,name=ack_disable_user,json=ackDisableUser,proto3" json:"ack_disable_user,omitempty"`
+	// Required audit comment explaining why the credential is being disabled.
+	Comment string `protobuf:"bytes,3,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Required for authenticated callers because this changes local access.
+	StepUpToken   string `protobuf:"bytes,4,opt,name=step_up_token,json=stepUpToken,proto3" json:"step_up_token,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DisableLocalUserRequest) Reset() {
+	*x = DisableLocalUserRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[81]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DisableLocalUserRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisableLocalUserRequest) ProtoMessage() {}
+
+func (x *DisableLocalUserRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[81]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisableLocalUserRequest.ProtoReflect.Descriptor instead.
+func (*DisableLocalUserRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{81}
+}
+
+func (x *DisableLocalUserRequest) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DisableLocalUserRequest) GetAckDisableUser() bool {
+	if x != nil {
+		return x.AckDisableUser
+	}
+	return false
+}
+
+func (x *DisableLocalUserRequest) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *DisableLocalUserRequest) GetStepUpToken() string {
+	if x != nil {
+		return x.StepUpToken
+	}
+	return ""
+}
+
+type CreateLocalUserResponse struct {
+	state protoimpl.MessageState         `protogen:"open.v1"`
+	User  *AccessAdministrationLocalUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	// Generated bearer token returned only once. It is never persisted in API
+	// state and is not returned by inventory endpoints.
+	OneTimeToken  string `protobuf:"bytes,2,opt,name=one_time_token,json=oneTimeToken,proto3" json:"one_time_token,omitempty"`
+	Detail        string `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *CreateLocalUserResponse) Reset() {
+	*x = CreateLocalUserResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[82]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *CreateLocalUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*CreateLocalUserResponse) ProtoMessage() {}
+
+func (x *CreateLocalUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[82]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use CreateLocalUserResponse.ProtoReflect.Descriptor instead.
+func (*CreateLocalUserResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{82}
+}
+
+func (x *CreateLocalUserResponse) GetUser() *AccessAdministrationLocalUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *CreateLocalUserResponse) GetOneTimeToken() string {
+	if x != nil {
+		return x.OneTimeToken
+	}
+	return ""
+}
+
+func (x *CreateLocalUserResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type UpdateLocalUserResponse struct {
+	state         protoimpl.MessageState         `protogen:"open.v1"`
+	User          *AccessAdministrationLocalUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Detail        string                         `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UpdateLocalUserResponse) Reset() {
+	*x = UpdateLocalUserResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[83]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UpdateLocalUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UpdateLocalUserResponse) ProtoMessage() {}
+
+func (x *UpdateLocalUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[83]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UpdateLocalUserResponse.ProtoReflect.Descriptor instead.
+func (*UpdateLocalUserResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{83}
+}
+
+func (x *UpdateLocalUserResponse) GetUser() *AccessAdministrationLocalUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *UpdateLocalUserResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type RotateLocalUserTokenResponse struct {
+	state protoimpl.MessageState         `protogen:"open.v1"`
+	User  *AccessAdministrationLocalUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	// Generated bearer token returned only once. It is never persisted in API
+	// state and is not returned by inventory endpoints.
+	OneTimeToken  string `protobuf:"bytes,2,opt,name=one_time_token,json=oneTimeToken,proto3" json:"one_time_token,omitempty"`
+	Detail        string `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RotateLocalUserTokenResponse) Reset() {
+	*x = RotateLocalUserTokenResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[84]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RotateLocalUserTokenResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RotateLocalUserTokenResponse) ProtoMessage() {}
+
+func (x *RotateLocalUserTokenResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[84]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RotateLocalUserTokenResponse.ProtoReflect.Descriptor instead.
+func (*RotateLocalUserTokenResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{84}
+}
+
+func (x *RotateLocalUserTokenResponse) GetUser() *AccessAdministrationLocalUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *RotateLocalUserTokenResponse) GetOneTimeToken() string {
+	if x != nil {
+		return x.OneTimeToken
+	}
+	return ""
+}
+
+func (x *RotateLocalUserTokenResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type DisableLocalUserResponse struct {
+	state         protoimpl.MessageState         `protogen:"open.v1"`
+	User          *AccessAdministrationLocalUser `protobuf:"bytes,1,opt,name=user,proto3" json:"user,omitempty"`
+	Detail        string                         `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DisableLocalUserResponse) Reset() {
+	*x = DisableLocalUserResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[85]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DisableLocalUserResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DisableLocalUserResponse) ProtoMessage() {}
+
+func (x *DisableLocalUserResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[85]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DisableLocalUserResponse.ProtoReflect.Descriptor instead.
+func (*DisableLocalUserResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{85}
+}
+
+func (x *DisableLocalUserResponse) GetUser() *AccessAdministrationLocalUser {
+	if x != nil {
+		return x.User
+	}
+	return nil
+}
+
+func (x *DisableLocalUserResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type AccessAdministrationOidc struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Enabled           bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Issuer            string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`
+	ClientId          string                 `protobuf:"bytes,3,opt,name=client_id,json=clientId,proto3" json:"client_id,omitempty"`
+	RoleClaim         string                 `protobuf:"bytes,4,opt,name=role_claim,json=roleClaim,proto3" json:"role_claim,omitempty"`
+	DefaultRole       string                 `protobuf:"bytes,5,opt,name=default_role,json=defaultRole,proto3" json:"default_role,omitempty"`
+	CookieSecure      bool                   `protobuf:"varint,6,opt,name=cookie_secure,json=cookieSecure,proto3" json:"cookie_secure,omitempty"`
+	Scopes            []string               `protobuf:"bytes,7,rep,name=scopes,proto3" json:"scopes,omitempty"`
+	TrustedProxyCidrs []string               `protobuf:"bytes,8,rep,name=trusted_proxy_cidrs,json=trustedProxyCidrs,proto3" json:"trusted_proxy_cidrs,omitempty"`
+	SessionTtlSeconds uint64                 `protobuf:"varint,9,opt,name=session_ttl_seconds,json=sessionTtlSeconds,proto3" json:"session_ttl_seconds,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *AccessAdministrationOidc) Reset() {
+	*x = AccessAdministrationOidc{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[86]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessAdministrationOidc) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessAdministrationOidc) ProtoMessage() {}
+
+func (x *AccessAdministrationOidc) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[86]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessAdministrationOidc.ProtoReflect.Descriptor instead.
+func (*AccessAdministrationOidc) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{86}
+}
+
+func (x *AccessAdministrationOidc) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *AccessAdministrationOidc) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+func (x *AccessAdministrationOidc) GetClientId() string {
+	if x != nil {
+		return x.ClientId
+	}
+	return ""
+}
+
+func (x *AccessAdministrationOidc) GetRoleClaim() string {
+	if x != nil {
+		return x.RoleClaim
+	}
+	return ""
+}
+
+func (x *AccessAdministrationOidc) GetDefaultRole() string {
+	if x != nil {
+		return x.DefaultRole
+	}
+	return ""
+}
+
+func (x *AccessAdministrationOidc) GetCookieSecure() bool {
+	if x != nil {
+		return x.CookieSecure
+	}
+	return false
+}
+
+func (x *AccessAdministrationOidc) GetScopes() []string {
+	if x != nil {
+		return x.Scopes
+	}
+	return nil
+}
+
+func (x *AccessAdministrationOidc) GetTrustedProxyCidrs() []string {
+	if x != nil {
+		return x.TrustedProxyCidrs
+	}
+	return nil
+}
+
+func (x *AccessAdministrationOidc) GetSessionTtlSeconds() uint64 {
+	if x != nil {
+		return x.SessionTtlSeconds
+	}
+	return 0
+}
+
+type AccessAdministrationSaml struct {
+	state                            protoimpl.MessageState `protogen:"open.v1"`
+	Enabled                          bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	MetadataUrl                      string                 `protobuf:"bytes,2,opt,name=metadata_url,json=metadataUrl,proto3" json:"metadata_url,omitempty"`
+	IdpEntityId                      string                 `protobuf:"bytes,3,opt,name=idp_entity_id,json=idpEntityId,proto3" json:"idp_entity_id,omitempty"`
+	SsoUrl                           string                 `protobuf:"bytes,4,opt,name=sso_url,json=ssoUrl,proto3" json:"sso_url,omitempty"`
+	SpEntityId                       string                 `protobuf:"bytes,5,opt,name=sp_entity_id,json=spEntityId,proto3" json:"sp_entity_id,omitempty"`
+	AcsUrl                           string                 `protobuf:"bytes,6,opt,name=acs_url,json=acsUrl,proto3" json:"acs_url,omitempty"`
+	RoleAttribute                    string                 `protobuf:"bytes,7,opt,name=role_attribute,json=roleAttribute,proto3" json:"role_attribute,omitempty"`
+	DefaultRole                      string                 `protobuf:"bytes,8,opt,name=default_role,json=defaultRole,proto3" json:"default_role,omitempty"`
+	CertificateFingerprintConfigured bool                   `protobuf:"varint,9,opt,name=certificate_fingerprint_configured,json=certificateFingerprintConfigured,proto3" json:"certificate_fingerprint_configured,omitempty"`
+	RuntimeAvailable                 bool                   `protobuf:"varint,10,opt,name=runtime_available,json=runtimeAvailable,proto3" json:"runtime_available,omitempty"`
+	Detail                           string                 `protobuf:"bytes,11,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields                    protoimpl.UnknownFields
+	sizeCache                        protoimpl.SizeCache
+}
+
+func (x *AccessAdministrationSaml) Reset() {
+	*x = AccessAdministrationSaml{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[87]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessAdministrationSaml) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessAdministrationSaml) ProtoMessage() {}
+
+func (x *AccessAdministrationSaml) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[87]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessAdministrationSaml.ProtoReflect.Descriptor instead.
+func (*AccessAdministrationSaml) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{87}
+}
+
+func (x *AccessAdministrationSaml) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *AccessAdministrationSaml) GetMetadataUrl() string {
+	if x != nil {
+		return x.MetadataUrl
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSaml) GetIdpEntityId() string {
+	if x != nil {
+		return x.IdpEntityId
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSaml) GetSsoUrl() string {
+	if x != nil {
+		return x.SsoUrl
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSaml) GetSpEntityId() string {
+	if x != nil {
+		return x.SpEntityId
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSaml) GetAcsUrl() string {
+	if x != nil {
+		return x.AcsUrl
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSaml) GetRoleAttribute() string {
+	if x != nil {
+		return x.RoleAttribute
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSaml) GetDefaultRole() string {
+	if x != nil {
+		return x.DefaultRole
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSaml) GetCertificateFingerprintConfigured() bool {
+	if x != nil {
+		return x.CertificateFingerprintConfigured
+	}
+	return false
+}
+
+func (x *AccessAdministrationSaml) GetRuntimeAvailable() bool {
+	if x != nil {
+		return x.RuntimeAvailable
+	}
+	return false
+}
+
+func (x *AccessAdministrationSaml) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type AccessAdministrationSessions struct {
+	state                      protoimpl.MessageState         `protogen:"open.v1"`
+	OidcActiveSessions         uint32                         `protobuf:"varint,1,opt,name=oidc_active_sessions,json=oidcActiveSessions,proto3" json:"oidc_active_sessions,omitempty"`
+	OidcMaxSessions            uint32                         `protobuf:"varint,2,opt,name=oidc_max_sessions,json=oidcMaxSessions,proto3" json:"oidc_max_sessions,omitempty"`
+	SessionRevocationAvailable bool                           `protobuf:"varint,3,opt,name=session_revocation_available,json=sessionRevocationAvailable,proto3" json:"session_revocation_available,omitempty"`
+	Detail                     string                         `protobuf:"bytes,4,opt,name=detail,proto3" json:"detail,omitempty"`
+	ActiveSessions             []*AccessAdministrationSession `protobuf:"bytes,5,rep,name=active_sessions,json=activeSessions,proto3" json:"active_sessions,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *AccessAdministrationSessions) Reset() {
+	*x = AccessAdministrationSessions{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[88]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessAdministrationSessions) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessAdministrationSessions) ProtoMessage() {}
+
+func (x *AccessAdministrationSessions) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[88]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessAdministrationSessions.ProtoReflect.Descriptor instead.
+func (*AccessAdministrationSessions) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{88}
+}
+
+func (x *AccessAdministrationSessions) GetOidcActiveSessions() uint32 {
+	if x != nil {
+		return x.OidcActiveSessions
+	}
+	return 0
+}
+
+func (x *AccessAdministrationSessions) GetOidcMaxSessions() uint32 {
+	if x != nil {
+		return x.OidcMaxSessions
+	}
+	return 0
+}
+
+func (x *AccessAdministrationSessions) GetSessionRevocationAvailable() bool {
+	if x != nil {
+		return x.SessionRevocationAvailable
+	}
+	return false
+}
+
+func (x *AccessAdministrationSessions) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSessions) GetActiveSessions() []*AccessAdministrationSession {
+	if x != nil {
+		return x.ActiveSessions
+	}
+	return nil
+}
+
+type AccessAdministrationSession struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Stable non-secret fingerprint of the server-side session token.
+	SessionId          string `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	Actor              string `protobuf:"bytes,2,opt,name=actor,proto3" json:"actor,omitempty"`
+	Role               string `protobuf:"bytes,3,opt,name=role,proto3" json:"role,omitempty"`
+	AuthSource         string `protobuf:"bytes,4,opt,name=auth_source,json=authSource,proto3" json:"auth_source,omitempty"`
+	ExpiresAt          string `protobuf:"bytes,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	SecondsUntilExpiry uint64 `protobuf:"varint,6,opt,name=seconds_until_expiry,json=secondsUntilExpiry,proto3" json:"seconds_until_expiry,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *AccessAdministrationSession) Reset() {
+	*x = AccessAdministrationSession{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[89]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessAdministrationSession) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessAdministrationSession) ProtoMessage() {}
+
+func (x *AccessAdministrationSession) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[89]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessAdministrationSession.ProtoReflect.Descriptor instead.
+func (*AccessAdministrationSession) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{89}
+}
+
+func (x *AccessAdministrationSession) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSession) GetActor() string {
+	if x != nil {
+		return x.Actor
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSession) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSession) GetAuthSource() string {
+	if x != nil {
+		return x.AuthSource
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSession) GetExpiresAt() string {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return ""
+}
+
+func (x *AccessAdministrationSession) GetSecondsUntilExpiry() uint64 {
+	if x != nil {
+		return x.SecondsUntilExpiry
+	}
+	return 0
+}
+
+type RevokeAccessSessionRequest struct {
+	state     protoimpl.MessageState `protogen:"open.v1"`
+	SessionId string                 `protobuf:"bytes,1,opt,name=session_id,json=sessionId,proto3" json:"session_id,omitempty"`
+	// Required acknowledgement because this forcibly signs out another browser.
+	AckRevokeSession bool `protobuf:"varint,2,opt,name=ack_revoke_session,json=ackRevokeSession,proto3" json:"ack_revoke_session,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *RevokeAccessSessionRequest) Reset() {
+	*x = RevokeAccessSessionRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[90]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeAccessSessionRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeAccessSessionRequest) ProtoMessage() {}
+
+func (x *RevokeAccessSessionRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[90]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeAccessSessionRequest.ProtoReflect.Descriptor instead.
+func (*RevokeAccessSessionRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{90}
+}
+
+func (x *RevokeAccessSessionRequest) GetSessionId() string {
+	if x != nil {
+		return x.SessionId
+	}
+	return ""
+}
+
+func (x *RevokeAccessSessionRequest) GetAckRevokeSession() bool {
+	if x != nil {
+		return x.AckRevokeSession
+	}
+	return false
+}
+
+type RevokeAccessSessionResponse struct {
+	state         protoimpl.MessageState       `protogen:"open.v1"`
+	Revoked       bool                         `protobuf:"varint,1,opt,name=revoked,proto3" json:"revoked,omitempty"`
+	Session       *AccessAdministrationSession `protobuf:"bytes,2,opt,name=session,proto3" json:"session,omitempty"`
+	Detail        string                       `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RevokeAccessSessionResponse) Reset() {
+	*x = RevokeAccessSessionResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[91]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RevokeAccessSessionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RevokeAccessSessionResponse) ProtoMessage() {}
+
+func (x *RevokeAccessSessionResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[91]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RevokeAccessSessionResponse.ProtoReflect.Descriptor instead.
+func (*RevokeAccessSessionResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{91}
+}
+
+func (x *RevokeAccessSessionResponse) GetRevoked() bool {
+	if x != nil {
+		return x.Revoked
+	}
+	return false
+}
+
+func (x *RevokeAccessSessionResponse) GetSession() *AccessAdministrationSession {
+	if x != nil {
+		return x.Session
+	}
+	return nil
+}
+
+func (x *RevokeAccessSessionResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type AccessAdministrationBreakGlass struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	State         string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	NextAction    string                 `protobuf:"bytes,3,opt,name=next_action,json=nextAction,proto3" json:"next_action,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AccessAdministrationBreakGlass) Reset() {
+	*x = AccessAdministrationBreakGlass{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[92]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AccessAdministrationBreakGlass) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AccessAdministrationBreakGlass) ProtoMessage() {}
+
+func (x *AccessAdministrationBreakGlass) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[92]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AccessAdministrationBreakGlass.ProtoReflect.Descriptor instead.
+func (*AccessAdministrationBreakGlass) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{92}
+}
+
+func (x *AccessAdministrationBreakGlass) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *AccessAdministrationBreakGlass) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *AccessAdministrationBreakGlass) GetNextAction() string {
+	if x != nil {
+		return x.NextAction
+	}
+	return ""
+}
+
+type GetStatusResponse struct {
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Runtime      *RuntimeStatus         `protobuf:"bytes,1,opt,name=runtime,proto3" json:"runtime,omitempty"`
+	Engines      []*EngineStatus        `protobuf:"bytes,2,rep,name=engines,proto3" json:"engines,omitempty"`
+	Capabilities []*SystemCapability    `protobuf:"bytes,3,rep,name=capabilities,proto3" json:"capabilities,omitempty"`
+	Warnings     []*StatusWarning       `protobuf:"bytes,4,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	Dataplane    *DataplaneStatus       `protobuf:"bytes,5,opt,name=dataplane,proto3" json:"dataplane,omitempty"`
+	Management   *ManagementPlaneStatus `protobuf:"bytes,6,opt,name=management,proto3" json:"management,omitempty"`
+	Host         *HostResourceStatus    `protobuf:"bytes,7,opt,name=host,proto3" json:"host,omitempty"`
+	// Policy-aware inspection readiness for the running policy and managed
+	// inspection engine. This is the canonical source for fail-open/fail-closed
+	// operator posture; clients should not infer it from raw engine state alone.
+	Inspection       *InspectionStatus       `protobuf:"bytes,8,opt,name=inspection,proto3" json:"inspection,omitempty"`
+	Vpn              *VpnRuntimeStatus       `protobuf:"bytes,9,opt,name=vpn,proto3" json:"vpn,omitempty"`
+	Routing          *RoutingRuntimeStatus   `protobuf:"bytes,10,opt,name=routing,proto3" json:"routing,omitempty"`
+	HighAvailability *HighAvailabilityStatus `protobuf:"bytes,11,opt,name=high_availability,json=highAvailability,proto3" json:"high_availability,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *GetStatusResponse) Reset() {
+	*x = GetStatusResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[93]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *GetStatusResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetStatusResponse) ProtoMessage() {}
+
+func (x *GetStatusResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[93]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetStatusResponse.ProtoReflect.Descriptor instead.
+func (*GetStatusResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{93}
+}
+
+func (x *GetStatusResponse) GetRuntime() *RuntimeStatus {
+	if x != nil {
+		return x.Runtime
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetEngines() []*EngineStatus {
+	if x != nil {
+		return x.Engines
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetCapabilities() []*SystemCapability {
+	if x != nil {
+		return x.Capabilities
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetWarnings() []*StatusWarning {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetDataplane() *DataplaneStatus {
+	if x != nil {
+		return x.Dataplane
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetManagement() *ManagementPlaneStatus {
+	if x != nil {
+		return x.Management
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetHost() *HostResourceStatus {
+	if x != nil {
+		return x.Host
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetInspection() *InspectionStatus {
+	if x != nil {
+		return x.Inspection
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetVpn() *VpnRuntimeStatus {
+	if x != nil {
+		return x.Vpn
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetRouting() *RoutingRuntimeStatus {
+	if x != nil {
+		return x.Routing
+	}
+	return nil
+}
+
+func (x *GetStatusResponse) GetHighAvailability() *HighAvailabilityStatus {
+	if x != nil {
+		return x.HighAvailability
+	}
+	return nil
+}
+
+type ProveNetworkPathRequest struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Representative source IP for kernel route lookup.
+	SrcIp string `protobuf:"bytes,1,opt,name=src_ip,json=srcIp,proto3" json:"src_ip,omitempty"`
+	// Representative destination IP for kernel route lookup.
+	DestIp string `protobuf:"bytes,2,opt,name=dest_ip,json=destIp,proto3" json:"dest_ip,omitempty"`
+	// Optional protocol label for operator context.
+	Protocol Protocol `protobuf:"varint,3,opt,name=protocol,proto3,enum=openngfw.v1.Protocol" json:"protocol,omitempty"`
+	// Optional destination port for operator context.
+	DestPort uint32 `protobuf:"varint,4,opt,name=dest_port,json=destPort,proto3" json:"dest_port,omitempty"`
+	// Optional expected source interface. When set, the proof reports a warning
+	// if the kernel route lookup returns a different device.
+	SourceInterface string `protobuf:"bytes,5,opt,name=source_interface,json=sourceInterface,proto3" json:"source_interface,omitempty"`
+	// Optional tunnel reference for passive VPN runtime correlation.
+	Tunnel *NetworkPathTunnelRef `protobuf:"bytes,6,opt,name=tunnel,proto3" json:"tunnel,omitempty"`
+	// Optional expected egress source IP after source-NAT/masquerade. Empty keeps
+	// the proof observational and reports only the kernel-selected preferred
+	// source, if the host exposes one.
+	ExpectedMasqueradeEgressIp string `protobuf:"bytes,7,opt,name=expected_masquerade_egress_ip,json=expectedMasqueradeEgressIp,proto3" json:"expected_masquerade_egress_ip,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *ProveNetworkPathRequest) Reset() {
+	*x = ProveNetworkPathRequest{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[94]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProveNetworkPathRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProveNetworkPathRequest) ProtoMessage() {}
+
+func (x *ProveNetworkPathRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[94]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProveNetworkPathRequest.ProtoReflect.Descriptor instead.
+func (*ProveNetworkPathRequest) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{94}
+}
+
+func (x *ProveNetworkPathRequest) GetSrcIp() string {
+	if x != nil {
+		return x.SrcIp
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathRequest) GetDestIp() string {
+	if x != nil {
+		return x.DestIp
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathRequest) GetProtocol() Protocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return Protocol_PROTOCOL_UNSPECIFIED
+}
+
+func (x *ProveNetworkPathRequest) GetDestPort() uint32 {
+	if x != nil {
+		return x.DestPort
+	}
+	return 0
+}
+
+func (x *ProveNetworkPathRequest) GetSourceInterface() string {
+	if x != nil {
+		return x.SourceInterface
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathRequest) GetTunnel() *NetworkPathTunnelRef {
+	if x != nil {
+		return x.Tunnel
+	}
+	return nil
+}
+
+func (x *ProveNetworkPathRequest) GetExpectedMasqueradeEgressIp() string {
+	if x != nil {
+		return x.ExpectedMasqueradeEgressIp
+	}
+	return ""
+}
+
+type NetworkPathTunnelRef struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ipsec or wireguard.
+	Kind string `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
+	// IPsec tunnel name or operator display label.
+	Name string `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
+	// WireGuard interface name.
+	Interface string `protobuf:"bytes,3,opt,name=interface,proto3" json:"interface,omitempty"`
+	// WireGuard peer display name, if known by the caller.
+	Peer string `protobuf:"bytes,4,opt,name=peer,proto3" json:"peer,omitempty"`
+	// WireGuard peer public key, if known by the caller.
+	PeerPublicKey string `protobuf:"bytes,5,opt,name=peer_public_key,json=peerPublicKey,proto3" json:"peer_public_key,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NetworkPathTunnelRef) Reset() {
+	*x = NetworkPathTunnelRef{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[95]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkPathTunnelRef) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkPathTunnelRef) ProtoMessage() {}
+
+func (x *NetworkPathTunnelRef) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[95]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkPathTunnelRef.ProtoReflect.Descriptor instead.
+func (*NetworkPathTunnelRef) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{95}
+}
+
+func (x *NetworkPathTunnelRef) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *NetworkPathTunnelRef) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *NetworkPathTunnelRef) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *NetworkPathTunnelRef) GetPeer() string {
+	if x != nil {
+		return x.Peer
+	}
+	return ""
+}
+
+func (x *NetworkPathTunnelRef) GetPeerPublicKey() string {
+	if x != nil {
+		return x.PeerPublicKey
+	}
+	return ""
+}
+
+type ProveNetworkPathResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	SchemaVersion string                 `protobuf:"bytes,1,opt,name=schema_version,json=schemaVersion,proto3" json:"schema_version,omitempty"`
+	GeneratedAt   string                 `protobuf:"bytes,2,opt,name=generated_at,json=generatedAt,proto3" json:"generated_at,omitempty"`
+	// ready, degraded, unavailable, or unknown.
+	State                string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Detail               string                 `protobuf:"bytes,4,opt,name=detail,proto3" json:"detail,omitempty"`
+	RunningPolicyVersion uint64                 `protobuf:"varint,5,opt,name=running_policy_version,json=runningPolicyVersion,proto3" json:"running_policy_version,omitempty"`
+	Route                *NetworkPathRouteProof `protobuf:"bytes,6,opt,name=route,proto3" json:"route,omitempty"`
+	Vpn                  *NetworkPathVpnProof   `protobuf:"bytes,7,opt,name=vpn,proto3" json:"vpn,omitempty"`
+	Evidence             []string               `protobuf:"bytes,8,rep,name=evidence,proto3" json:"evidence,omitempty"`
+	Warnings             []string               `protobuf:"bytes,9,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	// Structured mismatch records for operators and automation. Warning strings
+	// are retained for compatibility with existing clients.
+	Mismatches []*NetworkPathMismatch `protobuf:"bytes,10,rep,name=mismatches,proto3" json:"mismatches,omitempty"`
+	// Explicit proof boundaries. This passive proof does not send traffic,
+	// attest the remote peer, capture packets, or sign/retain custody records.
+	Limitations []string `protobuf:"bytes,11,rep,name=limitations,proto3" json:"limitations,omitempty"`
+	// Copyable handoff strings for operator shells and API clients.
+	CliHandoff    string `protobuf:"bytes,12,opt,name=cli_handoff,json=cliHandoff,proto3" json:"cli_handoff,omitempty"`
+	ApiHandoff    string `protobuf:"bytes,13,opt,name=api_handoff,json=apiHandoff,proto3" json:"api_handoff,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProveNetworkPathResponse) Reset() {
+	*x = ProveNetworkPathResponse{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[96]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProveNetworkPathResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProveNetworkPathResponse) ProtoMessage() {}
+
+func (x *ProveNetworkPathResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[96]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProveNetworkPathResponse.ProtoReflect.Descriptor instead.
+func (*ProveNetworkPathResponse) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{96}
+}
+
+func (x *ProveNetworkPathResponse) GetSchemaVersion() string {
+	if x != nil {
+		return x.SchemaVersion
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathResponse) GetGeneratedAt() string {
+	if x != nil {
+		return x.GeneratedAt
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathResponse) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathResponse) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathResponse) GetRunningPolicyVersion() uint64 {
+	if x != nil {
+		return x.RunningPolicyVersion
+	}
+	return 0
+}
+
+func (x *ProveNetworkPathResponse) GetRoute() *NetworkPathRouteProof {
+	if x != nil {
+		return x.Route
+	}
+	return nil
+}
+
+func (x *ProveNetworkPathResponse) GetVpn() *NetworkPathVpnProof {
+	if x != nil {
+		return x.Vpn
+	}
+	return nil
+}
+
+func (x *ProveNetworkPathResponse) GetEvidence() []string {
+	if x != nil {
+		return x.Evidence
+	}
+	return nil
+}
+
+func (x *ProveNetworkPathResponse) GetWarnings() []string {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *ProveNetworkPathResponse) GetMismatches() []*NetworkPathMismatch {
+	if x != nil {
+		return x.Mismatches
+	}
+	return nil
+}
+
+func (x *ProveNetworkPathResponse) GetLimitations() []string {
+	if x != nil {
+		return x.Limitations
+	}
+	return nil
+}
+
+func (x *ProveNetworkPathResponse) GetCliHandoff() string {
+	if x != nil {
+		return x.CliHandoff
+	}
+	return ""
+}
+
+func (x *ProveNetworkPathResponse) GetApiHandoff() string {
+	if x != nil {
+		return x.ApiHandoff
+	}
+	return ""
+}
+
+type NetworkPathRouteProof struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	State           string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail          string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	Destination     string                 `protobuf:"bytes,3,opt,name=destination,proto3" json:"destination,omitempty"`
+	Gateway         string                 `protobuf:"bytes,4,opt,name=gateway,proto3" json:"gateway,omitempty"`
+	Dev             string                 `protobuf:"bytes,5,opt,name=dev,proto3" json:"dev,omitempty"`
+	PreferredSource string                 `protobuf:"bytes,6,opt,name=preferred_source,json=preferredSource,proto3" json:"preferred_source,omitempty"`
+	Protocol        string                 `protobuf:"bytes,7,opt,name=protocol,proto3" json:"protocol,omitempty"`
+	Table           string                 `protobuf:"bytes,8,opt,name=table,proto3" json:"table,omitempty"`
+	RawRedacted     string                 `protobuf:"bytes,9,opt,name=raw_redacted,json=rawRedacted,proto3" json:"raw_redacted,omitempty"`
+	// Additional route identity parsed from `ip -j route get` and
+	// `ip -j -d link show dev <route dev>` when available. Generated clients must
+	// run the proto/OpenAPI generation step before consuming these fields.
+	RouteType         string                      `protobuf:"bytes,10,opt,name=route_type,json=routeType,proto3" json:"route_type,omitempty"`
+	Scope             string                      `protobuf:"bytes,11,opt,name=scope,proto3" json:"scope,omitempty"`
+	Flags             []string                    `protobuf:"bytes,12,rep,name=flags,proto3" json:"flags,omitempty"`
+	Source            string                      `protobuf:"bytes,13,opt,name=source,proto3" json:"source,omitempty"`
+	InterfaceIndex    uint32                      `protobuf:"varint,14,opt,name=interface_index,json=interfaceIndex,proto3" json:"interface_index,omitempty"`
+	InterfaceName     string                      `protobuf:"bytes,15,opt,name=interface_name,json=interfaceName,proto3" json:"interface_name,omitempty"`
+	InterfaceMaster   string                      `protobuf:"bytes,16,opt,name=interface_master,json=interfaceMaster,proto3" json:"interface_master,omitempty"`
+	InterfaceKind     string                      `protobuf:"bytes,17,opt,name=interface_kind,json=interfaceKind,proto3" json:"interface_kind,omitempty"`
+	Vrf               string                      `protobuf:"bytes,18,opt,name=vrf,proto3" json:"vrf,omitempty"`
+	InterfaceIdentity string                      `protobuf:"bytes,19,opt,name=interface_identity,json=interfaceIdentity,proto3" json:"interface_identity,omitempty"`
+	Frr               *NetworkPathFrrProof        `protobuf:"bytes,20,opt,name=frr,proto3" json:"frr,omitempty"`
+	Masquerade        *NetworkPathMasqueradeProof `protobuf:"bytes,21,opt,name=masquerade,proto3" json:"masquerade,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *NetworkPathRouteProof) Reset() {
+	*x = NetworkPathRouteProof{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[97]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkPathRouteProof) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkPathRouteProof) ProtoMessage() {}
+
+func (x *NetworkPathRouteProof) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[97]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkPathRouteProof.ProtoReflect.Descriptor instead.
+func (*NetworkPathRouteProof) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{97}
+}
+
+func (x *NetworkPathRouteProof) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetDestination() string {
+	if x != nil {
+		return x.Destination
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetGateway() string {
+	if x != nil {
+		return x.Gateway
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetDev() string {
+	if x != nil {
+		return x.Dev
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetPreferredSource() string {
+	if x != nil {
+		return x.PreferredSource
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetProtocol() string {
+	if x != nil {
+		return x.Protocol
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetTable() string {
+	if x != nil {
+		return x.Table
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetRawRedacted() string {
+	if x != nil {
+		return x.RawRedacted
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetRouteType() string {
+	if x != nil {
+		return x.RouteType
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetScope() string {
+	if x != nil {
+		return x.Scope
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetFlags() []string {
+	if x != nil {
+		return x.Flags
+	}
+	return nil
+}
+
+func (x *NetworkPathRouteProof) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetInterfaceIndex() uint32 {
+	if x != nil {
+		return x.InterfaceIndex
+	}
+	return 0
+}
+
+func (x *NetworkPathRouteProof) GetInterfaceName() string {
+	if x != nil {
+		return x.InterfaceName
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetInterfaceMaster() string {
+	if x != nil {
+		return x.InterfaceMaster
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetInterfaceKind() string {
+	if x != nil {
+		return x.InterfaceKind
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetVrf() string {
+	if x != nil {
+		return x.Vrf
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetInterfaceIdentity() string {
+	if x != nil {
+		return x.InterfaceIdentity
+	}
+	return ""
+}
+
+func (x *NetworkPathRouteProof) GetFrr() *NetworkPathFrrProof {
+	if x != nil {
+		return x.Frr
+	}
+	return nil
+}
+
+func (x *NetworkPathRouteProof) GetMasquerade() *NetworkPathMasqueradeProof {
+	if x != nil {
+		return x.Masquerade
+	}
+	return nil
+}
+
+type NetworkPathFrrProof struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// observed, unavailable, not-configured, or unknown.
+	State         string `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	Command       string `protobuf:"bytes,3,opt,name=command,proto3" json:"command,omitempty"`
+	RouteFamily   string `protobuf:"bytes,4,opt,name=route_family,json=routeFamily,proto3" json:"route_family,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NetworkPathFrrProof) Reset() {
+	*x = NetworkPathFrrProof{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[98]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkPathFrrProof) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkPathFrrProof) ProtoMessage() {}
+
+func (x *NetworkPathFrrProof) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[98]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkPathFrrProof.ProtoReflect.Descriptor instead.
+func (*NetworkPathFrrProof) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{98}
+}
+
+func (x *NetworkPathFrrProof) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *NetworkPathFrrProof) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *NetworkPathFrrProof) GetCommand() string {
+	if x != nil {
+		return x.Command
+	}
+	return ""
+}
+
+func (x *NetworkPathFrrProof) GetRouteFamily() string {
+	if x != nil {
+		return x.RouteFamily
+	}
+	return ""
+}
+
+type NetworkPathMasqueradeProof struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// observed, mismatch, unavailable, not-requested, or unknown.
+	State                string `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail               string `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	RequestedSource      string `protobuf:"bytes,3,opt,name=requested_source,json=requestedSource,proto3" json:"requested_source,omitempty"`
+	ObservedEgressSource string `protobuf:"bytes,4,opt,name=observed_egress_source,json=observedEgressSource,proto3" json:"observed_egress_source,omitempty"`
+	ExpectedEgressSource string `protobuf:"bytes,5,opt,name=expected_egress_source,json=expectedEgressSource,proto3" json:"expected_egress_source,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *NetworkPathMasqueradeProof) Reset() {
+	*x = NetworkPathMasqueradeProof{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[99]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkPathMasqueradeProof) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkPathMasqueradeProof) ProtoMessage() {}
+
+func (x *NetworkPathMasqueradeProof) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[99]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkPathMasqueradeProof.ProtoReflect.Descriptor instead.
+func (*NetworkPathMasqueradeProof) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{99}
+}
+
+func (x *NetworkPathMasqueradeProof) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *NetworkPathMasqueradeProof) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *NetworkPathMasqueradeProof) GetRequestedSource() string {
+	if x != nil {
+		return x.RequestedSource
+	}
+	return ""
+}
+
+func (x *NetworkPathMasqueradeProof) GetObservedEgressSource() string {
+	if x != nil {
+		return x.ObservedEgressSource
+	}
+	return ""
+}
+
+func (x *NetworkPathMasqueradeProof) GetExpectedEgressSource() string {
+	if x != nil {
+		return x.ExpectedEgressSource
+	}
+	return ""
+}
+
+type NetworkPathVpnProof struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Kind                  string                 `protobuf:"bytes,1,opt,name=kind,proto3" json:"kind,omitempty"`
+	State                 string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Detail                string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	MatchedTunnel         string                 `protobuf:"bytes,4,opt,name=matched_tunnel,json=matchedTunnel,proto3" json:"matched_tunnel,omitempty"`
+	Interface             string                 `protobuf:"bytes,5,opt,name=interface,proto3" json:"interface,omitempty"`
+	Peer                  string                 `protobuf:"bytes,6,opt,name=peer,proto3" json:"peer,omitempty"`
+	HandshakeAgeSeconds   uint64                 `protobuf:"varint,7,opt,name=handshake_age_seconds,json=handshakeAgeSeconds,proto3" json:"handshake_age_seconds,omitempty"`
+	ChildSaCount          uint32                 `protobuf:"varint,8,opt,name=child_sa_count,json=childSaCount,proto3" json:"child_sa_count,omitempty"`
+	InstalledChildSaCount uint32                 `protobuf:"varint,9,opt,name=installed_child_sa_count,json=installedChildSaCount,proto3" json:"installed_child_sa_count,omitempty"`
+	Correlation           string                 `protobuf:"bytes,10,opt,name=correlation,proto3" json:"correlation,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *NetworkPathVpnProof) Reset() {
+	*x = NetworkPathVpnProof{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[100]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkPathVpnProof) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkPathVpnProof) ProtoMessage() {}
+
+func (x *NetworkPathVpnProof) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[100]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkPathVpnProof.ProtoReflect.Descriptor instead.
+func (*NetworkPathVpnProof) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{100}
+}
+
+func (x *NetworkPathVpnProof) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *NetworkPathVpnProof) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *NetworkPathVpnProof) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *NetworkPathVpnProof) GetMatchedTunnel() string {
+	if x != nil {
+		return x.MatchedTunnel
+	}
+	return ""
+}
+
+func (x *NetworkPathVpnProof) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *NetworkPathVpnProof) GetPeer() string {
+	if x != nil {
+		return x.Peer
+	}
+	return ""
+}
+
+func (x *NetworkPathVpnProof) GetHandshakeAgeSeconds() uint64 {
+	if x != nil {
+		return x.HandshakeAgeSeconds
+	}
+	return 0
+}
+
+func (x *NetworkPathVpnProof) GetChildSaCount() uint32 {
+	if x != nil {
+		return x.ChildSaCount
+	}
+	return 0
+}
+
+func (x *NetworkPathVpnProof) GetInstalledChildSaCount() uint32 {
+	if x != nil {
+		return x.InstalledChildSaCount
+	}
+	return 0
+}
+
+func (x *NetworkPathVpnProof) GetCorrelation() string {
+	if x != nil {
+		return x.Correlation
+	}
+	return ""
+}
+
+type NetworkPathMismatch struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// info, warning, or critical.
+	Severity string `protobuf:"bytes,1,opt,name=severity,proto3" json:"severity,omitempty"`
+	// route, vpn, input, or proof.
+	Subject       string `protobuf:"bytes,2,opt,name=subject,proto3" json:"subject,omitempty"`
+	Detail        string `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *NetworkPathMismatch) Reset() {
+	*x = NetworkPathMismatch{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[101]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *NetworkPathMismatch) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*NetworkPathMismatch) ProtoMessage() {}
+
+func (x *NetworkPathMismatch) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[101]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use NetworkPathMismatch.ProtoReflect.Descriptor instead.
+func (*NetworkPathMismatch) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{101}
+}
+
+func (x *NetworkPathMismatch) GetSeverity() string {
+	if x != nil {
+		return x.Severity
+	}
+	return ""
+}
+
+func (x *NetworkPathMismatch) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *NetworkPathMismatch) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type HighAvailabilityStatus struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// standalone, planned, ready, degraded, or unknown.
+	State string `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	// standalone, active, passive, or unknown.
+	Role string `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	// standalone or active-passive.
+	Mode                           string                                   `protobuf:"bytes,3,opt,name=mode,proto3" json:"mode,omitempty"`
+	NodeId                         string                                   `protobuf:"bytes,4,opt,name=node_id,json=nodeId,proto3" json:"node_id,omitempty"`
+	PeerId                         string                                   `protobuf:"bytes,5,opt,name=peer_id,json=peerId,proto3" json:"peer_id,omitempty"`
+	PeerAddress                    string                                   `protobuf:"bytes,6,opt,name=peer_address,json=peerAddress,proto3" json:"peer_address,omitempty"`
+	RunningPolicyVersion           uint64                                   `protobuf:"varint,7,opt,name=running_policy_version,json=runningPolicyVersion,proto3" json:"running_policy_version,omitempty"`
+	LastKnownGoodVersion           uint64                                   `protobuf:"varint,8,opt,name=last_known_good_version,json=lastKnownGoodVersion,proto3" json:"last_known_good_version,omitempty"`
+	LastKnownGoodState             string                                   `protobuf:"bytes,9,opt,name=last_known_good_state,json=lastKnownGoodState,proto3" json:"last_known_good_state,omitempty"`
+	LastKnownGoodArtifactSetSha256 string                                   `protobuf:"bytes,10,opt,name=last_known_good_artifact_set_sha256,json=lastKnownGoodArtifactSetSha256,proto3" json:"last_known_good_artifact_set_sha256,omitempty"`
+	Sync                           *HighAvailabilitySyncStatus              `protobuf:"bytes,11,opt,name=sync,proto3" json:"sync,omitempty"`
+	Failover                       *HighAvailabilityFailoverStatus          `protobuf:"bytes,12,opt,name=failover,proto3" json:"failover,omitempty"`
+	Blockers                       []string                                 `protobuf:"bytes,13,rep,name=blockers,proto3" json:"blockers,omitempty"`
+	Warnings                       []*StatusWarning                         `protobuf:"bytes,14,rep,name=warnings,proto3" json:"warnings,omitempty"`
+	Detail                         string                                   `protobuf:"bytes,15,opt,name=detail,proto3" json:"detail,omitempty"`
+	Replication                    *HighAvailabilityReplicationStatus       `protobuf:"bytes,16,opt,name=replication,proto3" json:"replication,omitempty"`
+	FencingEvidence                *HighAvailabilityFencingEvidenceStatus   `protobuf:"bytes,17,opt,name=fencing_evidence,json=fencingEvidence,proto3" json:"fencing_evidence,omitempty"`
+	TransportEvidence              *HighAvailabilityTransportEvidenceStatus `protobuf:"bytes,18,opt,name=transport_evidence,json=transportEvidence,proto3" json:"transport_evidence,omitempty"`
+	ConntrackSync                  *HighAvailabilityConntrackSyncStatus     `protobuf:"bytes,19,opt,name=conntrack_sync,json=conntrackSync,proto3" json:"conntrack_sync,omitempty"`
+	unknownFields                  protoimpl.UnknownFields
+	sizeCache                      protoimpl.SizeCache
+}
+
+func (x *HighAvailabilityStatus) Reset() {
+	*x = HighAvailabilityStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[102]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilityStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilityStatus) ProtoMessage() {}
+
+func (x *HighAvailabilityStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[102]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilityStatus.ProtoReflect.Descriptor instead.
+func (*HighAvailabilityStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{102}
+}
+
+func (x *HighAvailabilityStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetNodeId() string {
+	if x != nil {
+		return x.NodeId
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetPeerId() string {
+	if x != nil {
+		return x.PeerId
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetPeerAddress() string {
+	if x != nil {
+		return x.PeerAddress
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetRunningPolicyVersion() uint64 {
+	if x != nil {
+		return x.RunningPolicyVersion
+	}
+	return 0
+}
+
+func (x *HighAvailabilityStatus) GetLastKnownGoodVersion() uint64 {
+	if x != nil {
+		return x.LastKnownGoodVersion
+	}
+	return 0
+}
+
+func (x *HighAvailabilityStatus) GetLastKnownGoodState() string {
+	if x != nil {
+		return x.LastKnownGoodState
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetLastKnownGoodArtifactSetSha256() string {
+	if x != nil {
+		return x.LastKnownGoodArtifactSetSha256
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetSync() *HighAvailabilitySyncStatus {
+	if x != nil {
+		return x.Sync
+	}
+	return nil
+}
+
+func (x *HighAvailabilityStatus) GetFailover() *HighAvailabilityFailoverStatus {
+	if x != nil {
+		return x.Failover
+	}
+	return nil
+}
+
+func (x *HighAvailabilityStatus) GetBlockers() []string {
+	if x != nil {
+		return x.Blockers
+	}
+	return nil
+}
+
+func (x *HighAvailabilityStatus) GetWarnings() []*StatusWarning {
+	if x != nil {
+		return x.Warnings
+	}
+	return nil
+}
+
+func (x *HighAvailabilityStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *HighAvailabilityStatus) GetReplication() *HighAvailabilityReplicationStatus {
+	if x != nil {
+		return x.Replication
+	}
+	return nil
+}
+
+func (x *HighAvailabilityStatus) GetFencingEvidence() *HighAvailabilityFencingEvidenceStatus {
+	if x != nil {
+		return x.FencingEvidence
+	}
+	return nil
+}
+
+func (x *HighAvailabilityStatus) GetTransportEvidence() *HighAvailabilityTransportEvidenceStatus {
+	if x != nil {
+		return x.TransportEvidence
+	}
+	return nil
+}
+
+func (x *HighAvailabilityStatus) GetConntrackSync() *HighAvailabilityConntrackSyncStatus {
+	if x != nil {
+		return x.ConntrackSync
+	}
+	return nil
+}
+
+type HighAvailabilitySyncStatus struct {
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	State                  string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail                 string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	LocalVersion           uint64                 `protobuf:"varint,3,opt,name=local_version,json=localVersion,proto3" json:"local_version,omitempty"`
+	PeerVersion            uint64                 `protobuf:"varint,4,opt,name=peer_version,json=peerVersion,proto3" json:"peer_version,omitempty"`
+	LocalArtifactSetSha256 string                 `protobuf:"bytes,5,opt,name=local_artifact_set_sha256,json=localArtifactSetSha256,proto3" json:"local_artifact_set_sha256,omitempty"`
+	PeerArtifactSetSha256  string                 `protobuf:"bytes,6,opt,name=peer_artifact_set_sha256,json=peerArtifactSetSha256,proto3" json:"peer_artifact_set_sha256,omitempty"`
+	SecondsSinceHeartbeat  uint64                 `protobuf:"varint,7,opt,name=seconds_since_heartbeat,json=secondsSinceHeartbeat,proto3" json:"seconds_since_heartbeat,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *HighAvailabilitySyncStatus) Reset() {
+	*x = HighAvailabilitySyncStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[103]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilitySyncStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilitySyncStatus) ProtoMessage() {}
+
+func (x *HighAvailabilitySyncStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[103]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilitySyncStatus.ProtoReflect.Descriptor instead.
+func (*HighAvailabilitySyncStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{103}
+}
+
+func (x *HighAvailabilitySyncStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HighAvailabilitySyncStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *HighAvailabilitySyncStatus) GetLocalVersion() uint64 {
+	if x != nil {
+		return x.LocalVersion
+	}
+	return 0
+}
+
+func (x *HighAvailabilitySyncStatus) GetPeerVersion() uint64 {
+	if x != nil {
+		return x.PeerVersion
+	}
+	return 0
+}
+
+func (x *HighAvailabilitySyncStatus) GetLocalArtifactSetSha256() string {
+	if x != nil {
+		return x.LocalArtifactSetSha256
+	}
+	return ""
+}
+
+func (x *HighAvailabilitySyncStatus) GetPeerArtifactSetSha256() string {
+	if x != nil {
+		return x.PeerArtifactSetSha256
+	}
+	return ""
+}
+
+func (x *HighAvailabilitySyncStatus) GetSecondsSinceHeartbeat() uint64 {
+	if x != nil {
+		return x.SecondsSinceHeartbeat
+	}
+	return 0
+}
+
+type HighAvailabilityReplicationStatus struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	State            string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Enabled          bool                   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Detail           string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	LastAttemptAt    string                 `protobuf:"bytes,4,opt,name=last_attempt_at,json=lastAttemptAt,proto3" json:"last_attempt_at,omitempty"`
+	LastSuccessAt    string                 `protobuf:"bytes,5,opt,name=last_success_at,json=lastSuccessAt,proto3" json:"last_success_at,omitempty"`
+	LastError        string                 `protobuf:"bytes,6,opt,name=last_error,json=lastError,proto3" json:"last_error,omitempty"`
+	LastPeerVersion  uint64                 `protobuf:"varint,7,opt,name=last_peer_version,json=lastPeerVersion,proto3" json:"last_peer_version,omitempty"`
+	LastLocalVersion uint64                 `protobuf:"varint,8,opt,name=last_local_version,json=lastLocalVersion,proto3" json:"last_local_version,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *HighAvailabilityReplicationStatus) Reset() {
+	*x = HighAvailabilityReplicationStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[104]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilityReplicationStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilityReplicationStatus) ProtoMessage() {}
+
+func (x *HighAvailabilityReplicationStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[104]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilityReplicationStatus.ProtoReflect.Descriptor instead.
+func (*HighAvailabilityReplicationStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{104}
+}
+
+func (x *HighAvailabilityReplicationStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HighAvailabilityReplicationStatus) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *HighAvailabilityReplicationStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *HighAvailabilityReplicationStatus) GetLastAttemptAt() string {
+	if x != nil {
+		return x.LastAttemptAt
+	}
+	return ""
+}
+
+func (x *HighAvailabilityReplicationStatus) GetLastSuccessAt() string {
+	if x != nil {
+		return x.LastSuccessAt
+	}
+	return ""
+}
+
+func (x *HighAvailabilityReplicationStatus) GetLastError() string {
+	if x != nil {
+		return x.LastError
+	}
+	return ""
+}
+
+func (x *HighAvailabilityReplicationStatus) GetLastPeerVersion() uint64 {
+	if x != nil {
+		return x.LastPeerVersion
+	}
+	return 0
+}
+
+func (x *HighAvailabilityReplicationStatus) GetLastLocalVersion() uint64 {
+	if x != nil {
+		return x.LastLocalVersion
+	}
+	return 0
+}
+
+type HighAvailabilityFailoverStatus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	State         string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Eligible      bool                   `protobuf:"varint,2,opt,name=eligible,proto3" json:"eligible,omitempty"`
+	Detail        string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	Blockers      []string               `protobuf:"bytes,4,rep,name=blockers,proto3" json:"blockers,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HighAvailabilityFailoverStatus) Reset() {
+	*x = HighAvailabilityFailoverStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[105]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilityFailoverStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilityFailoverStatus) ProtoMessage() {}
+
+func (x *HighAvailabilityFailoverStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[105]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilityFailoverStatus.ProtoReflect.Descriptor instead.
+func (*HighAvailabilityFailoverStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{105}
+}
+
+func (x *HighAvailabilityFailoverStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFailoverStatus) GetEligible() bool {
+	if x != nil {
+		return x.Eligible
+	}
+	return false
+}
+
+func (x *HighAvailabilityFailoverStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFailoverStatus) GetBlockers() []string {
+	if x != nil {
+		return x.Blockers
+	}
+	return nil
+}
+
+type HighAvailabilityFencingEvidenceStatus struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// not_recorded, acknowledged_external, recorded, or unavailable.
+	State         string `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Provider      string `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
+	Claim         string `protobuf:"bytes,3,opt,name=claim,proto3" json:"claim,omitempty"`
+	PeerId        string `protobuf:"bytes,4,opt,name=peer_id,json=peerId,proto3" json:"peer_id,omitempty"`
+	EvidenceId    string `protobuf:"bytes,5,opt,name=evidence_id,json=evidenceId,proto3" json:"evidence_id,omitempty"`
+	ObservedAt    string `protobuf:"bytes,6,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	Detail        string `protobuf:"bytes,7,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) Reset() {
+	*x = HighAvailabilityFencingEvidenceStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[106]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilityFencingEvidenceStatus) ProtoMessage() {}
+
+func (x *HighAvailabilityFencingEvidenceStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[106]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilityFencingEvidenceStatus.ProtoReflect.Descriptor instead.
+func (*HighAvailabilityFencingEvidenceStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{106}
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) GetClaim() string {
+	if x != nil {
+		return x.Claim
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) GetPeerId() string {
+	if x != nil {
+		return x.PeerId
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) GetEvidenceId() string {
+	if x != nil {
+		return x.EvidenceId
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) GetObservedAt() string {
+	if x != nil {
+		return x.ObservedAt
+	}
+	return ""
+}
+
+func (x *HighAvailabilityFencingEvidenceStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type HighAvailabilityTransportEvidenceStatus struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// not_configured, not_performed, promoted, degraded, or unavailable.
+	State          string   `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Claim          string   `protobuf:"bytes,2,opt,name=claim,proto3" json:"claim,omitempty"`
+	Vip            string   `protobuf:"bytes,3,opt,name=vip,proto3" json:"vip,omitempty"`
+	Interface      string   `protobuf:"bytes,4,opt,name=interface,proto3" json:"interface,omitempty"`
+	Routes         []string `protobuf:"bytes,5,rep,name=routes,proto3" json:"routes,omitempty"`
+	GarpState      string   `protobuf:"bytes,6,opt,name=garp_state,json=garpState,proto3" json:"garp_state,omitempty"`
+	GarpDetail     string   `protobuf:"bytes,7,opt,name=garp_detail,json=garpDetail,proto3" json:"garp_detail,omitempty"`
+	NeighborState  string   `protobuf:"bytes,8,opt,name=neighbor_state,json=neighborState,proto3" json:"neighbor_state,omitempty"`
+	NeighborDetail string   `protobuf:"bytes,9,opt,name=neighbor_detail,json=neighborDetail,proto3" json:"neighbor_detail,omitempty"`
+	ObservedAt     string   `protobuf:"bytes,10,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	Detail         string   `protobuf:"bytes,11,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields  protoimpl.UnknownFields
+	sizeCache      protoimpl.SizeCache
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) Reset() {
+	*x = HighAvailabilityTransportEvidenceStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[107]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilityTransportEvidenceStatus) ProtoMessage() {}
+
+func (x *HighAvailabilityTransportEvidenceStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[107]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilityTransportEvidenceStatus.ProtoReflect.Descriptor instead.
+func (*HighAvailabilityTransportEvidenceStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{107}
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetClaim() string {
+	if x != nil {
+		return x.Claim
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetVip() string {
+	if x != nil {
+		return x.Vip
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetRoutes() []string {
+	if x != nil {
+		return x.Routes
+	}
+	return nil
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetGarpState() string {
+	if x != nil {
+		return x.GarpState
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetGarpDetail() string {
+	if x != nil {
+		return x.GarpDetail
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetNeighborState() string {
+	if x != nil {
+		return x.NeighborState
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetNeighborDetail() string {
+	if x != nil {
+		return x.NeighborDetail
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetObservedAt() string {
+	if x != nil {
+		return x.ObservedAt
+	}
+	return ""
+}
+
+func (x *HighAvailabilityTransportEvidenceStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type HighAvailabilityConntrackSyncStatus struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// not_configured, not_performed, synced, degraded, or unavailable.
+	State         string `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Provider      string `protobuf:"bytes,2,opt,name=provider,proto3" json:"provider,omitempty"`
+	Claim         string `protobuf:"bytes,3,opt,name=claim,proto3" json:"claim,omitempty"`
+	PeerId        string `protobuf:"bytes,4,opt,name=peer_id,json=peerId,proto3" json:"peer_id,omitempty"`
+	EvidenceId    string `protobuf:"bytes,5,opt,name=evidence_id,json=evidenceId,proto3" json:"evidence_id,omitempty"`
+	ObservedAt    string `protobuf:"bytes,6,opt,name=observed_at,json=observedAt,proto3" json:"observed_at,omitempty"`
+	Detail        string `protobuf:"bytes,7,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) Reset() {
+	*x = HighAvailabilityConntrackSyncStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[108]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HighAvailabilityConntrackSyncStatus) ProtoMessage() {}
+
+func (x *HighAvailabilityConntrackSyncStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[108]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HighAvailabilityConntrackSyncStatus.ProtoReflect.Descriptor instead.
+func (*HighAvailabilityConntrackSyncStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{108}
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) GetProvider() string {
+	if x != nil {
+		return x.Provider
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) GetClaim() string {
+	if x != nil {
+		return x.Claim
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) GetPeerId() string {
+	if x != nil {
+		return x.PeerId
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) GetEvidenceId() string {
+	if x != nil {
+		return x.EvidenceId
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) GetObservedAt() string {
+	if x != nil {
+		return x.ObservedAt
+	}
+	return ""
+}
+
+func (x *HighAvailabilityConntrackSyncStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type RuntimeStatus struct {
+	state             protoimpl.MessageState `protogen:"open.v1"`
+	Version           string                 `protobuf:"bytes,1,opt,name=version,proto3" json:"version,omitempty"`
+	Commit            string                 `protobuf:"bytes,2,opt,name=commit,proto3" json:"commit,omitempty"`
+	BuildDate         string                 `protobuf:"bytes,3,opt,name=build_date,json=buildDate,proto3" json:"build_date,omitempty"`
+	StartedAt         string                 `protobuf:"bytes,4,opt,name=started_at,json=startedAt,proto3" json:"started_at,omitempty"`
+	UptimeSeconds     uint64                 `protobuf:"varint,5,opt,name=uptime_seconds,json=uptimeSeconds,proto3" json:"uptime_seconds,omitempty"`
+	GrpcListen        string                 `protobuf:"bytes,6,opt,name=grpc_listen,json=grpcListen,proto3" json:"grpc_listen,omitempty"`
+	HttpListen        string                 `protobuf:"bytes,7,opt,name=http_listen,json=httpListen,proto3" json:"http_listen,omitempty"`
+	TlsEnabled        bool                   `protobuf:"varint,8,opt,name=tls_enabled,json=tlsEnabled,proto3" json:"tls_enabled,omitempty"`
+	AuthEnabled       bool                   `protobuf:"varint,9,opt,name=auth_enabled,json=authEnabled,proto3" json:"auth_enabled,omitempty"`
+	DryRun            bool                   `protobuf:"varint,10,opt,name=dry_run,json=dryRun,proto3" json:"dry_run,omitempty"`
+	DataDir           string                 `protobuf:"bytes,11,opt,name=data_dir,json=dataDir,proto3" json:"data_dir,omitempty"`
+	LogDir            string                 `protobuf:"bytes,12,opt,name=log_dir,json=logDir,proto3" json:"log_dir,omitempty"`
+	InspectionWorkers uint32                 `protobuf:"varint,13,opt,name=inspection_workers,json=inspectionWorkers,proto3" json:"inspection_workers,omitempty"`
+	HostCpus          uint32                 `protobuf:"varint,14,opt,name=host_cpus,json=hostCpus,proto3" json:"host_cpus,omitempty"`
+	ActiveDataplane   string                 `protobuf:"bytes,15,opt,name=active_dataplane,json=activeDataplane,proto3" json:"active_dataplane,omitempty"`
+	unknownFields     protoimpl.UnknownFields
+	sizeCache         protoimpl.SizeCache
+}
+
+func (x *RuntimeStatus) Reset() {
+	*x = RuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[109]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuntimeStatus) ProtoMessage() {}
+
+func (x *RuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[109]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuntimeStatus.ProtoReflect.Descriptor instead.
+func (*RuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{109}
+}
+
+func (x *RuntimeStatus) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetCommit() string {
+	if x != nil {
+		return x.Commit
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetBuildDate() string {
+	if x != nil {
+		return x.BuildDate
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetStartedAt() string {
+	if x != nil {
+		return x.StartedAt
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetUptimeSeconds() uint64 {
+	if x != nil {
+		return x.UptimeSeconds
+	}
+	return 0
+}
+
+func (x *RuntimeStatus) GetGrpcListen() string {
+	if x != nil {
+		return x.GrpcListen
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetHttpListen() string {
+	if x != nil {
+		return x.HttpListen
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetTlsEnabled() bool {
+	if x != nil {
+		return x.TlsEnabled
+	}
+	return false
+}
+
+func (x *RuntimeStatus) GetAuthEnabled() bool {
+	if x != nil {
+		return x.AuthEnabled
+	}
+	return false
+}
+
+func (x *RuntimeStatus) GetDryRun() bool {
+	if x != nil {
+		return x.DryRun
+	}
+	return false
+}
+
+func (x *RuntimeStatus) GetDataDir() string {
+	if x != nil {
+		return x.DataDir
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetLogDir() string {
+	if x != nil {
+		return x.LogDir
+	}
+	return ""
+}
+
+func (x *RuntimeStatus) GetInspectionWorkers() uint32 {
+	if x != nil {
+		return x.InspectionWorkers
+	}
+	return 0
+}
+
+func (x *RuntimeStatus) GetHostCpus() uint32 {
+	if x != nil {
+		return x.HostCpus
+	}
+	return 0
+}
+
+func (x *RuntimeStatus) GetActiveDataplane() string {
+	if x != nil {
+		return x.ActiveDataplane
+	}
+	return ""
+}
+
+type EngineStatus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Role          string                 `protobuf:"bytes,2,opt,name=role,proto3" json:"role,omitempty"`
+	Mode          string                 `protobuf:"bytes,3,opt,name=mode,proto3" json:"mode,omitempty"`
+	State         string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,5,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EngineStatus) Reset() {
+	*x = EngineStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[110]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EngineStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EngineStatus) ProtoMessage() {}
+
+func (x *EngineStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[110]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EngineStatus.ProtoReflect.Descriptor instead.
+func (*EngineStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{110}
+}
+
+func (x *EngineStatus) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *EngineStatus) GetRole() string {
+	if x != nil {
+		return x.Role
+	}
+	return ""
+}
+
+func (x *EngineStatus) GetMode() string {
+	if x != nil {
+		return x.Mode
+	}
+	return ""
+}
+
+func (x *EngineStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *EngineStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type SystemCapability struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SystemCapability) Reset() {
+	*x = SystemCapability{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[111]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SystemCapability) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SystemCapability) ProtoMessage() {}
+
+func (x *SystemCapability) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[111]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SystemCapability.ProtoReflect.Descriptor instead.
+func (*SystemCapability) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{111}
+}
+
+func (x *SystemCapability) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SystemCapability) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *SystemCapability) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type DataplaneStatus struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	ActiveDataplane string                 `protobuf:"bytes,1,opt,name=active_dataplane,json=activeDataplane,proto3" json:"active_dataplane,omitempty"`
+	Flowtable       *FlowtableStatus       `protobuf:"bytes,2,opt,name=flowtable,proto3" json:"flowtable,omitempty"`
+	KernelTuning    *KernelTuningStatus    `protobuf:"bytes,3,opt,name=kernel_tuning,json=kernelTuning,proto3" json:"kernel_tuning,omitempty"`
+	Ebpf            *EbpfDataplaneStatus   `protobuf:"bytes,4,opt,name=ebpf,proto3" json:"ebpf,omitempty"`
+	// Aggregated nftables counters grouped by OpenNGFW rule/comment identity.
+	Counters []*DataplaneCounter `protobuf:"bytes,5,rep,name=counters,proto3" json:"counters,omitempty"`
+	// Live Linux conntrack table capacity from /proc/sys/net/netfilter.
+	Conntrack *ConntrackTableStatus `protobuf:"bytes,6,opt,name=conntrack,proto3" json:"conntrack,omitempty"`
+	// Running policy version active when counters and dataplane posture were
+	// sampled. Zero means no committed policy or version context unavailable.
+	RunningPolicyVersion uint64 `protobuf:"varint,7,opt,name=running_policy_version,json=runningPolicyVersion,proto3" json:"running_policy_version,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *DataplaneStatus) Reset() {
+	*x = DataplaneStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[112]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DataplaneStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DataplaneStatus) ProtoMessage() {}
+
+func (x *DataplaneStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[112]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DataplaneStatus.ProtoReflect.Descriptor instead.
+func (*DataplaneStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{112}
+}
+
+func (x *DataplaneStatus) GetActiveDataplane() string {
+	if x != nil {
+		return x.ActiveDataplane
+	}
+	return ""
+}
+
+func (x *DataplaneStatus) GetFlowtable() *FlowtableStatus {
+	if x != nil {
+		return x.Flowtable
+	}
+	return nil
+}
+
+func (x *DataplaneStatus) GetKernelTuning() *KernelTuningStatus {
+	if x != nil {
+		return x.KernelTuning
+	}
+	return nil
+}
+
+func (x *DataplaneStatus) GetEbpf() *EbpfDataplaneStatus {
+	if x != nil {
+		return x.Ebpf
+	}
+	return nil
+}
+
+func (x *DataplaneStatus) GetCounters() []*DataplaneCounter {
+	if x != nil {
+		return x.Counters
+	}
+	return nil
+}
+
+func (x *DataplaneStatus) GetConntrack() *ConntrackTableStatus {
+	if x != nil {
+		return x.Conntrack
+	}
+	return nil
+}
+
+func (x *DataplaneStatus) GetRunningPolicyVersion() uint64 {
+	if x != nil {
+		return x.RunningPolicyVersion
+	}
+	return 0
+}
+
+type DataplaneCounter struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Raw nftables comment emitted by OpenNGFW, e.g. rule:lan-to-wan.
+	Comment string `protobuf:"bytes,1,opt,name=comment,proto3" json:"comment,omitempty"`
+	// Counter class derived from the comment prefix: rule, host-input, snat,
+	// dnat, intel, ips, network, flow-offload, default, or system.
+	Kind string `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	// Human-readable policy/runtime object name derived from the comment.
+	Name    string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`
+	Packets uint64 `protobuf:"varint,4,opt,name=packets,proto3" json:"packets,omitempty"`
+	Bytes   uint64 `protobuf:"varint,5,opt,name=bytes,proto3" json:"bytes,omitempty"`
+	// Durable forwarding-rule identity parsed from OpenNGFW renderer metadata
+	// when kind == "rule"; empty for legacy counters and non-forwarding counters.
+	RuleId string `protobuf:"bytes,6,opt,name=rule_id,json=ruleId,proto3" json:"rule_id,omitempty"`
+	// Durable policy-item identity parsed from OpenNGFW renderer metadata. For
+	// forwarding rules this matches rule_id; for non-forwarding counters it
+	// carries host-input, source NAT, or destination NAT item identity.
+	ItemId        string `protobuf:"bytes,7,opt,name=item_id,json=itemId,proto3" json:"item_id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *DataplaneCounter) Reset() {
+	*x = DataplaneCounter{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[113]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *DataplaneCounter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*DataplaneCounter) ProtoMessage() {}
+
+func (x *DataplaneCounter) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[113]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use DataplaneCounter.ProtoReflect.Descriptor instead.
+func (*DataplaneCounter) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{113}
+}
+
+func (x *DataplaneCounter) GetComment() string {
+	if x != nil {
+		return x.Comment
+	}
+	return ""
+}
+
+func (x *DataplaneCounter) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *DataplaneCounter) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *DataplaneCounter) GetPackets() uint64 {
+	if x != nil {
+		return x.Packets
+	}
+	return 0
+}
+
+func (x *DataplaneCounter) GetBytes() uint64 {
+	if x != nil {
+		return x.Bytes
+	}
+	return 0
+}
+
+func (x *DataplaneCounter) GetRuleId() string {
+	if x != nil {
+		return x.RuleId
+	}
+	return ""
+}
+
+func (x *DataplaneCounter) GetItemId() string {
+	if x != nil {
+		return x.ItemId
+	}
+	return ""
+}
+
+type FlowtableStatus struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	HostState          string                 `protobuf:"bytes,1,opt,name=host_state,json=hostState,proto3" json:"host_state,omitempty"`
+	HostDetail         string                 `protobuf:"bytes,2,opt,name=host_detail,json=hostDetail,proto3" json:"host_detail,omitempty"`
+	RuntimeState       string                 `protobuf:"bytes,3,opt,name=runtime_state,json=runtimeState,proto3" json:"runtime_state,omitempty"`
+	RuntimeDetail      string                 `protobuf:"bytes,4,opt,name=runtime_detail,json=runtimeDetail,proto3" json:"runtime_detail,omitempty"`
+	Devices            []string               `protobuf:"bytes,5,rep,name=devices,proto3" json:"devices,omitempty"`
+	Packets            uint64                 `protobuf:"varint,6,opt,name=packets,proto3" json:"packets,omitempty"`
+	Bytes              uint64                 `protobuf:"varint,7,opt,name=bytes,proto3" json:"bytes,omitempty"`
+	FlowtableDeclared  bool                   `protobuf:"varint,8,opt,name=flowtable_declared,json=flowtableDeclared,proto3" json:"flowtable_declared,omitempty"`
+	OffloadRulePresent bool                   `protobuf:"varint,9,opt,name=offload_rule_present,json=offloadRulePresent,proto3" json:"offload_rule_present,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *FlowtableStatus) Reset() {
+	*x = FlowtableStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[114]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FlowtableStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FlowtableStatus) ProtoMessage() {}
+
+func (x *FlowtableStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[114]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FlowtableStatus.ProtoReflect.Descriptor instead.
+func (*FlowtableStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{114}
+}
+
+func (x *FlowtableStatus) GetHostState() string {
+	if x != nil {
+		return x.HostState
+	}
+	return ""
+}
+
+func (x *FlowtableStatus) GetHostDetail() string {
+	if x != nil {
+		return x.HostDetail
+	}
+	return ""
+}
+
+func (x *FlowtableStatus) GetRuntimeState() string {
+	if x != nil {
+		return x.RuntimeState
+	}
+	return ""
+}
+
+func (x *FlowtableStatus) GetRuntimeDetail() string {
+	if x != nil {
+		return x.RuntimeDetail
+	}
+	return ""
+}
+
+func (x *FlowtableStatus) GetDevices() []string {
+	if x != nil {
+		return x.Devices
+	}
+	return nil
+}
+
+func (x *FlowtableStatus) GetPackets() uint64 {
+	if x != nil {
+		return x.Packets
+	}
+	return 0
+}
+
+func (x *FlowtableStatus) GetBytes() uint64 {
+	if x != nil {
+		return x.Bytes
+	}
+	return 0
+}
+
+func (x *FlowtableStatus) GetFlowtableDeclared() bool {
+	if x != nil {
+		return x.FlowtableDeclared
+	}
+	return false
+}
+
+func (x *FlowtableStatus) GetOffloadRulePresent() bool {
+	if x != nil {
+		return x.OffloadRulePresent
+	}
+	return false
+}
+
+type ConntrackTableStatus struct {
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	State                    string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail                   string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	CurrentEntries           uint64                 `protobuf:"varint,3,opt,name=current_entries,json=currentEntries,proto3" json:"current_entries,omitempty"`
+	MaxEntries               uint64                 `protobuf:"varint,4,opt,name=max_entries,json=maxEntries,proto3" json:"max_entries,omitempty"`
+	UsagePercent             float64                `protobuf:"fixed64,5,opt,name=usage_percent,json=usagePercent,proto3" json:"usage_percent,omitempty"`
+	WarningThresholdPercent  float64                `protobuf:"fixed64,6,opt,name=warning_threshold_percent,json=warningThresholdPercent,proto3" json:"warning_threshold_percent,omitempty"`
+	DegradedThresholdPercent float64                `protobuf:"fixed64,7,opt,name=degraded_threshold_percent,json=degradedThresholdPercent,proto3" json:"degraded_threshold_percent,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *ConntrackTableStatus) Reset() {
+	*x = ConntrackTableStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[115]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ConntrackTableStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ConntrackTableStatus) ProtoMessage() {}
+
+func (x *ConntrackTableStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[115]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ConntrackTableStatus.ProtoReflect.Descriptor instead.
+func (*ConntrackTableStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{115}
+}
+
+func (x *ConntrackTableStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *ConntrackTableStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *ConntrackTableStatus) GetCurrentEntries() uint64 {
+	if x != nil {
+		return x.CurrentEntries
+	}
+	return 0
+}
+
+func (x *ConntrackTableStatus) GetMaxEntries() uint64 {
+	if x != nil {
+		return x.MaxEntries
+	}
+	return 0
+}
+
+func (x *ConntrackTableStatus) GetUsagePercent() float64 {
+	if x != nil {
+		return x.UsagePercent
+	}
+	return 0
+}
+
+func (x *ConntrackTableStatus) GetWarningThresholdPercent() float64 {
+	if x != nil {
+		return x.WarningThresholdPercent
+	}
+	return 0
+}
+
+func (x *ConntrackTableStatus) GetDegradedThresholdPercent() float64 {
+	if x != nil {
+		return x.DegradedThresholdPercent
+	}
+	return 0
+}
+
+type VpnRuntimeStatus struct {
+	state         protoimpl.MessageState  `protogen:"open.v1"`
+	Wireguard     *WireGuardRuntimeStatus `protobuf:"bytes,1,opt,name=wireguard,proto3" json:"wireguard,omitempty"`
+	Ipsec         *IpsecRuntimeStatus     `protobuf:"bytes,2,opt,name=ipsec,proto3" json:"ipsec,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VpnRuntimeStatus) Reset() {
+	*x = VpnRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[116]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VpnRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VpnRuntimeStatus) ProtoMessage() {}
+
+func (x *VpnRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[116]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VpnRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*VpnRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{116}
+}
+
+func (x *VpnRuntimeStatus) GetWireguard() *WireGuardRuntimeStatus {
+	if x != nil {
+		return x.Wireguard
+	}
+	return nil
+}
+
+func (x *VpnRuntimeStatus) GetIpsec() *IpsecRuntimeStatus {
+	if x != nil {
+		return x.Ipsec
+	}
+	return nil
+}
+
+type RoutingRuntimeStatus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Frr           *FrrRuntimeStatus      `protobuf:"bytes,1,opt,name=frr,proto3" json:"frr,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RoutingRuntimeStatus) Reset() {
+	*x = RoutingRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[117]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RoutingRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RoutingRuntimeStatus) ProtoMessage() {}
+
+func (x *RoutingRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[117]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RoutingRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*RoutingRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{117}
+}
+
+func (x *RoutingRuntimeStatus) GetFrr() *FrrRuntimeStatus {
+	if x != nil {
+		return x.Frr
+	}
+	return nil
+}
+
+type FrrRuntimeStatus struct {
+	state         protoimpl.MessageState       `protogen:"open.v1"`
+	State         string                       `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                       `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	BgpNeighbors  []*BgpNeighborRuntimeStatus  `protobuf:"bytes,3,rep,name=bgp_neighbors,json=bgpNeighbors,proto3" json:"bgp_neighbors,omitempty"`
+	OspfNeighbors []*OspfNeighborRuntimeStatus `protobuf:"bytes,4,rep,name=ospf_neighbors,json=ospfNeighbors,proto3" json:"ospf_neighbors,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *FrrRuntimeStatus) Reset() {
+	*x = FrrRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[118]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *FrrRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*FrrRuntimeStatus) ProtoMessage() {}
+
+func (x *FrrRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[118]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use FrrRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*FrrRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{118}
+}
+
+func (x *FrrRuntimeStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *FrrRuntimeStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *FrrRuntimeStatus) GetBgpNeighbors() []*BgpNeighborRuntimeStatus {
+	if x != nil {
+		return x.BgpNeighbors
+	}
+	return nil
+}
+
+func (x *FrrRuntimeStatus) GetOspfNeighbors() []*OspfNeighborRuntimeStatus {
+	if x != nil {
+		return x.OspfNeighbors
+	}
+	return nil
+}
+
+type BgpNeighborRuntimeStatus struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	Peer             string                 `protobuf:"bytes,1,opt,name=peer,proto3" json:"peer,omitempty"`
+	RemoteAsn        uint32                 `protobuf:"varint,2,opt,name=remote_asn,json=remoteAsn,proto3" json:"remote_asn,omitempty"`
+	State            string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Uptime           string                 `protobuf:"bytes,4,opt,name=uptime,proto3" json:"uptime,omitempty"`
+	PrefixesReceived uint64                 `protobuf:"varint,5,opt,name=prefixes_received,json=prefixesReceived,proto3" json:"prefixes_received,omitempty"`
+	Detail           string                 `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *BgpNeighborRuntimeStatus) Reset() {
+	*x = BgpNeighborRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[119]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *BgpNeighborRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*BgpNeighborRuntimeStatus) ProtoMessage() {}
+
+func (x *BgpNeighborRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[119]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use BgpNeighborRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*BgpNeighborRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{119}
+}
+
+func (x *BgpNeighborRuntimeStatus) GetPeer() string {
+	if x != nil {
+		return x.Peer
+	}
+	return ""
+}
+
+func (x *BgpNeighborRuntimeStatus) GetRemoteAsn() uint32 {
+	if x != nil {
+		return x.RemoteAsn
+	}
+	return 0
+}
+
+func (x *BgpNeighborRuntimeStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *BgpNeighborRuntimeStatus) GetUptime() string {
+	if x != nil {
+		return x.Uptime
+	}
+	return ""
+}
+
+func (x *BgpNeighborRuntimeStatus) GetPrefixesReceived() uint64 {
+	if x != nil {
+		return x.PrefixesReceived
+	}
+	return 0
+}
+
+func (x *BgpNeighborRuntimeStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type OspfNeighborRuntimeStatus struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	NeighborId    string                 `protobuf:"bytes,1,opt,name=neighbor_id,json=neighborId,proto3" json:"neighbor_id,omitempty"`
+	Address       string                 `protobuf:"bytes,2,opt,name=address,proto3" json:"address,omitempty"`
+	Interface     string                 `protobuf:"bytes,3,opt,name=interface,proto3" json:"interface,omitempty"`
+	State         string                 `protobuf:"bytes,4,opt,name=state,proto3" json:"state,omitempty"`
+	DeadTime      string                 `protobuf:"bytes,5,opt,name=dead_time,json=deadTime,proto3" json:"dead_time,omitempty"`
+	Detail        string                 `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *OspfNeighborRuntimeStatus) Reset() {
+	*x = OspfNeighborRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[120]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *OspfNeighborRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*OspfNeighborRuntimeStatus) ProtoMessage() {}
+
+func (x *OspfNeighborRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[120]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use OspfNeighborRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*OspfNeighborRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{120}
+}
+
+func (x *OspfNeighborRuntimeStatus) GetNeighborId() string {
+	if x != nil {
+		return x.NeighborId
+	}
+	return ""
+}
+
+func (x *OspfNeighborRuntimeStatus) GetAddress() string {
+	if x != nil {
+		return x.Address
+	}
+	return ""
+}
+
+func (x *OspfNeighborRuntimeStatus) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *OspfNeighborRuntimeStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *OspfNeighborRuntimeStatus) GetDeadTime() string {
+	if x != nil {
+		return x.DeadTime
+	}
+	return ""
+}
+
+func (x *OspfNeighborRuntimeStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type WireGuardRuntimeStatus struct {
+	state         protoimpl.MessageState      `protogen:"open.v1"`
+	State         string                      `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                      `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	Interfaces    []*WireGuardInterfaceStatus `protobuf:"bytes,3,rep,name=interfaces,proto3" json:"interfaces,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WireGuardRuntimeStatus) Reset() {
+	*x = WireGuardRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[121]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WireGuardRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WireGuardRuntimeStatus) ProtoMessage() {}
+
+func (x *WireGuardRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[121]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WireGuardRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*WireGuardRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{121}
+}
+
+func (x *WireGuardRuntimeStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *WireGuardRuntimeStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *WireGuardRuntimeStatus) GetInterfaces() []*WireGuardInterfaceStatus {
+	if x != nil {
+		return x.Interfaces
+	}
+	return nil
+}
+
+type WireGuardInterfaceStatus struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	State           string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Detail          string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	PeerCount       uint32                 `protobuf:"varint,4,opt,name=peer_count,json=peerCount,proto3" json:"peer_count,omitempty"`
+	ActivePeerCount uint32                 `protobuf:"varint,5,opt,name=active_peer_count,json=activePeerCount,proto3" json:"active_peer_count,omitempty"`
+	Peers           []*WireGuardPeerStatus `protobuf:"bytes,6,rep,name=peers,proto3" json:"peers,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *WireGuardInterfaceStatus) Reset() {
+	*x = WireGuardInterfaceStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[122]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WireGuardInterfaceStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WireGuardInterfaceStatus) ProtoMessage() {}
+
+func (x *WireGuardInterfaceStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[122]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WireGuardInterfaceStatus.ProtoReflect.Descriptor instead.
+func (*WireGuardInterfaceStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{122}
+}
+
+func (x *WireGuardInterfaceStatus) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *WireGuardInterfaceStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *WireGuardInterfaceStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *WireGuardInterfaceStatus) GetPeerCount() uint32 {
+	if x != nil {
+		return x.PeerCount
+	}
+	return 0
+}
+
+func (x *WireGuardInterfaceStatus) GetActivePeerCount() uint32 {
+	if x != nil {
+		return x.ActivePeerCount
+	}
+	return 0
+}
+
+func (x *WireGuardInterfaceStatus) GetPeers() []*WireGuardPeerStatus {
+	if x != nil {
+		return x.Peers
+	}
+	return nil
+}
+
+type WireGuardPeerStatus struct {
+	state                      protoimpl.MessageState `protogen:"open.v1"`
+	PublicKey                  string                 `protobuf:"bytes,1,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`
+	Endpoint                   string                 `protobuf:"bytes,2,opt,name=endpoint,proto3" json:"endpoint,omitempty"`
+	LatestHandshakeUnixSeconds uint64                 `protobuf:"varint,3,opt,name=latest_handshake_unix_seconds,json=latestHandshakeUnixSeconds,proto3" json:"latest_handshake_unix_seconds,omitempty"`
+	LatestHandshakeAgeSeconds  uint64                 `protobuf:"varint,4,opt,name=latest_handshake_age_seconds,json=latestHandshakeAgeSeconds,proto3" json:"latest_handshake_age_seconds,omitempty"`
+	RxBytes                    uint64                 `protobuf:"varint,5,opt,name=rx_bytes,json=rxBytes,proto3" json:"rx_bytes,omitempty"`
+	TxBytes                    uint64                 `protobuf:"varint,6,opt,name=tx_bytes,json=txBytes,proto3" json:"tx_bytes,omitempty"`
+	State                      string                 `protobuf:"bytes,7,opt,name=state,proto3" json:"state,omitempty"`
+	Detail                     string                 `protobuf:"bytes,8,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *WireGuardPeerStatus) Reset() {
+	*x = WireGuardPeerStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[123]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WireGuardPeerStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WireGuardPeerStatus) ProtoMessage() {}
+
+func (x *WireGuardPeerStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[123]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WireGuardPeerStatus.ProtoReflect.Descriptor instead.
+func (*WireGuardPeerStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{123}
+}
+
+func (x *WireGuardPeerStatus) GetPublicKey() string {
+	if x != nil {
+		return x.PublicKey
+	}
+	return ""
+}
+
+func (x *WireGuardPeerStatus) GetEndpoint() string {
+	if x != nil {
+		return x.Endpoint
+	}
+	return ""
+}
+
+func (x *WireGuardPeerStatus) GetLatestHandshakeUnixSeconds() uint64 {
+	if x != nil {
+		return x.LatestHandshakeUnixSeconds
+	}
+	return 0
+}
+
+func (x *WireGuardPeerStatus) GetLatestHandshakeAgeSeconds() uint64 {
+	if x != nil {
+		return x.LatestHandshakeAgeSeconds
+	}
+	return 0
+}
+
+func (x *WireGuardPeerStatus) GetRxBytes() uint64 {
+	if x != nil {
+		return x.RxBytes
+	}
+	return 0
+}
+
+func (x *WireGuardPeerStatus) GetTxBytes() uint64 {
+	if x != nil {
+		return x.TxBytes
+	}
+	return 0
+}
+
+func (x *WireGuardPeerStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *WireGuardPeerStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type IpsecRuntimeStatus struct {
+	state         protoimpl.MessageState      `protogen:"open.v1"`
+	State         string                      `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                      `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	Tunnels       []*IpsecTunnelRuntimeStatus `protobuf:"bytes,3,rep,name=tunnels,proto3" json:"tunnels,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IpsecRuntimeStatus) Reset() {
+	*x = IpsecRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[124]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IpsecRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IpsecRuntimeStatus) ProtoMessage() {}
+
+func (x *IpsecRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[124]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IpsecRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*IpsecRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{124}
+}
+
+func (x *IpsecRuntimeStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *IpsecRuntimeStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *IpsecRuntimeStatus) GetTunnels() []*IpsecTunnelRuntimeStatus {
+	if x != nil {
+		return x.Tunnels
+	}
+	return nil
+}
+
+type IpsecTunnelRuntimeStatus struct {
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Name                  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	State                 string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Detail                string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	IkeState              string                 `protobuf:"bytes,4,opt,name=ike_state,json=ikeState,proto3" json:"ike_state,omitempty"`
+	ChildSaCount          uint32                 `protobuf:"varint,5,opt,name=child_sa_count,json=childSaCount,proto3" json:"child_sa_count,omitempty"`
+	InstalledChildSaCount uint32                 `protobuf:"varint,6,opt,name=installed_child_sa_count,json=installedChildSaCount,proto3" json:"installed_child_sa_count,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
+}
+
+func (x *IpsecTunnelRuntimeStatus) Reset() {
+	*x = IpsecTunnelRuntimeStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[125]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IpsecTunnelRuntimeStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IpsecTunnelRuntimeStatus) ProtoMessage() {}
+
+func (x *IpsecTunnelRuntimeStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[125]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IpsecTunnelRuntimeStatus.ProtoReflect.Descriptor instead.
+func (*IpsecTunnelRuntimeStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{125}
+}
+
+func (x *IpsecTunnelRuntimeStatus) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *IpsecTunnelRuntimeStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *IpsecTunnelRuntimeStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *IpsecTunnelRuntimeStatus) GetIkeState() string {
+	if x != nil {
+		return x.IkeState
+	}
+	return ""
+}
+
+func (x *IpsecTunnelRuntimeStatus) GetChildSaCount() uint32 {
+	if x != nil {
+		return x.ChildSaCount
+	}
+	return 0
+}
+
+func (x *IpsecTunnelRuntimeStatus) GetInstalledChildSaCount() uint32 {
+	if x != nil {
+		return x.InstalledChildSaCount
+	}
+	return 0
+}
+
+type KernelTuningStatus struct {
+	state            protoimpl.MessageState `protogen:"open.v1"`
+	State            string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail           string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	SysctlConfigPath string                 `protobuf:"bytes,3,opt,name=sysctl_config_path,json=sysctlConfigPath,proto3" json:"sysctl_config_path,omitempty"`
+	Checks           []*KernelTuningCheck   `protobuf:"bytes,4,rep,name=checks,proto3" json:"checks,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *KernelTuningStatus) Reset() {
+	*x = KernelTuningStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[126]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KernelTuningStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KernelTuningStatus) ProtoMessage() {}
+
+func (x *KernelTuningStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[126]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KernelTuningStatus.ProtoReflect.Descriptor instead.
+func (*KernelTuningStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{126}
+}
+
+func (x *KernelTuningStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *KernelTuningStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *KernelTuningStatus) GetSysctlConfigPath() string {
+	if x != nil {
+		return x.SysctlConfigPath
+	}
+	return ""
+}
+
+func (x *KernelTuningStatus) GetChecks() []*KernelTuningCheck {
+	if x != nil {
+		return x.Checks
+	}
+	return nil
+}
+
+type KernelTuningCheck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	Current       string                 `protobuf:"bytes,3,opt,name=current,proto3" json:"current,omitempty"`
+	Recommended   string                 `protobuf:"bytes,4,opt,name=recommended,proto3" json:"recommended,omitempty"`
+	State         string                 `protobuf:"bytes,5,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *KernelTuningCheck) Reset() {
+	*x = KernelTuningCheck{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[127]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *KernelTuningCheck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*KernelTuningCheck) ProtoMessage() {}
+
+func (x *KernelTuningCheck) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[127]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use KernelTuningCheck.ProtoReflect.Descriptor instead.
+func (*KernelTuningCheck) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{127}
+}
+
+func (x *KernelTuningCheck) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *KernelTuningCheck) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *KernelTuningCheck) GetCurrent() string {
+	if x != nil {
+		return x.Current
+	}
+	return ""
+}
+
+func (x *KernelTuningCheck) GetRecommended() string {
+	if x != nil {
+		return x.Recommended
+	}
+	return ""
+}
+
+func (x *KernelTuningCheck) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *KernelTuningCheck) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type EbpfDataplaneStatus struct {
+	state  protoimpl.MessageState `protogen:"open.v1"`
+	State  string                 `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail string                 `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	// Host/tool/kernel prerequisites needed before any first-party eBPF dataplane
+	// can be compiled or inspected.
+	Probes []*EbpfProbe `protobuf:"bytes,3,rep,name=probes,proto3" json:"probes,omitempty"`
+	// planned, ready, degraded, or active. This is attach readiness only; it is
+	// not proof that eBPF is the active dataplane.
+	AttachState  string `protobuf:"bytes,4,opt,name=attach_state,json=attachState,proto3" json:"attach_state,omitempty"`
+	AttachDetail string `protobuf:"bytes,5,opt,name=attach_detail,json=attachDetail,proto3" json:"attach_detail,omitempty"`
+	// Probe results for XDP/tc attachment prerequisites.
+	AttachProbes []*EbpfProbe `protobuf:"bytes,6,rep,name=attach_probes,json=attachProbes,proto3" json:"attach_probes,omitempty"`
+	// planned or active. The v2-mixed implementation exposes plan-only renderer
+	// scaffolding while nftables remains the production renderer.
+	RendererState       string            `protobuf:"bytes,7,opt,name=renderer_state,json=rendererState,proto3" json:"renderer_state,omitempty"`
+	RendererDetail      string            `protobuf:"bytes,8,opt,name=renderer_detail,json=rendererDetail,proto3" json:"renderer_detail,omitempty"`
+	SupportedHooks      []string          `protobuf:"bytes,9,rep,name=supported_hooks,json=supportedHooks,proto3" json:"supported_hooks,omitempty"`
+	Blockers            []string          `protobuf:"bytes,10,rep,name=blockers,proto3" json:"blockers,omitempty"`
+	Attachments         []*EbpfAttachment `protobuf:"bytes,11,rep,name=attachments,proto3" json:"attachments,omitempty"`
+	Artifacts           []*EbpfArtifact   `protobuf:"bytes,12,rep,name=artifacts,proto3" json:"artifacts,omitempty"`
+	EvidenceCollectedAt string            `protobuf:"bytes,13,opt,name=evidence_collected_at,json=evidenceCollectedAt,proto3" json:"evidence_collected_at,omitempty"`
+	EvidenceScope       string            `protobuf:"bytes,14,opt,name=evidence_scope,json=evidenceScope,proto3" json:"evidence_scope,omitempty"`
+	unknownFields       protoimpl.UnknownFields
+	sizeCache           protoimpl.SizeCache
+}
+
+func (x *EbpfDataplaneStatus) Reset() {
+	*x = EbpfDataplaneStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[128]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EbpfDataplaneStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EbpfDataplaneStatus) ProtoMessage() {}
+
+func (x *EbpfDataplaneStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[128]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EbpfDataplaneStatus.ProtoReflect.Descriptor instead.
+func (*EbpfDataplaneStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{128}
+}
+
+func (x *EbpfDataplaneStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *EbpfDataplaneStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *EbpfDataplaneStatus) GetProbes() []*EbpfProbe {
+	if x != nil {
+		return x.Probes
+	}
+	return nil
+}
+
+func (x *EbpfDataplaneStatus) GetAttachState() string {
+	if x != nil {
+		return x.AttachState
+	}
+	return ""
+}
+
+func (x *EbpfDataplaneStatus) GetAttachDetail() string {
+	if x != nil {
+		return x.AttachDetail
+	}
+	return ""
+}
+
+func (x *EbpfDataplaneStatus) GetAttachProbes() []*EbpfProbe {
+	if x != nil {
+		return x.AttachProbes
+	}
+	return nil
+}
+
+func (x *EbpfDataplaneStatus) GetRendererState() string {
+	if x != nil {
+		return x.RendererState
+	}
+	return ""
+}
+
+func (x *EbpfDataplaneStatus) GetRendererDetail() string {
+	if x != nil {
+		return x.RendererDetail
+	}
+	return ""
+}
+
+func (x *EbpfDataplaneStatus) GetSupportedHooks() []string {
+	if x != nil {
+		return x.SupportedHooks
+	}
+	return nil
+}
+
+func (x *EbpfDataplaneStatus) GetBlockers() []string {
+	if x != nil {
+		return x.Blockers
+	}
+	return nil
+}
+
+func (x *EbpfDataplaneStatus) GetAttachments() []*EbpfAttachment {
+	if x != nil {
+		return x.Attachments
+	}
+	return nil
+}
+
+func (x *EbpfDataplaneStatus) GetArtifacts() []*EbpfArtifact {
+	if x != nil {
+		return x.Artifacts
+	}
+	return nil
+}
+
+func (x *EbpfDataplaneStatus) GetEvidenceCollectedAt() string {
+	if x != nil {
+		return x.EvidenceCollectedAt
+	}
+	return ""
+}
+
+func (x *EbpfDataplaneStatus) GetEvidenceScope() string {
+	if x != nil {
+		return x.EvidenceScope
+	}
+	return ""
+}
+
+type EbpfProbe struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Key           string                 `protobuf:"bytes,2,opt,name=key,proto3" json:"key,omitempty"`
+	State         string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,4,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EbpfProbe) Reset() {
+	*x = EbpfProbe{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[129]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EbpfProbe) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EbpfProbe) ProtoMessage() {}
+
+func (x *EbpfProbe) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[129]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EbpfProbe.ProtoReflect.Descriptor instead.
+func (*EbpfProbe) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{129}
+}
+
+func (x *EbpfProbe) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *EbpfProbe) GetKey() string {
+	if x != nil {
+		return x.Key
+	}
+	return ""
+}
+
+func (x *EbpfProbe) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *EbpfProbe) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type EbpfAttachment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Interface     string                 `protobuf:"bytes,1,opt,name=interface,proto3" json:"interface,omitempty"`
+	Hook          string                 `protobuf:"bytes,2,opt,name=hook,proto3" json:"hook,omitempty"`
+	State         string                 `protobuf:"bytes,3,opt,name=state,proto3" json:"state,omitempty"`
+	ProgramId     string                 `protobuf:"bytes,4,opt,name=program_id,json=programId,proto3" json:"program_id,omitempty"`
+	ProgramName   string                 `protobuf:"bytes,5,opt,name=program_name,json=programName,proto3" json:"program_name,omitempty"`
+	PinnedPath    string                 `protobuf:"bytes,6,opt,name=pinned_path,json=pinnedPath,proto3" json:"pinned_path,omitempty"`
+	Detail        string                 `protobuf:"bytes,7,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EbpfAttachment) Reset() {
+	*x = EbpfAttachment{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[130]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EbpfAttachment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EbpfAttachment) ProtoMessage() {}
+
+func (x *EbpfAttachment) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[130]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EbpfAttachment.ProtoReflect.Descriptor instead.
+func (*EbpfAttachment) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{130}
+}
+
+func (x *EbpfAttachment) GetInterface() string {
+	if x != nil {
+		return x.Interface
+	}
+	return ""
+}
+
+func (x *EbpfAttachment) GetHook() string {
+	if x != nil {
+		return x.Hook
+	}
+	return ""
+}
+
+func (x *EbpfAttachment) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *EbpfAttachment) GetProgramId() string {
+	if x != nil {
+		return x.ProgramId
+	}
+	return ""
+}
+
+func (x *EbpfAttachment) GetProgramName() string {
+	if x != nil {
+		return x.ProgramName
+	}
+	return ""
+}
+
+func (x *EbpfAttachment) GetPinnedPath() string {
+	if x != nil {
+		return x.PinnedPath
+	}
+	return ""
+}
+
+func (x *EbpfAttachment) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type EbpfArtifact struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Kind          string                 `protobuf:"bytes,2,opt,name=kind,proto3" json:"kind,omitempty"`
+	Path          string                 `protobuf:"bytes,3,opt,name=path,proto3" json:"path,omitempty"`
+	Sha256        string                 `protobuf:"bytes,4,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	State         string                 `protobuf:"bytes,5,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,6,opt,name=detail,proto3" json:"detail,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EbpfArtifact) Reset() {
+	*x = EbpfArtifact{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[131]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EbpfArtifact) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EbpfArtifact) ProtoMessage() {}
+
+func (x *EbpfArtifact) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[131]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EbpfArtifact.ProtoReflect.Descriptor instead.
+func (*EbpfArtifact) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{131}
+}
+
+func (x *EbpfArtifact) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *EbpfArtifact) GetKind() string {
+	if x != nil {
+		return x.Kind
+	}
+	return ""
+}
+
+func (x *EbpfArtifact) GetPath() string {
+	if x != nil {
+		return x.Path
+	}
+	return ""
+}
+
+func (x *EbpfArtifact) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
+func (x *EbpfArtifact) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *EbpfArtifact) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+type ManagementPlaneStatus struct {
+	state                      protoimpl.MessageState `protogen:"open.v1"`
+	TlsEnabled                 bool                   `protobuf:"varint,1,opt,name=tls_enabled,json=tlsEnabled,proto3" json:"tls_enabled,omitempty"`
+	AuthEnabled                bool                   `protobuf:"varint,2,opt,name=auth_enabled,json=authEnabled,proto3" json:"auth_enabled,omitempty"`
+	RateLimitEnabled           bool                   `protobuf:"varint,3,opt,name=rate_limit_enabled,json=rateLimitEnabled,proto3" json:"rate_limit_enabled,omitempty"`
+	RateLimitRequestsPerMinute uint32                 `protobuf:"varint,4,opt,name=rate_limit_requests_per_minute,json=rateLimitRequestsPerMinute,proto3" json:"rate_limit_requests_per_minute,omitempty"`
+	RateLimitBurst             uint32                 `protobuf:"varint,5,opt,name=rate_limit_burst,json=rateLimitBurst,proto3" json:"rate_limit_burst,omitempty"`
+	HttpMaxBodyBytes           uint64                 `protobuf:"varint,6,opt,name=http_max_body_bytes,json=httpMaxBodyBytes,proto3" json:"http_max_body_bytes,omitempty"`
+	HttpMaxHeaderBytes         uint32                 `protobuf:"varint,7,opt,name=http_max_header_bytes,json=httpMaxHeaderBytes,proto3" json:"http_max_header_bytes,omitempty"`
+	GrpcMaxRecvBytes           uint32                 `protobuf:"varint,8,opt,name=grpc_max_recv_bytes,json=grpcMaxRecvBytes,proto3" json:"grpc_max_recv_bytes,omitempty"`
+	GrpcMaxSendBytes           uint32                 `protobuf:"varint,9,opt,name=grpc_max_send_bytes,json=grpcMaxSendBytes,proto3" json:"grpc_max_send_bytes,omitempty"`
+	HttpReadHeaderTimeout      string                 `protobuf:"bytes,10,opt,name=http_read_header_timeout,json=httpReadHeaderTimeout,proto3" json:"http_read_header_timeout,omitempty"`
+	HttpReadTimeout            string                 `protobuf:"bytes,11,opt,name=http_read_timeout,json=httpReadTimeout,proto3" json:"http_read_timeout,omitempty"`
+	HttpWriteTimeout           string                 `protobuf:"bytes,12,opt,name=http_write_timeout,json=httpWriteTimeout,proto3" json:"http_write_timeout,omitempty"`
+	HttpIdleTimeout            string                 `protobuf:"bytes,13,opt,name=http_idle_timeout,json=httpIdleTimeout,proto3" json:"http_idle_timeout,omitempty"`
+	TrustedProxyCidrs          []string               `protobuf:"bytes,14,rep,name=trusted_proxy_cidrs,json=trustedProxyCidrs,proto3" json:"trusted_proxy_cidrs,omitempty"`
+	RateLimitClientIdentity    string                 `protobuf:"bytes,15,opt,name=rate_limit_client_identity,json=rateLimitClientIdentity,proto3" json:"rate_limit_client_identity,omitempty"`
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
+}
+
+func (x *ManagementPlaneStatus) Reset() {
+	*x = ManagementPlaneStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[132]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ManagementPlaneStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ManagementPlaneStatus) ProtoMessage() {}
+
+func (x *ManagementPlaneStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[132]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ManagementPlaneStatus.ProtoReflect.Descriptor instead.
+func (*ManagementPlaneStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{132}
+}
+
+func (x *ManagementPlaneStatus) GetTlsEnabled() bool {
+	if x != nil {
+		return x.TlsEnabled
+	}
+	return false
+}
+
+func (x *ManagementPlaneStatus) GetAuthEnabled() bool {
+	if x != nil {
+		return x.AuthEnabled
+	}
+	return false
+}
+
+func (x *ManagementPlaneStatus) GetRateLimitEnabled() bool {
+	if x != nil {
+		return x.RateLimitEnabled
+	}
+	return false
+}
+
+func (x *ManagementPlaneStatus) GetRateLimitRequestsPerMinute() uint32 {
+	if x != nil {
+		return x.RateLimitRequestsPerMinute
+	}
+	return 0
+}
+
+func (x *ManagementPlaneStatus) GetRateLimitBurst() uint32 {
+	if x != nil {
+		return x.RateLimitBurst
+	}
+	return 0
+}
+
+func (x *ManagementPlaneStatus) GetHttpMaxBodyBytes() uint64 {
+	if x != nil {
+		return x.HttpMaxBodyBytes
+	}
+	return 0
+}
+
+func (x *ManagementPlaneStatus) GetHttpMaxHeaderBytes() uint32 {
+	if x != nil {
+		return x.HttpMaxHeaderBytes
+	}
+	return 0
+}
+
+func (x *ManagementPlaneStatus) GetGrpcMaxRecvBytes() uint32 {
+	if x != nil {
+		return x.GrpcMaxRecvBytes
+	}
+	return 0
+}
+
+func (x *ManagementPlaneStatus) GetGrpcMaxSendBytes() uint32 {
+	if x != nil {
+		return x.GrpcMaxSendBytes
+	}
+	return 0
+}
+
+func (x *ManagementPlaneStatus) GetHttpReadHeaderTimeout() string {
+	if x != nil {
+		return x.HttpReadHeaderTimeout
+	}
+	return ""
+}
+
+func (x *ManagementPlaneStatus) GetHttpReadTimeout() string {
+	if x != nil {
+		return x.HttpReadTimeout
+	}
+	return ""
+}
+
+func (x *ManagementPlaneStatus) GetHttpWriteTimeout() string {
+	if x != nil {
+		return x.HttpWriteTimeout
+	}
+	return ""
+}
+
+func (x *ManagementPlaneStatus) GetHttpIdleTimeout() string {
+	if x != nil {
+		return x.HttpIdleTimeout
+	}
+	return ""
+}
+
+func (x *ManagementPlaneStatus) GetTrustedProxyCidrs() []string {
+	if x != nil {
+		return x.TrustedProxyCidrs
+	}
+	return nil
+}
+
+func (x *ManagementPlaneStatus) GetRateLimitClientIdentity() string {
+	if x != nil {
+		return x.RateLimitClientIdentity
+	}
+	return ""
+}
+
+type HostResourceStatus struct {
+	state                protoimpl.MessageState  `protogen:"open.v1"`
+	State                string                  `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail               string                  `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	CpuCount             uint32                  `protobuf:"varint,3,opt,name=cpu_count,json=cpuCount,proto3" json:"cpu_count,omitempty"`
+	Load1                float64                 `protobuf:"fixed64,4,opt,name=load1,proto3" json:"load1,omitempty"`
+	Load5                float64                 `protobuf:"fixed64,5,opt,name=load5,proto3" json:"load5,omitempty"`
+	Load15               float64                 `protobuf:"fixed64,6,opt,name=load15,proto3" json:"load15,omitempty"`
+	Load1PerCpu          float64                 `protobuf:"fixed64,7,opt,name=load1_per_cpu,json=load1PerCpu,proto3" json:"load1_per_cpu,omitempty"`
+	MemoryTotalBytes     uint64                  `protobuf:"varint,8,opt,name=memory_total_bytes,json=memoryTotalBytes,proto3" json:"memory_total_bytes,omitempty"`
+	MemoryAvailableBytes uint64                  `protobuf:"varint,9,opt,name=memory_available_bytes,json=memoryAvailableBytes,proto3" json:"memory_available_bytes,omitempty"`
+	MemoryUsedPercent    float64                 `protobuf:"fixed64,10,opt,name=memory_used_percent,json=memoryUsedPercent,proto3" json:"memory_used_percent,omitempty"`
+	Interfaces           []*HostInterfaceCounter `protobuf:"bytes,11,rep,name=interfaces,proto3" json:"interfaces,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *HostResourceStatus) Reset() {
+	*x = HostResourceStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[133]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HostResourceStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HostResourceStatus) ProtoMessage() {}
+
+func (x *HostResourceStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[133]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HostResourceStatus.ProtoReflect.Descriptor instead.
+func (*HostResourceStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{133}
+}
+
+func (x *HostResourceStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HostResourceStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *HostResourceStatus) GetCpuCount() uint32 {
+	if x != nil {
+		return x.CpuCount
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetLoad1() float64 {
+	if x != nil {
+		return x.Load1
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetLoad5() float64 {
+	if x != nil {
+		return x.Load5
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetLoad15() float64 {
+	if x != nil {
+		return x.Load15
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetLoad1PerCpu() float64 {
+	if x != nil {
+		return x.Load1PerCpu
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetMemoryTotalBytes() uint64 {
+	if x != nil {
+		return x.MemoryTotalBytes
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetMemoryAvailableBytes() uint64 {
+	if x != nil {
+		return x.MemoryAvailableBytes
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetMemoryUsedPercent() float64 {
+	if x != nil {
+		return x.MemoryUsedPercent
+	}
+	return 0
+}
+
+func (x *HostResourceStatus) GetInterfaces() []*HostInterfaceCounter {
+	if x != nil {
+		return x.Interfaces
+	}
+	return nil
+}
+
+type HostInterfaceCounter struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	State         string                 `protobuf:"bytes,2,opt,name=state,proto3" json:"state,omitempty"`
+	Detail        string                 `protobuf:"bytes,3,opt,name=detail,proto3" json:"detail,omitempty"`
+	RxBytes       uint64                 `protobuf:"varint,4,opt,name=rx_bytes,json=rxBytes,proto3" json:"rx_bytes,omitempty"`
+	TxBytes       uint64                 `protobuf:"varint,5,opt,name=tx_bytes,json=txBytes,proto3" json:"tx_bytes,omitempty"`
+	RxPackets     uint64                 `protobuf:"varint,6,opt,name=rx_packets,json=rxPackets,proto3" json:"rx_packets,omitempty"`
+	TxPackets     uint64                 `protobuf:"varint,7,opt,name=tx_packets,json=txPackets,proto3" json:"tx_packets,omitempty"`
+	RxErrors      uint64                 `protobuf:"varint,8,opt,name=rx_errors,json=rxErrors,proto3" json:"rx_errors,omitempty"`
+	TxErrors      uint64                 `protobuf:"varint,9,opt,name=tx_errors,json=txErrors,proto3" json:"tx_errors,omitempty"`
+	RxDrops       uint64                 `protobuf:"varint,10,opt,name=rx_drops,json=rxDrops,proto3" json:"rx_drops,omitempty"`
+	TxDrops       uint64                 `protobuf:"varint,11,opt,name=tx_drops,json=txDrops,proto3" json:"tx_drops,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HostInterfaceCounter) Reset() {
+	*x = HostInterfaceCounter{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[134]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HostInterfaceCounter) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HostInterfaceCounter) ProtoMessage() {}
+
+func (x *HostInterfaceCounter) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[134]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HostInterfaceCounter.ProtoReflect.Descriptor instead.
+func (*HostInterfaceCounter) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{134}
+}
+
+func (x *HostInterfaceCounter) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *HostInterfaceCounter) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *HostInterfaceCounter) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *HostInterfaceCounter) GetRxBytes() uint64 {
+	if x != nil {
+		return x.RxBytes
+	}
+	return 0
+}
+
+func (x *HostInterfaceCounter) GetTxBytes() uint64 {
+	if x != nil {
+		return x.TxBytes
+	}
+	return 0
+}
+
+func (x *HostInterfaceCounter) GetRxPackets() uint64 {
+	if x != nil {
+		return x.RxPackets
+	}
+	return 0
+}
+
+func (x *HostInterfaceCounter) GetTxPackets() uint64 {
+	if x != nil {
+		return x.TxPackets
+	}
+	return 0
+}
+
+func (x *HostInterfaceCounter) GetRxErrors() uint64 {
+	if x != nil {
+		return x.RxErrors
+	}
+	return 0
+}
+
+func (x *HostInterfaceCounter) GetTxErrors() uint64 {
+	if x != nil {
+		return x.TxErrors
+	}
+	return 0
+}
+
+func (x *HostInterfaceCounter) GetRxDrops() uint64 {
+	if x != nil {
+		return x.RxDrops
+	}
+	return 0
+}
+
+func (x *HostInterfaceCounter) GetTxDrops() uint64 {
+	if x != nil {
+		return x.TxDrops
+	}
+	return 0
+}
+
+type InspectionStatus struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ready, disabled, degraded, failed-open, failed-closed, or unknown.
+	State            string             `protobuf:"bytes,1,opt,name=state,proto3" json:"state,omitempty"`
+	Detail           string             `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"`
+	IdsEnabled       bool               `protobuf:"varint,3,opt,name=ids_enabled,json=idsEnabled,proto3" json:"ids_enabled,omitempty"`
+	IdsMode          IdsMode            `protobuf:"varint,4,opt,name=ids_mode,json=idsMode,proto3,enum=openngfw.v1.IdsMode" json:"ids_mode,omitempty"`
+	FailureBehavior  IdsFailureBehavior `protobuf:"varint,5,opt,name=failure_behavior,json=failureBehavior,proto3,enum=openngfw.v1.IdsFailureBehavior" json:"failure_behavior,omitempty"`
+	InspectionState  string             `protobuf:"bytes,6,opt,name=inspection_state,json=inspectionState,proto3" json:"inspection_state,omitempty"`
+	EngineName       string             `protobuf:"bytes,7,opt,name=engine_name,json=engineName,proto3" json:"engine_name,omitempty"`
+	EngineMode       string             `protobuf:"bytes,8,opt,name=engine_mode,json=engineMode,proto3" json:"engine_mode,omitempty"`
+	EngineState      string             `protobuf:"bytes,9,opt,name=engine_state,json=engineState,proto3" json:"engine_state,omitempty"`
+	EngineRequired   bool               `protobuf:"varint,10,opt,name=engine_required,json=engineRequired,proto3" json:"engine_required,omitempty"`
+	BypassPossible   bool               `protobuf:"varint,11,opt,name=bypass_possible,json=bypassPossible,proto3" json:"bypass_possible,omitempty"`
+	BypassReason     string             `protobuf:"bytes,12,opt,name=bypass_reason,json=bypassReason,proto3" json:"bypass_reason,omitempty"`
+	DegradedBehavior string             `protobuf:"bytes,13,opt,name=degraded_behavior,json=degradedBehavior,proto3" json:"degraded_behavior,omitempty"`
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
+}
+
+func (x *InspectionStatus) Reset() {
+	*x = InspectionStatus{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[135]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *InspectionStatus) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InspectionStatus) ProtoMessage() {}
+
+func (x *InspectionStatus) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[135]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InspectionStatus.ProtoReflect.Descriptor instead.
+func (*InspectionStatus) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{135}
+}
+
+func (x *InspectionStatus) GetState() string {
+	if x != nil {
+		return x.State
+	}
+	return ""
+}
+
+func (x *InspectionStatus) GetDetail() string {
+	if x != nil {
+		return x.Detail
+	}
+	return ""
+}
+
+func (x *InspectionStatus) GetIdsEnabled() bool {
+	if x != nil {
+		return x.IdsEnabled
+	}
+	return false
+}
+
+func (x *InspectionStatus) GetIdsMode() IdsMode {
+	if x != nil {
+		return x.IdsMode
+	}
+	return IdsMode_IDS_MODE_UNSPECIFIED
+}
+
+func (x *InspectionStatus) GetFailureBehavior() IdsFailureBehavior {
+	if x != nil {
+		return x.FailureBehavior
+	}
+	return IdsFailureBehavior_IDS_FAILURE_BEHAVIOR_UNSPECIFIED
+}
+
+func (x *InspectionStatus) GetInspectionState() string {
+	if x != nil {
+		return x.InspectionState
+	}
+	return ""
+}
+
+func (x *InspectionStatus) GetEngineName() string {
+	if x != nil {
+		return x.EngineName
+	}
+	return ""
+}
+
+func (x *InspectionStatus) GetEngineMode() string {
+	if x != nil {
+		return x.EngineMode
+	}
+	return ""
+}
+
+func (x *InspectionStatus) GetEngineState() string {
+	if x != nil {
+		return x.EngineState
+	}
+	return ""
+}
+
+func (x *InspectionStatus) GetEngineRequired() bool {
+	if x != nil {
+		return x.EngineRequired
+	}
+	return false
+}
+
+func (x *InspectionStatus) GetBypassPossible() bool {
+	if x != nil {
+		return x.BypassPossible
+	}
+	return false
+}
+
+func (x *InspectionStatus) GetBypassReason() string {
+	if x != nil {
+		return x.BypassReason
+	}
+	return ""
+}
+
+func (x *InspectionStatus) GetDegradedBehavior() string {
+	if x != nil {
+		return x.DegradedBehavior
+	}
+	return ""
+}
+
+type StatusWarning struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Severity      string                 `protobuf:"bytes,1,opt,name=severity,proto3" json:"severity,omitempty"`
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"`
+	Action        string                 `protobuf:"bytes,3,opt,name=action,proto3" json:"action,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *StatusWarning) Reset() {
+	*x = StatusWarning{}
+	mi := &file_openngfw_v1_system_proto_msgTypes[136]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *StatusWarning) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*StatusWarning) ProtoMessage() {}
+
+func (x *StatusWarning) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_system_proto_msgTypes[136]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use StatusWarning.ProtoReflect.Descriptor instead.
+func (*StatusWarning) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_system_proto_rawDescGZIP(), []int{136}
+}
+
+func (x *StatusWarning) GetSeverity() string {
+	if x != nil {
+		return x.Severity
+	}
+	return ""
+}
+
+func (x *StatusWarning) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+func (x *StatusWarning) GetAction() string {
+	if x != nil {
+		return x.Action
+	}
+	return ""
+}
+
 var File_openngfw_v1_system_proto protoreflect.FileDescriptor
 
 const file_openngfw_v1_system_proto_rawDesc = "" +
 	"\n" +
-	"\x18openngfw/v1/system.proto\x12\vopenngfw.v1\x1a\x1cgoogle/api/annotations.proto\"\x13\n" +
+	"\x18openngfw/v1/system.proto\x12\vopenngfw.v1\x1a\x1cgoogle/api/annotations.proto\x1a\x19google/api/httpbody.proto\x1a\x1cgoogle/protobuf/struct.proto\x1a\x15openngfw/v1/ids.proto\x1a\x18openngfw/v1/policy.proto\x1a openngfw/v1/policy_service.proto\x1a\x1bopenngfw/v1/telemetry.proto\"\x13\n" +
 	"\x11GetVersionRequest\"e\n" +
 	"\x12GetVersionResponse\x12\x18\n" +
 	"\aversion\x18\x01 \x01(\tR\aversion\x12\x16\n" +
 	"\x06commit\x18\x02 \x01(\tR\x06commit\x12\x1d\n" +
 	"\n" +
-	"build_date\x18\x03 \x01(\tR\tbuildDate2z\n" +
+	"build_date\x18\x03 \x01(\tR\tbuildDate\"\x12\n" +
+	"\x10GetStatusRequest\"!\n" +
+	"\x1fGetTelemetryExportStatusRequest\"\xcb\x01\n" +
+	"\x1cVerifyTelemetryExportRequest\x12\x1f\n" +
+	"\vexport_name\x18\x01 \x01(\tR\n" +
+	"exportName\x124\n" +
+	"\x04type\x18\x02 \x01(\x0e2 .openngfw.v1.TelemetryExportTypeR\x04type\x12\x16\n" +
+	"\x06target\x18\x03 \x01(\tR\x06target\x12\x16\n" +
+	"\x06reason\x18\x04 \x01(\tR\x06reason\x12$\n" +
+	"\x0eack_test_event\x18\x05 \x01(\bR\fackTestEvent\"\xa2\x02\n" +
+	"\x1dVerifyTelemetryExportResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x04 \x01(\tR\x06detail\x124\n" +
+	"\x16running_policy_version\x18\x05 \x01(\x04R\x14runningPolicyVersion\x127\n" +
+	"\x05proof\x18\x06 \x01(\v2!.openngfw.v1.TelemetryExportProofR\x05proof\x12\x1a\n" +
+	"\bwarnings\x18\a \x03(\tR\bwarnings\"\x8d\x02\n" +
+	"\x14TelemetryExportProof\x12\x19\n" +
+	"\bproof_id\x18\x01 \x01(\tR\aproofId\x12\x1f\n" +
+	"\vexport_name\x18\x02 \x01(\tR\n" +
+	"exportName\x124\n" +
+	"\x04type\x18\x03 \x01(\x0e2 .openngfw.v1.TelemetryExportTypeR\x04type\x12\x1a\n" +
+	"\bprotocol\x18\x04 \x01(\tR\bprotocol\x12\x16\n" +
+	"\x06target\x18\x05 \x01(\tR\x06target\x12\x14\n" +
+	"\x05bytes\x18\x06 \x01(\x04R\x05bytes\x12\x1d\n" +
+	"\n" +
+	"event_hash\x18\a \x01(\tR\teventHash\x12\x1a\n" +
+	"\bevidence\x18\b \x01(\tR\bevidence\"\xbb\x01\n" +
+	"\x15ListSystemLogsRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\rR\x05limit\x12\x16\n" +
+	"\x06source\x18\x02 \x01(\tR\x06source\x12\x16\n" +
+	"\x06engine\x18\x03 \x01(\tR\x06engine\x12\x1a\n" +
+	"\bseverity\x18\x04 \x01(\tR\bseverity\x12\x14\n" +
+	"\x05query\x18\x05 \x01(\tR\x05query\x12\x14\n" +
+	"\x05since\x18\x06 \x01(\tR\x05since\x12\x14\n" +
+	"\x05until\x18\a \x01(\tR\x05until\"\xd2\x01\n" +
+	"\x16ListSystemLogsResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x125\n" +
+	"\aentries\x18\x03 \x03(\v2\x1b.openngfw.v1.SystemLogEntryR\aentries\x127\n" +
+	"\asummary\x18\x04 \x01(\v2\x1d.openngfw.v1.SystemLogSummaryR\asummary\"\xe8\x01\n" +
+	"\x0eSystemLogEntry\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x1c\n" +
+	"\ttimestamp\x18\x02 \x01(\tR\ttimestamp\x12\x16\n" +
+	"\x06source\x18\x03 \x01(\tR\x06source\x12\x16\n" +
+	"\x06engine\x18\x04 \x01(\tR\x06engine\x12\x1a\n" +
+	"\bseverity\x18\x05 \x01(\tR\bseverity\x12\x18\n" +
+	"\amessage\x18\x06 \x01(\tR\amessage\x12\x1a\n" +
+	"\bfacility\x18\a \x01(\tR\bfacility\x12\x12\n" +
+	"\x04file\x18\b \x01(\tR\x04file\x12\x12\n" +
+	"\x04line\x18\t \x01(\rR\x04line\"\x8f\x02\n" +
+	"\x10SystemLogSummary\x12#\n" +
+	"\rscanned_files\x18\x01 \x01(\rR\fscannedFiles\x12#\n" +
+	"\rscanned_lines\x18\x02 \x01(\rR\fscannedLines\x12#\n" +
+	"\rmatched_lines\x18\x03 \x01(\rR\fmatchedLines\x12\x1c\n" +
+	"\ttruncated\x18\x04 \x01(\bR\ttruncated\x12\x18\n" +
+	"\asources\x18\x05 \x03(\tR\asources\x12\x1e\n" +
+	"\n" +
+	"severities\x18\x06 \x03(\tR\n" +
+	"severities\x12\x18\n" +
+	"\aengines\x18\a \x03(\tR\aengines\x12\x1a\n" +
+	"\bwarnings\x18\b \x03(\tR\bwarnings\"\x86\x04\n" +
+	" GetTelemetryExportStatusResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x04 \x01(\tR\x06detail\x12+\n" +
+	"\x11telemetry_enabled\x18\x05 \x01(\bR\x10telemetryEnabled\x124\n" +
+	"\x16running_policy_version\x18\x06 \x01(\x04R\x14runningPolicyVersion\x12A\n" +
+	"\x06vector\x18\a \x01(\v2).openngfw.v1.TelemetryVectorRuntimeStatusR\x06vector\x12J\n" +
+	"\n" +
+	"clickhouse\x18\b \x01(\v2*.openngfw.v1.TelemetryClickHouseSinkStatusR\n" +
+	"clickhouse\x12@\n" +
+	"\aexports\x18\t \x03(\v2&.openngfw.v1.TelemetryExportSinkStatusR\aexports\x126\n" +
+	"\bwarnings\x18\n" +
+	" \x03(\v2\x1a.openngfw.v1.StatusWarningR\bwarnings\"L\n" +
+	"\x1cTelemetryVectorRuntimeStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"\x8d\x02\n" +
+	"\x1dTelemetryClickHouseSinkStatus\x12\x1e\n" +
+	"\n" +
+	"configured\x18\x01 \x01(\bR\n" +
+	"configured\x12\x1a\n" +
+	"\bendpoint\x18\x02 \x01(\tR\bendpoint\x12\x1a\n" +
+	"\bdatabase\x18\x03 \x01(\tR\bdatabase\x12!\n" +
+	"\fevents_table\x18\x04 \x01(\tR\veventsTable\x12!\n" +
+	"\falerts_table\x18\x05 \x01(\tR\valertsTable\x12%\n" +
+	"\x0eevidence_state\x18\x06 \x01(\tR\revidenceState\x12'\n" +
+	"\x0fevidence_detail\x18\a \x01(\tR\x0eevidenceDetail\"\xc6\x02\n" +
+	"\x19TelemetryExportSinkStatus\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1e\n" +
+	"\n" +
+	"configured\x18\x02 \x01(\bR\n" +
+	"configured\x124\n" +
+	"\x04type\x18\x03 \x01(\x0e2 .openngfw.v1.TelemetryExportTypeR\x04type\x12\x16\n" +
+	"\x06target\x18\x04 \x01(\tR\x06target\x12\x1a\n" +
+	"\bprotocol\x18\x05 \x01(\tR\bprotocol\x12%\n" +
+	"\x0eevidence_state\x18\x06 \x01(\tR\revidenceState\x12'\n" +
+	"\x0fevidence_detail\x18\a \x01(\tR\x0eevidenceDetail\x12;\n" +
+	"\x04file\x18\b \x01(\v2'.openngfw.v1.TelemetryLocalFileEvidenceR\x04file\"\xa0\x01\n" +
+	"\x1aTelemetryLocalFileEvidence\x12\x12\n" +
+	"\x04path\x18\x01 \x01(\tR\x04path\x12\x18\n" +
+	"\apresent\x18\x02 \x01(\bR\apresent\x12\x1d\n" +
+	"\n" +
+	"size_bytes\x18\x03 \x01(\x04R\tsizeBytes\x12\x1f\n" +
+	"\vmodified_at\x18\x04 \x01(\tR\n" +
+	"modifiedAt\x12\x14\n" +
+	"\x05error\x18\x05 \x01(\tR\x05error\"\xb2\x01\n" +
+	"\x1cCheckRuntimeReadinessRequest\x128\n" +
+	"\rtarget_policy\x18\x01 \x01(\v2\x13.openngfw.v1.PolicyR\ftargetPolicy\x12:\n" +
+	"\x0erunning_policy\x18\x02 \x01(\v2\x13.openngfw.v1.PolicyR\rrunningPolicy\x12\x1c\n" +
+	"\toperation\x18\x03 \x01(\tR\toperation\"\xbf\x02\n" +
+	"\x1dCheckRuntimeReadinessResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x12\x1c\n" +
+	"\toperation\x18\x03 \x01(\tR\toperation\x12\x14\n" +
+	"\x05label\x18\x04 \x01(\tR\x05label\x12\x10\n" +
+	"\x03cls\x18\x05 \x01(\tR\x03cls\x12!\n" +
+	"\frequires_ack\x18\x06 \x01(\bR\vrequiresAck\x12\x16\n" +
+	"\x06detail\x18\a \x01(\tR\x06detail\x127\n" +
+	"\x05items\x18\b \x03(\v2!.openngfw.v1.RuntimeReadinessItemR\x05items\x12\x1a\n" +
+	"\bwarnings\x18\t \x03(\tR\bwarnings\"\xae\x01\n" +
+	"\x14RuntimeReadinessItem\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05level\x18\x02 \x01(\tR\x05level\x12\x14\n" +
+	"\x05badge\x18\x03 \x01(\tR\x05badge\x12\x14\n" +
+	"\x05title\x18\x04 \x01(\tR\x05title\x12\x16\n" +
+	"\x06detail\x18\x05 \x01(\tR\x06detail\x12\x12\n" +
+	"\x04href\x18\x06 \x01(\tR\x04href\x12\x18\n" +
+	"\acommand\x18\a \x01(\tR\acommand\"\"\n" +
+	" GetHighAvailabilityStatusRequest\"\xaa\x01\n" +
+	"!GetHighAvailabilityStatusResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x12;\n" +
+	"\x06status\x18\x03 \x01(\v2#.openngfw.v1.HighAvailabilityStatusR\x06status\"\x94\x01\n" +
+	"!PullHighAvailabilityPolicyRequest\x12\x18\n" +
+	"\acomment\x18\x01 \x01(\tR\acomment\x12\x19\n" +
+	"\back_pull\x18\x02 \x01(\bR\aackPull\x12\x19\n" +
+	"\back_risk\x18\x03 \x01(\bR\aackRisk\x12\x1f\n" +
+	"\vack_runtime\x18\x04 \x01(\bR\n" +
+	"ackRuntime\"\x92\x03\n" +
+	"\"PullHighAvailabilityPolicyResponse\x12\x18\n" +
+	"\aversion\x18\x01 \x01(\x04R\aversion\x12)\n" +
+	"\x10previous_version\x18\x02 \x01(\x04R\x0fpreviousVersion\x12;\n" +
+	"\fversion_info\x18\x03 \x01(\v2\x18.openngfw.v1.VersionInfoR\vversionInfo\x12;\n" +
+	"\x06before\x18\x04 \x01(\v2#.openngfw.v1.HighAvailabilityStatusR\x06before\x129\n" +
+	"\x05after\x18\x05 \x01(\v2#.openngfw.v1.HighAvailabilityStatusR\x05after\x12!\n" +
+	"\fpeer_version\x18\x06 \x01(\x04R\vpeerVersion\x127\n" +
+	"\x18peer_artifact_set_sha256\x18\a \x01(\tR\x15peerArtifactSetSha256\x12\x16\n" +
+	"\x06detail\x18\b \x01(\tR\x06detail\"\xee\x01\n" +
+	"'ActivateHighAvailabilityFailoverRequest\x12\x18\n" +
+	"\acomment\x18\x01 \x01(\tR\acomment\x12!\n" +
+	"\fack_failover\x18\x02 \x01(\bR\vackFailover\x120\n" +
+	"\x14ack_external_cutover\x18\x03 \x01(\bR\x12ackExternalCutover\x120\n" +
+	"\x14ack_external_fencing\x18\x04 \x01(\bR\x12ackExternalFencing\x12\"\n" +
+	"\rstep_up_token\x18\x05 \x01(\tR\vstepUpToken\"\xf1\x02\n" +
+	"(ActivateHighAvailabilityFailoverResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\factivated_at\x18\x02 \x01(\tR\vactivatedAt\x12;\n" +
+	"\x06before\x18\x03 \x01(\v2#.openngfw.v1.HighAvailabilityStatusR\x06before\x129\n" +
+	"\x05after\x18\x04 \x01(\v2#.openngfw.v1.HighAvailabilityStatusR\x05after\x124\n" +
+	"\x16running_policy_version\x18\x05 \x01(\x04R\x14runningPolicyVersion\x125\n" +
+	"\x17last_known_good_version\x18\x06 \x01(\x04R\x14lastKnownGoodVersion\x12\x16\n" +
+	"\x06detail\x18\a \x01(\tR\x06detail\"#\n" +
+	"!GetReleaseAcceptanceStatusRequest\"\x80\x01\n" +
+	"\x17GetSupportBundleRequest\x12#\n" +
+	"\rversion_limit\x18\x01 \x01(\rR\fversionLimit\x12\x1f\n" +
+	"\vaudit_limit\x18\x02 \x01(\rR\n" +
+	"auditLimit\x12\x1f\n" +
+	"\vevent_limit\x18\x03 \x01(\rR\n" +
+	"eventLimit\"\x9a\x03\n" +
+	"\x18GetSupportBundleResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fcollected_at\x18\x02 \x01(\tR\vcollectedAt\x12A\n" +
+	"\tcollector\x18\x03 \x01(\v2#.openngfw.v1.SupportBundleCollectorR\tcollector\x12R\n" +
+	"\tendpoints\x18\x04 \x03(\v24.openngfw.v1.GetSupportBundleResponse.EndpointsEntryR\tendpoints\x12;\n" +
+	"\asummary\x18\x05 \x01(\v2!.openngfw.v1.SupportBundleSummaryR\asummary\x1a`\n" +
+	"\x0eEndpointsEntry\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x128\n" +
+	"\x05value\x18\x02 \x01(\v2\".openngfw.v1.SupportBundleEndpointR\x05value:\x028\x01\"Z\n" +
+	"\x16SupportBundleCollector\x12\x12\n" +
+	"\x04type\x18\x01 \x01(\tR\x04type\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x18\n" +
+	"\aversion\x18\x03 \x01(\tR\aversion\"j\n" +
+	"\x15SupportBundleEndpoint\x12\x0e\n" +
+	"\x02ok\x18\x01 \x01(\bR\x02ok\x12+\n" +
+	"\x04data\x18\x02 \x01(\v2\x17.google.protobuf.StructR\x04data\x12\x14\n" +
+	"\x05error\x18\x03 \x01(\tR\x05error\"\xf1\x15\n" +
+	"\x14SupportBundleSummary\x12'\n" +
+	"\x0fruntime_version\x18\x01 \x01(\tR\x0eruntimeVersion\x124\n" +
+	"\x16running_policy_version\x18\x02 \x01(\tR\x14runningPolicyVersion\x12)\n" +
+	"\x10active_dataplane\x18\x03 \x01(\tR\x0factiveDataplane\x12'\n" +
+	"\x0fconntrack_state\x18\x04 \x01(\tR\x0econntrackState\x126\n" +
+	"\x17conntrack_usage_percent\x18\x05 \x01(\x01R\x15conntrackUsagePercent\x12+\n" +
+	"\x11conntrack_entries\x18\x06 \x01(\x04R\x10conntrackEntries\x122\n" +
+	"\x15conntrack_max_entries\x18\a \x01(\x04R\x13conntrackMaxEntries\x121\n" +
+	"\x14candidate_validation\x18\b \x01(\tR\x13candidateValidation\x12)\n" +
+	"\x10candidate_impact\x18\t \x01(\tR\x0fcandidateImpact\x126\n" +
+	"\x17candidate_has_candidate\x18\n" +
+	" \x01(\bR\x15candidateHasCandidate\x12'\n" +
+	"\x0fcandidate_dirty\x18\v \x01(\bR\x0ecandidateDirty\x12:\n" +
+	"\x19candidate_running_version\x18\f \x01(\x04R\x17candidateRunningVersion\x124\n" +
+	"\x16candidate_change_count\x18\r \x01(\rR\x14candidateChangeCount\x12#\n" +
+	"\rsession_state\x18\x0e \x01(\tR\fsessionState\x12#\n" +
+	"\rsession_count\x18\x0f \x01(\x05R\fsessionCount\x12\x1f\n" +
+	"\valert_count\x18\x10 \x01(\x05R\n" +
+	"alertCount\x12\x1d\n" +
+	"\n" +
+	"flow_count\x18\x11 \x01(\x05R\tflowCount\x12\x1d\n" +
+	"\n" +
+	"feed_count\x18\x12 \x01(\x05R\tfeedCount\x12#\n" +
+	"\renabled_feeds\x18\x13 \x01(\x05R\fenabledFeeds\x122\n" +
+	"\x15content_package_count\x18\x14 \x01(\x05R\x13contentPackageCount\x12:\n" +
+	"\x19verified_content_packages\x18\x15 \x01(\x05R\x17verifiedContentPackages\x128\n" +
+	"\x18content_package_blockers\x18\x16 \x01(\x05R\x16contentPackageBlockers\x128\n" +
+	"\x18release_acceptance_state\x18\x17 \x01(\tR\x16releaseAcceptanceState\x128\n" +
+	"\x18release_acceptance_ready\x18\x18 \x01(\bR\x16releaseAcceptanceReady\x12M\n" +
+	"#release_acceptance_manifest_present\x18\x19 \x01(\bR releaseAcceptanceManifestPresent\x12<\n" +
+	"\x1arelease_acceptance_missing\x18\x1a \x01(\rR\x18releaseAcceptanceMissing\x12<\n" +
+	"\x1arelease_acceptance_invalid\x18\x1b \x01(\rR\x18releaseAcceptanceInvalid\x12I\n" +
+	"!release_acceptance_not_applicable\x18\x1c \x01(\rR\x1ereleaseAcceptanceNotApplicable\x126\n" +
+	"\x17release_acceptance_todo\x18\x1d \x01(\rR\x15releaseAcceptanceTodo\x12>\n" +
+	"\x1brelease_acceptance_problems\x18\x1e \x01(\x05R\x19releaseAcceptanceProblems\x12E\n" +
+	"\x1frelease_acceptance_next_actions\x18\x1f \x01(\x05R\x1creleaseAcceptanceNextActions\x12G\n" +
+	" release_acceptance_next_commands\x18  \x01(\x05R\x1dreleaseAcceptanceNextCommands\x12'\n" +
+	"\x0faudit_integrity\x18! \x01(\tR\x0eauditIntegrity\x12*\n" +
+	"\x11audit_entry_count\x18\" \x01(\rR\x0fauditEntryCount\x12*\n" +
+	"\x11latest_audit_hash\x18# \x01(\tR\x0flatestAuditHash\x12+\n" +
+	"\x11critical_warnings\x18$ \x01(\x05R\x10criticalWarnings\x12\x1a\n" +
+	"\bwarnings\x18% \x01(\x05R\bwarnings\x12'\n" +
+	"\x0fblocked_engines\x18& \x01(\x05R\x0eblockedEngines\x12)\n" +
+	"\x10failed_endpoints\x18' \x03(\tR\x0ffailedEndpoints\x12S\n" +
+	"&release_acceptance_recordability_ready\x18( \x01(\bR#releaseAcceptanceRecordabilityReady\x12Y\n" +
+	")release_acceptance_recordability_problems\x18) \x01(\x05R&releaseAcceptanceRecordabilityProblems\x12P\n" +
+	"%release_acceptance_dirty_source_paths\x18* \x01(\x05R!releaseAcceptanceDirtySourcePaths\x12c\n" +
+	"/release_acceptance_truncated_dirty_source_count\x18+ \x01(\rR*releaseAcceptanceTruncatedDirtySourceCount\x124\n" +
+	"\x16telemetry_export_state\x18, \x01(\tR\x14telemetryExportState\x128\n" +
+	"\x18telemetry_export_enabled\x18- \x01(\bR\x16telemetryExportEnabled\x12A\n" +
+	"\x1dtelemetry_export_vector_state\x18. \x01(\tR\x1atelemetryExportVectorState\x12=\n" +
+	"\x1btelemetry_export_sink_count\x18/ \x01(\x05R\x18telemetryExportSinkCount\x12N\n" +
+	"$telemetry_export_observed_sink_count\x180 \x01(\x05R telemetryExportObservedSinkCount\x12O\n" +
+	"$telemetry_export_clickhouse_evidence\x181 \x01(\tR!telemetryExportClickhouseEvidence\x12:\n" +
+	"\x19telemetry_export_warnings\x182 \x01(\x05R\x17telemetryExportWarnings\"\x8c\x04\n" +
+	"\"GetReleaseAcceptanceStatusResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x12#\n" +
+	"\rmanifest_path\x18\x03 \x01(\tR\fmanifestPath\x12!\n" +
+	"\fevidence_dir\x18\x04 \x01(\tR\vevidenceDir\x12)\n" +
+	"\x10manifest_present\x18\x05 \x01(\bR\x0fmanifestPresent\x12\x14\n" +
+	"\x05ready\x18\x06 \x01(\bR\x05ready\x12\x14\n" +
+	"\x05state\x18\a \x01(\tR\x05state\x12E\n" +
+	"\asummary\x18\b \x01(\v2+.openngfw.v1.ReleaseAcceptanceStatusSummaryR\asummary\x12\x1a\n" +
+	"\bproblems\x18\t \x03(\tR\bproblems\x12A\n" +
+	"\x06checks\x18\n" +
+	" \x03(\v2).openngfw.v1.ReleaseAcceptanceCheckStatusR\x06checks\x12W\n" +
+	"\rrecordability\x18\v \x01(\v21.openngfw.v1.ReleaseAcceptanceRecordabilityStatusR\rrecordability\"\xc3\x01\n" +
+	"\x1eReleaseAcceptanceStatusSummary\x12\x16\n" +
+	"\x06passed\x18\x01 \x01(\rR\x06passed\x12\x1a\n" +
+	"\brecorded\x18\x02 \x01(\rR\brecorded\x12\x18\n" +
+	"\amissing\x18\x03 \x01(\rR\amissing\x12\x18\n" +
+	"\ainvalid\x18\x04 \x01(\rR\ainvalid\x12%\n" +
+	"\x0enot_applicable\x18\x05 \x01(\rR\rnotApplicable\x12\x12\n" +
+	"\x04todo\x18\x06 \x01(\rR\x04todo\"\xdf\x02\n" +
+	"\x1cReleaseAcceptanceCheckStatus\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x1a\n" +
+	"\bartifact\x18\x03 \x01(\tR\bartifact\x12#\n" +
+	"\revidence_path\x18\x04 \x01(\tR\fevidencePath\x12\x15\n" +
+	"\x06ran_at\x18\x05 \x01(\tR\x05ranAt\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\x12\x18\n" +
+	"\acommand\x18\a \x03(\tR\acommand\x12\x1a\n" +
+	"\bproblems\x18\b \x03(\tR\bproblems\x12\x1f\n" +
+	"\vnext_action\x18\t \x01(\tR\n" +
+	"nextAction\x12!\n" +
+	"\fnext_command\x18\n" +
+	" \x03(\tR\vnextCommand\x12+\n" +
+	"\x11benchmark_summary\x18\v \x01(\tR\x10benchmarkSummary\"\xed\x02\n" +
+	"$ReleaseAcceptanceRecordabilityStatus\x12\x14\n" +
+	"\x05ready\x18\x01 \x01(\bR\x05ready\x12\x19\n" +
+	"\bgit_head\x18\x02 \x01(\tR\agitHead\x12#\n" +
+	"\rrecord_commit\x18\x03 \x01(\tR\frecordCommit\x12.\n" +
+	"\x13allowed_dirty_paths\x18\x04 \x03(\tR\x11allowedDirtyPaths\x12,\n" +
+	"\x12dirty_source_paths\x18\x05 \x03(\tR\x10dirtySourcePaths\x12\x1a\n" +
+	"\bproblems\x18\x06 \x03(\tR\bproblems\x12C\n" +
+	"\x1ctruncated_dirty_source_count\x18\a \x01(\rB\x02\x18\x01R\x19truncatedDirtySourceCount\x120\n" +
+	"\x14stale_evidence_paths\x18\b \x03(\tR\x12staleEvidencePaths\"\x7f\n" +
+	"\x0fTuneHostRequest\x12\x18\n" +
+	"\aprofile\x18\x01 \x01(\tR\aprofile\x12\x14\n" +
+	"\x05write\x18\x02 \x01(\bR\x05write\x12\x14\n" +
+	"\x05apply\x18\x03 \x01(\bR\x05apply\x12&\n" +
+	"\x0fack_host_change\x18\x04 \x01(\bR\rackHostChange\"\xf8\x01\n" +
+	"\x10TuneHostResponse\x12\x18\n" +
+	"\aprofile\x18\x01 \x01(\tR\aprofile\x12,\n" +
+	"\x12sysctl_config_path\x18\x02 \x01(\tR\x10sysctlConfigPath\x12\x1f\n" +
+	"\vconfig_text\x18\x03 \x01(\tR\n" +
+	"configText\x12!\n" +
+	"\fwrote_config\x18\x04 \x01(\bR\vwroteConfig\x12!\n" +
+	"\fapplied_live\x18\x05 \x01(\bR\vappliedLive\x125\n" +
+	"\aresults\x18\x06 \x03(\v2\x1b.openngfw.v1.TuneHostResultR\aresults\"f\n" +
+	"\x0eTuneHostResult\x12\x10\n" +
+	"\x03key\x18\x01 \x01(\tR\x03key\x12\x14\n" +
+	"\x05value\x18\x02 \x01(\tR\x05value\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x04 \x01(\tR\x06detail\"\xf5\x02\n" +
+	"\x18PlanPacketCaptureRequest\x12\x1c\n" +
+	"\tinterface\x18\x01 \x01(\tR\tinterface\x121\n" +
+	"\bprotocol\x18\x02 \x01(\x0e2\x15.openngfw.v1.ProtocolR\bprotocol\x12\x15\n" +
+	"\x06src_ip\x18\x03 \x01(\tR\x05srcIp\x12\x19\n" +
+	"\bsrc_port\x18\x04 \x01(\rR\asrcPort\x12\x17\n" +
+	"\adest_ip\x18\x05 \x01(\tR\x06destIp\x12\x1b\n" +
+	"\tdest_port\x18\x06 \x01(\rR\bdestPort\x12)\n" +
+	"\x10duration_seconds\x18\a \x01(\rR\x0fdurationSeconds\x12!\n" +
+	"\fpacket_count\x18\b \x01(\rR\vpacketCount\x12#\n" +
+	"\rsnaplen_bytes\x18\t \x01(\rR\fsnaplenBytes\x12\x14\n" +
+	"\x05label\x18\n" +
+	" \x01(\tR\x05label\x12\x17\n" +
+	"\aflow_id\x18\v \x01(\tR\x06flowId\"\x97\x03\n" +
+	"\x19StartPacketCaptureRequest\x12\x1c\n" +
+	"\tinterface\x18\x01 \x01(\tR\tinterface\x121\n" +
+	"\bprotocol\x18\x02 \x01(\x0e2\x15.openngfw.v1.ProtocolR\bprotocol\x12\x15\n" +
+	"\x06src_ip\x18\x03 \x01(\tR\x05srcIp\x12\x19\n" +
+	"\bsrc_port\x18\x04 \x01(\rR\asrcPort\x12\x17\n" +
+	"\adest_ip\x18\x05 \x01(\tR\x06destIp\x12\x1b\n" +
+	"\tdest_port\x18\x06 \x01(\rR\bdestPort\x12)\n" +
+	"\x10duration_seconds\x18\a \x01(\rR\x0fdurationSeconds\x12!\n" +
+	"\fpacket_count\x18\b \x01(\rR\vpacketCount\x12#\n" +
+	"\rsnaplen_bytes\x18\t \x01(\rR\fsnaplenBytes\x12\x14\n" +
+	"\x05label\x18\n" +
+	" \x01(\tR\x05label\x12\x1f\n" +
+	"\vack_capture\x18\v \x01(\bR\n" +
+	"ackCapture\x12\x17\n" +
+	"\aflow_id\x18\f \x01(\tR\x06flowId\"J\n" +
+	"\x19ListPacketCapturesRequest\x12\x14\n" +
+	"\x05limit\x18\x01 \x01(\rR\x05limit\x12\x17\n" +
+	"\aflow_id\x18\x02 \x01(\tR\x06flowId\"x\n" +
+	"\x1aListPacketCapturesResponse\x129\n" +
+	"\bcaptures\x18\x01 \x03(\v2\x1d.openngfw.v1.PacketCaptureJobR\bcaptures\x12\x1f\n" +
+	"\vcapture_dir\x18\x02 \x01(\tR\n" +
+	"captureDir\".\n" +
+	"\x1cDownloadPacketCaptureRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\"\xfd\x01\n" +
+	"\x16PacketCaptureRetention\x12>\n" +
+	"\x05state\x18\x01 \x01(\x0e2(.openngfw.v1.PacketCaptureRetentionStateR\x05state\x12!\n" +
+	"\fretain_until\x18\x02 \x01(\tR\vretainUntil\x12)\n" +
+	"\x10retention_reason\x18\x03 \x01(\tR\x0fretentionReason\x12\x17\n" +
+	"\acase_id\x18\x04 \x01(\tR\x06caseId\x12\x1d\n" +
+	"\n" +
+	"updated_at\x18\x05 \x01(\tR\tupdatedAt\x12\x1d\n" +
+	"\n" +
+	"updated_by\x18\x06 \x01(\tR\tupdatedBy\"\x8b\x02\n" +
+	" SetPacketCaptureRetentionRequest\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12>\n" +
+	"\x05state\x18\x02 \x01(\x0e2(.openngfw.v1.PacketCaptureRetentionStateR\x05state\x12!\n" +
+	"\fretain_until\x18\x03 \x01(\tR\vretainUntil\x12)\n" +
+	"\x10retention_reason\x18\x04 \x01(\tR\x0fretentionReason\x12\x17\n" +
+	"\acase_id\x18\x05 \x01(\tR\x06caseId\x120\n" +
+	"\x14ack_retention_change\x18\x06 \x01(\bR\x12ackRetentionChange\"T\n" +
+	"!SetPacketCaptureRetentionResponse\x12/\n" +
+	"\x03job\x18\x01 \x01(\v2\x1d.openngfw.v1.PacketCaptureJobR\x03job\"O\n" +
+	"\x19PlanPacketCaptureResponse\x122\n" +
+	"\x04plan\x18\x01 \x01(\v2\x1e.openngfw.v1.PacketCapturePlanR\x04plan\"\xf1\x03\n" +
+	"\x11PacketCapturePlan\x12\x1c\n" +
+	"\tinterface\x18\x01 \x01(\tR\tinterface\x121\n" +
+	"\bprotocol\x18\x02 \x01(\x0e2\x15.openngfw.v1.ProtocolR\bprotocol\x12\x15\n" +
+	"\x06src_ip\x18\x03 \x01(\tR\x05srcIp\x12\x19\n" +
+	"\bsrc_port\x18\x04 \x01(\rR\asrcPort\x12\x17\n" +
+	"\adest_ip\x18\x05 \x01(\tR\x06destIp\x12\x1b\n" +
+	"\tdest_port\x18\x06 \x01(\rR\bdestPort\x12)\n" +
+	"\x10duration_seconds\x18\a \x01(\rR\x0fdurationSeconds\x12!\n" +
+	"\fpacket_count\x18\b \x01(\rR\vpacketCount\x12#\n" +
+	"\rsnaplen_bytes\x18\t \x01(\rR\fsnaplenBytes\x12\x1f\n" +
+	"\voutput_path\x18\n" +
+	" \x01(\tR\n" +
+	"outputPath\x12\x1d\n" +
+	"\n" +
+	"bpf_filter\x18\v \x01(\tR\tbpfFilter\x12\x18\n" +
+	"\acommand\x18\f \x01(\tR\acommand\x12!\n" +
+	"\fcommand_argv\x18\r \x03(\tR\vcommandArgv\x12\x1a\n" +
+	"\bwarnings\x18\x0e \x03(\tR\bwarnings\x12\x17\n" +
+	"\aflow_id\x18\x0f \x01(\tR\x06flowId\"M\n" +
+	"\x1aStartPacketCaptureResponse\x12/\n" +
+	"\x03job\x18\x01 \x01(\v2\x1d.openngfw.v1.PacketCaptureJobR\x03job\"\xfc\x03\n" +
+	"\x10PacketCaptureJob\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x122\n" +
+	"\x04plan\x18\x04 \x01(\v2\x1e.openngfw.v1.PacketCapturePlanR\x04plan\x12\x1d\n" +
+	"\n" +
+	"started_at\x18\x05 \x01(\tR\tstartedAt\x12!\n" +
+	"\fcompleted_at\x18\x06 \x01(\tR\vcompletedAt\x12\x1b\n" +
+	"\texit_code\x18\a \x01(\x05R\bexitCode\x12\x16\n" +
+	"\x06stderr\x18\b \x01(\tR\x06stderr\x12#\n" +
+	"\rbytes_written\x18\t \x01(\x04R\fbytesWritten\x12\x16\n" +
+	"\x06sha256\x18\n" +
+	" \x01(\tR\x06sha256\x12\x1f\n" +
+	"\vartifact_id\x18\v \x01(\tR\n" +
+	"artifactId\x12#\n" +
+	"\rdownload_path\x18\f \x01(\tR\fdownloadPath\x12\x1a\n" +
+	"\bfilename\x18\r \x01(\tR\bfilename\x12\x1d\n" +
+	"\n" +
+	"media_type\x18\x0e \x01(\tR\tmediaType\x12A\n" +
+	"\tretention\x18\x0f \x01(\v2#.openngfw.v1.PacketCaptureRetentionR\tretention\"\x14\n" +
+	"\x12GetIdentityRequest\"\xa7\x01\n" +
+	"\x13GetIdentityResponse\x12\x14\n" +
+	"\x05actor\x18\x01 \x01(\tR\x05actor\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x12!\n" +
+	"\fauth_enabled\x18\x03 \x01(\bR\vauthEnabled\x12\x1f\n" +
+	"\vauth_source\x18\x04 \x01(\tR\n" +
+	"authSource\x12\"\n" +
+	"\fcapabilities\x18\x05 \x03(\tR\fcapabilities\"p\n" +
+	"\x1cCreateStepUpChallengeRequest\x12\x16\n" +
+	"\x06action\x18\x01 \x01(\tR\x06action\x12\x1e\n" +
+	"\vack_step_up\x18\x02 \x01(\bR\tackStepUp\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\"\xf4\x01\n" +
+	"\x1dCreateStepUpChallengeResponse\x12\x14\n" +
+	"\x05token\x18\x01 \x01(\tR\x05token\x12\x16\n" +
+	"\x06action\x18\x02 \x01(\tR\x06action\x12\x14\n" +
+	"\x05actor\x18\x03 \x01(\tR\x05actor\x12\x1f\n" +
+	"\vauth_source\x18\x04 \x01(\tR\n" +
+	"authSource\x12\x1b\n" +
+	"\tissued_at\x18\x05 \x01(\tR\bissuedAt\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\x06 \x01(\tR\texpiresAt\x12\x16\n" +
+	"\x06detail\x18\a \x01(\tR\x06detail\x12\x1a\n" +
+	"\bwarnings\x18\b \x03(\tR\bwarnings\" \n" +
+	"\x1eGetAccessAdministrationRequest\"\x19\n" +
+	"\x17RunOIDCPreflightRequest\"\xf0\x02\n" +
+	"\x18RunOIDCPreflightResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x14\n" +
+	"\x05label\x18\x04 \x01(\tR\x05label\x12\x16\n" +
+	"\x06detail\x18\x05 \x01(\tR\x06detail\x129\n" +
+	"\x04oidc\x18\x06 \x01(\v2%.openngfw.v1.AccessAdministrationOidcR\x04oidc\x127\n" +
+	"\x06checks\x18\a \x03(\v2\x1f.openngfw.v1.OIDCPreflightCheckR\x06checks\x12\x1a\n" +
+	"\bblockers\x18\b \x03(\tR\bblockers\x12\x1a\n" +
+	"\bwarnings\x18\t \x03(\tR\bwarnings\x12\x1a\n" +
+	"\bevidence\x18\n" +
+	" \x03(\tR\bevidence\"\xbb\x01\n" +
+	"\x12OIDCPreflightCheck\x12\x0e\n" +
+	"\x02id\x18\x01 \x01(\tR\x02id\x12\x14\n" +
+	"\x05label\x18\x02 \x01(\tR\x05label\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x14\n" +
+	"\x05class\x18\x04 \x01(\tR\x05class\x12\x16\n" +
+	"\x06detail\x18\x05 \x01(\tR\x06detail\x12\x1a\n" +
+	"\bevidence\x18\x06 \x01(\tR\bevidence\x12\x1f\n" +
+	"\vnext_action\x18\a \x01(\tR\n" +
+	"nextAction\"\x1e\n" +
+	"\x1cGetOIDCProviderConfigRequest\"p\n" +
+	"\x1dGetOIDCProviderConfigResponse\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.OIDCProviderConfigR\x06config\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"\\\n" +
+	"!ValidateOIDCProviderConfigRequest\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.OIDCProviderConfigR\x06config\"\xd8\x01\n" +
+	"\"ValidateOIDCProviderConfigResponse\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x1a\n" +
+	"\bblockers\x18\x03 \x03(\tR\bblockers\x12\x1a\n" +
+	"\bwarnings\x18\x04 \x03(\tR\bwarnings\x12L\n" +
+	"\x11normalized_config\x18\x05 \x01(\v2\x1f.openngfw.v1.OIDCProviderConfigR\x10normalizedConfig\"\xbd\x01\n" +
+	"\x1cSetOIDCProviderConfigRequest\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.OIDCProviderConfigR\x06config\x12&\n" +
+	"\x0fack_oidc_change\x18\x02 \x01(\bR\rackOidcChange\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x04 \x01(\tR\vstepUpToken\"\xdf\x01\n" +
+	"\x1dSetOIDCProviderConfigResponse\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.OIDCProviderConfigR\x06config\x129\n" +
+	"\x04oidc\x18\x02 \x01(\v2%.openngfw.v1.AccessAdministrationOidcR\x04oidc\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x122\n" +
+	"\x15revoked_oidc_sessions\x18\x04 \x01(\rR\x13revokedOidcSessions\"\x84\x01\n" +
+	"\x1aDisableOIDCProviderRequest\x12(\n" +
+	"\x10ack_disable_oidc\x18\x01 \x01(\bR\x0eackDisableOidc\x12\x18\n" +
+	"\acomment\x18\x02 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x03 \x01(\tR\vstepUpToken\"\x85\x01\n" +
+	"\x1bDisableOIDCProviderResponse\x12\x1a\n" +
+	"\bdisabled\x18\x01 \x01(\bR\bdisabled\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x122\n" +
+	"\x15revoked_oidc_sessions\x18\x03 \x01(\rR\x13revokedOidcSessions\"\x1e\n" +
+	"\x1cGetSAMLProviderConfigRequest\"p\n" +
+	"\x1dGetSAMLProviderConfigResponse\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.SAMLProviderConfigR\x06config\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"\\\n" +
+	"!ValidateSAMLProviderConfigRequest\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.SAMLProviderConfigR\x06config\"\xd8\x01\n" +
+	"\"ValidateSAMLProviderConfigResponse\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x1a\n" +
+	"\bblockers\x18\x03 \x03(\tR\bblockers\x12\x1a\n" +
+	"\bwarnings\x18\x04 \x03(\tR\bwarnings\x12L\n" +
+	"\x11normalized_config\x18\x05 \x01(\v2\x1f.openngfw.v1.SAMLProviderConfigR\x10normalizedConfig\"\xbd\x01\n" +
+	"\x1cSetSAMLProviderConfigRequest\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.SAMLProviderConfigR\x06config\x12&\n" +
+	"\x0fack_saml_change\x18\x02 \x01(\bR\rackSamlChange\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x04 \x01(\tR\vstepUpToken\"\xab\x01\n" +
+	"\x1dSetSAMLProviderConfigResponse\x127\n" +
+	"\x06config\x18\x01 \x01(\v2\x1f.openngfw.v1.SAMLProviderConfigR\x06config\x129\n" +
+	"\x04saml\x18\x02 \x01(\v2%.openngfw.v1.AccessAdministrationSamlR\x04saml\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\"\x84\x01\n" +
+	"\x1aDisableSAMLProviderRequest\x12(\n" +
+	"\x10ack_disable_saml\x18\x01 \x01(\bR\x0eackDisableSaml\x12\x18\n" +
+	"\acomment\x18\x02 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x03 \x01(\tR\vstepUpToken\"Q\n" +
+	"\x1bDisableSAMLProviderResponse\x12\x1a\n" +
+	"\bdisabled\x18\x01 \x01(\bR\bdisabled\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"\xd4\x03\n" +
+	"\x12OIDCProviderConfig\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x1b\n" +
+	"\tclient_id\x18\x03 \x01(\tR\bclientId\x12,\n" +
+	"\x12client_secret_file\x18\x04 \x01(\tR\x10clientSecretFile\x12!\n" +
+	"\fredirect_url\x18\x05 \x01(\tR\vredirectUrl\x12\x1d\n" +
+	"\n" +
+	"role_claim\x18\x06 \x01(\tR\troleClaim\x12!\n" +
+	"\fdefault_role\x18\a \x01(\tR\vdefaultRole\x12\x16\n" +
+	"\x06scopes\x18\b \x03(\tR\x06scopes\x12.\n" +
+	"\x13trusted_proxy_cidrs\x18\t \x03(\tR\x11trustedProxyCidrs\x12.\n" +
+	"\x13session_ttl_seconds\x18\n" +
+	" \x01(\x04R\x11sessionTtlSeconds\x12!\n" +
+	"\fmax_sessions\x18\v \x01(\rR\vmaxSessions\x12A\n" +
+	"\x1dclient_secret_file_configured\x18\f \x01(\bR\x1aclientSecretFileConfigured\"\x9d\x04\n" +
+	"\x12SAMLProviderConfig\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12!\n" +
+	"\fmetadata_url\x18\x02 \x01(\tR\vmetadataUrl\x12\"\n" +
+	"\ridp_entity_id\x18\x03 \x01(\tR\vidpEntityId\x12\x17\n" +
+	"\asso_url\x18\x04 \x01(\tR\x06ssoUrl\x12 \n" +
+	"\fsp_entity_id\x18\x05 \x01(\tR\n" +
+	"spEntityId\x12\x17\n" +
+	"\aacs_url\x18\x06 \x01(\tR\x06acsUrl\x12%\n" +
+	"\x0erole_attribute\x18\a \x01(\tR\rroleAttribute\x12!\n" +
+	"\fdefault_role\x18\b \x01(\tR\vdefaultRole\x127\n" +
+	"\x17certificate_fingerprint\x18\t \x01(\tR\x16certificateFingerprint\x12L\n" +
+	"\"certificate_fingerprint_configured\x18\n" +
+	" \x01(\bR certificateFingerprintConfigured\x12.\n" +
+	"\x13trusted_proxy_cidrs\x18\v \x03(\tR\x11trustedProxyCidrs\x12.\n" +
+	"\x13session_ttl_seconds\x18\f \x01(\x04R\x11sessionTtlSeconds\x12!\n" +
+	"\fmax_sessions\x18\r \x01(\rR\vmaxSessions\"\xb8\x03\n" +
+	"\x1fGetAccessAdministrationResponse\x12!\n" +
+	"\fauth_enabled\x18\x01 \x01(\bR\vauthEnabled\x12K\n" +
+	"\vlocal_users\x18\x02 \x03(\v2*.openngfw.v1.AccessAdministrationLocalUserR\n" +
+	"localUsers\x129\n" +
+	"\x04oidc\x18\x03 \x01(\v2%.openngfw.v1.AccessAdministrationOidcR\x04oidc\x12E\n" +
+	"\bsessions\x18\x04 \x01(\v2).openngfw.v1.AccessAdministrationSessionsR\bsessions\x12L\n" +
+	"\vbreak_glass\x18\x05 \x01(\v2+.openngfw.v1.AccessAdministrationBreakGlassR\n" +
+	"breakGlass\x12\x1a\n" +
+	"\bblockers\x18\x06 \x03(\tR\bblockers\x129\n" +
+	"\x04saml\x18\a \x01(\v2%.openngfw.v1.AccessAdministrationSamlR\x04saml\"\xe4\x01\n" +
+	"\x1dAccessAdministrationLocalUser\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x12\x1f\n" +
+	"\vauth_source\x18\x03 \x01(\tR\n" +
+	"authSource\x12%\n" +
+	"\x0etoken_material\x18\x04 \x01(\tR\rtokenMaterial\x12\x1a\n" +
+	"\beditable\x18\x05 \x01(\bR\beditable\x12\x1d\n" +
+	"\n" +
+	"audit_hash\x18\x06 \x01(\tR\tauditHash\x12\x18\n" +
+	"\aenabled\x18\a \x01(\bR\aenabled\"\xb1\x01\n" +
+	"\x16CreateLocalUserRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x121\n" +
+	"\x15ack_local_user_change\x18\x03 \x01(\bR\x12ackLocalUserChange\x12\x18\n" +
+	"\acomment\x18\x04 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x05 \x01(\tR\vstepUpToken\"\xb1\x01\n" +
+	"\x16UpdateLocalUserRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x121\n" +
+	"\x15ack_local_user_change\x18\x03 \x01(\bR\x12ackLocalUserChange\x12\x18\n" +
+	"\acomment\x18\x04 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x05 \x01(\tR\vstepUpToken\"\x99\x01\n" +
+	"\x1bRotateLocalUserTokenRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12(\n" +
+	"\x10ack_rotate_token\x18\x02 \x01(\bR\x0eackRotateToken\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x04 \x01(\tR\vstepUpToken\"\x95\x01\n" +
+	"\x17DisableLocalUserRequest\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12(\n" +
+	"\x10ack_disable_user\x18\x02 \x01(\bR\x0eackDisableUser\x12\x18\n" +
+	"\acomment\x18\x03 \x01(\tR\acomment\x12\"\n" +
+	"\rstep_up_token\x18\x04 \x01(\tR\vstepUpToken\"\x97\x01\n" +
+	"\x17CreateLocalUserResponse\x12>\n" +
+	"\x04user\x18\x01 \x01(\v2*.openngfw.v1.AccessAdministrationLocalUserR\x04user\x12$\n" +
+	"\x0eone_time_token\x18\x02 \x01(\tR\foneTimeToken\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\"q\n" +
+	"\x17UpdateLocalUserResponse\x12>\n" +
+	"\x04user\x18\x01 \x01(\v2*.openngfw.v1.AccessAdministrationLocalUserR\x04user\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"\x9c\x01\n" +
+	"\x1cRotateLocalUserTokenResponse\x12>\n" +
+	"\x04user\x18\x01 \x01(\v2*.openngfw.v1.AccessAdministrationLocalUserR\x04user\x12$\n" +
+	"\x0eone_time_token\x18\x02 \x01(\tR\foneTimeToken\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\"r\n" +
+	"\x18DisableLocalUserResponse\x12>\n" +
+	"\x04user\x18\x01 \x01(\v2*.openngfw.v1.AccessAdministrationLocalUserR\x04user\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\"\xc8\x02\n" +
+	"\x18AccessAdministrationOidc\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x1b\n" +
+	"\tclient_id\x18\x03 \x01(\tR\bclientId\x12\x1d\n" +
+	"\n" +
+	"role_claim\x18\x04 \x01(\tR\troleClaim\x12!\n" +
+	"\fdefault_role\x18\x05 \x01(\tR\vdefaultRole\x12#\n" +
+	"\rcookie_secure\x18\x06 \x01(\bR\fcookieSecure\x12\x16\n" +
+	"\x06scopes\x18\a \x03(\tR\x06scopes\x12.\n" +
+	"\x13trusted_proxy_cidrs\x18\b \x03(\tR\x11trustedProxyCidrs\x12.\n" +
+	"\x13session_ttl_seconds\x18\t \x01(\x04R\x11sessionTtlSeconds\"\xac\x03\n" +
+	"\x18AccessAdministrationSaml\x12\x18\n" +
+	"\aenabled\x18\x01 \x01(\bR\aenabled\x12!\n" +
+	"\fmetadata_url\x18\x02 \x01(\tR\vmetadataUrl\x12\"\n" +
+	"\ridp_entity_id\x18\x03 \x01(\tR\vidpEntityId\x12\x17\n" +
+	"\asso_url\x18\x04 \x01(\tR\x06ssoUrl\x12 \n" +
+	"\fsp_entity_id\x18\x05 \x01(\tR\n" +
+	"spEntityId\x12\x17\n" +
+	"\aacs_url\x18\x06 \x01(\tR\x06acsUrl\x12%\n" +
+	"\x0erole_attribute\x18\a \x01(\tR\rroleAttribute\x12!\n" +
+	"\fdefault_role\x18\b \x01(\tR\vdefaultRole\x12L\n" +
+	"\"certificate_fingerprint_configured\x18\t \x01(\bR certificateFingerprintConfigured\x12+\n" +
+	"\x11runtime_available\x18\n" +
+	" \x01(\bR\x10runtimeAvailable\x12\x16\n" +
+	"\x06detail\x18\v \x01(\tR\x06detail\"\xa9\x02\n" +
+	"\x1cAccessAdministrationSessions\x120\n" +
+	"\x14oidc_active_sessions\x18\x01 \x01(\rR\x12oidcActiveSessions\x12*\n" +
+	"\x11oidc_max_sessions\x18\x02 \x01(\rR\x0foidcMaxSessions\x12@\n" +
+	"\x1csession_revocation_available\x18\x03 \x01(\bR\x1asessionRevocationAvailable\x12\x16\n" +
+	"\x06detail\x18\x04 \x01(\tR\x06detail\x12Q\n" +
+	"\x0factive_sessions\x18\x05 \x03(\v2(.openngfw.v1.AccessAdministrationSessionR\x0eactiveSessions\"\xd8\x01\n" +
+	"\x1bAccessAdministrationSession\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12\x14\n" +
+	"\x05actor\x18\x02 \x01(\tR\x05actor\x12\x12\n" +
+	"\x04role\x18\x03 \x01(\tR\x04role\x12\x1f\n" +
+	"\vauth_source\x18\x04 \x01(\tR\n" +
+	"authSource\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\x05 \x01(\tR\texpiresAt\x120\n" +
+	"\x14seconds_until_expiry\x18\x06 \x01(\x04R\x12secondsUntilExpiry\"i\n" +
+	"\x1aRevokeAccessSessionRequest\x12\x1d\n" +
+	"\n" +
+	"session_id\x18\x01 \x01(\tR\tsessionId\x12,\n" +
+	"\x12ack_revoke_session\x18\x02 \x01(\bR\x10ackRevokeSession\"\x93\x01\n" +
+	"\x1bRevokeAccessSessionResponse\x12\x18\n" +
+	"\arevoked\x18\x01 \x01(\bR\arevoked\x12B\n" +
+	"\asession\x18\x02 \x01(\v2(.openngfw.v1.AccessAdministrationSessionR\asession\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\"o\n" +
+	"\x1eAccessAdministrationBreakGlass\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x1f\n" +
+	"\vnext_action\x18\x03 \x01(\tR\n" +
+	"nextAction\"\xad\x05\n" +
+	"\x11GetStatusResponse\x124\n" +
+	"\aruntime\x18\x01 \x01(\v2\x1a.openngfw.v1.RuntimeStatusR\aruntime\x123\n" +
+	"\aengines\x18\x02 \x03(\v2\x19.openngfw.v1.EngineStatusR\aengines\x12A\n" +
+	"\fcapabilities\x18\x03 \x03(\v2\x1d.openngfw.v1.SystemCapabilityR\fcapabilities\x126\n" +
+	"\bwarnings\x18\x04 \x03(\v2\x1a.openngfw.v1.StatusWarningR\bwarnings\x12:\n" +
+	"\tdataplane\x18\x05 \x01(\v2\x1c.openngfw.v1.DataplaneStatusR\tdataplane\x12B\n" +
+	"\n" +
+	"management\x18\x06 \x01(\v2\".openngfw.v1.ManagementPlaneStatusR\n" +
+	"management\x123\n" +
+	"\x04host\x18\a \x01(\v2\x1f.openngfw.v1.HostResourceStatusR\x04host\x12=\n" +
+	"\n" +
+	"inspection\x18\b \x01(\v2\x1d.openngfw.v1.InspectionStatusR\n" +
+	"inspection\x12/\n" +
+	"\x03vpn\x18\t \x01(\v2\x1d.openngfw.v1.VpnRuntimeStatusR\x03vpn\x12;\n" +
+	"\arouting\x18\n" +
+	" \x01(\v2!.openngfw.v1.RoutingRuntimeStatusR\arouting\x12P\n" +
+	"\x11high_availability\x18\v \x01(\v2#.openngfw.v1.HighAvailabilityStatusR\x10highAvailability\"\xc2\x02\n" +
+	"\x17ProveNetworkPathRequest\x12\x15\n" +
+	"\x06src_ip\x18\x01 \x01(\tR\x05srcIp\x12\x17\n" +
+	"\adest_ip\x18\x02 \x01(\tR\x06destIp\x121\n" +
+	"\bprotocol\x18\x03 \x01(\x0e2\x15.openngfw.v1.ProtocolR\bprotocol\x12\x1b\n" +
+	"\tdest_port\x18\x04 \x01(\rR\bdestPort\x12)\n" +
+	"\x10source_interface\x18\x05 \x01(\tR\x0fsourceInterface\x129\n" +
+	"\x06tunnel\x18\x06 \x01(\v2!.openngfw.v1.NetworkPathTunnelRefR\x06tunnel\x12A\n" +
+	"\x1dexpected_masquerade_egress_ip\x18\a \x01(\tR\x1aexpectedMasqueradeEgressIp\"\x98\x01\n" +
+	"\x14NetworkPathTunnelRef\x12\x12\n" +
+	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x1c\n" +
+	"\tinterface\x18\x03 \x01(\tR\tinterface\x12\x12\n" +
+	"\x04peer\x18\x04 \x01(\tR\x04peer\x12&\n" +
+	"\x0fpeer_public_key\x18\x05 \x01(\tR\rpeerPublicKey\"\x94\x04\n" +
+	"\x18ProveNetworkPathResponse\x12%\n" +
+	"\x0eschema_version\x18\x01 \x01(\tR\rschemaVersion\x12!\n" +
+	"\fgenerated_at\x18\x02 \x01(\tR\vgeneratedAt\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x04 \x01(\tR\x06detail\x124\n" +
+	"\x16running_policy_version\x18\x05 \x01(\x04R\x14runningPolicyVersion\x128\n" +
+	"\x05route\x18\x06 \x01(\v2\".openngfw.v1.NetworkPathRouteProofR\x05route\x122\n" +
+	"\x03vpn\x18\a \x01(\v2 .openngfw.v1.NetworkPathVpnProofR\x03vpn\x12\x1a\n" +
+	"\bevidence\x18\b \x03(\tR\bevidence\x12\x1a\n" +
+	"\bwarnings\x18\t \x03(\tR\bwarnings\x12@\n" +
+	"\n" +
+	"mismatches\x18\n" +
+	" \x03(\v2 .openngfw.v1.NetworkPathMismatchR\n" +
+	"mismatches\x12 \n" +
+	"\vlimitations\x18\v \x03(\tR\vlimitations\x12\x1f\n" +
+	"\vcli_handoff\x18\f \x01(\tR\n" +
+	"cliHandoff\x12\x1f\n" +
+	"\vapi_handoff\x18\r \x01(\tR\n" +
+	"apiHandoff\"\xd6\x05\n" +
+	"\x15NetworkPathRouteProof\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12 \n" +
+	"\vdestination\x18\x03 \x01(\tR\vdestination\x12\x18\n" +
+	"\agateway\x18\x04 \x01(\tR\agateway\x12\x10\n" +
+	"\x03dev\x18\x05 \x01(\tR\x03dev\x12)\n" +
+	"\x10preferred_source\x18\x06 \x01(\tR\x0fpreferredSource\x12\x1a\n" +
+	"\bprotocol\x18\a \x01(\tR\bprotocol\x12\x14\n" +
+	"\x05table\x18\b \x01(\tR\x05table\x12!\n" +
+	"\fraw_redacted\x18\t \x01(\tR\vrawRedacted\x12\x1d\n" +
+	"\n" +
+	"route_type\x18\n" +
+	" \x01(\tR\trouteType\x12\x14\n" +
+	"\x05scope\x18\v \x01(\tR\x05scope\x12\x14\n" +
+	"\x05flags\x18\f \x03(\tR\x05flags\x12\x16\n" +
+	"\x06source\x18\r \x01(\tR\x06source\x12'\n" +
+	"\x0finterface_index\x18\x0e \x01(\rR\x0einterfaceIndex\x12%\n" +
+	"\x0einterface_name\x18\x0f \x01(\tR\rinterfaceName\x12)\n" +
+	"\x10interface_master\x18\x10 \x01(\tR\x0finterfaceMaster\x12%\n" +
+	"\x0einterface_kind\x18\x11 \x01(\tR\rinterfaceKind\x12\x10\n" +
+	"\x03vrf\x18\x12 \x01(\tR\x03vrf\x12-\n" +
+	"\x12interface_identity\x18\x13 \x01(\tR\x11interfaceIdentity\x122\n" +
+	"\x03frr\x18\x14 \x01(\v2 .openngfw.v1.NetworkPathFrrProofR\x03frr\x12G\n" +
+	"\n" +
+	"masquerade\x18\x15 \x01(\v2'.openngfw.v1.NetworkPathMasqueradeProofR\n" +
+	"masquerade\"\x80\x01\n" +
+	"\x13NetworkPathFrrProof\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x18\n" +
+	"\acommand\x18\x03 \x01(\tR\acommand\x12!\n" +
+	"\froute_family\x18\x04 \x01(\tR\vrouteFamily\"\xe1\x01\n" +
+	"\x1aNetworkPathMasqueradeProof\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12)\n" +
+	"\x10requested_source\x18\x03 \x01(\tR\x0frequestedSource\x124\n" +
+	"\x16observed_egress_source\x18\x04 \x01(\tR\x14observedEgressSource\x124\n" +
+	"\x16expected_egress_source\x18\x05 \x01(\tR\x14expectedEgressSource\"\xe5\x02\n" +
+	"\x13NetworkPathVpnProof\x12\x12\n" +
+	"\x04kind\x18\x01 \x01(\tR\x04kind\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x12%\n" +
+	"\x0ematched_tunnel\x18\x04 \x01(\tR\rmatchedTunnel\x12\x1c\n" +
+	"\tinterface\x18\x05 \x01(\tR\tinterface\x12\x12\n" +
+	"\x04peer\x18\x06 \x01(\tR\x04peer\x122\n" +
+	"\x15handshake_age_seconds\x18\a \x01(\x04R\x13handshakeAgeSeconds\x12$\n" +
+	"\x0echild_sa_count\x18\b \x01(\rR\fchildSaCount\x127\n" +
+	"\x18installed_child_sa_count\x18\t \x01(\rR\x15installedChildSaCount\x12 \n" +
+	"\vcorrelation\x18\n" +
+	" \x01(\tR\vcorrelation\"c\n" +
+	"\x13NetworkPathMismatch\x12\x1a\n" +
+	"\bseverity\x18\x01 \x01(\tR\bseverity\x12\x18\n" +
+	"\asubject\x18\x02 \x01(\tR\asubject\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\"\xf9\a\n" +
+	"\x16HighAvailabilityStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x12\x12\n" +
+	"\x04mode\x18\x03 \x01(\tR\x04mode\x12\x17\n" +
+	"\anode_id\x18\x04 \x01(\tR\x06nodeId\x12\x17\n" +
+	"\apeer_id\x18\x05 \x01(\tR\x06peerId\x12!\n" +
+	"\fpeer_address\x18\x06 \x01(\tR\vpeerAddress\x124\n" +
+	"\x16running_policy_version\x18\a \x01(\x04R\x14runningPolicyVersion\x125\n" +
+	"\x17last_known_good_version\x18\b \x01(\x04R\x14lastKnownGoodVersion\x121\n" +
+	"\x15last_known_good_state\x18\t \x01(\tR\x12lastKnownGoodState\x12K\n" +
+	"#last_known_good_artifact_set_sha256\x18\n" +
+	" \x01(\tR\x1elastKnownGoodArtifactSetSha256\x12;\n" +
+	"\x04sync\x18\v \x01(\v2'.openngfw.v1.HighAvailabilitySyncStatusR\x04sync\x12G\n" +
+	"\bfailover\x18\f \x01(\v2+.openngfw.v1.HighAvailabilityFailoverStatusR\bfailover\x12\x1a\n" +
+	"\bblockers\x18\r \x03(\tR\bblockers\x126\n" +
+	"\bwarnings\x18\x0e \x03(\v2\x1a.openngfw.v1.StatusWarningR\bwarnings\x12\x16\n" +
+	"\x06detail\x18\x0f \x01(\tR\x06detail\x12P\n" +
+	"\vreplication\x18\x10 \x01(\v2..openngfw.v1.HighAvailabilityReplicationStatusR\vreplication\x12]\n" +
+	"\x10fencing_evidence\x18\x11 \x01(\v22.openngfw.v1.HighAvailabilityFencingEvidenceStatusR\x0ffencingEvidence\x12c\n" +
+	"\x12transport_evidence\x18\x12 \x01(\v24.openngfw.v1.HighAvailabilityTransportEvidenceStatusR\x11transportEvidence\x12W\n" +
+	"\x0econntrack_sync\x18\x13 \x01(\v20.openngfw.v1.HighAvailabilityConntrackSyncStatusR\rconntrackSync\"\xbe\x02\n" +
+	"\x1aHighAvailabilitySyncStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12#\n" +
+	"\rlocal_version\x18\x03 \x01(\x04R\flocalVersion\x12!\n" +
+	"\fpeer_version\x18\x04 \x01(\x04R\vpeerVersion\x129\n" +
+	"\x19local_artifact_set_sha256\x18\x05 \x01(\tR\x16localArtifactSetSha256\x127\n" +
+	"\x18peer_artifact_set_sha256\x18\x06 \x01(\tR\x15peerArtifactSetSha256\x126\n" +
+	"\x17seconds_since_heartbeat\x18\a \x01(\x04R\x15secondsSinceHeartbeat\"\xb4\x02\n" +
+	"!HighAvailabilityReplicationStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x18\n" +
+	"\aenabled\x18\x02 \x01(\bR\aenabled\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x12&\n" +
+	"\x0flast_attempt_at\x18\x04 \x01(\tR\rlastAttemptAt\x12&\n" +
+	"\x0flast_success_at\x18\x05 \x01(\tR\rlastSuccessAt\x12\x1d\n" +
+	"\n" +
+	"last_error\x18\x06 \x01(\tR\tlastError\x12*\n" +
+	"\x11last_peer_version\x18\a \x01(\x04R\x0flastPeerVersion\x12,\n" +
+	"\x12last_local_version\x18\b \x01(\x04R\x10lastLocalVersion\"\x86\x01\n" +
+	"\x1eHighAvailabilityFailoverStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x1a\n" +
+	"\beligible\x18\x02 \x01(\bR\beligible\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x12\x1a\n" +
+	"\bblockers\x18\x04 \x03(\tR\bblockers\"\xe2\x01\n" +
+	"%HighAvailabilityFencingEvidenceStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x1a\n" +
+	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x14\n" +
+	"\x05claim\x18\x03 \x01(\tR\x05claim\x12\x17\n" +
+	"\apeer_id\x18\x04 \x01(\tR\x06peerId\x12\x1f\n" +
+	"\vevidence_id\x18\x05 \x01(\tR\n" +
+	"evidenceId\x12\x1f\n" +
+	"\vobserved_at\x18\x06 \x01(\tR\n" +
+	"observedAt\x12\x16\n" +
+	"\x06detail\x18\a \x01(\tR\x06detail\"\xe6\x02\n" +
+	"'HighAvailabilityTransportEvidenceStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x14\n" +
+	"\x05claim\x18\x02 \x01(\tR\x05claim\x12\x10\n" +
+	"\x03vip\x18\x03 \x01(\tR\x03vip\x12\x1c\n" +
+	"\tinterface\x18\x04 \x01(\tR\tinterface\x12\x16\n" +
+	"\x06routes\x18\x05 \x03(\tR\x06routes\x12\x1d\n" +
+	"\n" +
+	"garp_state\x18\x06 \x01(\tR\tgarpState\x12\x1f\n" +
+	"\vgarp_detail\x18\a \x01(\tR\n" +
+	"garpDetail\x12%\n" +
+	"\x0eneighbor_state\x18\b \x01(\tR\rneighborState\x12'\n" +
+	"\x0fneighbor_detail\x18\t \x01(\tR\x0eneighborDetail\x12\x1f\n" +
+	"\vobserved_at\x18\n" +
+	" \x01(\tR\n" +
+	"observedAt\x12\x16\n" +
+	"\x06detail\x18\v \x01(\tR\x06detail\"\xe0\x01\n" +
+	"#HighAvailabilityConntrackSyncStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x1a\n" +
+	"\bprovider\x18\x02 \x01(\tR\bprovider\x12\x14\n" +
+	"\x05claim\x18\x03 \x01(\tR\x05claim\x12\x17\n" +
+	"\apeer_id\x18\x04 \x01(\tR\x06peerId\x12\x1f\n" +
+	"\vevidence_id\x18\x05 \x01(\tR\n" +
+	"evidenceId\x12\x1f\n" +
+	"\vobserved_at\x18\x06 \x01(\tR\n" +
+	"observedAt\x12\x16\n" +
+	"\x06detail\x18\a \x01(\tR\x06detail\"\xf0\x03\n" +
+	"\rRuntimeStatus\x12\x18\n" +
+	"\aversion\x18\x01 \x01(\tR\aversion\x12\x16\n" +
+	"\x06commit\x18\x02 \x01(\tR\x06commit\x12\x1d\n" +
+	"\n" +
+	"build_date\x18\x03 \x01(\tR\tbuildDate\x12\x1d\n" +
+	"\n" +
+	"started_at\x18\x04 \x01(\tR\tstartedAt\x12%\n" +
+	"\x0euptime_seconds\x18\x05 \x01(\x04R\ruptimeSeconds\x12\x1f\n" +
+	"\vgrpc_listen\x18\x06 \x01(\tR\n" +
+	"grpcListen\x12\x1f\n" +
+	"\vhttp_listen\x18\a \x01(\tR\n" +
+	"httpListen\x12\x1f\n" +
+	"\vtls_enabled\x18\b \x01(\bR\n" +
+	"tlsEnabled\x12!\n" +
+	"\fauth_enabled\x18\t \x01(\bR\vauthEnabled\x12\x17\n" +
+	"\adry_run\x18\n" +
+	" \x01(\bR\x06dryRun\x12\x19\n" +
+	"\bdata_dir\x18\v \x01(\tR\adataDir\x12\x17\n" +
+	"\alog_dir\x18\f \x01(\tR\x06logDir\x12-\n" +
+	"\x12inspection_workers\x18\r \x01(\rR\x11inspectionWorkers\x12\x1b\n" +
+	"\thost_cpus\x18\x0e \x01(\rR\bhostCpus\x12)\n" +
+	"\x10active_dataplane\x18\x0f \x01(\tR\x0factiveDataplane\"x\n" +
+	"\fEngineStatus\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04role\x18\x02 \x01(\tR\x04role\x12\x12\n" +
+	"\x04mode\x18\x03 \x01(\tR\x04mode\x12\x14\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x05 \x01(\tR\x06detail\"T\n" +
+	"\x10SystemCapability\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\"\xa6\x03\n" +
+	"\x0fDataplaneStatus\x12)\n" +
+	"\x10active_dataplane\x18\x01 \x01(\tR\x0factiveDataplane\x12:\n" +
+	"\tflowtable\x18\x02 \x01(\v2\x1c.openngfw.v1.FlowtableStatusR\tflowtable\x12D\n" +
+	"\rkernel_tuning\x18\x03 \x01(\v2\x1f.openngfw.v1.KernelTuningStatusR\fkernelTuning\x124\n" +
+	"\x04ebpf\x18\x04 \x01(\v2 .openngfw.v1.EbpfDataplaneStatusR\x04ebpf\x129\n" +
+	"\bcounters\x18\x05 \x03(\v2\x1d.openngfw.v1.DataplaneCounterR\bcounters\x12?\n" +
+	"\tconntrack\x18\x06 \x01(\v2!.openngfw.v1.ConntrackTableStatusR\tconntrack\x124\n" +
+	"\x16running_policy_version\x18\a \x01(\x04R\x14runningPolicyVersion\"\xb6\x01\n" +
+	"\x10DataplaneCounter\x12\x18\n" +
+	"\acomment\x18\x01 \x01(\tR\acomment\x12\x12\n" +
+	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x12\n" +
+	"\x04name\x18\x03 \x01(\tR\x04name\x12\x18\n" +
+	"\apackets\x18\x04 \x01(\x04R\apackets\x12\x14\n" +
+	"\x05bytes\x18\x05 \x01(\x04R\x05bytes\x12\x17\n" +
+	"\arule_id\x18\x06 \x01(\tR\x06ruleId\x12\x17\n" +
+	"\aitem_id\x18\a \x01(\tR\x06itemId\"\xc8\x02\n" +
+	"\x0fFlowtableStatus\x12\x1d\n" +
+	"\n" +
+	"host_state\x18\x01 \x01(\tR\thostState\x12\x1f\n" +
+	"\vhost_detail\x18\x02 \x01(\tR\n" +
+	"hostDetail\x12#\n" +
+	"\rruntime_state\x18\x03 \x01(\tR\fruntimeState\x12%\n" +
+	"\x0eruntime_detail\x18\x04 \x01(\tR\rruntimeDetail\x12\x18\n" +
+	"\adevices\x18\x05 \x03(\tR\adevices\x12\x18\n" +
+	"\apackets\x18\x06 \x01(\x04R\apackets\x12\x14\n" +
+	"\x05bytes\x18\a \x01(\x04R\x05bytes\x12-\n" +
+	"\x12flowtable_declared\x18\b \x01(\bR\x11flowtableDeclared\x120\n" +
+	"\x14offload_rule_present\x18\t \x01(\bR\x12offloadRulePresent\"\xad\x02\n" +
+	"\x14ConntrackTableStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12'\n" +
+	"\x0fcurrent_entries\x18\x03 \x01(\x04R\x0ecurrentEntries\x12\x1f\n" +
+	"\vmax_entries\x18\x04 \x01(\x04R\n" +
+	"maxEntries\x12#\n" +
+	"\rusage_percent\x18\x05 \x01(\x01R\fusagePercent\x12:\n" +
+	"\x19warning_threshold_percent\x18\x06 \x01(\x01R\x17warningThresholdPercent\x12<\n" +
+	"\x1adegraded_threshold_percent\x18\a \x01(\x01R\x18degradedThresholdPercent\"\x8c\x01\n" +
+	"\x10VpnRuntimeStatus\x12A\n" +
+	"\twireguard\x18\x01 \x01(\v2#.openngfw.v1.WireGuardRuntimeStatusR\twireguard\x125\n" +
+	"\x05ipsec\x18\x02 \x01(\v2\x1f.openngfw.v1.IpsecRuntimeStatusR\x05ipsec\"G\n" +
+	"\x14RoutingRuntimeStatus\x12/\n" +
+	"\x03frr\x18\x01 \x01(\v2\x1d.openngfw.v1.FrrRuntimeStatusR\x03frr\"\xdb\x01\n" +
+	"\x10FrrRuntimeStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12J\n" +
+	"\rbgp_neighbors\x18\x03 \x03(\v2%.openngfw.v1.BgpNeighborRuntimeStatusR\fbgpNeighbors\x12M\n" +
+	"\x0eospf_neighbors\x18\x04 \x03(\v2&.openngfw.v1.OspfNeighborRuntimeStatusR\rospfNeighbors\"\xc0\x01\n" +
+	"\x18BgpNeighborRuntimeStatus\x12\x12\n" +
+	"\x04peer\x18\x01 \x01(\tR\x04peer\x12\x1d\n" +
+	"\n" +
+	"remote_asn\x18\x02 \x01(\rR\tremoteAsn\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x16\n" +
+	"\x06uptime\x18\x04 \x01(\tR\x06uptime\x12+\n" +
+	"\x11prefixes_received\x18\x05 \x01(\x04R\x10prefixesReceived\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\"\xbf\x01\n" +
+	"\x19OspfNeighborRuntimeStatus\x12\x1f\n" +
+	"\vneighbor_id\x18\x01 \x01(\tR\n" +
+	"neighborId\x12\x18\n" +
+	"\aaddress\x18\x02 \x01(\tR\aaddress\x12\x1c\n" +
+	"\tinterface\x18\x03 \x01(\tR\tinterface\x12\x14\n" +
+	"\x05state\x18\x04 \x01(\tR\x05state\x12\x1b\n" +
+	"\tdead_time\x18\x05 \x01(\tR\bdeadTime\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\"\x8d\x01\n" +
+	"\x16WireGuardRuntimeStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12E\n" +
+	"\n" +
+	"interfaces\x18\x03 \x03(\v2%.openngfw.v1.WireGuardInterfaceStatusR\n" +
+	"interfaces\"\xdf\x01\n" +
+	"\x18WireGuardInterfaceStatus\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x12\x1d\n" +
+	"\n" +
+	"peer_count\x18\x04 \x01(\rR\tpeerCount\x12*\n" +
+	"\x11active_peer_count\x18\x05 \x01(\rR\x0factivePeerCount\x126\n" +
+	"\x05peers\x18\x06 \x03(\v2 .openngfw.v1.WireGuardPeerStatusR\x05peers\"\xb8\x02\n" +
+	"\x13WireGuardPeerStatus\x12\x1d\n" +
+	"\n" +
+	"public_key\x18\x01 \x01(\tR\tpublicKey\x12\x1a\n" +
+	"\bendpoint\x18\x02 \x01(\tR\bendpoint\x12A\n" +
+	"\x1dlatest_handshake_unix_seconds\x18\x03 \x01(\x04R\x1alatestHandshakeUnixSeconds\x12?\n" +
+	"\x1clatest_handshake_age_seconds\x18\x04 \x01(\x04R\x19latestHandshakeAgeSeconds\x12\x19\n" +
+	"\brx_bytes\x18\x05 \x01(\x04R\arxBytes\x12\x19\n" +
+	"\btx_bytes\x18\x06 \x01(\x04R\atxBytes\x12\x14\n" +
+	"\x05state\x18\a \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\b \x01(\tR\x06detail\"\x83\x01\n" +
+	"\x12IpsecRuntimeStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12?\n" +
+	"\atunnels\x18\x03 \x03(\v2%.openngfw.v1.IpsecTunnelRuntimeStatusR\atunnels\"\xd8\x01\n" +
+	"\x18IpsecTunnelRuntimeStatus\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x12\x1b\n" +
+	"\tike_state\x18\x04 \x01(\tR\bikeState\x12$\n" +
+	"\x0echild_sa_count\x18\x05 \x01(\rR\fchildSaCount\x127\n" +
+	"\x18installed_child_sa_count\x18\x06 \x01(\rR\x15installedChildSaCount\"\xa8\x01\n" +
+	"\x12KernelTuningStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12,\n" +
+	"\x12sysctl_config_path\x18\x03 \x01(\tR\x10sysctlConfigPath\x126\n" +
+	"\x06checks\x18\x04 \x03(\v2\x1e.openngfw.v1.KernelTuningCheckR\x06checks\"\xa3\x01\n" +
+	"\x11KernelTuningCheck\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\x12\x18\n" +
+	"\acurrent\x18\x03 \x01(\tR\acurrent\x12 \n" +
+	"\vrecommended\x18\x04 \x01(\tR\vrecommended\x12\x14\n" +
+	"\x05state\x18\x05 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\"\xe0\x04\n" +
+	"\x13EbpfDataplaneStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12.\n" +
+	"\x06probes\x18\x03 \x03(\v2\x16.openngfw.v1.EbpfProbeR\x06probes\x12!\n" +
+	"\fattach_state\x18\x04 \x01(\tR\vattachState\x12#\n" +
+	"\rattach_detail\x18\x05 \x01(\tR\fattachDetail\x12;\n" +
+	"\rattach_probes\x18\x06 \x03(\v2\x16.openngfw.v1.EbpfProbeR\fattachProbes\x12%\n" +
+	"\x0erenderer_state\x18\a \x01(\tR\rrendererState\x12'\n" +
+	"\x0frenderer_detail\x18\b \x01(\tR\x0erendererDetail\x12'\n" +
+	"\x0fsupported_hooks\x18\t \x03(\tR\x0esupportedHooks\x12\x1a\n" +
+	"\bblockers\x18\n" +
+	" \x03(\tR\bblockers\x12=\n" +
+	"\vattachments\x18\v \x03(\v2\x1b.openngfw.v1.EbpfAttachmentR\vattachments\x127\n" +
+	"\tartifacts\x18\f \x03(\v2\x19.openngfw.v1.EbpfArtifactR\tartifacts\x122\n" +
+	"\x15evidence_collected_at\x18\r \x01(\tR\x13evidenceCollectedAt\x12%\n" +
+	"\x0eevidence_scope\x18\x0e \x01(\tR\revidenceScope\"_\n" +
+	"\tEbpfProbe\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
+	"\x03key\x18\x02 \x01(\tR\x03key\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x04 \x01(\tR\x06detail\"\xd3\x01\n" +
+	"\x0eEbpfAttachment\x12\x1c\n" +
+	"\tinterface\x18\x01 \x01(\tR\tinterface\x12\x12\n" +
+	"\x04hook\x18\x02 \x01(\tR\x04hook\x12\x14\n" +
+	"\x05state\x18\x03 \x01(\tR\x05state\x12\x1d\n" +
+	"\n" +
+	"program_id\x18\x04 \x01(\tR\tprogramId\x12!\n" +
+	"\fprogram_name\x18\x05 \x01(\tR\vprogramName\x12\x1f\n" +
+	"\vpinned_path\x18\x06 \x01(\tR\n" +
+	"pinnedPath\x12\x16\n" +
+	"\x06detail\x18\a \x01(\tR\x06detail\"\x90\x01\n" +
+	"\fEbpfArtifact\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
+	"\x04kind\x18\x02 \x01(\tR\x04kind\x12\x12\n" +
+	"\x04path\x18\x03 \x01(\tR\x04path\x12\x16\n" +
+	"\x06sha256\x18\x04 \x01(\tR\x06sha256\x12\x14\n" +
+	"\x05state\x18\x05 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x06 \x01(\tR\x06detail\"\xe3\x05\n" +
+	"\x15ManagementPlaneStatus\x12\x1f\n" +
+	"\vtls_enabled\x18\x01 \x01(\bR\n" +
+	"tlsEnabled\x12!\n" +
+	"\fauth_enabled\x18\x02 \x01(\bR\vauthEnabled\x12,\n" +
+	"\x12rate_limit_enabled\x18\x03 \x01(\bR\x10rateLimitEnabled\x12B\n" +
+	"\x1erate_limit_requests_per_minute\x18\x04 \x01(\rR\x1arateLimitRequestsPerMinute\x12(\n" +
+	"\x10rate_limit_burst\x18\x05 \x01(\rR\x0erateLimitBurst\x12-\n" +
+	"\x13http_max_body_bytes\x18\x06 \x01(\x04R\x10httpMaxBodyBytes\x121\n" +
+	"\x15http_max_header_bytes\x18\a \x01(\rR\x12httpMaxHeaderBytes\x12-\n" +
+	"\x13grpc_max_recv_bytes\x18\b \x01(\rR\x10grpcMaxRecvBytes\x12-\n" +
+	"\x13grpc_max_send_bytes\x18\t \x01(\rR\x10grpcMaxSendBytes\x127\n" +
+	"\x18http_read_header_timeout\x18\n" +
+	" \x01(\tR\x15httpReadHeaderTimeout\x12*\n" +
+	"\x11http_read_timeout\x18\v \x01(\tR\x0fhttpReadTimeout\x12,\n" +
+	"\x12http_write_timeout\x18\f \x01(\tR\x10httpWriteTimeout\x12*\n" +
+	"\x11http_idle_timeout\x18\r \x01(\tR\x0fhttpIdleTimeout\x12.\n" +
+	"\x13trusted_proxy_cidrs\x18\x0e \x03(\tR\x11trustedProxyCidrs\x12;\n" +
+	"\x1arate_limit_client_identity\x18\x0f \x01(\tR\x17rateLimitClientIdentity\"\x9e\x03\n" +
+	"\x12HostResourceStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x1b\n" +
+	"\tcpu_count\x18\x03 \x01(\rR\bcpuCount\x12\x14\n" +
+	"\x05load1\x18\x04 \x01(\x01R\x05load1\x12\x14\n" +
+	"\x05load5\x18\x05 \x01(\x01R\x05load5\x12\x16\n" +
+	"\x06load15\x18\x06 \x01(\x01R\x06load15\x12\"\n" +
+	"\rload1_per_cpu\x18\a \x01(\x01R\vload1PerCpu\x12,\n" +
+	"\x12memory_total_bytes\x18\b \x01(\x04R\x10memoryTotalBytes\x124\n" +
+	"\x16memory_available_bytes\x18\t \x01(\x04R\x14memoryAvailableBytes\x12.\n" +
+	"\x13memory_used_percent\x18\n" +
+	" \x01(\x01R\x11memoryUsedPercent\x12A\n" +
+	"\n" +
+	"interfaces\x18\v \x03(\v2!.openngfw.v1.HostInterfaceCounterR\n" +
+	"interfaces\"\xbc\x02\n" +
+	"\x14HostInterfaceCounter\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x14\n" +
+	"\x05state\x18\x02 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x03 \x01(\tR\x06detail\x12\x19\n" +
+	"\brx_bytes\x18\x04 \x01(\x04R\arxBytes\x12\x19\n" +
+	"\btx_bytes\x18\x05 \x01(\x04R\atxBytes\x12\x1d\n" +
+	"\n" +
+	"rx_packets\x18\x06 \x01(\x04R\trxPackets\x12\x1d\n" +
+	"\n" +
+	"tx_packets\x18\a \x01(\x04R\ttxPackets\x12\x1b\n" +
+	"\trx_errors\x18\b \x01(\x04R\brxErrors\x12\x1b\n" +
+	"\ttx_errors\x18\t \x01(\x04R\btxErrors\x12\x19\n" +
+	"\brx_drops\x18\n" +
+	" \x01(\x04R\arxDrops\x12\x19\n" +
+	"\btx_drops\x18\v \x01(\x04R\atxDrops\"\x92\x04\n" +
+	"\x10InspectionStatus\x12\x14\n" +
+	"\x05state\x18\x01 \x01(\tR\x05state\x12\x16\n" +
+	"\x06detail\x18\x02 \x01(\tR\x06detail\x12\x1f\n" +
+	"\vids_enabled\x18\x03 \x01(\bR\n" +
+	"idsEnabled\x12/\n" +
+	"\bids_mode\x18\x04 \x01(\x0e2\x14.openngfw.v1.IdsModeR\aidsMode\x12J\n" +
+	"\x10failure_behavior\x18\x05 \x01(\x0e2\x1f.openngfw.v1.IdsFailureBehaviorR\x0ffailureBehavior\x12)\n" +
+	"\x10inspection_state\x18\x06 \x01(\tR\x0finspectionState\x12\x1f\n" +
+	"\vengine_name\x18\a \x01(\tR\n" +
+	"engineName\x12\x1f\n" +
+	"\vengine_mode\x18\b \x01(\tR\n" +
+	"engineMode\x12!\n" +
+	"\fengine_state\x18\t \x01(\tR\vengineState\x12'\n" +
+	"\x0fengine_required\x18\n" +
+	" \x01(\bR\x0eengineRequired\x12'\n" +
+	"\x0fbypass_possible\x18\v \x01(\bR\x0ebypassPossible\x12#\n" +
+	"\rbypass_reason\x18\f \x01(\tR\fbypassReason\x12+\n" +
+	"\x11degraded_behavior\x18\r \x01(\tR\x10degradedBehavior\"]\n" +
+	"\rStatusWarning\x12\x1a\n" +
+	"\bseverity\x18\x01 \x01(\tR\bseverity\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\x12\x16\n" +
+	"\x06action\x18\x03 \x01(\tR\x06action*\xa7\x01\n" +
+	"\x1bPacketCaptureRetentionState\x12.\n" +
+	"*PACKET_CAPTURE_RETENTION_STATE_UNSPECIFIED\x10\x00\x12+\n" +
+	"'PACKET_CAPTURE_RETENTION_STATE_RETAINED\x10\x01\x12+\n" +
+	"'PACKET_CAPTURE_RETENTION_STATE_RELEASED\x10\x022\xf3*\n" +
 	"\rSystemService\x12i\n" +
 	"\n" +
-	"GetVersion\x12\x1e.openngfw.v1.GetVersionRequest\x1a\x1f.openngfw.v1.GetVersionResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/system/versionB\xaa\x01\n" +
+	"GetVersion\x12\x1e.openngfw.v1.GetVersionRequest\x1a\x1f.openngfw.v1.GetVersionResponse\"\x1a\x82\xd3\xe4\x93\x02\x14\x12\x12/v1/system/version\x12e\n" +
+	"\tGetStatus\x12\x1d.openngfw.v1.GetStatusRequest\x1a\x1e.openngfw.v1.GetStatusResponse\"\x19\x82\xd3\xe4\x93\x02\x13\x12\x11/v1/system/status\x12\x89\x01\n" +
+	"\x10ProveNetworkPath\x12$.openngfw.v1.ProveNetworkPathRequest\x1a%.openngfw.v1.ProveNetworkPathResponse\"(\x82\xd3\xe4\x93\x02\":\x01*\"\x1d/v1/system/network-path:prove\x12\xa4\x01\n" +
+	"\x18GetTelemetryExportStatus\x12,.openngfw.v1.GetTelemetryExportStatusRequest\x1a-.openngfw.v1.GetTelemetryExportStatusResponse\"+\x82\xd3\xe4\x93\x02%\x12#/v1/system/telemetry/exports/status\x12\x9e\x01\n" +
+	"\x15VerifyTelemetryExport\x12).openngfw.v1.VerifyTelemetryExportRequest\x1a*.openngfw.v1.VerifyTelemetryExportResponse\".\x82\xd3\xe4\x93\x02(:\x01*\"#/v1/system/telemetry/exports:verify\x12r\n" +
+	"\x0eListSystemLogs\x12\".openngfw.v1.ListSystemLogsRequest\x1a#.openngfw.v1.ListSystemLogsResponse\"\x17\x82\xd3\xe4\x93\x02\x11\x12\x0f/v1/system/logs\x12\x9d\x01\n" +
+	"\x15CheckRuntimeReadiness\x12).openngfw.v1.CheckRuntimeReadinessRequest\x1a*.openngfw.v1.CheckRuntimeReadinessResponse\"-\x82\xd3\xe4\x93\x02':\x01*\"\"/v1/system/runtime-readiness:check\x12\x98\x01\n" +
+	"\x19GetHighAvailabilityStatus\x12-.openngfw.v1.GetHighAvailabilityStatusRequest\x1a..openngfw.v1.GetHighAvailabilityStatusResponse\"\x1c\x82\xd3\xe4\x93\x02\x16\x12\x14/v1/system/ha/status\x12\xa3\x01\n" +
+	"\x1aPullHighAvailabilityPolicy\x12..openngfw.v1.PullHighAvailabilityPolicyRequest\x1a/.openngfw.v1.PullHighAvailabilityPolicyResponse\"$\x82\xd3\xe4\x93\x02\x1e:\x01*\"\x19/v1/system/ha/policy:pull\x12\xbb\x01\n" +
+	" ActivateHighAvailabilityFailover\x124.openngfw.v1.ActivateHighAvailabilityFailoverRequest\x1a5.openngfw.v1.ActivateHighAvailabilityFailoverResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/system/ha/failover:activate\x12\xab\x01\n" +
+	"\x1aGetReleaseAcceptanceStatus\x12..openngfw.v1.GetReleaseAcceptanceStatusRequest\x1a/.openngfw.v1.GetReleaseAcceptanceStatusResponse\",\x82\xd3\xe4\x93\x02&\x12$/v1/system/release-acceptance/status\x12\x82\x01\n" +
+	"\x10GetSupportBundle\x12$.openngfw.v1.GetSupportBundleRequest\x1a%.openngfw.v1.GetSupportBundleResponse\"!\x82\xd3\xe4\x93\x02\x1b\x12\x19/v1/system/support-bundle\x12m\n" +
+	"\vGetIdentity\x12\x1f.openngfw.v1.GetIdentityRequest\x1a .openngfw.v1.GetIdentityResponse\"\x1b\x82\xd3\xe4\x93\x02\x15\x12\x13/v1/system/identity\x12\xa3\x01\n" +
+	"\x15CreateStepUpChallenge\x12).openngfw.v1.CreateStepUpChallengeRequest\x1a*.openngfw.v1.CreateStepUpChallengeResponse\"3\x82\xd3\xe4\x93\x02-:\x01*\"(/v1/system/access-administration/step-up\x12\x9e\x01\n" +
+	"\x17GetAccessAdministration\x12+.openngfw.v1.GetAccessAdministrationRequest\x1a,.openngfw.v1.GetAccessAdministrationResponse\"(\x82\xd3\xe4\x93\x02\"\x12 /v1/system/access-administration\x12\x9b\x01\n" +
+	"\x10RunOIDCPreflight\x12$.openngfw.v1.RunOIDCPreflightRequest\x1a%.openngfw.v1.RunOIDCPreflightResponse\":\x82\xd3\xe4\x93\x024:\x01*\"//v1/system/access-administration/oidc:preflight\x12\xa4\x01\n" +
+	"\x15GetOIDCProviderConfig\x12).openngfw.v1.GetOIDCProviderConfigRequest\x1a*.openngfw.v1.GetOIDCProviderConfigResponse\"4\x82\xd3\xe4\x93\x02.\x12,/v1/system/access-administration/oidc/config\x12\xbf\x01\n" +
+	"\x1aValidateOIDCProviderConfig\x12..openngfw.v1.ValidateOIDCProviderConfigRequest\x1a/.openngfw.v1.ValidateOIDCProviderConfigResponse\"@\x82\xd3\xe4\x93\x02::\x01*\"5/v1/system/access-administration/oidc/config:validate\x12\xa7\x01\n" +
+	"\x15SetOIDCProviderConfig\x12).openngfw.v1.SetOIDCProviderConfigRequest\x1a*.openngfw.v1.SetOIDCProviderConfigResponse\"7\x82\xd3\xe4\x93\x021:\x01*\x1a,/v1/system/access-administration/oidc/config\x12\xa9\x01\n" +
+	"\x13DisableOIDCProvider\x12'.openngfw.v1.DisableOIDCProviderRequest\x1a(.openngfw.v1.DisableOIDCProviderResponse\"?\x82\xd3\xe4\x93\x029:\x01*\"4/v1/system/access-administration/oidc/config:disable\x12\xa4\x01\n" +
+	"\x15GetSAMLProviderConfig\x12).openngfw.v1.GetSAMLProviderConfigRequest\x1a*.openngfw.v1.GetSAMLProviderConfigResponse\"4\x82\xd3\xe4\x93\x02.\x12,/v1/system/access-administration/saml/config\x12\xbf\x01\n" +
+	"\x1aValidateSAMLProviderConfig\x12..openngfw.v1.ValidateSAMLProviderConfigRequest\x1a/.openngfw.v1.ValidateSAMLProviderConfigResponse\"@\x82\xd3\xe4\x93\x02::\x01*\"5/v1/system/access-administration/saml/config:validate\x12\xa7\x01\n" +
+	"\x15SetSAMLProviderConfig\x12).openngfw.v1.SetSAMLProviderConfigRequest\x1a*.openngfw.v1.SetSAMLProviderConfigResponse\"7\x82\xd3\xe4\x93\x021:\x01*\x1a,/v1/system/access-administration/saml/config\x12\xa9\x01\n" +
+	"\x13DisableSAMLProvider\x12'.openngfw.v1.DisableSAMLProviderRequest\x1a(.openngfw.v1.DisableSAMLProviderResponse\"?\x82\xd3\xe4\x93\x029:\x01*\"4/v1/system/access-administration/saml/config:disable\x12\x95\x01\n" +
+	"\x0fCreateLocalUser\x12#.openngfw.v1.CreateLocalUserRequest\x1a$.openngfw.v1.CreateLocalUserResponse\"7\x82\xd3\xe4\x93\x021:\x01*\",/v1/system/access-administration/local-users\x12\x9c\x01\n" +
+	"\x0fUpdateLocalUser\x12#.openngfw.v1.UpdateLocalUserRequest\x1a$.openngfw.v1.UpdateLocalUserResponse\">\x82\xd3\xe4\x93\x028:\x01*23/v1/system/access-administration/local-users/{name}\x12\xb8\x01\n" +
+	"\x14RotateLocalUserToken\x12(.openngfw.v1.RotateLocalUserTokenRequest\x1a).openngfw.v1.RotateLocalUserTokenResponse\"K\x82\xd3\xe4\x93\x02E:\x01*\"@/v1/system/access-administration/local-users/{name}:rotate-token\x12\xa7\x01\n" +
+	"\x10DisableLocalUser\x12$.openngfw.v1.DisableLocalUserRequest\x1a%.openngfw.v1.DisableLocalUserResponse\"F\x82\xd3\xe4\x93\x02@:\x01*\";/v1/system/access-administration/local-users/{name}:disable\x12\xb2\x01\n" +
+	"\x13RevokeAccessSession\x12'.openngfw.v1.RevokeAccessSessionRequest\x1a(.openngfw.v1.RevokeAccessSessionResponse\"H\x82\xd3\xe4\x93\x02B:\x01*\"=/v1/system/access-administration/sessions/{session_id}:revoke\x12c\n" +
+	"\bTuneHost\x12\x1c.openngfw.v1.TuneHostRequest\x1a\x1d.openngfw.v1.TuneHostResponse\"\x1a\x82\xd3\xe4\x93\x02\x14:\x01*\"\x0f/v1/system/tune\x12\x8e\x01\n" +
+	"\x11PlanPacketCapture\x12%.openngfw.v1.PlanPacketCaptureRequest\x1a&.openngfw.v1.PlanPacketCaptureResponse\"*\x82\xd3\xe4\x93\x02$:\x01*\"\x1f/v1/system/packet-captures/plan\x12\x89\x01\n" +
+	"\x12ListPacketCaptures\x12&.openngfw.v1.ListPacketCapturesRequest\x1a'.openngfw.v1.ListPacketCapturesResponse\"\"\x82\xd3\xe4\x93\x02\x1c\x12\x1a/v1/system/packet-captures\x12\x8c\x01\n" +
+	"\x12StartPacketCapture\x12&.openngfw.v1.StartPacketCaptureRequest\x1a'.openngfw.v1.StartPacketCaptureResponse\"%\x82\xd3\xe4\x93\x02\x1f:\x01*\"\x1a/v1/system/packet-captures\x12\x8a\x01\n" +
+	"\x15DownloadPacketCapture\x12).openngfw.v1.DownloadPacketCaptureRequest\x1a\x14.google.api.HttpBody\"0\x82\xd3\xe4\x93\x02*\x12(/v1/system/packet-captures/{id}/download\x12\xb4\x01\n" +
+	"\x19SetPacketCaptureRetention\x12-.openngfw.v1.SetPacketCaptureRetentionRequest\x1a..openngfw.v1.SetPacketCaptureRetentionResponse\"8\x82\xd3\xe4\x93\x022:\x01*\"-/v1/system/packet-captures/{id}:set-retentionB\xaa\x01\n" +
 	"\x0fcom.openngfw.v1B\vSystemProtoP\x01Z=github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1\xa2\x02\x03OXX\xaa\x02\vOpenngfw.V1\xca\x02\vOpenngfw\\V1\xe2\x02\x17Openngfw\\V1\\GPBMetadata\xea\x02\fOpenngfw::V1b\x06proto3"
 
 var (
@@ -155,19 +13011,344 @@ func file_openngfw_v1_system_proto_rawDescGZIP() []byte {
 	return file_openngfw_v1_system_proto_rawDescData
 }
 
-var file_openngfw_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_openngfw_v1_system_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
+var file_openngfw_v1_system_proto_msgTypes = make([]protoimpl.MessageInfo, 138)
 var file_openngfw_v1_system_proto_goTypes = []any{
-	(*GetVersionRequest)(nil),  // 0: openngfw.v1.GetVersionRequest
-	(*GetVersionResponse)(nil), // 1: openngfw.v1.GetVersionResponse
+	(PacketCaptureRetentionState)(0),                 // 0: openngfw.v1.PacketCaptureRetentionState
+	(*GetVersionRequest)(nil),                        // 1: openngfw.v1.GetVersionRequest
+	(*GetVersionResponse)(nil),                       // 2: openngfw.v1.GetVersionResponse
+	(*GetStatusRequest)(nil),                         // 3: openngfw.v1.GetStatusRequest
+	(*GetTelemetryExportStatusRequest)(nil),          // 4: openngfw.v1.GetTelemetryExportStatusRequest
+	(*VerifyTelemetryExportRequest)(nil),             // 5: openngfw.v1.VerifyTelemetryExportRequest
+	(*VerifyTelemetryExportResponse)(nil),            // 6: openngfw.v1.VerifyTelemetryExportResponse
+	(*TelemetryExportProof)(nil),                     // 7: openngfw.v1.TelemetryExportProof
+	(*ListSystemLogsRequest)(nil),                    // 8: openngfw.v1.ListSystemLogsRequest
+	(*ListSystemLogsResponse)(nil),                   // 9: openngfw.v1.ListSystemLogsResponse
+	(*SystemLogEntry)(nil),                           // 10: openngfw.v1.SystemLogEntry
+	(*SystemLogSummary)(nil),                         // 11: openngfw.v1.SystemLogSummary
+	(*GetTelemetryExportStatusResponse)(nil),         // 12: openngfw.v1.GetTelemetryExportStatusResponse
+	(*TelemetryVectorRuntimeStatus)(nil),             // 13: openngfw.v1.TelemetryVectorRuntimeStatus
+	(*TelemetryClickHouseSinkStatus)(nil),            // 14: openngfw.v1.TelemetryClickHouseSinkStatus
+	(*TelemetryExportSinkStatus)(nil),                // 15: openngfw.v1.TelemetryExportSinkStatus
+	(*TelemetryLocalFileEvidence)(nil),               // 16: openngfw.v1.TelemetryLocalFileEvidence
+	(*CheckRuntimeReadinessRequest)(nil),             // 17: openngfw.v1.CheckRuntimeReadinessRequest
+	(*CheckRuntimeReadinessResponse)(nil),            // 18: openngfw.v1.CheckRuntimeReadinessResponse
+	(*RuntimeReadinessItem)(nil),                     // 19: openngfw.v1.RuntimeReadinessItem
+	(*GetHighAvailabilityStatusRequest)(nil),         // 20: openngfw.v1.GetHighAvailabilityStatusRequest
+	(*GetHighAvailabilityStatusResponse)(nil),        // 21: openngfw.v1.GetHighAvailabilityStatusResponse
+	(*PullHighAvailabilityPolicyRequest)(nil),        // 22: openngfw.v1.PullHighAvailabilityPolicyRequest
+	(*PullHighAvailabilityPolicyResponse)(nil),       // 23: openngfw.v1.PullHighAvailabilityPolicyResponse
+	(*ActivateHighAvailabilityFailoverRequest)(nil),  // 24: openngfw.v1.ActivateHighAvailabilityFailoverRequest
+	(*ActivateHighAvailabilityFailoverResponse)(nil), // 25: openngfw.v1.ActivateHighAvailabilityFailoverResponse
+	(*GetReleaseAcceptanceStatusRequest)(nil),        // 26: openngfw.v1.GetReleaseAcceptanceStatusRequest
+	(*GetSupportBundleRequest)(nil),                  // 27: openngfw.v1.GetSupportBundleRequest
+	(*GetSupportBundleResponse)(nil),                 // 28: openngfw.v1.GetSupportBundleResponse
+	(*SupportBundleCollector)(nil),                   // 29: openngfw.v1.SupportBundleCollector
+	(*SupportBundleEndpoint)(nil),                    // 30: openngfw.v1.SupportBundleEndpoint
+	(*SupportBundleSummary)(nil),                     // 31: openngfw.v1.SupportBundleSummary
+	(*GetReleaseAcceptanceStatusResponse)(nil),       // 32: openngfw.v1.GetReleaseAcceptanceStatusResponse
+	(*ReleaseAcceptanceStatusSummary)(nil),           // 33: openngfw.v1.ReleaseAcceptanceStatusSummary
+	(*ReleaseAcceptanceCheckStatus)(nil),             // 34: openngfw.v1.ReleaseAcceptanceCheckStatus
+	(*ReleaseAcceptanceRecordabilityStatus)(nil),     // 35: openngfw.v1.ReleaseAcceptanceRecordabilityStatus
+	(*TuneHostRequest)(nil),                          // 36: openngfw.v1.TuneHostRequest
+	(*TuneHostResponse)(nil),                         // 37: openngfw.v1.TuneHostResponse
+	(*TuneHostResult)(nil),                           // 38: openngfw.v1.TuneHostResult
+	(*PlanPacketCaptureRequest)(nil),                 // 39: openngfw.v1.PlanPacketCaptureRequest
+	(*StartPacketCaptureRequest)(nil),                // 40: openngfw.v1.StartPacketCaptureRequest
+	(*ListPacketCapturesRequest)(nil),                // 41: openngfw.v1.ListPacketCapturesRequest
+	(*ListPacketCapturesResponse)(nil),               // 42: openngfw.v1.ListPacketCapturesResponse
+	(*DownloadPacketCaptureRequest)(nil),             // 43: openngfw.v1.DownloadPacketCaptureRequest
+	(*PacketCaptureRetention)(nil),                   // 44: openngfw.v1.PacketCaptureRetention
+	(*SetPacketCaptureRetentionRequest)(nil),         // 45: openngfw.v1.SetPacketCaptureRetentionRequest
+	(*SetPacketCaptureRetentionResponse)(nil),        // 46: openngfw.v1.SetPacketCaptureRetentionResponse
+	(*PlanPacketCaptureResponse)(nil),                // 47: openngfw.v1.PlanPacketCaptureResponse
+	(*PacketCapturePlan)(nil),                        // 48: openngfw.v1.PacketCapturePlan
+	(*StartPacketCaptureResponse)(nil),               // 49: openngfw.v1.StartPacketCaptureResponse
+	(*PacketCaptureJob)(nil),                         // 50: openngfw.v1.PacketCaptureJob
+	(*GetIdentityRequest)(nil),                       // 51: openngfw.v1.GetIdentityRequest
+	(*GetIdentityResponse)(nil),                      // 52: openngfw.v1.GetIdentityResponse
+	(*CreateStepUpChallengeRequest)(nil),             // 53: openngfw.v1.CreateStepUpChallengeRequest
+	(*CreateStepUpChallengeResponse)(nil),            // 54: openngfw.v1.CreateStepUpChallengeResponse
+	(*GetAccessAdministrationRequest)(nil),           // 55: openngfw.v1.GetAccessAdministrationRequest
+	(*RunOIDCPreflightRequest)(nil),                  // 56: openngfw.v1.RunOIDCPreflightRequest
+	(*RunOIDCPreflightResponse)(nil),                 // 57: openngfw.v1.RunOIDCPreflightResponse
+	(*OIDCPreflightCheck)(nil),                       // 58: openngfw.v1.OIDCPreflightCheck
+	(*GetOIDCProviderConfigRequest)(nil),             // 59: openngfw.v1.GetOIDCProviderConfigRequest
+	(*GetOIDCProviderConfigResponse)(nil),            // 60: openngfw.v1.GetOIDCProviderConfigResponse
+	(*ValidateOIDCProviderConfigRequest)(nil),        // 61: openngfw.v1.ValidateOIDCProviderConfigRequest
+	(*ValidateOIDCProviderConfigResponse)(nil),       // 62: openngfw.v1.ValidateOIDCProviderConfigResponse
+	(*SetOIDCProviderConfigRequest)(nil),             // 63: openngfw.v1.SetOIDCProviderConfigRequest
+	(*SetOIDCProviderConfigResponse)(nil),            // 64: openngfw.v1.SetOIDCProviderConfigResponse
+	(*DisableOIDCProviderRequest)(nil),               // 65: openngfw.v1.DisableOIDCProviderRequest
+	(*DisableOIDCProviderResponse)(nil),              // 66: openngfw.v1.DisableOIDCProviderResponse
+	(*GetSAMLProviderConfigRequest)(nil),             // 67: openngfw.v1.GetSAMLProviderConfigRequest
+	(*GetSAMLProviderConfigResponse)(nil),            // 68: openngfw.v1.GetSAMLProviderConfigResponse
+	(*ValidateSAMLProviderConfigRequest)(nil),        // 69: openngfw.v1.ValidateSAMLProviderConfigRequest
+	(*ValidateSAMLProviderConfigResponse)(nil),       // 70: openngfw.v1.ValidateSAMLProviderConfigResponse
+	(*SetSAMLProviderConfigRequest)(nil),             // 71: openngfw.v1.SetSAMLProviderConfigRequest
+	(*SetSAMLProviderConfigResponse)(nil),            // 72: openngfw.v1.SetSAMLProviderConfigResponse
+	(*DisableSAMLProviderRequest)(nil),               // 73: openngfw.v1.DisableSAMLProviderRequest
+	(*DisableSAMLProviderResponse)(nil),              // 74: openngfw.v1.DisableSAMLProviderResponse
+	(*OIDCProviderConfig)(nil),                       // 75: openngfw.v1.OIDCProviderConfig
+	(*SAMLProviderConfig)(nil),                       // 76: openngfw.v1.SAMLProviderConfig
+	(*GetAccessAdministrationResponse)(nil),          // 77: openngfw.v1.GetAccessAdministrationResponse
+	(*AccessAdministrationLocalUser)(nil),            // 78: openngfw.v1.AccessAdministrationLocalUser
+	(*CreateLocalUserRequest)(nil),                   // 79: openngfw.v1.CreateLocalUserRequest
+	(*UpdateLocalUserRequest)(nil),                   // 80: openngfw.v1.UpdateLocalUserRequest
+	(*RotateLocalUserTokenRequest)(nil),              // 81: openngfw.v1.RotateLocalUserTokenRequest
+	(*DisableLocalUserRequest)(nil),                  // 82: openngfw.v1.DisableLocalUserRequest
+	(*CreateLocalUserResponse)(nil),                  // 83: openngfw.v1.CreateLocalUserResponse
+	(*UpdateLocalUserResponse)(nil),                  // 84: openngfw.v1.UpdateLocalUserResponse
+	(*RotateLocalUserTokenResponse)(nil),             // 85: openngfw.v1.RotateLocalUserTokenResponse
+	(*DisableLocalUserResponse)(nil),                 // 86: openngfw.v1.DisableLocalUserResponse
+	(*AccessAdministrationOidc)(nil),                 // 87: openngfw.v1.AccessAdministrationOidc
+	(*AccessAdministrationSaml)(nil),                 // 88: openngfw.v1.AccessAdministrationSaml
+	(*AccessAdministrationSessions)(nil),             // 89: openngfw.v1.AccessAdministrationSessions
+	(*AccessAdministrationSession)(nil),              // 90: openngfw.v1.AccessAdministrationSession
+	(*RevokeAccessSessionRequest)(nil),               // 91: openngfw.v1.RevokeAccessSessionRequest
+	(*RevokeAccessSessionResponse)(nil),              // 92: openngfw.v1.RevokeAccessSessionResponse
+	(*AccessAdministrationBreakGlass)(nil),           // 93: openngfw.v1.AccessAdministrationBreakGlass
+	(*GetStatusResponse)(nil),                        // 94: openngfw.v1.GetStatusResponse
+	(*ProveNetworkPathRequest)(nil),                  // 95: openngfw.v1.ProveNetworkPathRequest
+	(*NetworkPathTunnelRef)(nil),                     // 96: openngfw.v1.NetworkPathTunnelRef
+	(*ProveNetworkPathResponse)(nil),                 // 97: openngfw.v1.ProveNetworkPathResponse
+	(*NetworkPathRouteProof)(nil),                    // 98: openngfw.v1.NetworkPathRouteProof
+	(*NetworkPathFrrProof)(nil),                      // 99: openngfw.v1.NetworkPathFrrProof
+	(*NetworkPathMasqueradeProof)(nil),               // 100: openngfw.v1.NetworkPathMasqueradeProof
+	(*NetworkPathVpnProof)(nil),                      // 101: openngfw.v1.NetworkPathVpnProof
+	(*NetworkPathMismatch)(nil),                      // 102: openngfw.v1.NetworkPathMismatch
+	(*HighAvailabilityStatus)(nil),                   // 103: openngfw.v1.HighAvailabilityStatus
+	(*HighAvailabilitySyncStatus)(nil),               // 104: openngfw.v1.HighAvailabilitySyncStatus
+	(*HighAvailabilityReplicationStatus)(nil),        // 105: openngfw.v1.HighAvailabilityReplicationStatus
+	(*HighAvailabilityFailoverStatus)(nil),           // 106: openngfw.v1.HighAvailabilityFailoverStatus
+	(*HighAvailabilityFencingEvidenceStatus)(nil),    // 107: openngfw.v1.HighAvailabilityFencingEvidenceStatus
+	(*HighAvailabilityTransportEvidenceStatus)(nil),  // 108: openngfw.v1.HighAvailabilityTransportEvidenceStatus
+	(*HighAvailabilityConntrackSyncStatus)(nil),      // 109: openngfw.v1.HighAvailabilityConntrackSyncStatus
+	(*RuntimeStatus)(nil),                            // 110: openngfw.v1.RuntimeStatus
+	(*EngineStatus)(nil),                             // 111: openngfw.v1.EngineStatus
+	(*SystemCapability)(nil),                         // 112: openngfw.v1.SystemCapability
+	(*DataplaneStatus)(nil),                          // 113: openngfw.v1.DataplaneStatus
+	(*DataplaneCounter)(nil),                         // 114: openngfw.v1.DataplaneCounter
+	(*FlowtableStatus)(nil),                          // 115: openngfw.v1.FlowtableStatus
+	(*ConntrackTableStatus)(nil),                     // 116: openngfw.v1.ConntrackTableStatus
+	(*VpnRuntimeStatus)(nil),                         // 117: openngfw.v1.VpnRuntimeStatus
+	(*RoutingRuntimeStatus)(nil),                     // 118: openngfw.v1.RoutingRuntimeStatus
+	(*FrrRuntimeStatus)(nil),                         // 119: openngfw.v1.FrrRuntimeStatus
+	(*BgpNeighborRuntimeStatus)(nil),                 // 120: openngfw.v1.BgpNeighborRuntimeStatus
+	(*OspfNeighborRuntimeStatus)(nil),                // 121: openngfw.v1.OspfNeighborRuntimeStatus
+	(*WireGuardRuntimeStatus)(nil),                   // 122: openngfw.v1.WireGuardRuntimeStatus
+	(*WireGuardInterfaceStatus)(nil),                 // 123: openngfw.v1.WireGuardInterfaceStatus
+	(*WireGuardPeerStatus)(nil),                      // 124: openngfw.v1.WireGuardPeerStatus
+	(*IpsecRuntimeStatus)(nil),                       // 125: openngfw.v1.IpsecRuntimeStatus
+	(*IpsecTunnelRuntimeStatus)(nil),                 // 126: openngfw.v1.IpsecTunnelRuntimeStatus
+	(*KernelTuningStatus)(nil),                       // 127: openngfw.v1.KernelTuningStatus
+	(*KernelTuningCheck)(nil),                        // 128: openngfw.v1.KernelTuningCheck
+	(*EbpfDataplaneStatus)(nil),                      // 129: openngfw.v1.EbpfDataplaneStatus
+	(*EbpfProbe)(nil),                                // 130: openngfw.v1.EbpfProbe
+	(*EbpfAttachment)(nil),                           // 131: openngfw.v1.EbpfAttachment
+	(*EbpfArtifact)(nil),                             // 132: openngfw.v1.EbpfArtifact
+	(*ManagementPlaneStatus)(nil),                    // 133: openngfw.v1.ManagementPlaneStatus
+	(*HostResourceStatus)(nil),                       // 134: openngfw.v1.HostResourceStatus
+	(*HostInterfaceCounter)(nil),                     // 135: openngfw.v1.HostInterfaceCounter
+	(*InspectionStatus)(nil),                         // 136: openngfw.v1.InspectionStatus
+	(*StatusWarning)(nil),                            // 137: openngfw.v1.StatusWarning
+	nil,                                              // 138: openngfw.v1.GetSupportBundleResponse.EndpointsEntry
+	(TelemetryExportType)(0),                         // 139: openngfw.v1.TelemetryExportType
+	(*Policy)(nil),                                   // 140: openngfw.v1.Policy
+	(*VersionInfo)(nil),                              // 141: openngfw.v1.VersionInfo
+	(*structpb.Struct)(nil),                          // 142: google.protobuf.Struct
+	(Protocol)(0),                                    // 143: openngfw.v1.Protocol
+	(IdsMode)(0),                                     // 144: openngfw.v1.IdsMode
+	(IdsFailureBehavior)(0),                          // 145: openngfw.v1.IdsFailureBehavior
+	(*httpbody.HttpBody)(nil),                        // 146: google.api.HttpBody
 }
 var file_openngfw_v1_system_proto_depIdxs = []int32{
-	0, // 0: openngfw.v1.SystemService.GetVersion:input_type -> openngfw.v1.GetVersionRequest
-	1, // 1: openngfw.v1.SystemService.GetVersion:output_type -> openngfw.v1.GetVersionResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	139, // 0: openngfw.v1.VerifyTelemetryExportRequest.type:type_name -> openngfw.v1.TelemetryExportType
+	7,   // 1: openngfw.v1.VerifyTelemetryExportResponse.proof:type_name -> openngfw.v1.TelemetryExportProof
+	139, // 2: openngfw.v1.TelemetryExportProof.type:type_name -> openngfw.v1.TelemetryExportType
+	10,  // 3: openngfw.v1.ListSystemLogsResponse.entries:type_name -> openngfw.v1.SystemLogEntry
+	11,  // 4: openngfw.v1.ListSystemLogsResponse.summary:type_name -> openngfw.v1.SystemLogSummary
+	13,  // 5: openngfw.v1.GetTelemetryExportStatusResponse.vector:type_name -> openngfw.v1.TelemetryVectorRuntimeStatus
+	14,  // 6: openngfw.v1.GetTelemetryExportStatusResponse.clickhouse:type_name -> openngfw.v1.TelemetryClickHouseSinkStatus
+	15,  // 7: openngfw.v1.GetTelemetryExportStatusResponse.exports:type_name -> openngfw.v1.TelemetryExportSinkStatus
+	137, // 8: openngfw.v1.GetTelemetryExportStatusResponse.warnings:type_name -> openngfw.v1.StatusWarning
+	139, // 9: openngfw.v1.TelemetryExportSinkStatus.type:type_name -> openngfw.v1.TelemetryExportType
+	16,  // 10: openngfw.v1.TelemetryExportSinkStatus.file:type_name -> openngfw.v1.TelemetryLocalFileEvidence
+	140, // 11: openngfw.v1.CheckRuntimeReadinessRequest.target_policy:type_name -> openngfw.v1.Policy
+	140, // 12: openngfw.v1.CheckRuntimeReadinessRequest.running_policy:type_name -> openngfw.v1.Policy
+	19,  // 13: openngfw.v1.CheckRuntimeReadinessResponse.items:type_name -> openngfw.v1.RuntimeReadinessItem
+	103, // 14: openngfw.v1.GetHighAvailabilityStatusResponse.status:type_name -> openngfw.v1.HighAvailabilityStatus
+	141, // 15: openngfw.v1.PullHighAvailabilityPolicyResponse.version_info:type_name -> openngfw.v1.VersionInfo
+	103, // 16: openngfw.v1.PullHighAvailabilityPolicyResponse.before:type_name -> openngfw.v1.HighAvailabilityStatus
+	103, // 17: openngfw.v1.PullHighAvailabilityPolicyResponse.after:type_name -> openngfw.v1.HighAvailabilityStatus
+	103, // 18: openngfw.v1.ActivateHighAvailabilityFailoverResponse.before:type_name -> openngfw.v1.HighAvailabilityStatus
+	103, // 19: openngfw.v1.ActivateHighAvailabilityFailoverResponse.after:type_name -> openngfw.v1.HighAvailabilityStatus
+	29,  // 20: openngfw.v1.GetSupportBundleResponse.collector:type_name -> openngfw.v1.SupportBundleCollector
+	138, // 21: openngfw.v1.GetSupportBundleResponse.endpoints:type_name -> openngfw.v1.GetSupportBundleResponse.EndpointsEntry
+	31,  // 22: openngfw.v1.GetSupportBundleResponse.summary:type_name -> openngfw.v1.SupportBundleSummary
+	142, // 23: openngfw.v1.SupportBundleEndpoint.data:type_name -> google.protobuf.Struct
+	33,  // 24: openngfw.v1.GetReleaseAcceptanceStatusResponse.summary:type_name -> openngfw.v1.ReleaseAcceptanceStatusSummary
+	34,  // 25: openngfw.v1.GetReleaseAcceptanceStatusResponse.checks:type_name -> openngfw.v1.ReleaseAcceptanceCheckStatus
+	35,  // 26: openngfw.v1.GetReleaseAcceptanceStatusResponse.recordability:type_name -> openngfw.v1.ReleaseAcceptanceRecordabilityStatus
+	38,  // 27: openngfw.v1.TuneHostResponse.results:type_name -> openngfw.v1.TuneHostResult
+	143, // 28: openngfw.v1.PlanPacketCaptureRequest.protocol:type_name -> openngfw.v1.Protocol
+	143, // 29: openngfw.v1.StartPacketCaptureRequest.protocol:type_name -> openngfw.v1.Protocol
+	50,  // 30: openngfw.v1.ListPacketCapturesResponse.captures:type_name -> openngfw.v1.PacketCaptureJob
+	0,   // 31: openngfw.v1.PacketCaptureRetention.state:type_name -> openngfw.v1.PacketCaptureRetentionState
+	0,   // 32: openngfw.v1.SetPacketCaptureRetentionRequest.state:type_name -> openngfw.v1.PacketCaptureRetentionState
+	50,  // 33: openngfw.v1.SetPacketCaptureRetentionResponse.job:type_name -> openngfw.v1.PacketCaptureJob
+	48,  // 34: openngfw.v1.PlanPacketCaptureResponse.plan:type_name -> openngfw.v1.PacketCapturePlan
+	143, // 35: openngfw.v1.PacketCapturePlan.protocol:type_name -> openngfw.v1.Protocol
+	50,  // 36: openngfw.v1.StartPacketCaptureResponse.job:type_name -> openngfw.v1.PacketCaptureJob
+	48,  // 37: openngfw.v1.PacketCaptureJob.plan:type_name -> openngfw.v1.PacketCapturePlan
+	44,  // 38: openngfw.v1.PacketCaptureJob.retention:type_name -> openngfw.v1.PacketCaptureRetention
+	87,  // 39: openngfw.v1.RunOIDCPreflightResponse.oidc:type_name -> openngfw.v1.AccessAdministrationOidc
+	58,  // 40: openngfw.v1.RunOIDCPreflightResponse.checks:type_name -> openngfw.v1.OIDCPreflightCheck
+	75,  // 41: openngfw.v1.GetOIDCProviderConfigResponse.config:type_name -> openngfw.v1.OIDCProviderConfig
+	75,  // 42: openngfw.v1.ValidateOIDCProviderConfigRequest.config:type_name -> openngfw.v1.OIDCProviderConfig
+	75,  // 43: openngfw.v1.ValidateOIDCProviderConfigResponse.normalized_config:type_name -> openngfw.v1.OIDCProviderConfig
+	75,  // 44: openngfw.v1.SetOIDCProviderConfigRequest.config:type_name -> openngfw.v1.OIDCProviderConfig
+	75,  // 45: openngfw.v1.SetOIDCProviderConfigResponse.config:type_name -> openngfw.v1.OIDCProviderConfig
+	87,  // 46: openngfw.v1.SetOIDCProviderConfigResponse.oidc:type_name -> openngfw.v1.AccessAdministrationOidc
+	76,  // 47: openngfw.v1.GetSAMLProviderConfigResponse.config:type_name -> openngfw.v1.SAMLProviderConfig
+	76,  // 48: openngfw.v1.ValidateSAMLProviderConfigRequest.config:type_name -> openngfw.v1.SAMLProviderConfig
+	76,  // 49: openngfw.v1.ValidateSAMLProviderConfigResponse.normalized_config:type_name -> openngfw.v1.SAMLProviderConfig
+	76,  // 50: openngfw.v1.SetSAMLProviderConfigRequest.config:type_name -> openngfw.v1.SAMLProviderConfig
+	76,  // 51: openngfw.v1.SetSAMLProviderConfigResponse.config:type_name -> openngfw.v1.SAMLProviderConfig
+	88,  // 52: openngfw.v1.SetSAMLProviderConfigResponse.saml:type_name -> openngfw.v1.AccessAdministrationSaml
+	78,  // 53: openngfw.v1.GetAccessAdministrationResponse.local_users:type_name -> openngfw.v1.AccessAdministrationLocalUser
+	87,  // 54: openngfw.v1.GetAccessAdministrationResponse.oidc:type_name -> openngfw.v1.AccessAdministrationOidc
+	89,  // 55: openngfw.v1.GetAccessAdministrationResponse.sessions:type_name -> openngfw.v1.AccessAdministrationSessions
+	93,  // 56: openngfw.v1.GetAccessAdministrationResponse.break_glass:type_name -> openngfw.v1.AccessAdministrationBreakGlass
+	88,  // 57: openngfw.v1.GetAccessAdministrationResponse.saml:type_name -> openngfw.v1.AccessAdministrationSaml
+	78,  // 58: openngfw.v1.CreateLocalUserResponse.user:type_name -> openngfw.v1.AccessAdministrationLocalUser
+	78,  // 59: openngfw.v1.UpdateLocalUserResponse.user:type_name -> openngfw.v1.AccessAdministrationLocalUser
+	78,  // 60: openngfw.v1.RotateLocalUserTokenResponse.user:type_name -> openngfw.v1.AccessAdministrationLocalUser
+	78,  // 61: openngfw.v1.DisableLocalUserResponse.user:type_name -> openngfw.v1.AccessAdministrationLocalUser
+	90,  // 62: openngfw.v1.AccessAdministrationSessions.active_sessions:type_name -> openngfw.v1.AccessAdministrationSession
+	90,  // 63: openngfw.v1.RevokeAccessSessionResponse.session:type_name -> openngfw.v1.AccessAdministrationSession
+	110, // 64: openngfw.v1.GetStatusResponse.runtime:type_name -> openngfw.v1.RuntimeStatus
+	111, // 65: openngfw.v1.GetStatusResponse.engines:type_name -> openngfw.v1.EngineStatus
+	112, // 66: openngfw.v1.GetStatusResponse.capabilities:type_name -> openngfw.v1.SystemCapability
+	137, // 67: openngfw.v1.GetStatusResponse.warnings:type_name -> openngfw.v1.StatusWarning
+	113, // 68: openngfw.v1.GetStatusResponse.dataplane:type_name -> openngfw.v1.DataplaneStatus
+	133, // 69: openngfw.v1.GetStatusResponse.management:type_name -> openngfw.v1.ManagementPlaneStatus
+	134, // 70: openngfw.v1.GetStatusResponse.host:type_name -> openngfw.v1.HostResourceStatus
+	136, // 71: openngfw.v1.GetStatusResponse.inspection:type_name -> openngfw.v1.InspectionStatus
+	117, // 72: openngfw.v1.GetStatusResponse.vpn:type_name -> openngfw.v1.VpnRuntimeStatus
+	118, // 73: openngfw.v1.GetStatusResponse.routing:type_name -> openngfw.v1.RoutingRuntimeStatus
+	103, // 74: openngfw.v1.GetStatusResponse.high_availability:type_name -> openngfw.v1.HighAvailabilityStatus
+	143, // 75: openngfw.v1.ProveNetworkPathRequest.protocol:type_name -> openngfw.v1.Protocol
+	96,  // 76: openngfw.v1.ProveNetworkPathRequest.tunnel:type_name -> openngfw.v1.NetworkPathTunnelRef
+	98,  // 77: openngfw.v1.ProveNetworkPathResponse.route:type_name -> openngfw.v1.NetworkPathRouteProof
+	101, // 78: openngfw.v1.ProveNetworkPathResponse.vpn:type_name -> openngfw.v1.NetworkPathVpnProof
+	102, // 79: openngfw.v1.ProveNetworkPathResponse.mismatches:type_name -> openngfw.v1.NetworkPathMismatch
+	99,  // 80: openngfw.v1.NetworkPathRouteProof.frr:type_name -> openngfw.v1.NetworkPathFrrProof
+	100, // 81: openngfw.v1.NetworkPathRouteProof.masquerade:type_name -> openngfw.v1.NetworkPathMasqueradeProof
+	104, // 82: openngfw.v1.HighAvailabilityStatus.sync:type_name -> openngfw.v1.HighAvailabilitySyncStatus
+	106, // 83: openngfw.v1.HighAvailabilityStatus.failover:type_name -> openngfw.v1.HighAvailabilityFailoverStatus
+	137, // 84: openngfw.v1.HighAvailabilityStatus.warnings:type_name -> openngfw.v1.StatusWarning
+	105, // 85: openngfw.v1.HighAvailabilityStatus.replication:type_name -> openngfw.v1.HighAvailabilityReplicationStatus
+	107, // 86: openngfw.v1.HighAvailabilityStatus.fencing_evidence:type_name -> openngfw.v1.HighAvailabilityFencingEvidenceStatus
+	108, // 87: openngfw.v1.HighAvailabilityStatus.transport_evidence:type_name -> openngfw.v1.HighAvailabilityTransportEvidenceStatus
+	109, // 88: openngfw.v1.HighAvailabilityStatus.conntrack_sync:type_name -> openngfw.v1.HighAvailabilityConntrackSyncStatus
+	115, // 89: openngfw.v1.DataplaneStatus.flowtable:type_name -> openngfw.v1.FlowtableStatus
+	127, // 90: openngfw.v1.DataplaneStatus.kernel_tuning:type_name -> openngfw.v1.KernelTuningStatus
+	129, // 91: openngfw.v1.DataplaneStatus.ebpf:type_name -> openngfw.v1.EbpfDataplaneStatus
+	114, // 92: openngfw.v1.DataplaneStatus.counters:type_name -> openngfw.v1.DataplaneCounter
+	116, // 93: openngfw.v1.DataplaneStatus.conntrack:type_name -> openngfw.v1.ConntrackTableStatus
+	122, // 94: openngfw.v1.VpnRuntimeStatus.wireguard:type_name -> openngfw.v1.WireGuardRuntimeStatus
+	125, // 95: openngfw.v1.VpnRuntimeStatus.ipsec:type_name -> openngfw.v1.IpsecRuntimeStatus
+	119, // 96: openngfw.v1.RoutingRuntimeStatus.frr:type_name -> openngfw.v1.FrrRuntimeStatus
+	120, // 97: openngfw.v1.FrrRuntimeStatus.bgp_neighbors:type_name -> openngfw.v1.BgpNeighborRuntimeStatus
+	121, // 98: openngfw.v1.FrrRuntimeStatus.ospf_neighbors:type_name -> openngfw.v1.OspfNeighborRuntimeStatus
+	123, // 99: openngfw.v1.WireGuardRuntimeStatus.interfaces:type_name -> openngfw.v1.WireGuardInterfaceStatus
+	124, // 100: openngfw.v1.WireGuardInterfaceStatus.peers:type_name -> openngfw.v1.WireGuardPeerStatus
+	126, // 101: openngfw.v1.IpsecRuntimeStatus.tunnels:type_name -> openngfw.v1.IpsecTunnelRuntimeStatus
+	128, // 102: openngfw.v1.KernelTuningStatus.checks:type_name -> openngfw.v1.KernelTuningCheck
+	130, // 103: openngfw.v1.EbpfDataplaneStatus.probes:type_name -> openngfw.v1.EbpfProbe
+	130, // 104: openngfw.v1.EbpfDataplaneStatus.attach_probes:type_name -> openngfw.v1.EbpfProbe
+	131, // 105: openngfw.v1.EbpfDataplaneStatus.attachments:type_name -> openngfw.v1.EbpfAttachment
+	132, // 106: openngfw.v1.EbpfDataplaneStatus.artifacts:type_name -> openngfw.v1.EbpfArtifact
+	135, // 107: openngfw.v1.HostResourceStatus.interfaces:type_name -> openngfw.v1.HostInterfaceCounter
+	144, // 108: openngfw.v1.InspectionStatus.ids_mode:type_name -> openngfw.v1.IdsMode
+	145, // 109: openngfw.v1.InspectionStatus.failure_behavior:type_name -> openngfw.v1.IdsFailureBehavior
+	30,  // 110: openngfw.v1.GetSupportBundleResponse.EndpointsEntry.value:type_name -> openngfw.v1.SupportBundleEndpoint
+	1,   // 111: openngfw.v1.SystemService.GetVersion:input_type -> openngfw.v1.GetVersionRequest
+	3,   // 112: openngfw.v1.SystemService.GetStatus:input_type -> openngfw.v1.GetStatusRequest
+	95,  // 113: openngfw.v1.SystemService.ProveNetworkPath:input_type -> openngfw.v1.ProveNetworkPathRequest
+	4,   // 114: openngfw.v1.SystemService.GetTelemetryExportStatus:input_type -> openngfw.v1.GetTelemetryExportStatusRequest
+	5,   // 115: openngfw.v1.SystemService.VerifyTelemetryExport:input_type -> openngfw.v1.VerifyTelemetryExportRequest
+	8,   // 116: openngfw.v1.SystemService.ListSystemLogs:input_type -> openngfw.v1.ListSystemLogsRequest
+	17,  // 117: openngfw.v1.SystemService.CheckRuntimeReadiness:input_type -> openngfw.v1.CheckRuntimeReadinessRequest
+	20,  // 118: openngfw.v1.SystemService.GetHighAvailabilityStatus:input_type -> openngfw.v1.GetHighAvailabilityStatusRequest
+	22,  // 119: openngfw.v1.SystemService.PullHighAvailabilityPolicy:input_type -> openngfw.v1.PullHighAvailabilityPolicyRequest
+	24,  // 120: openngfw.v1.SystemService.ActivateHighAvailabilityFailover:input_type -> openngfw.v1.ActivateHighAvailabilityFailoverRequest
+	26,  // 121: openngfw.v1.SystemService.GetReleaseAcceptanceStatus:input_type -> openngfw.v1.GetReleaseAcceptanceStatusRequest
+	27,  // 122: openngfw.v1.SystemService.GetSupportBundle:input_type -> openngfw.v1.GetSupportBundleRequest
+	51,  // 123: openngfw.v1.SystemService.GetIdentity:input_type -> openngfw.v1.GetIdentityRequest
+	53,  // 124: openngfw.v1.SystemService.CreateStepUpChallenge:input_type -> openngfw.v1.CreateStepUpChallengeRequest
+	55,  // 125: openngfw.v1.SystemService.GetAccessAdministration:input_type -> openngfw.v1.GetAccessAdministrationRequest
+	56,  // 126: openngfw.v1.SystemService.RunOIDCPreflight:input_type -> openngfw.v1.RunOIDCPreflightRequest
+	59,  // 127: openngfw.v1.SystemService.GetOIDCProviderConfig:input_type -> openngfw.v1.GetOIDCProviderConfigRequest
+	61,  // 128: openngfw.v1.SystemService.ValidateOIDCProviderConfig:input_type -> openngfw.v1.ValidateOIDCProviderConfigRequest
+	63,  // 129: openngfw.v1.SystemService.SetOIDCProviderConfig:input_type -> openngfw.v1.SetOIDCProviderConfigRequest
+	65,  // 130: openngfw.v1.SystemService.DisableOIDCProvider:input_type -> openngfw.v1.DisableOIDCProviderRequest
+	67,  // 131: openngfw.v1.SystemService.GetSAMLProviderConfig:input_type -> openngfw.v1.GetSAMLProviderConfigRequest
+	69,  // 132: openngfw.v1.SystemService.ValidateSAMLProviderConfig:input_type -> openngfw.v1.ValidateSAMLProviderConfigRequest
+	71,  // 133: openngfw.v1.SystemService.SetSAMLProviderConfig:input_type -> openngfw.v1.SetSAMLProviderConfigRequest
+	73,  // 134: openngfw.v1.SystemService.DisableSAMLProvider:input_type -> openngfw.v1.DisableSAMLProviderRequest
+	79,  // 135: openngfw.v1.SystemService.CreateLocalUser:input_type -> openngfw.v1.CreateLocalUserRequest
+	80,  // 136: openngfw.v1.SystemService.UpdateLocalUser:input_type -> openngfw.v1.UpdateLocalUserRequest
+	81,  // 137: openngfw.v1.SystemService.RotateLocalUserToken:input_type -> openngfw.v1.RotateLocalUserTokenRequest
+	82,  // 138: openngfw.v1.SystemService.DisableLocalUser:input_type -> openngfw.v1.DisableLocalUserRequest
+	91,  // 139: openngfw.v1.SystemService.RevokeAccessSession:input_type -> openngfw.v1.RevokeAccessSessionRequest
+	36,  // 140: openngfw.v1.SystemService.TuneHost:input_type -> openngfw.v1.TuneHostRequest
+	39,  // 141: openngfw.v1.SystemService.PlanPacketCapture:input_type -> openngfw.v1.PlanPacketCaptureRequest
+	41,  // 142: openngfw.v1.SystemService.ListPacketCaptures:input_type -> openngfw.v1.ListPacketCapturesRequest
+	40,  // 143: openngfw.v1.SystemService.StartPacketCapture:input_type -> openngfw.v1.StartPacketCaptureRequest
+	43,  // 144: openngfw.v1.SystemService.DownloadPacketCapture:input_type -> openngfw.v1.DownloadPacketCaptureRequest
+	45,  // 145: openngfw.v1.SystemService.SetPacketCaptureRetention:input_type -> openngfw.v1.SetPacketCaptureRetentionRequest
+	2,   // 146: openngfw.v1.SystemService.GetVersion:output_type -> openngfw.v1.GetVersionResponse
+	94,  // 147: openngfw.v1.SystemService.GetStatus:output_type -> openngfw.v1.GetStatusResponse
+	97,  // 148: openngfw.v1.SystemService.ProveNetworkPath:output_type -> openngfw.v1.ProveNetworkPathResponse
+	12,  // 149: openngfw.v1.SystemService.GetTelemetryExportStatus:output_type -> openngfw.v1.GetTelemetryExportStatusResponse
+	6,   // 150: openngfw.v1.SystemService.VerifyTelemetryExport:output_type -> openngfw.v1.VerifyTelemetryExportResponse
+	9,   // 151: openngfw.v1.SystemService.ListSystemLogs:output_type -> openngfw.v1.ListSystemLogsResponse
+	18,  // 152: openngfw.v1.SystemService.CheckRuntimeReadiness:output_type -> openngfw.v1.CheckRuntimeReadinessResponse
+	21,  // 153: openngfw.v1.SystemService.GetHighAvailabilityStatus:output_type -> openngfw.v1.GetHighAvailabilityStatusResponse
+	23,  // 154: openngfw.v1.SystemService.PullHighAvailabilityPolicy:output_type -> openngfw.v1.PullHighAvailabilityPolicyResponse
+	25,  // 155: openngfw.v1.SystemService.ActivateHighAvailabilityFailover:output_type -> openngfw.v1.ActivateHighAvailabilityFailoverResponse
+	32,  // 156: openngfw.v1.SystemService.GetReleaseAcceptanceStatus:output_type -> openngfw.v1.GetReleaseAcceptanceStatusResponse
+	28,  // 157: openngfw.v1.SystemService.GetSupportBundle:output_type -> openngfw.v1.GetSupportBundleResponse
+	52,  // 158: openngfw.v1.SystemService.GetIdentity:output_type -> openngfw.v1.GetIdentityResponse
+	54,  // 159: openngfw.v1.SystemService.CreateStepUpChallenge:output_type -> openngfw.v1.CreateStepUpChallengeResponse
+	77,  // 160: openngfw.v1.SystemService.GetAccessAdministration:output_type -> openngfw.v1.GetAccessAdministrationResponse
+	57,  // 161: openngfw.v1.SystemService.RunOIDCPreflight:output_type -> openngfw.v1.RunOIDCPreflightResponse
+	60,  // 162: openngfw.v1.SystemService.GetOIDCProviderConfig:output_type -> openngfw.v1.GetOIDCProviderConfigResponse
+	62,  // 163: openngfw.v1.SystemService.ValidateOIDCProviderConfig:output_type -> openngfw.v1.ValidateOIDCProviderConfigResponse
+	64,  // 164: openngfw.v1.SystemService.SetOIDCProviderConfig:output_type -> openngfw.v1.SetOIDCProviderConfigResponse
+	66,  // 165: openngfw.v1.SystemService.DisableOIDCProvider:output_type -> openngfw.v1.DisableOIDCProviderResponse
+	68,  // 166: openngfw.v1.SystemService.GetSAMLProviderConfig:output_type -> openngfw.v1.GetSAMLProviderConfigResponse
+	70,  // 167: openngfw.v1.SystemService.ValidateSAMLProviderConfig:output_type -> openngfw.v1.ValidateSAMLProviderConfigResponse
+	72,  // 168: openngfw.v1.SystemService.SetSAMLProviderConfig:output_type -> openngfw.v1.SetSAMLProviderConfigResponse
+	74,  // 169: openngfw.v1.SystemService.DisableSAMLProvider:output_type -> openngfw.v1.DisableSAMLProviderResponse
+	83,  // 170: openngfw.v1.SystemService.CreateLocalUser:output_type -> openngfw.v1.CreateLocalUserResponse
+	84,  // 171: openngfw.v1.SystemService.UpdateLocalUser:output_type -> openngfw.v1.UpdateLocalUserResponse
+	85,  // 172: openngfw.v1.SystemService.RotateLocalUserToken:output_type -> openngfw.v1.RotateLocalUserTokenResponse
+	86,  // 173: openngfw.v1.SystemService.DisableLocalUser:output_type -> openngfw.v1.DisableLocalUserResponse
+	92,  // 174: openngfw.v1.SystemService.RevokeAccessSession:output_type -> openngfw.v1.RevokeAccessSessionResponse
+	37,  // 175: openngfw.v1.SystemService.TuneHost:output_type -> openngfw.v1.TuneHostResponse
+	47,  // 176: openngfw.v1.SystemService.PlanPacketCapture:output_type -> openngfw.v1.PlanPacketCaptureResponse
+	42,  // 177: openngfw.v1.SystemService.ListPacketCaptures:output_type -> openngfw.v1.ListPacketCapturesResponse
+	49,  // 178: openngfw.v1.SystemService.StartPacketCapture:output_type -> openngfw.v1.StartPacketCaptureResponse
+	146, // 179: openngfw.v1.SystemService.DownloadPacketCapture:output_type -> google.api.HttpBody
+	46,  // 180: openngfw.v1.SystemService.SetPacketCaptureRetention:output_type -> openngfw.v1.SetPacketCaptureRetentionResponse
+	146, // [146:181] is the sub-list for method output_type
+	111, // [111:146] is the sub-list for method input_type
+	111, // [111:111] is the sub-list for extension type_name
+	111, // [111:111] is the sub-list for extension extendee
+	0,   // [0:111] is the sub-list for field type_name
 }
 
 func init() { file_openngfw_v1_system_proto_init() }
@@ -175,18 +13356,23 @@ func file_openngfw_v1_system_proto_init() {
 	if File_openngfw_v1_system_proto != nil {
 		return
 	}
+	file_openngfw_v1_ids_proto_init()
+	file_openngfw_v1_policy_proto_init()
+	file_openngfw_v1_policy_service_proto_init()
+	file_openngfw_v1_telemetry_proto_init()
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_openngfw_v1_system_proto_rawDesc), len(file_openngfw_v1_system_proto_rawDesc)),
-			NumEnums:      0,
-			NumMessages:   2,
+			NumEnums:      1,
+			NumMessages:   138,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
 		GoTypes:           file_openngfw_v1_system_proto_goTypes,
 		DependencyIndexes: file_openngfw_v1_system_proto_depIdxs,
+		EnumInfos:         file_openngfw_v1_system_proto_enumTypes,
 		MessageInfos:      file_openngfw_v1_system_proto_msgTypes,
 	}.Build()
 	File_openngfw_v1_system_proto = out.File

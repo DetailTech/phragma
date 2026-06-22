@@ -43,6 +43,25 @@ func TestCompileNetwork(t *testing.T) {
 	}
 }
 
+func TestCompileNetworkFlowOffload(t *testing.T) {
+	p := testPolicy()
+	p.Network = &openngfwv1.Network{EnableFlowOffload: true}
+	ir, err := Compile(p)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []string{"eth0", "eth1", "eth2"}
+	if got := ir.Network.FlowOffloadDevices; len(got) != len(want) {
+		t.Fatalf("FlowOffloadDevices = %v, want %v", got, want)
+	} else {
+		for i := range want {
+			if got[i] != want[i] {
+				t.Fatalf("FlowOffloadDevices = %v, want %v", got, want)
+			}
+		}
+	}
+}
+
 func TestCompileNetworkOffloads(t *testing.T) {
 	p := networkPolicy()
 	p.Network.ManageNicOffloads = true
@@ -60,6 +79,7 @@ func TestCompileNetworkOffloads(t *testing.T) {
 
 	// Prevent mode (NFQUEUE) doesn't sniff wire frames: no offload work.
 	p.Ids.Mode = openngfwv1.IdsMode_IDS_MODE_PREVENT
+	p.Ids.FailureBehavior = openngfwv1.IdsFailureBehavior_IDS_FAILURE_BEHAVIOR_FAIL_OPEN
 	ir, err = Compile(p)
 	if err != nil {
 		t.Fatal(err)

@@ -13,6 +13,7 @@ import (
 	"github.com/detailtech/oss-ngfw/internal/renderers/iproute"
 	"github.com/detailtech/oss-ngfw/internal/renderers/netdev"
 	"github.com/detailtech/oss-ngfw/internal/renderers/nftables"
+	"github.com/detailtech/oss-ngfw/internal/renderers/proxy"
 	"github.com/detailtech/oss-ngfw/internal/renderers/strongswan"
 	"github.com/detailtech/oss-ngfw/internal/renderers/suricata"
 	"github.com/detailtech/oss-ngfw/internal/renderers/vector"
@@ -28,6 +29,10 @@ type Options struct {
 	LogDir string
 	// VectorDataDir is Vector's disk-buffer directory.
 	VectorDataDir string
+	// InspectionWorkers is how many NFQUEUEs the inline IPS fans out
+	// across (one Suricata worker each) for multi-core throughput.
+	// Typically the host CPU count; 0 or 1 means a single queue.
+	InspectionWorkers int
 }
 
 // DefaultOptions derives engine paths from controld's data/log dirs.
@@ -55,6 +60,15 @@ func RenderAll(p *openngfwv1.Policy, opts Options) (map[string][]byte, error) {
 	ir, err := compiler.Compile(p)
 	if err != nil {
 		return nil, err
+	}
+	// Resolve the inline-IPS queue fan-out from node config (the pure
+	// renderers stay deterministic; this is where host facts enter).
+	if ir.IDs != nil && ir.IDs.Prevent {
+		workers := opts.InspectionWorkers
+		if workers < 1 {
+			workers = 1
+		}
+		ir.IDs.QueueCount = uint16(workers)
 	}
 	out := map[string][]byte{}
 
@@ -105,6 +119,14 @@ func RenderAll(p *openngfwv1.Policy, opts Options) (map[string][]byte, error) {
 		return nil, fmt.Errorf("render netdev: %w", err)
 	}
 	out[engines.NetdevName] = nd
+
+	proxyPlan, err := proxy.Render(ir)
+	if err != nil {
+		return nil, fmt.Errorf("render proxy plan: %w", err)
+	}
+	if ir.Proxy != nil {
+		out["proxy"] = proxyPlan
+	}
 
 	return out, nil
 }

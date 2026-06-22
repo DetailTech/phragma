@@ -32,7 +32,8 @@ const (
 	// Passive detection: Suricata sniffs interfaces via AF_PACKET.
 	IdsMode_IDS_MODE_DETECT IdsMode = 1
 	// Inline prevention: forwarded traffic is queued to Suricata via
-	// NFQUEUE (fail-open: if Suricata is down, traffic bypasses).
+	// NFQUEUE. failure_behavior defines whether queue failure bypasses or
+	// blocks traffic.
 	IdsMode_IDS_MODE_PREVENT IdsMode = 2
 )
 
@@ -77,6 +78,59 @@ func (IdsMode) EnumDescriptor() ([]byte, []int) {
 	return file_openngfw_v1_ids_proto_rawDescGZIP(), []int{0}
 }
 
+type IdsFailureBehavior int32
+
+const (
+	IdsFailureBehavior_IDS_FAILURE_BEHAVIOR_UNSPECIFIED IdsFailureBehavior = 0
+	// If Suricata/NFQUEUE is unavailable, bypass inspection and continue
+	// policy evaluation. This preserves availability but is a visible bypass.
+	IdsFailureBehavior_IDS_FAILURE_BEHAVIOR_FAIL_OPEN IdsFailureBehavior = 1
+	// If Suricata/NFQUEUE is unavailable, hold/drop queued traffic. This
+	// preserves inspection guarantees at the cost of availability.
+	IdsFailureBehavior_IDS_FAILURE_BEHAVIOR_FAIL_CLOSED IdsFailureBehavior = 2
+)
+
+// Enum value maps for IdsFailureBehavior.
+var (
+	IdsFailureBehavior_name = map[int32]string{
+		0: "IDS_FAILURE_BEHAVIOR_UNSPECIFIED",
+		1: "IDS_FAILURE_BEHAVIOR_FAIL_OPEN",
+		2: "IDS_FAILURE_BEHAVIOR_FAIL_CLOSED",
+	}
+	IdsFailureBehavior_value = map[string]int32{
+		"IDS_FAILURE_BEHAVIOR_UNSPECIFIED": 0,
+		"IDS_FAILURE_BEHAVIOR_FAIL_OPEN":   1,
+		"IDS_FAILURE_BEHAVIOR_FAIL_CLOSED": 2,
+	}
+)
+
+func (x IdsFailureBehavior) Enum() *IdsFailureBehavior {
+	p := new(IdsFailureBehavior)
+	*p = x
+	return p
+}
+
+func (x IdsFailureBehavior) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (IdsFailureBehavior) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_ids_proto_enumTypes[1].Descriptor()
+}
+
+func (IdsFailureBehavior) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_ids_proto_enumTypes[1]
+}
+
+func (x IdsFailureBehavior) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use IdsFailureBehavior.Descriptor instead.
+func (IdsFailureBehavior) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_ids_proto_rawDescGZIP(), []int{1}
+}
+
 type Ids struct {
 	state   protoimpl.MessageState `protogen:"open.v1"`
 	Enabled bool                   `protobuf:"varint,1,opt,name=enabled,proto3" json:"enabled,omitempty"`
@@ -89,7 +143,13 @@ type Ids struct {
 	// Empty = ["local.rules"]. Populate via suricata-update or drop-in.
 	RuleFiles []string `protobuf:"bytes,5,rep,name=rule_files,json=ruleFiles,proto3" json:"rule_files,omitempty"`
 	// NFQUEUE number for prevent mode (default 0).
-	QueueNum      uint32 `protobuf:"varint,6,opt,name=queue_num,json=queueNum,proto3" json:"queue_num,omitempty"`
+	QueueNum uint32 `protobuf:"varint,6,opt,name=queue_num,json=queueNum,proto3" json:"queue_num,omitempty"`
+	// Required when mode == IDS_MODE_PREVENT.
+	FailureBehavior IdsFailureBehavior `protobuf:"varint,7,opt,name=failure_behavior,json=failureBehavior,proto3,enum=openngfw.v1.IdsFailureBehavior" json:"failure_behavior,omitempty"`
+	// OpenNGFW-owned false-positive controls. These compile to native
+	// engine suppressions, but the policy model remains stable if the
+	// matching engine changes.
+	Exceptions    []*IdsException `protobuf:"bytes,8,rep,name=exceptions,proto3" json:"exceptions,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -166,11 +226,176 @@ func (x *Ids) GetQueueNum() uint32 {
 	return 0
 }
 
+func (x *Ids) GetFailureBehavior() IdsFailureBehavior {
+	if x != nil {
+		return x.FailureBehavior
+	}
+	return IdsFailureBehavior_IDS_FAILURE_BEHAVIOR_UNSPECIFIED
+}
+
+func (x *Ids) GetExceptions() []*IdsException {
+	if x != nil {
+		return x.Exceptions
+	}
+	return nil
+}
+
+// IdsException suppresses one noisy threat signature globally or for a
+// source/destination address object. signature_id is the current v1
+// engine key; threat_id preserves OpenNGFW Threat-ID metadata for audit,
+// UI, and future content-package mapping.
+type IdsException struct {
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	Name        string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Disabled    bool                   `protobuf:"varint,2,opt,name=disabled,proto3" json:"disabled,omitempty"`
+	SignatureId int64                  `protobuf:"varint,3,opt,name=signature_id,json=signatureId,proto3" json:"signature_id,omitempty"`
+	ThreatId    string                 `protobuf:"bytes,4,opt,name=threat_id,json=threatId,proto3" json:"threat_id,omitempty"`
+	// Optional Address object restricting suppression to source scope.
+	SourceAddress string `protobuf:"bytes,5,opt,name=source_address,json=sourceAddress,proto3" json:"source_address,omitempty"`
+	// Optional Address object restricting suppression to destination scope.
+	DestinationAddress string `protobuf:"bytes,6,opt,name=destination_address,json=destinationAddress,proto3" json:"destination_address,omitempty"`
+	Description        string `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	// Optional operator metadata for review ownership and CAB traceability.
+	Owner    string `protobuf:"bytes,8,opt,name=owner,proto3" json:"owner,omitempty"`
+	TicketId string `protobuf:"bytes,9,opt,name=ticket_id,json=ticketId,proto3" json:"ticket_id,omitempty"`
+	// ISO-8601 calendar date (YYYY-MM-DD) when this exception should be reviewed.
+	ReviewDate string `protobuf:"bytes,10,opt,name=review_date,json=reviewDate,proto3" json:"review_date,omitempty"`
+	// ISO-8601 calendar date (YYYY-MM-DD) after which this exception is stale.
+	ExpiresAt string `protobuf:"bytes,11,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`
+	// SHA-256 of the representative packet capture used to justify the exception.
+	PcapSha256 string `protobuf:"bytes,12,opt,name=pcap_sha256,json=pcapSha256,proto3" json:"pcap_sha256,omitempty"`
+	// Package-local regression evidence reference, e.g. evidence/fp-regression.json.
+	RegressionRef string `protobuf:"bytes,13,opt,name=regression_ref,json=regressionRef,proto3" json:"regression_ref,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *IdsException) Reset() {
+	*x = IdsException{}
+	mi := &file_openngfw_v1_ids_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *IdsException) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*IdsException) ProtoMessage() {}
+
+func (x *IdsException) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_ids_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use IdsException.ProtoReflect.Descriptor instead.
+func (*IdsException) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_ids_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *IdsException) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *IdsException) GetDisabled() bool {
+	if x != nil {
+		return x.Disabled
+	}
+	return false
+}
+
+func (x *IdsException) GetSignatureId() int64 {
+	if x != nil {
+		return x.SignatureId
+	}
+	return 0
+}
+
+func (x *IdsException) GetThreatId() string {
+	if x != nil {
+		return x.ThreatId
+	}
+	return ""
+}
+
+func (x *IdsException) GetSourceAddress() string {
+	if x != nil {
+		return x.SourceAddress
+	}
+	return ""
+}
+
+func (x *IdsException) GetDestinationAddress() string {
+	if x != nil {
+		return x.DestinationAddress
+	}
+	return ""
+}
+
+func (x *IdsException) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *IdsException) GetOwner() string {
+	if x != nil {
+		return x.Owner
+	}
+	return ""
+}
+
+func (x *IdsException) GetTicketId() string {
+	if x != nil {
+		return x.TicketId
+	}
+	return ""
+}
+
+func (x *IdsException) GetReviewDate() string {
+	if x != nil {
+		return x.ReviewDate
+	}
+	return ""
+}
+
+func (x *IdsException) GetExpiresAt() string {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return ""
+}
+
+func (x *IdsException) GetPcapSha256() string {
+	if x != nil {
+		return x.PcapSha256
+	}
+	return ""
+}
+
+func (x *IdsException) GetRegressionRef() string {
+	if x != nil {
+		return x.RegressionRef
+	}
+	return ""
+}
+
 var File_openngfw_v1_ids_proto protoreflect.FileDescriptor
 
 const file_openngfw_v1_ids_proto_rawDesc = "" +
 	"\n" +
-	"\x15openngfw/v1/ids.proto\x12\vopenngfw.v1\"\xd9\x01\n" +
+	"\x15openngfw/v1/ids.proto\x12\vopenngfw.v1\"\xe0\x02\n" +
 	"\x03Ids\x12\x18\n" +
 	"\aenabled\x18\x01 \x01(\bR\aenabled\x12(\n" +
 	"\x04mode\x18\x02 \x01(\x0e2\x14.openngfw.v1.IdsModeR\x04mode\x12-\n" +
@@ -178,11 +403,37 @@ const file_openngfw_v1_ids_proto_rawDesc = "" +
 	"\rhome_networks\x18\x04 \x03(\tR\fhomeNetworks\x12\x1d\n" +
 	"\n" +
 	"rule_files\x18\x05 \x03(\tR\truleFiles\x12\x1b\n" +
-	"\tqueue_num\x18\x06 \x01(\rR\bqueueNum*N\n" +
+	"\tqueue_num\x18\x06 \x01(\rR\bqueueNum\x12J\n" +
+	"\x10failure_behavior\x18\a \x01(\x0e2\x1f.openngfw.v1.IdsFailureBehaviorR\x0ffailureBehavior\x129\n" +
+	"\n" +
+	"exceptions\x18\b \x03(\v2\x19.openngfw.v1.IdsExceptionR\n" +
+	"exceptions\"\xb3\x03\n" +
+	"\fIdsException\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1a\n" +
+	"\bdisabled\x18\x02 \x01(\bR\bdisabled\x12!\n" +
+	"\fsignature_id\x18\x03 \x01(\x03R\vsignatureId\x12\x1b\n" +
+	"\tthreat_id\x18\x04 \x01(\tR\bthreatId\x12%\n" +
+	"\x0esource_address\x18\x05 \x01(\tR\rsourceAddress\x12/\n" +
+	"\x13destination_address\x18\x06 \x01(\tR\x12destinationAddress\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\x12\x14\n" +
+	"\x05owner\x18\b \x01(\tR\x05owner\x12\x1b\n" +
+	"\tticket_id\x18\t \x01(\tR\bticketId\x12\x1f\n" +
+	"\vreview_date\x18\n" +
+	" \x01(\tR\n" +
+	"reviewDate\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\v \x01(\tR\texpiresAt\x12\x1f\n" +
+	"\vpcap_sha256\x18\f \x01(\tR\n" +
+	"pcapSha256\x12%\n" +
+	"\x0eregression_ref\x18\r \x01(\tR\rregressionRef*N\n" +
 	"\aIdsMode\x12\x18\n" +
 	"\x14IDS_MODE_UNSPECIFIED\x10\x00\x12\x13\n" +
 	"\x0fIDS_MODE_DETECT\x10\x01\x12\x14\n" +
-	"\x10IDS_MODE_PREVENT\x10\x02B\xa7\x01\n" +
+	"\x10IDS_MODE_PREVENT\x10\x02*\x84\x01\n" +
+	"\x12IdsFailureBehavior\x12$\n" +
+	" IDS_FAILURE_BEHAVIOR_UNSPECIFIED\x10\x00\x12\"\n" +
+	"\x1eIDS_FAILURE_BEHAVIOR_FAIL_OPEN\x10\x01\x12$\n" +
+	" IDS_FAILURE_BEHAVIOR_FAIL_CLOSED\x10\x02B\xa7\x01\n" +
 	"\x0fcom.openngfw.v1B\bIdsProtoP\x01Z=github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1\xa2\x02\x03OXX\xaa\x02\vOpenngfw.V1\xca\x02\vOpenngfw\\V1\xe2\x02\x17Openngfw\\V1\\GPBMetadata\xea\x02\fOpenngfw::V1b\x06proto3"
 
 var (
@@ -197,19 +448,23 @@ func file_openngfw_v1_ids_proto_rawDescGZIP() []byte {
 	return file_openngfw_v1_ids_proto_rawDescData
 }
 
-var file_openngfw_v1_ids_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_openngfw_v1_ids_proto_msgTypes = make([]protoimpl.MessageInfo, 1)
+var file_openngfw_v1_ids_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_openngfw_v1_ids_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_openngfw_v1_ids_proto_goTypes = []any{
-	(IdsMode)(0), // 0: openngfw.v1.IdsMode
-	(*Ids)(nil),  // 1: openngfw.v1.Ids
+	(IdsMode)(0),            // 0: openngfw.v1.IdsMode
+	(IdsFailureBehavior)(0), // 1: openngfw.v1.IdsFailureBehavior
+	(*Ids)(nil),             // 2: openngfw.v1.Ids
+	(*IdsException)(nil),    // 3: openngfw.v1.IdsException
 }
 var file_openngfw_v1_ids_proto_depIdxs = []int32{
 	0, // 0: openngfw.v1.Ids.mode:type_name -> openngfw.v1.IdsMode
-	1, // [1:1] is the sub-list for method output_type
-	1, // [1:1] is the sub-list for method input_type
-	1, // [1:1] is the sub-list for extension type_name
-	1, // [1:1] is the sub-list for extension extendee
-	0, // [0:1] is the sub-list for field type_name
+	1, // 1: openngfw.v1.Ids.failure_behavior:type_name -> openngfw.v1.IdsFailureBehavior
+	3, // 2: openngfw.v1.Ids.exceptions:type_name -> openngfw.v1.IdsException
+	3, // [3:3] is the sub-list for method output_type
+	3, // [3:3] is the sub-list for method input_type
+	3, // [3:3] is the sub-list for extension type_name
+	3, // [3:3] is the sub-list for extension extendee
+	0, // [0:3] is the sub-list for field type_name
 }
 
 func init() { file_openngfw_v1_ids_proto_init() }
@@ -222,8 +477,8 @@ func file_openngfw_v1_ids_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_openngfw_v1_ids_proto_rawDesc), len(file_openngfw_v1_ids_proto_rawDesc)),
-			NumEnums:      1,
-			NumMessages:   1,
+			NumEnums:      2,
+			NumMessages:   2,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

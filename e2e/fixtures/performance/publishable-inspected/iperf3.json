@@ -1,0 +1,10 @@
+{
+  "start": {
+    "connecting_to": { "host": "10.0.2.20", "port": 5201 },
+    "test_start": { "num_streams": 4, "duration": 60 }
+  },
+  "end": {
+    "sum_received": { "bits_per_second": 1000000000 },
+    "sum_sent": { "bits_per_second": 1001000000, "retransmits": 7 }
+  }
+}

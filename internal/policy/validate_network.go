@@ -10,7 +10,7 @@ const (
 	maxMTU = 9600
 )
 
-func (v *validator) checkNetwork(n *openngfwv1.Network) {
+func (v *validator) checkNetwork(n *openngfwv1.Network, p *openngfwv1.Policy) {
 	if n == nil {
 		return
 	}
@@ -30,6 +30,21 @@ func (v *validator) checkNetwork(n *openngfwv1.Network) {
 		seen[im.GetInterface()] = true
 		if mtu := im.GetMtu(); mtu < minMTU || mtu > maxMTU {
 			v.errf("network: interface %q mtu %d out of range %d-%d", im.GetInterface(), mtu, minMTU, maxMTU)
+		}
+	}
+	if n.GetEnableFlowOffload() {
+		if p.GetIds().GetEnabled() {
+			v.errf("network: enable_flow_offload cannot be used with IDS/IPS enabled because offloaded flows can bypass inspection")
+		}
+		hasZoneInterface := false
+		for _, z := range p.GetZones() {
+			if len(z.GetInterfaces()) > 0 {
+				hasZoneInterface = true
+				break
+			}
+		}
+		if !hasZoneInterface {
+			v.errf("network: enable_flow_offload requires at least one zone interface")
 		}
 	}
 }

@@ -1,0 +1,116 @@
+// ComplianceService exposes server-retained operational compliance reports.
+// Reports are functional evidence packets only; signed custody and legal
+// retention remain production hardening.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service ComplianceService {
+  // ListComplianceReports lists retained server-side report summaries. Payload
+  // bytes are intentionally omitted so report exports stay explicit.
+  rpc ListComplianceReports(ListComplianceReportsRequest) returns (ListComplianceReportsResponse) {
+    option (google.api.http) = {get: "/v1/compliance/reports"};
+  }
+
+  // CreateComplianceReport generates and retains one unsigned server-side
+  // operational report from bounded audit, version, and system-log state.
+  rpc CreateComplianceReport(CreateComplianceReportRequest) returns (CreateComplianceReportResponse) {
+    option (google.api.http) = {
+      post: "/v1/compliance/reports"
+      body: "*"
+    };
+  }
+
+  // GetComplianceReport returns one retained report summary by id.
+  rpc GetComplianceReport(GetComplianceReportRequest) returns (GetComplianceReportResponse) {
+    option (google.api.http) = {get: "/v1/compliance/reports/{id}"};
+  }
+
+  // ExportComplianceReport returns the retained JSON report payload for gRPC and
+  // CLI clients. The REST overlay owns /v1/compliance/reports/{id}/export as a
+  // raw JSON artifact download with integrity headers, so grpc-gateway does not
+  // bind this method to the same path.
+  rpc ExportComplianceReport(ExportComplianceReportRequest) returns (ExportComplianceReportResponse) {
+  }
+}
+
+message ListComplianceReportsRequest {
+  // Maximum summaries to return; 0 means server default (50), capped at 100.
+  uint32 limit = 1;
+}
+
+message ListComplianceReportsResponse {
+  string schema_version = 1;
+  repeated ComplianceReportSummary reports = 2;
+}
+
+message CreateComplianceReportRequest {
+  string profile = 1;
+  string title = 2;
+  uint32 audit_limit = 3;
+  uint32 version_limit = 4;
+  uint32 log_limit = 5;
+  string actor = 6;
+  string action = 7;
+  uint64 version = 8;
+  google.protobuf.Timestamp since = 9;
+  google.protobuf.Timestamp until = 10;
+  string query = 11;
+}
+
+message GetComplianceReportRequest {
+  string id = 1;
+}
+
+message ExportComplianceReportRequest {
+  string id = 1;
+}
+
+message CreateComplianceReportResponse {
+  string schema_version = 1;
+  ComplianceReportSummary report = 2;
+}
+
+message GetComplianceReportResponse {
+  string schema_version = 1;
+  ComplianceReportSummary report = 2;
+}
+
+message ExportComplianceReportResponse {
+  string schema_version = 1;
+  ComplianceReportSummary report = 2;
+  string filename = 3;
+  string content_type = 4;
+  bytes payload = 5;
+}
+
+message ComplianceReportSummary {
+  string id = 1;
+  string schema_version = 2;
+  google.protobuf.Timestamp generated_at = 3;
+  string generated_by = 4;
+  string generated_by_role = 5;
+  string auth_source = 6;
+  string profile = 7;
+  string profile_label = 8;
+  string title = 9;
+  string source = 10;
+  bool unsigned = 11;
+  bool signed = 12;
+  bool server_stored = 13;
+  bool retention_enforced = 14;
+  uint32 audit_entry_count = 15;
+  uint32 version_count = 16;
+  uint32 system_log_entry_count = 17;
+  repeated string entry_hashes = 18;
+  string latest_audit_hash = 19;
+  map<string, string> filters = 20;
+  string payload_sha256 = 21;
+  string export_path = 22;
+}

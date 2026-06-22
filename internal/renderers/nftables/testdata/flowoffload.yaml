@@ -1,0 +1,14 @@
+# Flowtable fast path: explicit forwarding acceleration for policies
+# without IDS/IPS inspection.
+zones:
+  - name: wan
+    interfaces: [eth0]
+  - name: lan
+    interfaces: [eth1]
+rules:
+  - name: lan-to-wan
+    from_zones: [lan]
+    to_zones: [wan]
+    action: ACTION_ALLOW
+network:
+  enable_flow_offload: true

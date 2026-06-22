@@ -1,20 +1,48 @@
-# OpenNGFW — Build Plan (Claude Code Handoff)
+# Phragma — Build Plan (Claude Code Handoff)
 
-> **Working name:** `OpenNGFW` (placeholder; rename freely, but use ONE consistent module prefix everywhere).
+> **Product name:** `Phragma`.
+> **Compatibility note:** this branch may still expose `openngfw`/`ngfwctl`
+> identifiers in code paths, binaries, schemas, config paths, nftables tables,
+> and tests. Rename those only through an explicit migration plan.
 > **Audience:** AI coding agents (Claude Code) and human contributors.
-> **Status:** v1.0 build plan. This is a *decisive* document — not a brainstorm. Where it says LOCKED, do not change without a human decision. Where it says OPEN, you have latitude.
+> **Status:** v2-mixed build plan. This branch starts from the working DetailTech implementation and applies the stricter Phragma product definition from `docs/PROJECT_DEFINITION.md` and `docs/HARD_REQUIREMENTS.md`. Where those documents conflict with this plan, they win.
 
-**This document deliberately differs from earlier "exploratory" planning.** Earlier notes were intentionally non-prescriptive for human discussion. A coding agent needs the opposite: firm decisions, bounded scope, and explicit acceptance criteria. Treat this file as authoritative.
+This document is implementation guidance for the current branch, not a scope reduction. The imported product definition remains the north star: a 100% open-source, VM-Series-class cloud/virtual NGFW whose product model is owned by Phragma, not by any integrated engine.
+
+-----
+
+## 0a. GUI and brand plan inputs `[LOCKED]`
+
+The WebUI is part of the product model, not a skin over the engines. The
+current branch adopts the repo-local 2026-06 GUI review and Phragma design
+system direction as canonical inputs for UI work:
+
+- `docs/GUI_RESEARCH.md`, `docs/GUI_FEATURE_MATRIX.md`, and
+  `docs/GUI_GAP_ANALYSIS.md` define the enterprise firewall workflows the UI
+  must cover: candidate safety, ordered policy operations, evidence-led flow
+  explanation, App-ID/Threat-ID ownership, content updates, auth/audit,
+  packet truth, and GUI/API/CLI parity.
+- `docs/webui-design.md` translates that review into the implementation plan
+  for the embedded management console.
+- Production WebUI code vendors the required Phragma assets under
+  `internal/webui/static/assets/`, uses self-hosted console fonts, and keeps
+  the cold holographic HUD console style: near-black blue canvas, electric
+  cyan for live/active controls, strict firewall status colors, angular
+  compact panels, and monospaced machine evidence.
+
+Visible product naming is **Phragma**. Compatibility identifiers such as
+`openngfw`, protobuf package names, Go module paths, system paths, and
+`ngfwctl` remain until a deliberate migration plan changes them safely.
 
 -----
 
 ## 0. Read this first — the one thing to internalize
 
-**The product is the control/policy plane, not the firewall engines and not the datapath.**
+**The product is Phragma's policy, verdict, explanation, content, and operations model.**
 
-The open-source world already has excellent inspection, routing, VPN, and proxy engines (Suricata, FRR, strongSwan, nDPI, Envoy). What it lacks — and the reason pfSense/OPNsense/VyOS aren't taken seriously at enterprise — is a unified, declarative, version-controlled, GitOps-friendly **management plane** with great DX.
+The control/policy plane is the current working foundation, but it is not permission to become only an engine orchestrator. Phragma uses proven engines behind adapters while owning the policy model, compiler, lifecycle supervisor, API, CLI, telemetry, verdicts, explanations, App-ID and Threat-ID product layers, and benchmark discipline.
 
-So: **you integrate and orchestrate existing engines. You do not rebuild them.** Your code is the policy model, the compiler that renders that model into each engine's native config, the lifecycle supervisor, the API, the CLI, the telemetry pipeline, and (later) the UI.
+So: **integrate engines; do not let engines define the product.** nDPI is a signal source, not App-ID. Suricata is a matching engine, not Threat-ID. nftables is the current real Linux renderer and compatibility path, not the end of the dataplane roadmap.
 
 If you find yourself writing a packet-inspection engine, a routing daemon, or a TLS stack from scratch — **stop and ask a human.** You are off-plan.
 
@@ -26,9 +54,12 @@ The vision is large. The *build* must be small and concrete. Scope is tracked as
 
 ### v1 (build now)
 
-Single-node, cloud-deployable firewall with a real control plane:
+Single-node, cloud-deployable firewall with a real control plane and a product
+path to VM-Series-class cloud/virtual NGFW capability:
 
-- Stateful L3/L4 zone-based firewall (nftables/conntrack renderer)
+- Stateful L3/L4 zone-based firewall with nftables/conntrack as the current
+  renderer and compatibility/fallback path
+- Linux/eBPF XDP/tc dataplane milestone behind the same policy/IR boundary
 - NAT (source/dest/static), static routes
 - Declarative policy model + candidate/commit/rollback
 - gRPC + REST API
@@ -36,15 +67,20 @@ Single-node, cloud-deployable firewall with a real control plane:
 - IDS/IPS via Suricata (integration, not reimplementation)
 - Structured logging + telemetry pipeline
 - Dynamic routing (FRR) + IPsec (strongSwan) + WireGuard
-- App/protocol **visibility** via nDPI (NOT "App-ID competitive with Palo")
+- App/protocol visibility with nDPI as one signal source, plus an
+  Phragma-owned App-ID taxonomy, evidence, confidence, custom app, and
+  regression model
+- Suricata-backed IDS/IPS as the v1 matching engine, plus a Phragma-owned
+  Threat-ID/profile/explanation layer
 - Threat-intel feed enforcement (CrowdSec + federated feeds) with a feed-license registry
-- Local SAML/OIDC auth, local RBAC, complete local audit log
-- Read-first WebUI, then policy editing
+- Local-token auth, browser OIDC SSO, local RBAC, complete local audit log
+- Embedded management WebUI with dashboard, policy editing, threat/traffic
+  pivots, changes view, and HTTPS by default
 - Supply-chain hygiene from commit #1 (SBOM, signing, DCO)
 
 ### Eventual (designed-for, built later)
 
-HA active/passive (keepalived/conntrackd), L7 (Envoy + Coraza WAF/proxy/API-gateway/LB), ZTNA (OpenZiti), DNS security, full single-node feature parity, fleet management (multi-node control plane), SSO federation/SCIM, compliance evidence/reporting, eBPF/XDP datapath renderer.
+HA active/passive (keepalived/conntrackd), L7 (Envoy + Coraza WAF/proxy/API-gateway/LB), ZTNA (OpenZiti), DNS security, full single-node feature parity, fleet management (multi-node control plane), SSO federation/SCIM, compliance evidence/reporting, Linux/eBPF XDP/tc dataplane renderer and agent.
 
 ### Later / research
 
@@ -52,7 +88,7 @@ TLS break-and-inspect (see §9 — this is hard and an *eroding* capability), sa
 
 ### Explicit non-goals
 
-- **Not** competing with Palo's entire surface area. Win the cloud-native wedge first.
+- **Not** claiming full Palo Alto product parity in this initial branch. The design still must not block VM-Series-class virtual/cloud capability.
 - **Not** building any inspection/routing/crypto engine from scratch.
 - **Not** a hardware appliance.
 - **Not** the holder of any certification (see §2).
@@ -70,7 +106,7 @@ TLS break-and-inspect (see §9 — this is hard and an *eroding* capability), sa
 |Governance   |Single-vendor-neutral OSS now; a foundation home is an **asset** under this model and a likely future step (attracts corporate contributors, signals longevity, vehicle for consortium funding). Hold the trademark + GitHub org in the founding entity to protect project integrity.|
 |First product|Single-node, cloud-deployable virtual firewall.                                                                                                                                                                                                                                      |
 |Wedge        |Cloud-native egress / Kubernetes east-west firewalling + homelab — where eBPF-native, declarative, GitOps management is an *advantage*, not just cheaper.                                                                                                                            |
-|Datapath     |nftables/conntrack first → eBPF/XDP second → VPP deferred. (See §5.)                                                                                                                                                                                                                 |
+|Datapath     |nftables/conntrack is the current real Linux renderer and fallback path; Linux/eBPF with XDP/tc is a required strategic milestone; VPP deferred. (See §5.)                                                                                                                          |
 
 ### The certification reality (plan around it)
 
@@ -132,14 +168,14 @@ What is **out of scope** for this code project: holding certificates, ATO sponso
 |Layer                                           |Choice                                                                      |Notes                                                                                              |
 |------------------------------------------------|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------|
 |Primary language (control plane, CLI, renderers)|**Go**                                                                      |Ecosystem fit (netlink, gRPC, K8s/Cilium/FRR/Envoy adjacency), static binaries, strong concurrency.|
-|eBPF datapath (later milestone)                 |Go (`cilium/ebpf`) or Rust (`aya`) `[OPEN]`                                 |Decide when the eBPF renderer milestone starts, not now.                                           |
+|eBPF datapath milestone                         |Go (`cilium/ebpf`) or Rust (`aya`) `[OPEN]`                                 |Required by the product definition; decide implementation language when the eBPF milestone starts. |
 |API contract                                    |**Protobuf + gRPC** canonical; REST via grpc-gateway; OpenAPI generated     |Single source of truth for the model.                                                              |
 |Config/state store                              |**SQLite or BoltDB** embedded (single-node) `[OPEN between the two]`        |Candidate/commit maps to versioned records. Git-backed reconciliation layered on top.              |
 |Higher-level policy validation                  |OPA/Rego or Cedar `[OPEN]`                                                  |Management-plane validation only — NEVER in the fast path.                                         |
 |Telemetry/log shipping                          |**Vector**                                                                  |Collects Suricata EVE JSON + system logs.                                                          |
 |Log/event store                                 |**ClickHouse** (default) or OpenSearch `[OPEN]`                             |ClickHouse preferred for volume/cost.                                                              |
 |CLI                                             |Go + Cobra                                                                  |—                                                                                                  |
-|WebUI (later)                                   |React + TypeScript                                                          |Read-first, then editing.                                                                          |
+|WebUI                                           |Dependency-free embedded SPA now; React + TypeScript remains optional later |Served from `controld`; all mutations use candidate/commit.                                        |
 |Packaging (v1)                                  |Containers + docker-compose / systemd units                                 |The "10-minute install" target.                                                                    |
 |Packaging (later)                               |Helm chart, K8s operator                                                    |Operator is a *client* of the API, not the canonical API.                                          |
 |Cloud deploy                                    |Terraform / OpenTofu modules + golden images (Packer)                       |Beachhead enablement.                                                                              |
@@ -169,20 +205,27 @@ Run GPL/AGPL items as **separate, un-linked processes**. Never import their code
 
 ## 5. Datapath strategy `[LOCKED]`
 
-**Why nftables first (not eBPF):**
+**v2-mixed implementation stance: preserve working nftables, require eBPF as a
+strategic milestone.**
 
-- It is a correct, mature, fully *stateful* firewall today (conntrack, NAT) with stable tooling.
-- It lets you build and prove the **entire control plane → compiler → renderer → dataplane loop** — the actual product — without months of kernel datapath engineering.
-- It is agent-tractable: rendering a declarative model to an nftables ruleset is a well-bounded codegen problem with golden-file tests.
-- It avoids the eBPF-GPL/Apache entanglement at the start.
-- nftables/conntrack is what large production Linux firewalls already run — it is not a toy.
+- nftables/conntrack stays because it is working, stateful, testable, and useful
+  as the compatibility/fallback path.
+- The branch must not treat nftables as the final dataplane story. Linux/eBPF
+  with XDP where available and tc where needed remains a required milestone
+  under `docs/HARD_REQUIREMENTS.md`.
+- The policy compiler and IR must stay backend-neutral enough for an eBPF/tc
+  renderer and agent to be added without replacing the API or product model.
+- eBPF work is deliberately not pulled into this first reconciliation branch:
+  kernel safety and GPL-helper licensing need focused design review.
 
 **Throughput framing (so nobody panics):** For an NGFW the datapath is *not* the throughput ceiling — the **userspace inspection tier (Suricata/nDPI) is**, and it is CPU-bound regardless of datapath. Forwarding throughput targets (10–40 Gbps) are reachable; threat-prevention throughput is a fraction of that and bounded by inspection. **Benchmark against Palo VM-Series (software), not hardware flagships.** Never assert a throughput number you have not measured (see §10).
 
 **Roadmap:**
 
-1. **nftables/conntrack** — v1.
-1. **eBPF/XDP** — a *second renderer* behind the same policy model, added only once benchmarks show nftables is the bottleneck for the target deployment. Focus its design effort on the inspection-tier scaling problem (flow steering via RSS/AF_XDP, multi-core Suricata, fast-path bypass so DPI only sees flows that need it).
+1. **nftables/conntrack** — current runnable renderer and fallback path.
+1. **eBPF/XDP/tc** — required product milestone behind the same policy model,
+   with design focused on safe hook lifecycle, map ownership, inspection-tier
+   steering, failure behavior, and licensing.
 1. **VPP/DPDK** — deferred further; documented future backend for 100 Gbps+, physical appliances, very-high-CPS. Do not build in v1.
 
 The **datapath abstraction** (control plane compiles to an intermediate representation, then a per-backend renderer) is built in v1 even though only the nftables renderer exists. This is what keeps the architecture from welding to nftables.
@@ -211,7 +254,7 @@ The **datapath abstraction** (control plane compiles to an intermediate represen
   /engines/           # lifecycle supervision of external processes
   /store/             # config/state, candidate/commit/versioning
   /telemetry/         # log/metric aggregation, Vector config
-  /authz/             # local RBAC, OIDC/SAML, audit log
+  /authz/             # local RBAC, OIDC sessions, audit log
   /apiserver/         # gRPC server + REST gateway
 /web/                 # React UI (later milestone)
 /deploy/
@@ -252,8 +295,11 @@ Scaffolding only. Highly agent-suitable.
 - Config store with candidate/commit/rollback + version history.
 - Compiler: policy → IR. Renderer: IR → nftables ruleset.
 - Engine supervisor applies/reloads nftables atomically.
-- gRPC API + REST gateway + CLI (`ngfwctl policy ...`, `commit`, `rollback`, `show`).
-- **DoD:** Author a policy in YAML, push via CLI/API, traffic is filtered/NATed correctly, `commit` is atomic, `rollback` restores prior state, every change is in the audit log. Golden-file tests cover policy→nftables rendering.
+- gRPC API + REST gateway + CLI (`ngfwctl policy ...`, `commit`, `rollback`, `show`, `sessions`).
+- Live conntrack session visibility through the canonical API/CLI so the
+  current nftables/conntrack dataplane remains observable even when IDS/App-ID
+  flow telemetry is absent.
+- **DoD:** Author a policy in YAML, push via CLI/API, traffic is filtered/NATed correctly, `commit` is atomic, `rollback` restores prior state, every change is in the audit log, and live state-table sessions are visible from API/CLI on a Linux firewall host. Golden-file tests cover policy→nftables rendering.
 
 ### M2 — IDS/IPS + telemetry
 
@@ -269,32 +315,104 @@ Scaffolding only. Highly agent-suitable.
 - strongSwan (IPsec) + WireGuard via the unified model.
 - **DoD:** BGP peering established and routes programmed through the model; IPsec tunnel + WireGuard peer established and managed entirely through policy (no out-of-band engine edits).
 
-### M4 — App/protocol visibility + threat intel
+### M4 — App-ID foundation + threat intel
 
-- nDPI integration for app/protocol **visibility** (label flows/logs; optional policy match). Explicitly NOT "App-ID parity."
+- nDPI integration for app/protocol visibility: label flows/logs and provide
+  policy-match signals.
+- Phragma-owned App-ID foundation: taxonomy, evidence model, confidence
+  scoring, custom application definitions, encrypted-traffic heuristics, update
+  package format, regression corpus, and the current safe App-ID rule subset:
+  deny rules enforced through custom application TCP/UDP port hints, plus broad
+  signal-only Suricata denies when IDS/IPS is Prevent fail-closed and the
+  signal is in the supported app-layer allowlist.
 - CrowdSec integration + federated feeds (ET Open, abuse.ch, Spamhaus) enforced as blocklists.
 - **Feed-license registry:** every feed records redistribution/commercial-use/attribution/privacy constraints; enforcement respects them.
-- **DoD:** Flows show app/protocol labels in logs; a blocklist feed is enforced and toggleable; the feed registry blocks enabling a feed whose license forbids the intended use.
+- **DoD:** Flows show app/protocol labels in logs; nDPI-derived evidence remains
+  distinguishable from Phragma-owned App-ID decisions; a blocklist feed is
+  enforced and toggleable; `/v1/app-id/observations` groups unknown,
+  low-confidence, and conflicting flow evidence into reviewable queue items;
+  the Traffic WebUI can inspect those observations and stage custom
+  `applications[]` definitions through the candidate path; App-ID deny rules
+  render concrete nftables port-hint drops or managed Suricata signal drops
+  for supported broad signal-only deny rules, while unsafe allow-by-App-ID,
+  service+application, scoped signal-only, unsupported-signal, and non-fail-
+  closed signal-only shapes are rejected; the feed registry blocks
+  enabling a feed whose license forbids the intended use.
 
 ### M5 — AuthN/Z + WebUI
 
-- Local SAML/OIDC login (single node), local RBAC, complete audit log surfaced.
-- WebUI: read-first (dashboards, logs, policy view), then policy editing through the candidate/commit workflow.
-- **DoD:** A user logs in via OIDC, role-gated actions enforced, full single-node management achievable via UI, all UI changes flow through candidate/commit and appear in the audit log.
+- Local users-file tokens, browser OIDC and SAML login (single node), local
+  RBAC, complete audit log surfaced.
+- WebUI: dashboard, logs, policy view, rules/objects editing, threat/traffic
+  pivots, live session visibility, command palette, and version/audit history
+  through the candidate/commit workflow.
+- GUI research from `docs/GUI_RESEARCH.md`, `docs/GUI_FEATURE_MATRIX.md`, and
+  `docs/GUI_GAP_ANALYSIS.md` is adopted as the WebUI planning input. The
+  branch plan changes from "build screens" to **build an evidence console with
+  a policy editor inside it**: running version, candidate state,
+  degraded-engine posture, recent verdict evidence, and direct paths from
+  logs/flows/threats to explanation, packet capture, candidate fixes, export,
+  and rollback.
+- Logs become a workbench, not a passive table. Traffic, threat, audit, and
+  system evidence must carry stable policy/rule/app/threat/config-version
+  context, support saved filters and export, and link to `explain` plus
+  candidate-safe next actions.
+- Guardrailed packet capture from explain/log/rule/interface context is a v1
+  diagnostic requirement. The current branch exposes API-backed plan/start
+  endpoints plus `ngfwctl system capture` for bounded host captures, with
+  admin-only RBAC, explicit acknowledgement, dry-run refusal, server-generated
+  BPF filters, audit entries, scope/duration/packet/snaplen limits, and
+  copyable commands for manual fallback or break-glass validation.
+- Content-update transparency moves into the WebUI plan: App-ID and Threat-ID
+  package status must show version, signature/hash, provenance, source license,
+  install time, staged rollout or regression status, and rollback posture as
+  the content APIs mature.
+- GUI/API/CLI parity is now a visible UX requirement. Advanced drawers should
+  expose stable object IDs and relevant public API endpoints now, with
+  copy-as-API-request and copy-as-CLI-command actions planned for candidate
+  changes and log queries.
+- First-run baseline staging is available in the Guided setup and Rules UI
+  surfaces plus `ngfwctl policy baseline`, producing ordinary candidate policy
+  objects that still require validate/review/commit. The browser and headless
+  workflows can stage throughput, IDS detect, or IPS prevent posture and keep
+  flowtable acceleration off when inspection is enabled. Headless review includes
+  `ngfwctl policy diff`, which compares the staged candidate against running
+  policy by default or a selected historical version.
+- Network operating profiles for throughput, IDS/IPS inspection, and
+  Internet/VPN edge are available in both Settings and
+  `ngfwctl policy network profile`, with lower-level overrides still available
+  through `ngfwctl policy network set`.
+- **DoD:** A user logs in via OIDC, role-gated actions enforced, full
+  single-node management achievable via UI, a headless operator can stage and
+  diff the same first-run baseline and network profile changes from the CLI,
+  logs/flows/threats can pivot into explanation and audited packet-capture
+  actions, content/update posture is visible, API object identity is visible
+  for GUI mutations, and all UI/CLI configuration mutations flow through
+  candidate/commit and appear in the audit log.
 
 ### M6+ — Eventual (separate planning when reached)
 
-HA active/passive (keepalived/conntrackd), L7 (Envoy+Coraza), ZTNA (OpenZiti), DNS security, eBPF/XDP renderer, fleet management, SSO federation/SCIM, compliance evidence. Each gets its own mini-plan and DoD.
+HA active/passive (keepalived/conntrackd), L7 (Envoy+Coraza), ZTNA (OpenZiti),
+DNS security, Linux/eBPF XDP/tc dataplane agent, fleet management, SSO
+federation/SCIM, compliance evidence. Each gets its own mini-plan and DoD.
 
 -----
 
 ## 8. Testing & validation `[LOCKED]`
 
 - **Unit:** policy model, compiler, validation.
+- **WebUI static checks:** `make webui-check` syntax-checks the browser modules
+  and runs dependency-free JavaScript regressions for browser-only support-bundle
+  behavior.
 - **Golden-file:** every renderer (policy/IR → engine config) has golden tests. Renderer changes must show diffs and be reviewed.
 - **Integration:** real engines in containers, real traffic (e.g. via network namespaces / scapy / iperf), asserting end-to-end behavior — not mocks.
-- **E2E "10-minute install":** an automated test that stands up a single node from scratch in a clean cloud VM / container and reaches a working filtered state. This is a *product requirement*, treat its failure as a release blocker.
-- **Performance harness:** repeatable benchmarks for forwarding throughput, threat-prevention throughput, connection rate, and latency. **All performance claims must come from this harness. Never assert a number you didn't measure.**
+- **E2E "10-minute install":** an automated test that stands up a single node from scratch in a clean cloud VM / container and reaches a working filtered state. This is a *product requirement*, treat its failure as a release blocker. The current branch provides `make e2e-install-check` for non-destructive CI/static validation and `sudo make e2e-install` for the disposable Linux host/VM acceptance run.
+- **Performance harness:** repeatable benchmarks for forwarding throughput, threat-prevention throughput, connection rate, and latency. The initial harness lives in `perf/` and is run through `make benchmark-check` / `make benchmark`. **All performance claims must come from this harness. Never assert a number you didn't measure.**
+- **Host appliance tuning:** install and verify forwarding/conntrack sysctls as a first-class readiness gate. `deploy/install.sh`, `ngfwctl system tune`, `ngfwctl status`, `/v1/system/status`, and the WebUI Readiness page must agree on whether the host kernel baseline is ready. High-bandwidth and connection-churn runs use `OPENNGFW_TUNE_PROFILE=throughput sudo deploy/install.sh` or `sudo ngfwctl system tune --profile throughput --write --apply` before benchmarking.
+- **Conntrack capacity telemetry:** `/v1/system/status.dataplane.conntrack`,
+  `ngfwctl status`, Dashboard, and Readiness must expose live state-table usage
+  versus `nf_conntrack_max`; elevated pressure is a production blocker for
+  high-throughput or high-connection-churn profiles.
 
 -----
 
@@ -325,9 +443,12 @@ Therefore:
 
 - Writing any inspection, routing, or crypto **engine** from scratch (you're off-plan — integrate instead).
 - Touching **TLS interception, MITM CA, or any crypto implementation**.
-- Writing **eBPF/XDP** kernel code (security + GPL-license implications).
+- Writing **eBPF/XDP/tc** kernel code (security + GPL-license implications).
 - Adding any **GPL/AGPL dependency** or changing the license-isolation boundary.
-- Implementing **network-exposed authentication** (OIDC/SAML) beyond scaffolding without review.
+- Changing **network-exposed authentication** (OIDC/SAML), role mapping, or
+  session handling without security review.
+- Treating nDPI as the App-ID product or Suricata signatures as the Threat-ID product.
+- Weakening the VM-Series-class virtual/cloud target or the no-open-core model.
 - Anything that could **delete or overwrite live config** outside the candidate/commit safety path.
 - Publishing or hard-coding any **performance/throughput claim** (must come from the §8 harness).
 - Security disclosure / CVE handling.
@@ -336,7 +457,11 @@ Therefore:
 
 - Keep engine integration as **separate processes**; generate native configs; never link engine code into Apache modules.
 - Route every config change through **candidate → validate → commit → (rollback available)**.
+- Surface validation impact before live apply in every client; high-risk
+  candidates require explicit acknowledgement in both CLI and WebUI paths.
 - Write **golden-file tests** for renderers and **integration tests** with real engines.
+- Keep bypass, failed-open, failed-closed, partial-inspection, full-inspection,
+  and degraded-engine behavior visible in policy and explanations.
 - Add **DCO sign-off** to commits; no secrets in the repo; deterministic builds.
 - Update **SBOM** when dependencies change.
 - Prefer the **smallest correct thing** that advances the current milestone's DoD. Do not pull future-milestone scope forward.

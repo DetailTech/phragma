@@ -7,6 +7,8 @@ delete table inet openngfw
 table inet openngfw {
 	chain input {
 		type filter hook input priority filter; policy accept;
+		iifname "lo" accept
+		ct state established,related accept
 		ct state invalid drop
 	}
 
@@ -14,12 +16,12 @@ table inet openngfw {
 		type filter hook forward priority filter; policy drop;
 		ct state established,related accept
 		ct state invalid drop
-		iifname "eth1" oifname "eth0" ip saddr 10.10.0.0/24 counter accept comment "rule:lan-to-wan"
+		iifname "eth1" oifname "eth0" ip saddr 10.10.0.0/24 counter accept comment "rule:lan-to-wan id=rule-lan-to-wan-dc9be7f9c879"
 		counter comment "default-drop"
 	}
 
 	chain nat_postrouting {
 		type nat hook postrouting priority srcnat; policy accept;
-		oifname "eth0" ip saddr 10.10.0.0/24 counter masquerade comment "snat:lan-masq"
+		oifname "eth0" ip saddr 10.10.0.0/24 counter masquerade comment "snat:lan-masq id=snat-lan-masq-412c2bf8040a"
 	}
 }

@@ -1,0 +1,22 @@
+<svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Phragma">
+  <defs>
+    <linearGradient id="phCyan" x1="6" y1="2" x2="28" y2="32" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#74DCFB"></stop>
+      <stop offset="0.5" stop-color="#37C6F4"></stop>
+      <stop offset="1" stop-color="#0E84AE"></stop>
+    </linearGradient>
+    <filter id="phGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="1.4" result="b"></feGaussianBlur>
+      <feMerge><feMergeNode in="b"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+    </filter>
+  </defs>
+
+  <path d="M17 2.5 29 9.2 V20.4 C29 26.2 23.8 30 17 31.6 C10.2 30 5 26.2 5 20.4 V9.2 Z" fill="#071019" stroke="url(#phCyan)" stroke-width="1.8" stroke-linejoin="round" filter="url(#phGlow)"></path>
+  <g filter="url(#phGlow)">
+
+    <path d="M9.5 16.8 H24.5" stroke="url(#phCyan)" stroke-width="2.2" stroke-linecap="round"></path>
+
+    <path d="M17 11.5 L20.2 14.2 L17 16.9 L13.8 14.2 Z" fill="#071019" stroke="url(#phCyan)" stroke-width="1.6" stroke-linejoin="round"></path>
+    <circle cx="17" cy="14.2" r="1" fill="#74DCFB"></circle>
+  </g>
+</svg>

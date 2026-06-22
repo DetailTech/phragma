@@ -7,6 +7,8 @@ delete table inet openngfw
 table inet openngfw {
 	chain input {
 		type filter hook input priority filter; policy accept;
+		iifname "lo" accept
+		ct state established,related accept
 		ct state invalid drop
 	}
 
@@ -14,24 +16,24 @@ table inet openngfw {
 		type filter hook forward priority filter; policy drop;
 		ct state established,related accept
 		ct state invalid drop
-		ip saddr 192.0.2.66 log prefix "ngfw:block-bad-host: " counter drop comment "rule:block-bad-host"
-		iifname { "eth1", "eth2" } oifname "eth0" ip saddr 10.10.0.0/24 counter accept comment "rule:lan-to-wan"
-		iifname { "eth1", "eth2" } oifname "eth0" ip6 saddr 2001:db8:10::/64 counter accept comment "rule:lan-to-wan"
-		iifname "eth0" oifname "eth3" ip daddr 10.20.0.80 tcp dport { 80, 443, 8000-8100 } log prefix "ngfw:wan-to-web: " counter accept comment "rule:wan-to-web"
-		iifname { "eth1", "eth2" } oifname "eth0" udp dport 53 counter accept comment "rule:lan-dns-and-ping"
-		iifname { "eth1", "eth2" } oifname "eth0" meta l4proto { icmp, ipv6-icmp } counter accept comment "rule:lan-dns-and-ping"
-		iifname "eth3" oifname { "eth1", "eth2" } counter reject comment "rule:dmz-to-lan-reject"
+		ip saddr 192.0.2.66 log prefix "ngfw:block-bad-host: " counter drop comment "rule:block-bad-host id=rule-block-bad-host-6417ee97aff7"
+		iifname { "eth1", "eth2" } oifname "eth0" ip saddr 10.10.0.0/24 counter accept comment "rule:lan-to-wan id=rule-lan-to-wan-93f0e1dae15f"
+		iifname { "eth1", "eth2" } oifname "eth0" ip6 saddr 2001:db8:10::/64 counter accept comment "rule:lan-to-wan id=rule-lan-to-wan-93f0e1dae15f"
+		iifname "eth0" oifname "eth3" ip daddr 10.20.0.80 tcp dport { 80, 443, 8000-8100 } log prefix "ngfw:wan-to-web: " counter accept comment "rule:wan-to-web id=rule-wan-to-web-7a29c5e377d5"
+		iifname { "eth1", "eth2" } oifname "eth0" udp dport 53 counter accept comment "rule:lan-dns-and-ping id=rule-lan-dns-and-ping-4d39c0474af1"
+		iifname { "eth1", "eth2" } oifname "eth0" meta l4proto { icmp, ipv6-icmp } counter accept comment "rule:lan-dns-and-ping id=rule-lan-dns-and-ping-4d39c0474af1"
+		iifname "eth3" oifname { "eth1", "eth2" } counter reject comment "rule:dmz-to-lan-reject id=rule-dmz-to-lan-reject-8bf7d3f30191"
 		counter comment "default-drop"
 	}
 
 	chain nat_prerouting {
 		type nat hook prerouting priority dstnat; policy accept;
-		iifname "eth0" ip daddr 203.0.113.10 tcp dport { 80, 443, 8000-8100 } counter dnat ip to 10.20.0.80:8080 comment "dnat:web-dnat"
+		iifname "eth0" ip daddr 203.0.113.10 tcp dport { 80, 443, 8000-8100 } counter dnat ip to 10.20.0.80:8080 comment "dnat:web-dnat id=dnat-web-dnat-51ea217f6795"
 	}
 
 	chain nat_postrouting {
 		type nat hook postrouting priority srcnat; policy accept;
-		oifname "eth0" ip saddr 10.10.0.0/24 counter masquerade comment "snat:lan-masq"
-		oifname "eth0" counter snat ip to 203.0.113.11 comment "snat:dmz-static-snat"
+		oifname "eth0" ip saddr 10.10.0.0/24 counter masquerade comment "snat:lan-masq id=snat-lan-masq-412c2bf8040a"
+		oifname "eth0" counter snat ip to 203.0.113.11 comment "snat:dmz-static-snat id=snat-dmz-static-snat-56b54aa0bb9b"
 	}
 }

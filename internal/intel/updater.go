@@ -83,16 +83,15 @@ func (u *Updater) Refresh(ctx context.Context) (int, error) {
 		}
 	}
 
+	normalized := normalizePrefixes(merged)
 	var v4, v6 []string
-	for p := range merged {
+	for _, p := range normalized {
 		if p.Addr().Is4() {
 			v4 = append(v4, p.String())
 		} else {
 			v6 = append(v6, p.String())
 		}
 	}
-	sort.Strings(v4)
-	sort.Strings(v6)
 
 	if err := u.applySets(ctx, v4, v6); err != nil {
 		return 0, err
@@ -102,6 +101,47 @@ func (u *Updater) Refresh(ctx context.Context) (int, error) {
 	u.lastRefresh = time.Now().UTC()
 	u.mu.Unlock()
 	return len(v4) + len(v6), nil
+}
+
+func normalizePrefixes(in map[netip.Prefix]bool) []netip.Prefix {
+	prefixes := make([]netip.Prefix, 0, len(in))
+	seen := map[netip.Prefix]bool{}
+	for p := range in {
+		p = p.Masked()
+		if !p.IsValid() || seen[p] {
+			continue
+		}
+		seen[p] = true
+		prefixes = append(prefixes, p)
+	}
+	sort.Slice(prefixes, func(i, j int) bool {
+		a, b := prefixes[i], prefixes[j]
+		if a.Addr().Is4() != b.Addr().Is4() {
+			return a.Addr().Is4()
+		}
+		if c := a.Addr().Compare(b.Addr()); c != 0 {
+			return c < 0
+		}
+		return a.Bits() < b.Bits()
+	})
+
+	out := make([]netip.Prefix, 0, len(prefixes))
+	for _, p := range prefixes {
+		covered := false
+		for _, keep := range out {
+			if keep.Addr().Is4() != p.Addr().Is4() {
+				continue
+			}
+			if keep.Bits() <= p.Bits() && keep.Contains(p.Addr()) {
+				covered = true
+				break
+			}
+		}
+		if !covered {
+			out = append(out, p)
+		}
+	}
+	return out
 }
 
 // applySets builds one atomic nft script that flushes and refills both

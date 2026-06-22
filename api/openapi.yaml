@@ -1,0 +1,32 @@
+openapiOptions:
+  file:
+    - file: openngfw/v1/alert_service.proto
+      option:
+        info:
+          title: Phragma Control Plane API
+          version: v1
+          description: |
+            Versioned local control-plane API for the Phragma single-node NGFW appliance.
+            Proto definitions and grpc-gateway annotations are the generated
+            REST/OpenAPI input for versioned appliance resources. Release acceptance
+            treats proto inputs, generator config, normalized OpenAPI output,
+            published docs spec, and bundled WebUI spec as one atomic API contract.
+            The published contract also includes maintained management-plane auth
+            routes registered outside protobuf by the embedded control daemon.
+        schemes:
+          - HTTPS
+        consumes:
+          - application/json
+        produces:
+          - application/json
+        securityDefinitions:
+          security:
+            BearerAuth:
+              type: TYPE_API_KEY
+              in: IN_HEADER
+              name: Authorization
+              description: "Use Authorization: Bearer <token> for authenticated management-plane calls."
+        security:
+          - securityRequirement:
+              BearerAuth:
+                scope: []

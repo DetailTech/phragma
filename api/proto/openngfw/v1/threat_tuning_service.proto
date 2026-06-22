@@ -1,0 +1,278 @@
+// ThreatTuningService — first-party Threat-ID false-positive tuning.
+//
+// Mutations stage policy candidates only. Nothing reaches the matching engine
+// until the normal candidate -> validate -> commit path succeeds.
+
+syntax = "proto3";
+
+package openngfw.v1;
+
+import "google/api/annotations.proto";
+import "openngfw/v1/ids.proto";
+import "openngfw/v1/policy.proto";
+import "openngfw/v1/policy_service.proto";
+
+option go_package = "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1";
+
+service ThreatTuningService {
+  // ListThreatExceptions returns first-party false-positive exceptions from
+  // the selected policy source. The default is the effective candidate when
+  // present, otherwise the running policy.
+  rpc ListThreatExceptions(ListThreatExceptionsRequest) returns (ListThreatExceptionsResponse) {
+    option (google.api.http) = {
+      get: "/v1/threat-exceptions"
+    };
+  }
+
+  // StageThreatException creates one candidate false-positive exception.
+  rpc StageThreatException(StageThreatExceptionRequest) returns (StageThreatExceptionResponse) {
+    option (google.api.http) = {
+      post: "/v1/threat-exceptions:stage"
+      body: "*"
+    };
+  }
+
+  // UpdateThreatException replaces one candidate exception object. It is used
+  // for operator-reviewed scope, signature, Threat-ID, and audit-reason edits.
+  rpc UpdateThreatException(UpdateThreatExceptionRequest) returns (UpdateThreatExceptionResponse) {
+    option (google.api.http) = {
+      patch: "/v1/threat-exceptions/{name}"
+      body: "*"
+    };
+  }
+
+  // SetThreatExceptionState enables or disables one candidate exception.
+  rpc SetThreatExceptionState(SetThreatExceptionStateRequest) returns (SetThreatExceptionStateResponse) {
+    option (google.api.http) = {
+      post: "/v1/threat-exceptions/{name}:set-state"
+      body: "*"
+    };
+  }
+
+  // RemoveThreatException removes one exception from the candidate policy.
+  rpc RemoveThreatException(RemoveThreatExceptionRequest) returns (RemoveThreatExceptionResponse) {
+    option (google.api.http) = {
+      post: "/v1/threat-exceptions/{name}:remove"
+      body: "*"
+    };
+  }
+
+  // ReplayThreatEvidence runs a bounded, metadata-only Threat-ID evidence check
+  // against explicit samples and/or recent alert evidence. It compares expected
+  // signature, Threat-ID, and verdict fields against observed classifier output
+  // and reports current engine/degraded-mode evidence. It does not execute
+  // packet payloads or certify malware/IPS efficacy.
+  rpc ReplayThreatEvidence(ReplayThreatEvidenceRequest) returns (ReplayThreatEvidenceResponse) {
+    option (google.api.http) = {
+      post: "/v1/threat-id/replay:check"
+      body: "*"
+    };
+  }
+}
+
+enum ThreatExceptionScope {
+  THREAT_EXCEPTION_SCOPE_UNSPECIFIED = 0;
+  THREAT_EXCEPTION_SCOPE_SOURCE = 1;
+  THREAT_EXCEPTION_SCOPE_DESTINATION = 2;
+  THREAT_EXCEPTION_SCOPE_GLOBAL = 3;
+}
+
+message ThreatEngineSignal {
+  // Matching engine name, e.g. "suricata".
+  string engine = 1;
+  // Engine evidence key, e.g. "signature_id".
+  string kind = 2;
+  // Engine evidence value, e.g. "9000001".
+  string value = 3;
+}
+
+message StageThreatExceptionRequest {
+  // Optional policy object name. Empty generates a stable fp-... name.
+  string name = 1;
+  // Canonical Phragma Threat-ID metadata preserved in policy/audit.
+  string threat_id = 2;
+  // Operator-facing event name used for generated descriptions/audit.
+  string threat_name = 3;
+  // Structured engine evidence. v1 requires suricata/signature_id.
+  repeated ThreatEngineSignal engine_signals = 4;
+  ThreatExceptionScope scope = 5;
+  // Required when scope == SOURCE.
+  string source_ip = 6;
+  // Required when scope == DESTINATION.
+  string destination_ip = 7;
+  // Required operator reason for audit and commit review.
+  string reason = 8;
+  // Required acknowledgement for global signature suppressions.
+  bool confirm_global = 9;
+  // Optional operator metadata copied onto the staged policy exception.
+  string owner = 10;
+  string ticket_id = 11;
+  string review_date = 12;
+  string expires_at = 13;
+  string pcap_sha256 = 14;
+  string regression_ref = 15;
+}
+
+message StageThreatExceptionResponse {
+  // The staged Phragma policy object.
+  IdsException exception = 1;
+  // Address object created or reused for source/destination scope.
+  Address address = 2;
+  bool address_reused = 3;
+  GetCandidateStatusResponse candidate_status = 4;
+  ValidateResponse validation = 5;
+  DiffPolicyResponse diff = 6;
+}
+
+message ListThreatExceptionsRequest {
+  // POLICY_SOURCE_UNSPECIFIED means effective policy: candidate when staged,
+  // otherwise running. POLICY_SOURCE_VERSION also requires version.
+  PolicySource source = 1;
+  uint64 version = 2;
+}
+
+message ThreatExceptionRecord {
+  IdsException exception = 1;
+  ThreatExceptionScope scope = 2;
+  string scope_object = 3;
+  bool present_in_running = 4;
+  bool candidate_only = 5;
+  bool changed_from_running = 6;
+}
+
+message ListThreatExceptionsResponse {
+  repeated ThreatExceptionRecord exceptions = 1;
+  PolicySource source = 2;
+  uint64 version = 3;
+  GetCandidateStatusResponse candidate_status = 4;
+}
+
+message UpdateThreatExceptionRequest {
+  // Existing exception name.
+  string name = 1;
+  // Replacement exception object. Its name may differ to stage a rename.
+  IdsException exception = 2;
+  // Required operator reason for audit and commit review.
+  string reason = 3;
+  // Required acknowledgement when the replacement is an active global
+  // signature suppression.
+  bool confirm_global = 4;
+}
+
+message SetThreatExceptionStateRequest {
+  string name = 1;
+  bool disabled = 2;
+  // Required operator reason for audit and commit review.
+  string reason = 3;
+  // Required when re-enabling an active global signature suppression.
+  bool confirm_global = 4;
+}
+
+message RemoveThreatExceptionRequest {
+  string name = 1;
+  // Required operator reason for audit and commit review.
+  string reason = 2;
+}
+
+message UpdateThreatExceptionResponse {
+  IdsException exception = 1;
+  IdsException previous_exception = 2;
+  GetCandidateStatusResponse candidate_status = 3;
+  ValidateResponse validation = 4;
+  DiffPolicyResponse diff = 5;
+}
+
+message SetThreatExceptionStateResponse {
+  IdsException exception = 1;
+  IdsException previous_exception = 2;
+  GetCandidateStatusResponse candidate_status = 3;
+  ValidateResponse validation = 4;
+  DiffPolicyResponse diff = 5;
+}
+
+message RemoveThreatExceptionResponse {
+  IdsException previous_exception = 1;
+  GetCandidateStatusResponse candidate_status = 2;
+  ValidateResponse validation = 3;
+  DiffPolicyResponse diff = 4;
+}
+
+message ReplayThreatEvidenceRequest {
+  repeated ThreatReplaySample samples = 1;
+  ThreatReplayRecentAlertSelector recent_alerts = 2;
+}
+
+message ThreatReplayRecentAlertSelector {
+  // Bounded number of recent alerts to replay. The server caps this at 25.
+  uint32 limit = 1;
+  string query = 2;
+  int64 signature_id = 3;
+  string flow_id = 4;
+  string action = 5;
+  string threat_severity = 6;
+}
+
+message ThreatReplaySample {
+  string id = 1;
+  // sample, recent-alert, or another operator-facing evidence source label.
+  string source = 2;
+  string signature = 3;
+  int64 signature_id = 4;
+  string category = 5;
+  uint32 severity = 6;
+  string action = 7;
+  ThreatReplayExpectation expected = 8;
+}
+
+message ThreatReplayExpectation {
+  int64 signature_id = 1;
+  string threat_id = 2;
+  // blocked, detected, or unknown.
+  string verdict = 3;
+}
+
+message ReplayThreatEvidenceResponse {
+  string schema_version = 1;
+  string generated_at = 2;
+  // passed, mismatched, degraded, or unavailable.
+  string state = 3;
+  string detail = 4;
+  ThreatReplayEngineEvidence engine = 5;
+  repeated ThreatReplayResult results = 6;
+  repeated string warnings = 7;
+  uint32 sample_count = 8;
+  uint32 recent_alert_count = 9;
+}
+
+message ThreatReplayEngineEvidence {
+  string engine_name = 1;
+  string engine_mode = 2;
+  string engine_state = 3;
+  string engine_detail = 4;
+  string inspection_state = 5;
+  string degraded_behavior = 6;
+  bool engine_required = 7;
+  bool bypass_possible = 8;
+  string bypass_reason = 9;
+  string evidence_label = 10;
+}
+
+message ThreatReplayResult {
+  string sample_id = 1;
+  string source = 2;
+  ThreatReplayExpectation expected = 3;
+  string observed_signature = 4;
+  int64 observed_signature_id = 5;
+  string observed_threat_id = 6;
+  string observed_threat_name = 7;
+  string observed_threat_category = 8;
+  string observed_threat_severity = 9;
+  uint32 observed_confidence = 10;
+  string observed_verdict = 11;
+  bool signature_matched = 12;
+  bool threat_id_matched = 13;
+  bool verdict_matched = 14;
+  bool passed = 15;
+  repeated string evidence = 16;
+  repeated string warnings = 17;
+}

@@ -24,13 +24,30 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	PolicyService_GetPolicy_FullMethodName        = "/openngfw.v1.PolicyService/GetPolicy"
-	PolicyService_SetCandidate_FullMethodName     = "/openngfw.v1.PolicyService/SetCandidate"
-	PolicyService_Validate_FullMethodName         = "/openngfw.v1.PolicyService/Validate"
-	PolicyService_Commit_FullMethodName           = "/openngfw.v1.PolicyService/Commit"
-	PolicyService_Rollback_FullMethodName         = "/openngfw.v1.PolicyService/Rollback"
-	PolicyService_ListVersions_FullMethodName     = "/openngfw.v1.PolicyService/ListVersions"
-	PolicyService_ListAuditEntries_FullMethodName = "/openngfw.v1.PolicyService/ListAuditEntries"
+	PolicyService_GetPolicy_FullMethodName                     = "/openngfw.v1.PolicyService/GetPolicy"
+	PolicyService_SetCandidate_FullMethodName                  = "/openngfw.v1.PolicyService/SetCandidate"
+	PolicyService_Validate_FullMethodName                      = "/openngfw.v1.PolicyService/Validate"
+	PolicyService_GetCandidateStatus_FullMethodName            = "/openngfw.v1.PolicyService/GetCandidateStatus"
+	PolicyService_ListNatRules_FullMethodName                  = "/openngfw.v1.PolicyService/ListNatRules"
+	PolicyService_UpsertCandidateSourceNat_FullMethodName      = "/openngfw.v1.PolicyService/UpsertCandidateSourceNat"
+	PolicyService_DeleteCandidateSourceNat_FullMethodName      = "/openngfw.v1.PolicyService/DeleteCandidateSourceNat"
+	PolicyService_UpsertCandidateDestinationNat_FullMethodName = "/openngfw.v1.PolicyService/UpsertCandidateDestinationNat"
+	PolicyService_DeleteCandidateDestinationNat_FullMethodName = "/openngfw.v1.PolicyService/DeleteCandidateDestinationNat"
+	PolicyService_ListObjectReferences_FullMethodName          = "/openngfw.v1.PolicyService/ListObjectReferences"
+	PolicyService_RenamePolicyObject_FullMethodName            = "/openngfw.v1.PolicyService/RenamePolicyObject"
+	PolicyService_DiffPolicy_FullMethodName                    = "/openngfw.v1.PolicyService/DiffPolicy"
+	PolicyService_CreateChangeApproval_FullMethodName          = "/openngfw.v1.PolicyService/CreateChangeApproval"
+	PolicyService_ListChangeApprovals_FullMethodName           = "/openngfw.v1.PolicyService/ListChangeApprovals"
+	PolicyService_CreateBackupSnapshot_FullMethodName          = "/openngfw.v1.PolicyService/CreateBackupSnapshot"
+	PolicyService_ListBackupSnapshots_FullMethodName           = "/openngfw.v1.PolicyService/ListBackupSnapshots"
+	PolicyService_GetBackupSnapshot_FullMethodName             = "/openngfw.v1.PolicyService/GetBackupSnapshot"
+	PolicyService_ValidateBackupSnapshot_FullMethodName        = "/openngfw.v1.PolicyService/ValidateBackupSnapshot"
+	PolicyService_PreviewBackupSnapshotRestore_FullMethodName  = "/openngfw.v1.PolicyService/PreviewBackupSnapshotRestore"
+	PolicyService_Commit_FullMethodName                        = "/openngfw.v1.PolicyService/Commit"
+	PolicyService_Rollback_FullMethodName                      = "/openngfw.v1.PolicyService/Rollback"
+	PolicyService_ListVersions_FullMethodName                  = "/openngfw.v1.PolicyService/ListVersions"
+	PolicyService_ListAuditEntries_FullMethodName              = "/openngfw.v1.PolicyService/ListAuditEntries"
+	PolicyService_VerifyAuditIntegrity_FullMethodName          = "/openngfw.v1.PolicyService/VerifyAuditIntegrity"
 )
 
 // PolicyServiceClient is the client API for PolicyService service.
@@ -42,8 +59,63 @@ type PolicyServiceClient interface {
 	// SetCandidate replaces the candidate policy. Nothing is applied.
 	SetCandidate(ctx context.Context, in *SetCandidateRequest, opts ...grpc.CallOption) (*SetCandidateResponse, error)
 	// Validate checks the candidate (schema, references, renderability)
-	// without touching any engine.
+	// without touching any engine. If request.policy is supplied, that
+	// unstaged policy is validated instead; the stored candidate is unchanged.
 	Validate(ctx context.Context, in *ValidateRequest, opts ...grpc.CallOption) (*ValidateResponse, error)
+	// GetCandidateStatus returns dirty-state, section-level change counts, and
+	// first-party impact metadata for the staged candidate. This is the read-only
+	// status source for GUI, CLI, and automation review surfaces.
+	GetCandidateStatus(ctx context.Context, in *GetCandidateStatusRequest, opts ...grpc.CallOption) (*GetCandidateStatusResponse, error)
+	// ListNatRules returns source and destination NAT rules from the selected
+	// policy snapshot. This is read-only and never mutates candidate state.
+	ListNatRules(ctx context.Context, in *ListNatRulesRequest, opts ...grpc.CallOption) (*ListNatRulesResponse, error)
+	// UpsertCandidateSourceNat adds or replaces one named source NAT rule in the
+	// candidate. Running policy is unchanged until the normal commit path.
+	UpsertCandidateSourceNat(ctx context.Context, in *UpsertCandidateSourceNatRequest, opts ...grpc.CallOption) (*UpsertCandidateSourceNatResponse, error)
+	// DeleteCandidateSourceNat removes one named source NAT rule from the
+	// candidate. Running policy is unchanged until the normal commit path.
+	DeleteCandidateSourceNat(ctx context.Context, in *DeleteCandidateSourceNatRequest, opts ...grpc.CallOption) (*DeleteCandidateSourceNatResponse, error)
+	// UpsertCandidateDestinationNat adds or replaces one named destination NAT
+	// rule in the candidate. Running policy is unchanged until commit.
+	UpsertCandidateDestinationNat(ctx context.Context, in *UpsertCandidateDestinationNatRequest, opts ...grpc.CallOption) (*UpsertCandidateDestinationNatResponse, error)
+	// DeleteCandidateDestinationNat removes one named destination NAT rule from
+	// the candidate. Running policy is unchanged until commit.
+	DeleteCandidateDestinationNat(ctx context.Context, in *DeleteCandidateDestinationNatRequest, opts ...grpc.CallOption) (*DeleteCandidateDestinationNatResponse, error)
+	// ListObjectReferences returns reverse references from the selected policy
+	// to named objects. This lets GUI, CLI, and automation prove the blast radius
+	// of changing or deleting an object through the public API.
+	ListObjectReferences(ctx context.Context, in *ListObjectReferencesRequest, opts ...grpc.CallOption) (*ListObjectReferencesResponse, error)
+	// RenamePolicyObject renames one reusable object in the candidate policy and
+	// rewrites every candidate reference to the new name. Running and historical
+	// policy snapshots are never mutated; operators must validate and commit the
+	// candidate through the normal lifecycle.
+	RenamePolicyObject(ctx context.Context, in *RenamePolicyObjectRequest, opts ...grpc.CallOption) (*RenamePolicyObjectResponse, error)
+	// DiffPolicy returns a stable typed line diff between two policy snapshots.
+	// It is the public API source for GUI, CLI, and automation change review.
+	DiffPolicy(ctx context.Context, in *DiffPolicyRequest, opts ...grpc.CallOption) (*DiffPolicyResponse, error)
+	// CreateChangeApproval records an admin approval for the exact candidate
+	// revision under review. Commit consumes one matching approval before live
+	// engine apply so direct API clients cannot bypass governance.
+	CreateChangeApproval(ctx context.Context, in *CreateChangeApprovalRequest, opts ...grpc.CallOption) (*CreateChangeApprovalResponse, error)
+	// ListChangeApprovals returns recent approval records for operator review.
+	ListChangeApprovals(ctx context.Context, in *ListChangeApprovalsRequest, opts ...grpc.CallOption) (*ListChangeApprovalsResponse, error)
+	// CreateBackupSnapshot stores an appliance-owned policy snapshot in the
+	// server store. It is distinct from browser export; the snapshot remains
+	// available to server-side validation and restore preview APIs.
+	CreateBackupSnapshot(ctx context.Context, in *CreateBackupSnapshotRequest, opts ...grpc.CallOption) (*CreateBackupSnapshotResponse, error)
+	// ListBackupSnapshots returns appliance-owned backup snapshot metadata,
+	// newest first.
+	ListBackupSnapshots(ctx context.Context, in *ListBackupSnapshotsRequest, opts ...grpc.CallOption) (*ListBackupSnapshotsResponse, error)
+	// GetBackupSnapshot returns one appliance-owned backup snapshot and its
+	// policy payload for inspection/export.
+	GetBackupSnapshot(ctx context.Context, in *GetBackupSnapshotRequest, opts ...grpc.CallOption) (*GetBackupSnapshotResponse, error)
+	// ValidateBackupSnapshot validates a stored snapshot without mutating
+	// candidate or running policy.
+	ValidateBackupSnapshot(ctx context.Context, in *ValidateBackupSnapshotRequest, opts ...grpc.CallOption) (*ValidateBackupSnapshotResponse, error)
+	// PreviewBackupSnapshotRestore builds a restore-job preview. When
+	// stage_candidate is true, the snapshot is staged as candidate only; live
+	// engines and running policy are unchanged until the normal commit path.
+	PreviewBackupSnapshotRestore(ctx context.Context, in *PreviewBackupSnapshotRestoreRequest, opts ...grpc.CallOption) (*PreviewBackupSnapshotRestoreResponse, error)
 	// Commit validates the candidate, applies it to the engines
 	// atomically, and records a new version. On any failure the previous
 	// running config is restored and an error is returned.
@@ -54,6 +126,8 @@ type PolicyServiceClient interface {
 	ListVersions(ctx context.Context, in *ListVersionsRequest, opts ...grpc.CallOption) (*ListVersionsResponse, error)
 	// ListAuditEntries returns the audit log, newest first.
 	ListAuditEntries(ctx context.Context, in *ListAuditEntriesRequest, opts ...grpc.CallOption) (*ListAuditEntriesResponse, error)
+	// VerifyAuditIntegrity validates the tamper-evident audit hash chain.
+	VerifyAuditIntegrity(ctx context.Context, in *VerifyAuditIntegrityRequest, opts ...grpc.CallOption) (*VerifyAuditIntegrityResponse, error)
 }
 
 type policyServiceClient struct {
@@ -88,6 +162,166 @@ func (c *policyServiceClient) Validate(ctx context.Context, in *ValidateRequest,
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ValidateResponse)
 	err := c.cc.Invoke(ctx, PolicyService_Validate_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) GetCandidateStatus(ctx context.Context, in *GetCandidateStatusRequest, opts ...grpc.CallOption) (*GetCandidateStatusResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetCandidateStatusResponse)
+	err := c.cc.Invoke(ctx, PolicyService_GetCandidateStatus_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) ListNatRules(ctx context.Context, in *ListNatRulesRequest, opts ...grpc.CallOption) (*ListNatRulesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListNatRulesResponse)
+	err := c.cc.Invoke(ctx, PolicyService_ListNatRules_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) UpsertCandidateSourceNat(ctx context.Context, in *UpsertCandidateSourceNatRequest, opts ...grpc.CallOption) (*UpsertCandidateSourceNatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertCandidateSourceNatResponse)
+	err := c.cc.Invoke(ctx, PolicyService_UpsertCandidateSourceNat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) DeleteCandidateSourceNat(ctx context.Context, in *DeleteCandidateSourceNatRequest, opts ...grpc.CallOption) (*DeleteCandidateSourceNatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCandidateSourceNatResponse)
+	err := c.cc.Invoke(ctx, PolicyService_DeleteCandidateSourceNat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) UpsertCandidateDestinationNat(ctx context.Context, in *UpsertCandidateDestinationNatRequest, opts ...grpc.CallOption) (*UpsertCandidateDestinationNatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UpsertCandidateDestinationNatResponse)
+	err := c.cc.Invoke(ctx, PolicyService_UpsertCandidateDestinationNat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) DeleteCandidateDestinationNat(ctx context.Context, in *DeleteCandidateDestinationNatRequest, opts ...grpc.CallOption) (*DeleteCandidateDestinationNatResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DeleteCandidateDestinationNatResponse)
+	err := c.cc.Invoke(ctx, PolicyService_DeleteCandidateDestinationNat_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) ListObjectReferences(ctx context.Context, in *ListObjectReferencesRequest, opts ...grpc.CallOption) (*ListObjectReferencesResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListObjectReferencesResponse)
+	err := c.cc.Invoke(ctx, PolicyService_ListObjectReferences_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) RenamePolicyObject(ctx context.Context, in *RenamePolicyObjectRequest, opts ...grpc.CallOption) (*RenamePolicyObjectResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(RenamePolicyObjectResponse)
+	err := c.cc.Invoke(ctx, PolicyService_RenamePolicyObject_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) DiffPolicy(ctx context.Context, in *DiffPolicyRequest, opts ...grpc.CallOption) (*DiffPolicyResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(DiffPolicyResponse)
+	err := c.cc.Invoke(ctx, PolicyService_DiffPolicy_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) CreateChangeApproval(ctx context.Context, in *CreateChangeApprovalRequest, opts ...grpc.CallOption) (*CreateChangeApprovalResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateChangeApprovalResponse)
+	err := c.cc.Invoke(ctx, PolicyService_CreateChangeApproval_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) ListChangeApprovals(ctx context.Context, in *ListChangeApprovalsRequest, opts ...grpc.CallOption) (*ListChangeApprovalsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListChangeApprovalsResponse)
+	err := c.cc.Invoke(ctx, PolicyService_ListChangeApprovals_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) CreateBackupSnapshot(ctx context.Context, in *CreateBackupSnapshotRequest, opts ...grpc.CallOption) (*CreateBackupSnapshotResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(CreateBackupSnapshotResponse)
+	err := c.cc.Invoke(ctx, PolicyService_CreateBackupSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) ListBackupSnapshots(ctx context.Context, in *ListBackupSnapshotsRequest, opts ...grpc.CallOption) (*ListBackupSnapshotsResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ListBackupSnapshotsResponse)
+	err := c.cc.Invoke(ctx, PolicyService_ListBackupSnapshots_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) GetBackupSnapshot(ctx context.Context, in *GetBackupSnapshotRequest, opts ...grpc.CallOption) (*GetBackupSnapshotResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(GetBackupSnapshotResponse)
+	err := c.cc.Invoke(ctx, PolicyService_GetBackupSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) ValidateBackupSnapshot(ctx context.Context, in *ValidateBackupSnapshotRequest, opts ...grpc.CallOption) (*ValidateBackupSnapshotResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ValidateBackupSnapshotResponse)
+	err := c.cc.Invoke(ctx, PolicyService_ValidateBackupSnapshot_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *policyServiceClient) PreviewBackupSnapshotRestore(ctx context.Context, in *PreviewBackupSnapshotRestoreRequest, opts ...grpc.CallOption) (*PreviewBackupSnapshotRestoreResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(PreviewBackupSnapshotRestoreResponse)
+	err := c.cc.Invoke(ctx, PolicyService_PreviewBackupSnapshotRestore_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -134,6 +368,16 @@ func (c *policyServiceClient) ListAuditEntries(ctx context.Context, in *ListAudi
 	return out, nil
 }
 
+func (c *policyServiceClient) VerifyAuditIntegrity(ctx context.Context, in *VerifyAuditIntegrityRequest, opts ...grpc.CallOption) (*VerifyAuditIntegrityResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(VerifyAuditIntegrityResponse)
+	err := c.cc.Invoke(ctx, PolicyService_VerifyAuditIntegrity_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PolicyServiceServer is the server API for PolicyService service.
 // All implementations must embed UnimplementedPolicyServiceServer
 // for forward compatibility.
@@ -143,8 +387,63 @@ type PolicyServiceServer interface {
 	// SetCandidate replaces the candidate policy. Nothing is applied.
 	SetCandidate(context.Context, *SetCandidateRequest) (*SetCandidateResponse, error)
 	// Validate checks the candidate (schema, references, renderability)
-	// without touching any engine.
+	// without touching any engine. If request.policy is supplied, that
+	// unstaged policy is validated instead; the stored candidate is unchanged.
 	Validate(context.Context, *ValidateRequest) (*ValidateResponse, error)
+	// GetCandidateStatus returns dirty-state, section-level change counts, and
+	// first-party impact metadata for the staged candidate. This is the read-only
+	// status source for GUI, CLI, and automation review surfaces.
+	GetCandidateStatus(context.Context, *GetCandidateStatusRequest) (*GetCandidateStatusResponse, error)
+	// ListNatRules returns source and destination NAT rules from the selected
+	// policy snapshot. This is read-only and never mutates candidate state.
+	ListNatRules(context.Context, *ListNatRulesRequest) (*ListNatRulesResponse, error)
+	// UpsertCandidateSourceNat adds or replaces one named source NAT rule in the
+	// candidate. Running policy is unchanged until the normal commit path.
+	UpsertCandidateSourceNat(context.Context, *UpsertCandidateSourceNatRequest) (*UpsertCandidateSourceNatResponse, error)
+	// DeleteCandidateSourceNat removes one named source NAT rule from the
+	// candidate. Running policy is unchanged until the normal commit path.
+	DeleteCandidateSourceNat(context.Context, *DeleteCandidateSourceNatRequest) (*DeleteCandidateSourceNatResponse, error)
+	// UpsertCandidateDestinationNat adds or replaces one named destination NAT
+	// rule in the candidate. Running policy is unchanged until commit.
+	UpsertCandidateDestinationNat(context.Context, *UpsertCandidateDestinationNatRequest) (*UpsertCandidateDestinationNatResponse, error)
+	// DeleteCandidateDestinationNat removes one named destination NAT rule from
+	// the candidate. Running policy is unchanged until commit.
+	DeleteCandidateDestinationNat(context.Context, *DeleteCandidateDestinationNatRequest) (*DeleteCandidateDestinationNatResponse, error)
+	// ListObjectReferences returns reverse references from the selected policy
+	// to named objects. This lets GUI, CLI, and automation prove the blast radius
+	// of changing or deleting an object through the public API.
+	ListObjectReferences(context.Context, *ListObjectReferencesRequest) (*ListObjectReferencesResponse, error)
+	// RenamePolicyObject renames one reusable object in the candidate policy and
+	// rewrites every candidate reference to the new name. Running and historical
+	// policy snapshots are never mutated; operators must validate and commit the
+	// candidate through the normal lifecycle.
+	RenamePolicyObject(context.Context, *RenamePolicyObjectRequest) (*RenamePolicyObjectResponse, error)
+	// DiffPolicy returns a stable typed line diff between two policy snapshots.
+	// It is the public API source for GUI, CLI, and automation change review.
+	DiffPolicy(context.Context, *DiffPolicyRequest) (*DiffPolicyResponse, error)
+	// CreateChangeApproval records an admin approval for the exact candidate
+	// revision under review. Commit consumes one matching approval before live
+	// engine apply so direct API clients cannot bypass governance.
+	CreateChangeApproval(context.Context, *CreateChangeApprovalRequest) (*CreateChangeApprovalResponse, error)
+	// ListChangeApprovals returns recent approval records for operator review.
+	ListChangeApprovals(context.Context, *ListChangeApprovalsRequest) (*ListChangeApprovalsResponse, error)
+	// CreateBackupSnapshot stores an appliance-owned policy snapshot in the
+	// server store. It is distinct from browser export; the snapshot remains
+	// available to server-side validation and restore preview APIs.
+	CreateBackupSnapshot(context.Context, *CreateBackupSnapshotRequest) (*CreateBackupSnapshotResponse, error)
+	// ListBackupSnapshots returns appliance-owned backup snapshot metadata,
+	// newest first.
+	ListBackupSnapshots(context.Context, *ListBackupSnapshotsRequest) (*ListBackupSnapshotsResponse, error)
+	// GetBackupSnapshot returns one appliance-owned backup snapshot and its
+	// policy payload for inspection/export.
+	GetBackupSnapshot(context.Context, *GetBackupSnapshotRequest) (*GetBackupSnapshotResponse, error)
+	// ValidateBackupSnapshot validates a stored snapshot without mutating
+	// candidate or running policy.
+	ValidateBackupSnapshot(context.Context, *ValidateBackupSnapshotRequest) (*ValidateBackupSnapshotResponse, error)
+	// PreviewBackupSnapshotRestore builds a restore-job preview. When
+	// stage_candidate is true, the snapshot is staged as candidate only; live
+	// engines and running policy are unchanged until the normal commit path.
+	PreviewBackupSnapshotRestore(context.Context, *PreviewBackupSnapshotRestoreRequest) (*PreviewBackupSnapshotRestoreResponse, error)
 	// Commit validates the candidate, applies it to the engines
 	// atomically, and records a new version. On any failure the previous
 	// running config is restored and an error is returned.
@@ -155,6 +454,8 @@ type PolicyServiceServer interface {
 	ListVersions(context.Context, *ListVersionsRequest) (*ListVersionsResponse, error)
 	// ListAuditEntries returns the audit log, newest first.
 	ListAuditEntries(context.Context, *ListAuditEntriesRequest) (*ListAuditEntriesResponse, error)
+	// VerifyAuditIntegrity validates the tamper-evident audit hash chain.
+	VerifyAuditIntegrity(context.Context, *VerifyAuditIntegrityRequest) (*VerifyAuditIntegrityResponse, error)
 	mustEmbedUnimplementedPolicyServiceServer()
 }
 
@@ -174,6 +475,54 @@ func (UnimplementedPolicyServiceServer) SetCandidate(context.Context, *SetCandid
 func (UnimplementedPolicyServiceServer) Validate(context.Context, *ValidateRequest) (*ValidateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Validate not implemented")
 }
+func (UnimplementedPolicyServiceServer) GetCandidateStatus(context.Context, *GetCandidateStatusRequest) (*GetCandidateStatusResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetCandidateStatus not implemented")
+}
+func (UnimplementedPolicyServiceServer) ListNatRules(context.Context, *ListNatRulesRequest) (*ListNatRulesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListNatRules not implemented")
+}
+func (UnimplementedPolicyServiceServer) UpsertCandidateSourceNat(context.Context, *UpsertCandidateSourceNatRequest) (*UpsertCandidateSourceNatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertCandidateSourceNat not implemented")
+}
+func (UnimplementedPolicyServiceServer) DeleteCandidateSourceNat(context.Context, *DeleteCandidateSourceNatRequest) (*DeleteCandidateSourceNatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCandidateSourceNat not implemented")
+}
+func (UnimplementedPolicyServiceServer) UpsertCandidateDestinationNat(context.Context, *UpsertCandidateDestinationNatRequest) (*UpsertCandidateDestinationNatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpsertCandidateDestinationNat not implemented")
+}
+func (UnimplementedPolicyServiceServer) DeleteCandidateDestinationNat(context.Context, *DeleteCandidateDestinationNatRequest) (*DeleteCandidateDestinationNatResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteCandidateDestinationNat not implemented")
+}
+func (UnimplementedPolicyServiceServer) ListObjectReferences(context.Context, *ListObjectReferencesRequest) (*ListObjectReferencesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListObjectReferences not implemented")
+}
+func (UnimplementedPolicyServiceServer) RenamePolicyObject(context.Context, *RenamePolicyObjectRequest) (*RenamePolicyObjectResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenamePolicyObject not implemented")
+}
+func (UnimplementedPolicyServiceServer) DiffPolicy(context.Context, *DiffPolicyRequest) (*DiffPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DiffPolicy not implemented")
+}
+func (UnimplementedPolicyServiceServer) CreateChangeApproval(context.Context, *CreateChangeApprovalRequest) (*CreateChangeApprovalResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateChangeApproval not implemented")
+}
+func (UnimplementedPolicyServiceServer) ListChangeApprovals(context.Context, *ListChangeApprovalsRequest) (*ListChangeApprovalsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListChangeApprovals not implemented")
+}
+func (UnimplementedPolicyServiceServer) CreateBackupSnapshot(context.Context, *CreateBackupSnapshotRequest) (*CreateBackupSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBackupSnapshot not implemented")
+}
+func (UnimplementedPolicyServiceServer) ListBackupSnapshots(context.Context, *ListBackupSnapshotsRequest) (*ListBackupSnapshotsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListBackupSnapshots not implemented")
+}
+func (UnimplementedPolicyServiceServer) GetBackupSnapshot(context.Context, *GetBackupSnapshotRequest) (*GetBackupSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBackupSnapshot not implemented")
+}
+func (UnimplementedPolicyServiceServer) ValidateBackupSnapshot(context.Context, *ValidateBackupSnapshotRequest) (*ValidateBackupSnapshotResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateBackupSnapshot not implemented")
+}
+func (UnimplementedPolicyServiceServer) PreviewBackupSnapshotRestore(context.Context, *PreviewBackupSnapshotRestoreRequest) (*PreviewBackupSnapshotRestoreResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PreviewBackupSnapshotRestore not implemented")
+}
 func (UnimplementedPolicyServiceServer) Commit(context.Context, *CommitRequest) (*CommitResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Commit not implemented")
 }
@@ -185,6 +534,9 @@ func (UnimplementedPolicyServiceServer) ListVersions(context.Context, *ListVersi
 }
 func (UnimplementedPolicyServiceServer) ListAuditEntries(context.Context, *ListAuditEntriesRequest) (*ListAuditEntriesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListAuditEntries not implemented")
+}
+func (UnimplementedPolicyServiceServer) VerifyAuditIntegrity(context.Context, *VerifyAuditIntegrityRequest) (*VerifyAuditIntegrityResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyAuditIntegrity not implemented")
 }
 func (UnimplementedPolicyServiceServer) mustEmbedUnimplementedPolicyServiceServer() {}
 func (UnimplementedPolicyServiceServer) testEmbeddedByValue()                       {}
@@ -261,6 +613,294 @@ func _PolicyService_Validate_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PolicyService_GetCandidateStatus_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetCandidateStatusRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).GetCandidateStatus(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_GetCandidateStatus_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).GetCandidateStatus(ctx, req.(*GetCandidateStatusRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_ListNatRules_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListNatRulesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).ListNatRules(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_ListNatRules_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).ListNatRules(ctx, req.(*ListNatRulesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_UpsertCandidateSourceNat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertCandidateSourceNatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).UpsertCandidateSourceNat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_UpsertCandidateSourceNat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).UpsertCandidateSourceNat(ctx, req.(*UpsertCandidateSourceNatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_DeleteCandidateSourceNat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCandidateSourceNatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).DeleteCandidateSourceNat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_DeleteCandidateSourceNat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).DeleteCandidateSourceNat(ctx, req.(*DeleteCandidateSourceNatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_UpsertCandidateDestinationNat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UpsertCandidateDestinationNatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).UpsertCandidateDestinationNat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_UpsertCandidateDestinationNat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).UpsertCandidateDestinationNat(ctx, req.(*UpsertCandidateDestinationNatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_DeleteCandidateDestinationNat_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DeleteCandidateDestinationNatRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).DeleteCandidateDestinationNat(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_DeleteCandidateDestinationNat_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).DeleteCandidateDestinationNat(ctx, req.(*DeleteCandidateDestinationNatRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_ListObjectReferences_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListObjectReferencesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).ListObjectReferences(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_ListObjectReferences_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).ListObjectReferences(ctx, req.(*ListObjectReferencesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_RenamePolicyObject_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RenamePolicyObjectRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).RenamePolicyObject(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_RenamePolicyObject_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).RenamePolicyObject(ctx, req.(*RenamePolicyObjectRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_DiffPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DiffPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).DiffPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_DiffPolicy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).DiffPolicy(ctx, req.(*DiffPolicyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_CreateChangeApproval_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateChangeApprovalRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).CreateChangeApproval(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_CreateChangeApproval_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).CreateChangeApproval(ctx, req.(*CreateChangeApprovalRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_ListChangeApprovals_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListChangeApprovalsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).ListChangeApprovals(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_ListChangeApprovals_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).ListChangeApprovals(ctx, req.(*ListChangeApprovalsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_CreateBackupSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBackupSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).CreateBackupSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_CreateBackupSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).CreateBackupSnapshot(ctx, req.(*CreateBackupSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_ListBackupSnapshots_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListBackupSnapshotsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).ListBackupSnapshots(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_ListBackupSnapshots_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).ListBackupSnapshots(ctx, req.(*ListBackupSnapshotsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_GetBackupSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBackupSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).GetBackupSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_GetBackupSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).GetBackupSnapshot(ctx, req.(*GetBackupSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_ValidateBackupSnapshot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ValidateBackupSnapshotRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).ValidateBackupSnapshot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_ValidateBackupSnapshot_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).ValidateBackupSnapshot(ctx, req.(*ValidateBackupSnapshotRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PolicyService_PreviewBackupSnapshotRestore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PreviewBackupSnapshotRestoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).PreviewBackupSnapshotRestore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_PreviewBackupSnapshotRestore_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).PreviewBackupSnapshotRestore(ctx, req.(*PreviewBackupSnapshotRestoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _PolicyService_Commit_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(CommitRequest)
 	if err := dec(in); err != nil {
@@ -333,6 +973,24 @@ func _PolicyService_ListAuditEntries_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PolicyService_VerifyAuditIntegrity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyAuditIntegrityRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PolicyServiceServer).VerifyAuditIntegrity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: PolicyService_VerifyAuditIntegrity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PolicyServiceServer).VerifyAuditIntegrity(ctx, req.(*VerifyAuditIntegrityRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PolicyService_ServiceDesc is the grpc.ServiceDesc for PolicyService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -353,6 +1011,70 @@ var PolicyService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _PolicyService_Validate_Handler,
 		},
 		{
+			MethodName: "GetCandidateStatus",
+			Handler:    _PolicyService_GetCandidateStatus_Handler,
+		},
+		{
+			MethodName: "ListNatRules",
+			Handler:    _PolicyService_ListNatRules_Handler,
+		},
+		{
+			MethodName: "UpsertCandidateSourceNat",
+			Handler:    _PolicyService_UpsertCandidateSourceNat_Handler,
+		},
+		{
+			MethodName: "DeleteCandidateSourceNat",
+			Handler:    _PolicyService_DeleteCandidateSourceNat_Handler,
+		},
+		{
+			MethodName: "UpsertCandidateDestinationNat",
+			Handler:    _PolicyService_UpsertCandidateDestinationNat_Handler,
+		},
+		{
+			MethodName: "DeleteCandidateDestinationNat",
+			Handler:    _PolicyService_DeleteCandidateDestinationNat_Handler,
+		},
+		{
+			MethodName: "ListObjectReferences",
+			Handler:    _PolicyService_ListObjectReferences_Handler,
+		},
+		{
+			MethodName: "RenamePolicyObject",
+			Handler:    _PolicyService_RenamePolicyObject_Handler,
+		},
+		{
+			MethodName: "DiffPolicy",
+			Handler:    _PolicyService_DiffPolicy_Handler,
+		},
+		{
+			MethodName: "CreateChangeApproval",
+			Handler:    _PolicyService_CreateChangeApproval_Handler,
+		},
+		{
+			MethodName: "ListChangeApprovals",
+			Handler:    _PolicyService_ListChangeApprovals_Handler,
+		},
+		{
+			MethodName: "CreateBackupSnapshot",
+			Handler:    _PolicyService_CreateBackupSnapshot_Handler,
+		},
+		{
+			MethodName: "ListBackupSnapshots",
+			Handler:    _PolicyService_ListBackupSnapshots_Handler,
+		},
+		{
+			MethodName: "GetBackupSnapshot",
+			Handler:    _PolicyService_GetBackupSnapshot_Handler,
+		},
+		{
+			MethodName: "ValidateBackupSnapshot",
+			Handler:    _PolicyService_ValidateBackupSnapshot_Handler,
+		},
+		{
+			MethodName: "PreviewBackupSnapshotRestore",
+			Handler:    _PolicyService_PreviewBackupSnapshotRestore_Handler,
+		},
+		{
 			MethodName: "Commit",
 			Handler:    _PolicyService_Commit_Handler,
 		},
@@ -367,6 +1089,10 @@ var PolicyService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListAuditEntries",
 			Handler:    _PolicyService_ListAuditEntries_Handler,
+		},
+		{
+			MethodName: "VerifyAuditIntegrity",
+			Handler:    _PolicyService_VerifyAuditIntegrity_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

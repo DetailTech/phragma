@@ -74,5 +74,38 @@ func Render(ir *compiler.IR, opts Options) ([]byte, error) {
 	b.WriteString("    table: alerts\n")
 	b.WriteString("    skip_unknown_fields: true\n")
 
+	for _, export := range tel.Exports {
+		writeExportSink(&b, export)
+	}
+
 	return []byte(b.String()), nil
+}
+
+func writeExportSink(b *strings.Builder, export compiler.TelemetryExportIR) {
+	sinkID := "event_export_" + strings.ReplaceAll(export.Name, "-", "_")
+	switch export.Type {
+	case compiler.TelemetryExportTypeJSONFile:
+		fmt.Fprintf(b, "  %s:\n", sinkID)
+		b.WriteString("    type: file\n")
+		b.WriteString("    inputs: [eve_parsed]\n")
+		fmt.Fprintf(b, "    path: %q\n", export.Target)
+		b.WriteString("    encoding:\n")
+		b.WriteString("      codec: json\n")
+	case compiler.TelemetryExportTypeJSONTCP, compiler.TelemetryExportTypeJSONUDP:
+		mode := "tcp"
+		if export.Type == compiler.TelemetryExportTypeJSONUDP {
+			mode = "udp"
+		}
+		fmt.Fprintf(b, "  %s:\n", sinkID)
+		b.WriteString("    type: socket\n")
+		b.WriteString("    inputs: [eve_parsed]\n")
+		fmt.Fprintf(b, "    address: %q\n", export.Target)
+		fmt.Fprintf(b, "    mode: %s\n", mode)
+		if mode == "tcp" {
+			b.WriteString("    framing:\n")
+			b.WriteString("      method: newline_delimited\n")
+		}
+		b.WriteString("    encoding:\n")
+		b.WriteString("      codec: json\n")
+	}
 }

@@ -83,6 +83,267 @@ func (Protocol) EnumDescriptor() ([]byte, []int) {
 	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{0}
 }
 
+type QosPriority int32
+
+const (
+	QosPriority_QOS_PRIORITY_UNSPECIFIED QosPriority = 0
+	QosPriority_QOS_PRIORITY_LOW         QosPriority = 1
+	QosPriority_QOS_PRIORITY_MEDIUM      QosPriority = 2
+	QosPriority_QOS_PRIORITY_HIGH        QosPriority = 3
+	QosPriority_QOS_PRIORITY_CRITICAL    QosPriority = 4
+)
+
+// Enum value maps for QosPriority.
+var (
+	QosPriority_name = map[int32]string{
+		0: "QOS_PRIORITY_UNSPECIFIED",
+		1: "QOS_PRIORITY_LOW",
+		2: "QOS_PRIORITY_MEDIUM",
+		3: "QOS_PRIORITY_HIGH",
+		4: "QOS_PRIORITY_CRITICAL",
+	}
+	QosPriority_value = map[string]int32{
+		"QOS_PRIORITY_UNSPECIFIED": 0,
+		"QOS_PRIORITY_LOW":         1,
+		"QOS_PRIORITY_MEDIUM":      2,
+		"QOS_PRIORITY_HIGH":        3,
+		"QOS_PRIORITY_CRITICAL":    4,
+	}
+)
+
+func (x QosPriority) Enum() *QosPriority {
+	p := new(QosPriority)
+	*p = x
+	return p
+}
+
+func (x QosPriority) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (QosPriority) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_proto_enumTypes[1].Descriptor()
+}
+
+func (QosPriority) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_proto_enumTypes[1]
+}
+
+func (x QosPriority) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use QosPriority.Descriptor instead.
+func (QosPriority) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{1}
+}
+
+type ZoneProtectionAction int32
+
+const (
+	ZoneProtectionAction_ZONE_PROTECTION_ACTION_UNSPECIFIED ZoneProtectionAction = 0
+	ZoneProtectionAction_ZONE_PROTECTION_ACTION_ALERT       ZoneProtectionAction = 1
+	ZoneProtectionAction_ZONE_PROTECTION_ACTION_DROP        ZoneProtectionAction = 2
+)
+
+// Enum value maps for ZoneProtectionAction.
+var (
+	ZoneProtectionAction_name = map[int32]string{
+		0: "ZONE_PROTECTION_ACTION_UNSPECIFIED",
+		1: "ZONE_PROTECTION_ACTION_ALERT",
+		2: "ZONE_PROTECTION_ACTION_DROP",
+	}
+	ZoneProtectionAction_value = map[string]int32{
+		"ZONE_PROTECTION_ACTION_UNSPECIFIED": 0,
+		"ZONE_PROTECTION_ACTION_ALERT":       1,
+		"ZONE_PROTECTION_ACTION_DROP":        2,
+	}
+)
+
+func (x ZoneProtectionAction) Enum() *ZoneProtectionAction {
+	p := new(ZoneProtectionAction)
+	*p = x
+	return p
+}
+
+func (x ZoneProtectionAction) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (ZoneProtectionAction) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_proto_enumTypes[2].Descriptor()
+}
+
+func (ZoneProtectionAction) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_proto_enumTypes[2]
+}
+
+func (x ZoneProtectionAction) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use ZoneProtectionAction.Descriptor instead.
+func (ZoneProtectionAction) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{2}
+}
+
+type TlsInspectionMode int32
+
+const (
+	TlsInspectionMode_TLS_INSPECTION_MODE_UNSPECIFIED TlsInspectionMode = 0
+	// Metadata-only TLS handling uses observable handshake/certificate/SNI
+	// signals when available; it does not decrypt payloads.
+	TlsInspectionMode_TLS_INSPECTION_MODE_METADATA_ONLY TlsInspectionMode = 1
+	// Decryption intent is review-only until a human-supervised TLS broker and
+	// certificate lifecycle are configured outside this policy object.
+	TlsInspectionMode_TLS_INSPECTION_MODE_DECRYPTION_REQUIRED TlsInspectionMode = 2
+	TlsInspectionMode_TLS_INSPECTION_MODE_BYPASS              TlsInspectionMode = 3
+)
+
+// Enum value maps for TlsInspectionMode.
+var (
+	TlsInspectionMode_name = map[int32]string{
+		0: "TLS_INSPECTION_MODE_UNSPECIFIED",
+		1: "TLS_INSPECTION_MODE_METADATA_ONLY",
+		2: "TLS_INSPECTION_MODE_DECRYPTION_REQUIRED",
+		3: "TLS_INSPECTION_MODE_BYPASS",
+	}
+	TlsInspectionMode_value = map[string]int32{
+		"TLS_INSPECTION_MODE_UNSPECIFIED":         0,
+		"TLS_INSPECTION_MODE_METADATA_ONLY":       1,
+		"TLS_INSPECTION_MODE_DECRYPTION_REQUIRED": 2,
+		"TLS_INSPECTION_MODE_BYPASS":              3,
+	}
+)
+
+func (x TlsInspectionMode) Enum() *TlsInspectionMode {
+	p := new(TlsInspectionMode)
+	*p = x
+	return p
+}
+
+func (x TlsInspectionMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (TlsInspectionMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_proto_enumTypes[3].Descriptor()
+}
+
+func (TlsInspectionMode) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_proto_enumTypes[3]
+}
+
+func (x TlsInspectionMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use TlsInspectionMode.Descriptor instead.
+func (TlsInspectionMode) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{3}
+}
+
+type DnsSecurityMode int32
+
+const (
+	DnsSecurityMode_DNS_SECURITY_MODE_UNSPECIFIED     DnsSecurityMode = 0
+	DnsSecurityMode_DNS_SECURITY_MODE_LOG_ONLY        DnsSecurityMode = 1
+	DnsSecurityMode_DNS_SECURITY_MODE_BLOCK_MALICIOUS DnsSecurityMode = 2
+)
+
+// Enum value maps for DnsSecurityMode.
+var (
+	DnsSecurityMode_name = map[int32]string{
+		0: "DNS_SECURITY_MODE_UNSPECIFIED",
+		1: "DNS_SECURITY_MODE_LOG_ONLY",
+		2: "DNS_SECURITY_MODE_BLOCK_MALICIOUS",
+	}
+	DnsSecurityMode_value = map[string]int32{
+		"DNS_SECURITY_MODE_UNSPECIFIED":     0,
+		"DNS_SECURITY_MODE_LOG_ONLY":        1,
+		"DNS_SECURITY_MODE_BLOCK_MALICIOUS": 2,
+	}
+)
+
+func (x DnsSecurityMode) Enum() *DnsSecurityMode {
+	p := new(DnsSecurityMode)
+	*p = x
+	return p
+}
+
+func (x DnsSecurityMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (DnsSecurityMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_proto_enumTypes[4].Descriptor()
+}
+
+func (DnsSecurityMode) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_proto_enumTypes[4]
+}
+
+func (x DnsSecurityMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use DnsSecurityMode.Descriptor instead.
+func (DnsSecurityMode) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{4}
+}
+
+type FileSecurityMode int32
+
+const (
+	FileSecurityMode_FILE_SECURITY_MODE_UNSPECIFIED       FileSecurityMode = 0
+	FileSecurityMode_FILE_SECURITY_MODE_LOG_ONLY          FileSecurityMode = 1
+	FileSecurityMode_FILE_SECURITY_MODE_BLOCK_EXECUTABLES FileSecurityMode = 2
+	FileSecurityMode_FILE_SECURITY_MODE_BLOCK_HIGH_RISK   FileSecurityMode = 3
+)
+
+// Enum value maps for FileSecurityMode.
+var (
+	FileSecurityMode_name = map[int32]string{
+		0: "FILE_SECURITY_MODE_UNSPECIFIED",
+		1: "FILE_SECURITY_MODE_LOG_ONLY",
+		2: "FILE_SECURITY_MODE_BLOCK_EXECUTABLES",
+		3: "FILE_SECURITY_MODE_BLOCK_HIGH_RISK",
+	}
+	FileSecurityMode_value = map[string]int32{
+		"FILE_SECURITY_MODE_UNSPECIFIED":       0,
+		"FILE_SECURITY_MODE_LOG_ONLY":          1,
+		"FILE_SECURITY_MODE_BLOCK_EXECUTABLES": 2,
+		"FILE_SECURITY_MODE_BLOCK_HIGH_RISK":   3,
+	}
+)
+
+func (x FileSecurityMode) Enum() *FileSecurityMode {
+	p := new(FileSecurityMode)
+	*p = x
+	return p
+}
+
+func (x FileSecurityMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (FileSecurityMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_proto_enumTypes[5].Descriptor()
+}
+
+func (FileSecurityMode) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_proto_enumTypes[5]
+}
+
+func (x FileSecurityMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use FileSecurityMode.Descriptor instead.
+func (FileSecurityMode) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{5}
+}
+
 type Action int32
 
 const (
@@ -121,11 +382,11 @@ func (x Action) String() string {
 }
 
 func (Action) Descriptor() protoreflect.EnumDescriptor {
-	return file_openngfw_v1_policy_proto_enumTypes[1].Descriptor()
+	return file_openngfw_v1_policy_proto_enumTypes[6].Descriptor()
 }
 
 func (Action) Type() protoreflect.EnumType {
-	return &file_openngfw_v1_policy_proto_enumTypes[1]
+	return &file_openngfw_v1_policy_proto_enumTypes[6]
 }
 
 func (x Action) Number() protoreflect.EnumNumber {
@@ -134,26 +395,95 @@ func (x Action) Number() protoreflect.EnumNumber {
 
 // Deprecated: Use Action.Descriptor instead.
 func (Action) EnumDescriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{1}
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{6}
+}
+
+type WafMode int32
+
+const (
+	WafMode_WAF_MODE_UNSPECIFIED WafMode = 0
+	WafMode_WAF_MODE_DETECT      WafMode = 1
+	WafMode_WAF_MODE_BLOCK       WafMode = 2
+)
+
+// Enum value maps for WafMode.
+var (
+	WafMode_name = map[int32]string{
+		0: "WAF_MODE_UNSPECIFIED",
+		1: "WAF_MODE_DETECT",
+		2: "WAF_MODE_BLOCK",
+	}
+	WafMode_value = map[string]int32{
+		"WAF_MODE_UNSPECIFIED": 0,
+		"WAF_MODE_DETECT":      1,
+		"WAF_MODE_BLOCK":       2,
+	}
+)
+
+func (x WafMode) Enum() *WafMode {
+	p := new(WafMode)
+	*p = x
+	return p
+}
+
+func (x WafMode) String() string {
+	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
+}
+
+func (WafMode) Descriptor() protoreflect.EnumDescriptor {
+	return file_openngfw_v1_policy_proto_enumTypes[7].Descriptor()
+}
+
+func (WafMode) Type() protoreflect.EnumType {
+	return &file_openngfw_v1_policy_proto_enumTypes[7]
+}
+
+func (x WafMode) Number() protoreflect.EnumNumber {
+	return protoreflect.EnumNumber(x)
+}
+
+// Deprecated: Use WafMode.Descriptor instead.
+func (WafMode) EnumDescriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{7}
 }
 
 // Policy is the complete declarative configuration of one node.
 type Policy struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Zones         []*Zone                `protobuf:"bytes,1,rep,name=zones,proto3" json:"zones,omitempty"`
-	Addresses     []*Address             `protobuf:"bytes,2,rep,name=addresses,proto3" json:"addresses,omitempty"`
-	Services      []*Service             `protobuf:"bytes,3,rep,name=services,proto3" json:"services,omitempty"`
-	Rules         []*Rule                `protobuf:"bytes,4,rep,name=rules,proto3" json:"rules,omitempty"`
-	Nat           *Nat                   `protobuf:"bytes,5,opt,name=nat,proto3" json:"nat,omitempty"`
-	StaticRoutes  []*StaticRoute         `protobuf:"bytes,6,rep,name=static_routes,json=staticRoutes,proto3" json:"static_routes,omitempty"`
-	Ids           *Ids                   `protobuf:"bytes,7,opt,name=ids,proto3" json:"ids,omitempty"`
-	Telemetry     *Telemetry             `protobuf:"bytes,8,opt,name=telemetry,proto3" json:"telemetry,omitempty"`
-	Routing       *Routing               `protobuf:"bytes,9,opt,name=routing,proto3" json:"routing,omitempty"`
-	Vpn           *Vpn                   `protobuf:"bytes,10,opt,name=vpn,proto3" json:"vpn,omitempty"`
-	Intel         *Intel                 `protobuf:"bytes,11,opt,name=intel,proto3" json:"intel,omitempty"`
-	Network       *Network               `protobuf:"bytes,12,opt,name=network,proto3" json:"network,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state        protoimpl.MessageState `protogen:"open.v1"`
+	Zones        []*Zone                `protobuf:"bytes,1,rep,name=zones,proto3" json:"zones,omitempty"`
+	Addresses    []*Address             `protobuf:"bytes,2,rep,name=addresses,proto3" json:"addresses,omitempty"`
+	Services     []*Service             `protobuf:"bytes,3,rep,name=services,proto3" json:"services,omitempty"`
+	Rules        []*Rule                `protobuf:"bytes,4,rep,name=rules,proto3" json:"rules,omitempty"`
+	Nat          *Nat                   `protobuf:"bytes,5,opt,name=nat,proto3" json:"nat,omitempty"`
+	StaticRoutes []*StaticRoute         `protobuf:"bytes,6,rep,name=static_routes,json=staticRoutes,proto3" json:"static_routes,omitempty"`
+	Ids          *Ids                   `protobuf:"bytes,7,opt,name=ids,proto3" json:"ids,omitempty"`
+	Telemetry    *Telemetry             `protobuf:"bytes,8,opt,name=telemetry,proto3" json:"telemetry,omitempty"`
+	Routing      *Routing               `protobuf:"bytes,9,opt,name=routing,proto3" json:"routing,omitempty"`
+	Vpn          *Vpn                   `protobuf:"bytes,10,opt,name=vpn,proto3" json:"vpn,omitempty"`
+	Intel        *Intel                 `protobuf:"bytes,11,opt,name=intel,proto3" json:"intel,omitempty"`
+	Network      *Network               `protobuf:"bytes,12,opt,name=network,proto3" json:"network,omitempty"`
+	HostInput    *HostInput             `protobuf:"bytes,13,opt,name=host_input,json=hostInput,proto3" json:"host_input,omitempty"`
+	// Custom OpenNGFW App-ID definitions. These enrich flow classification,
+	// evidence, and the v1 deny-rule port-hint enforcement path.
+	Applications []*Application `protobuf:"bytes,14,rep,name=applications,proto3" json:"applications,omitempty"`
+	// Reusable security inspection intents attached to rules. These are
+	// declarative policy objects; renderer/runtime enforcement is feature-
+	// specific and must not silently perform TLS interception.
+	SecurityProfiles []*SecurityProfile `protobuf:"bytes,15,rep,name=security_profiles,json=securityProfiles,proto3" json:"security_profiles,omitempty"`
+	// Bounded L7 virtual-service, WAF, and API gateway intent. This policy
+	// section renders an Envoy/Coraza-style deployment plan for review and
+	// readiness workflows; it does not activate a traffic proxy by itself.
+	Proxy *Proxy `protobuf:"bytes,16,opt,name=proxy,proto3" json:"proxy,omitempty"`
+	// Reusable traffic shaping intent attached to forwarding rules. The current
+	// Linux renderer emits deterministic plan-only posture; live tc/nft proof
+	// remains production hardening.
+	QosProfiles []*QosProfile `protobuf:"bytes,17,rep,name=qos_profiles,json=qosProfiles,proto3" json:"qos_profiles,omitempty"`
+	// Reusable zone-protection intent attached to zones. The current Linux
+	// renderer emits deterministic plan-only posture; live DoS enforcement and
+	// scale proof remain production hardening.
+	ZoneProtectionProfiles []*ZoneProtectionProfile `protobuf:"bytes,18,rep,name=zone_protection_profiles,json=zoneProtectionProfiles,proto3" json:"zone_protection_profiles,omitempty"`
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
 }
 
 func (x *Policy) Reset() {
@@ -270,14 +600,57 @@ func (x *Policy) GetNetwork() *Network {
 	return nil
 }
 
+func (x *Policy) GetHostInput() *HostInput {
+	if x != nil {
+		return x.HostInput
+	}
+	return nil
+}
+
+func (x *Policy) GetApplications() []*Application {
+	if x != nil {
+		return x.Applications
+	}
+	return nil
+}
+
+func (x *Policy) GetSecurityProfiles() []*SecurityProfile {
+	if x != nil {
+		return x.SecurityProfiles
+	}
+	return nil
+}
+
+func (x *Policy) GetProxy() *Proxy {
+	if x != nil {
+		return x.Proxy
+	}
+	return nil
+}
+
+func (x *Policy) GetQosProfiles() []*QosProfile {
+	if x != nil {
+		return x.QosProfiles
+	}
+	return nil
+}
+
+func (x *Policy) GetZoneProtectionProfiles() []*ZoneProtectionProfile {
+	if x != nil {
+		return x.ZoneProtectionProfiles
+	}
+	return nil
+}
+
 // Zone groups interfaces into a security zone. Rules match on zone pairs.
 type Zone struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
-	Interfaces    []string               `protobuf:"bytes,2,rep,name=interfaces,proto3" json:"interfaces,omitempty"`
-	Description   string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                 protoimpl.MessageState `protogen:"open.v1"`
+	Name                  string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Interfaces            []string               `protobuf:"bytes,2,rep,name=interfaces,proto3" json:"interfaces,omitempty"`
+	Description           string                 `protobuf:"bytes,3,opt,name=description,proto3" json:"description,omitempty"`
+	ZoneProtectionProfile string                 `protobuf:"bytes,4,opt,name=zone_protection_profile,json=zoneProtectionProfile,proto3" json:"zone_protection_profile,omitempty"`
+	unknownFields         protoimpl.UnknownFields
+	sizeCache             protoimpl.SizeCache
 }
 
 func (x *Zone) Reset() {
@@ -327,6 +700,13 @@ func (x *Zone) GetInterfaces() []string {
 func (x *Zone) GetDescription() string {
 	if x != nil {
 		return x.Description
+	}
+	return ""
+}
+
+func (x *Zone) GetZoneProtectionProfile() string {
+	if x != nil {
+		return x.ZoneProtectionProfile
 	}
 	return ""
 }
@@ -461,6 +841,151 @@ func (x *Service) GetDescription() string {
 	return ""
 }
 
+// Application is a first-party App-ID definition owned by OpenNGFW policy.
+// Engine-native labels are evidence aliases, not the product model.
+type Application struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Canonical App-ID value, e.g. "corp-admin".
+	Name string `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	// Human-readable name shown in API, CLI, and UI.
+	DisplayName string `protobuf:"bytes,2,opt,name=display_name,json=displayName,proto3" json:"display_name,omitempty"`
+	// OpenNGFW category, e.g. "business-app" or "remote-access".
+	Category string `protobuf:"bytes,3,opt,name=category,proto3" json:"category,omitempty"`
+	// Engine-native labels such as Suricata app_proto or future nDPI names.
+	EngineSignals []string `protobuf:"bytes,4,rep,name=engine_signals,json=engineSignals,proto3" json:"engine_signals,omitempty"`
+	// Low-confidence fallback hints used only when no engine signal is present.
+	Ports         []*ApplicationPort `protobuf:"bytes,5,rep,name=ports,proto3" json:"ports,omitempty"`
+	Description   string             `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Application) Reset() {
+	*x = Application{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[4]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Application) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Application) ProtoMessage() {}
+
+func (x *Application) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[4]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Application.ProtoReflect.Descriptor instead.
+func (*Application) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *Application) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *Application) GetDisplayName() string {
+	if x != nil {
+		return x.DisplayName
+	}
+	return ""
+}
+
+func (x *Application) GetCategory() string {
+	if x != nil {
+		return x.Category
+	}
+	return ""
+}
+
+func (x *Application) GetEngineSignals() []string {
+	if x != nil {
+		return x.EngineSignals
+	}
+	return nil
+}
+
+func (x *Application) GetPorts() []*ApplicationPort {
+	if x != nil {
+		return x.Ports
+	}
+	return nil
+}
+
+func (x *Application) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+// ApplicationPort is a protocol/port matcher for custom App-ID fallback.
+type ApplicationPort struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// Only TCP and UDP are valid for App-ID port hints.
+	Protocol      Protocol     `protobuf:"varint,1,opt,name=protocol,proto3,enum=openngfw.v1.Protocol" json:"protocol,omitempty"`
+	Ports         []*PortRange `protobuf:"bytes,2,rep,name=ports,proto3" json:"ports,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ApplicationPort) Reset() {
+	*x = ApplicationPort{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ApplicationPort) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ApplicationPort) ProtoMessage() {}
+
+func (x *ApplicationPort) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ApplicationPort.ProtoReflect.Descriptor instead.
+func (*ApplicationPort) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ApplicationPort) GetProtocol() Protocol {
+	if x != nil {
+		return x.Protocol
+	}
+	return Protocol_PROTOCOL_UNSPECIFIED
+}
+
+func (x *ApplicationPort) GetPorts() []*PortRange {
+	if x != nil {
+		return x.Ports
+	}
+	return nil
+}
+
 // PortRange matches a single port (end unset/0) or an inclusive range.
 type PortRange struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -472,7 +997,7 @@ type PortRange struct {
 
 func (x *PortRange) Reset() {
 	*x = PortRange{}
-	mi := &file_openngfw_v1_policy_proto_msgTypes[4]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -484,7 +1009,7 @@ func (x *PortRange) String() string {
 func (*PortRange) ProtoMessage() {}
 
 func (x *PortRange) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_proto_msgTypes[4]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -497,7 +1022,7 @@ func (x *PortRange) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use PortRange.ProtoReflect.Descriptor instead.
 func (*PortRange) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{4}
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *PortRange) GetStart() uint32 {
@@ -529,13 +1054,42 @@ type Rule struct {
 	Log                  bool                   `protobuf:"varint,8,opt,name=log,proto3" json:"log,omitempty"`
 	Disabled             bool                   `protobuf:"varint,9,opt,name=disabled,proto3" json:"disabled,omitempty"`
 	Description          string                 `protobuf:"bytes,10,opt,name=description,proto3" json:"description,omitempty"`
-	unknownFields        protoimpl.UnknownFields
-	sizeCache            protoimpl.SizeCache
+	// Application references match OpenNGFW App-ID objects. The current dataplane
+	// expands referenced TCP/UDP port hints in nftables for allow/drop path
+	// control, and IDS/IPS Prevent fail-closed can render supported Suricata
+	// app-layer allow/drop controls with source/destination/port metadata scope.
+	// True proxy-grade L7 allow semantics, zone-aware Suricata controls, and full
+	// application taxonomy breadth remain hardening/follow-on work.
+	Applications []string `protobuf:"bytes,11,rep,name=applications,proto3" json:"applications,omitempty"`
+	// Operator-defined rule tags used for grouping, ownership, compliance,
+	// lifecycle, and GUI/API filtering. Tags are policy metadata; they do not
+	// change dataplane match semantics.
+	Tags []string `protobuf:"bytes,12,rep,name=tags,proto3" json:"tags,omitempty"`
+	// Reusable inspection/profile intents. Profiles with blocking intent on
+	// allow rules require inline IPS fail-closed; TLS decryption, URL category
+	// databases, and file-inspection engines remain separate integrations.
+	SecurityProfiles []string `protobuf:"bytes,13,rep,name=security_profiles,json=securityProfiles,proto3" json:"security_profiles,omitempty"`
+	// Durable server-normalized policy identity for API/UI targeting, audit
+	// correlation, compiler IR, and renderer metadata. Names remain
+	// operator-facing labels and may be changed; id is stable for the life of
+	// the logical forwarding rule. Legacy or imported rules without IDs are
+	// backfilled by candidate/commit/validation server paths.
+	Id string `protobuf:"bytes,14,opt,name=id,proto3" json:"id,omitempty"`
+	// Optional bounded User-ID and device-posture policy context. This context
+	// is part of the OpenNGFW rule match model and ExplainFlow simulation
+	// surface; it does not by itself configure live directory, group freshness,
+	// MDM, or step-up authentication integrations.
+	MatchContext *RuleMatchContext `protobuf:"bytes,15,opt,name=match_context,json=matchContext,proto3" json:"match_context,omitempty"`
+	// Optional reusable QoS/shaping intent for matching traffic. The v1 runtime
+	// exposes this as plan-only metadata until tc/nft field proof is complete.
+	QosProfile    string `protobuf:"bytes,16,opt,name=qos_profile,json=qosProfile,proto3" json:"qos_profile,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *Rule) Reset() {
 	*x = Rule{}
-	mi := &file_openngfw_v1_policy_proto_msgTypes[5]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -547,7 +1101,7 @@ func (x *Rule) String() string {
 func (*Rule) ProtoMessage() {}
 
 func (x *Rule) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_proto_msgTypes[5]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -560,7 +1114,7 @@ func (x *Rule) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Rule.ProtoReflect.Descriptor instead.
 func (*Rule) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{5}
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *Rule) GetName() string {
@@ -633,6 +1187,582 @@ func (x *Rule) GetDescription() string {
 	return ""
 }
 
+func (x *Rule) GetApplications() []string {
+	if x != nil {
+		return x.Applications
+	}
+	return nil
+}
+
+func (x *Rule) GetTags() []string {
+	if x != nil {
+		return x.Tags
+	}
+	return nil
+}
+
+func (x *Rule) GetSecurityProfiles() []string {
+	if x != nil {
+		return x.SecurityProfiles
+	}
+	return nil
+}
+
+func (x *Rule) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
+func (x *Rule) GetMatchContext() *RuleMatchContext {
+	if x != nil {
+		return x.MatchContext
+	}
+	return nil
+}
+
+func (x *Rule) GetQosProfile() string {
+	if x != nil {
+		return x.QosProfile
+	}
+	return ""
+}
+
+// RuleMatchContext constrains a rule by identity and endpoint posture labels.
+// Values are canonical OpenNGFW labels, not live provider records. Empty lists
+// mean that dimension is not constrained; when a dimension is present, a flow
+// explanation must supply at least one matching value for that dimension.
+type RuleMatchContext struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Users         []string               `protobuf:"bytes,1,rep,name=users,proto3" json:"users,omitempty"`
+	Groups        []string               `protobuf:"bytes,2,rep,name=groups,proto3" json:"groups,omitempty"`
+	Devices       []string               `protobuf:"bytes,3,rep,name=devices,proto3" json:"devices,omitempty"`
+	PostureLabels []string               `protobuf:"bytes,4,rep,name=posture_labels,json=postureLabels,proto3" json:"posture_labels,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *RuleMatchContext) Reset() {
+	*x = RuleMatchContext{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *RuleMatchContext) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*RuleMatchContext) ProtoMessage() {}
+
+func (x *RuleMatchContext) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use RuleMatchContext.ProtoReflect.Descriptor instead.
+func (*RuleMatchContext) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *RuleMatchContext) GetUsers() []string {
+	if x != nil {
+		return x.Users
+	}
+	return nil
+}
+
+func (x *RuleMatchContext) GetGroups() []string {
+	if x != nil {
+		return x.Groups
+	}
+	return nil
+}
+
+func (x *RuleMatchContext) GetDevices() []string {
+	if x != nil {
+		return x.Devices
+	}
+	return nil
+}
+
+func (x *RuleMatchContext) GetPostureLabels() []string {
+	if x != nil {
+		return x.PostureLabels
+	}
+	return nil
+}
+
+// SecurityProfile describes layered inspection intent that may be attached to
+// forwarding rules. It is intentionally declarative: TLS interception and CA
+// lifecycle are not enabled by adding a profile alone.
+type SecurityProfile struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description   string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	TlsInspection TlsInspectionMode      `protobuf:"varint,3,opt,name=tls_inspection,json=tlsInspection,proto3,enum=openngfw.v1.TlsInspectionMode" json:"tls_inspection,omitempty"`
+	UrlCategories []string               `protobuf:"bytes,4,rep,name=url_categories,json=urlCategories,proto3" json:"url_categories,omitempty"`
+	DnsSecurity   DnsSecurityMode        `protobuf:"varint,5,opt,name=dns_security,json=dnsSecurity,proto3,enum=openngfw.v1.DnsSecurityMode" json:"dns_security,omitempty"`
+	FileSecurity  FileSecurityMode       `protobuf:"varint,6,opt,name=file_security,json=fileSecurity,proto3,enum=openngfw.v1.FileSecurityMode" json:"file_security,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *SecurityProfile) Reset() {
+	*x = SecurityProfile{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *SecurityProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*SecurityProfile) ProtoMessage() {}
+
+func (x *SecurityProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use SecurityProfile.ProtoReflect.Descriptor instead.
+func (*SecurityProfile) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *SecurityProfile) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *SecurityProfile) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *SecurityProfile) GetTlsInspection() TlsInspectionMode {
+	if x != nil {
+		return x.TlsInspection
+	}
+	return TlsInspectionMode_TLS_INSPECTION_MODE_UNSPECIFIED
+}
+
+func (x *SecurityProfile) GetUrlCategories() []string {
+	if x != nil {
+		return x.UrlCategories
+	}
+	return nil
+}
+
+func (x *SecurityProfile) GetDnsSecurity() DnsSecurityMode {
+	if x != nil {
+		return x.DnsSecurity
+	}
+	return DnsSecurityMode_DNS_SECURITY_MODE_UNSPECIFIED
+}
+
+func (x *SecurityProfile) GetFileSecurity() FileSecurityMode {
+	if x != nil {
+		return x.FileSecurity
+	}
+	return FileSecurityMode_FILE_SECURITY_MODE_UNSPECIFIED
+}
+
+// QosProfile declares bounded shaping intent for rule-matched traffic. It does
+// not by itself certify Linux tc enforcement, queue discipline selection, HA
+// synchronization, or telemetry SLAs.
+type QosProfile struct {
+	state                   protoimpl.MessageState `protogen:"open.v1"`
+	Name                    string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description             string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	MaxBandwidthKbps        uint64                 `protobuf:"varint,3,opt,name=max_bandwidth_kbps,json=maxBandwidthKbps,proto3" json:"max_bandwidth_kbps,omitempty"`
+	GuaranteedBandwidthKbps uint64                 `protobuf:"varint,4,opt,name=guaranteed_bandwidth_kbps,json=guaranteedBandwidthKbps,proto3" json:"guaranteed_bandwidth_kbps,omitempty"`
+	Priority                QosPriority            `protobuf:"varint,5,opt,name=priority,proto3,enum=openngfw.v1.QosPriority" json:"priority,omitempty"`
+	// DSCP value 0-63. The default 0 means no marking intent.
+	DscpMark uint32 `protobuf:"varint,6,opt,name=dscp_mark,json=dscpMark,proto3" json:"dscp_mark,omitempty"`
+	// Token-bucket burst intent in KiB. The default 0 lets the future runtime
+	// derive a bounded value from rate and interface posture.
+	BurstKbytes   uint32 `protobuf:"varint,7,opt,name=burst_kbytes,json=burstKbytes,proto3" json:"burst_kbytes,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *QosProfile) Reset() {
+	*x = QosProfile{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *QosProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*QosProfile) ProtoMessage() {}
+
+func (x *QosProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use QosProfile.ProtoReflect.Descriptor instead.
+func (*QosProfile) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *QosProfile) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *QosProfile) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *QosProfile) GetMaxBandwidthKbps() uint64 {
+	if x != nil {
+		return x.MaxBandwidthKbps
+	}
+	return 0
+}
+
+func (x *QosProfile) GetGuaranteedBandwidthKbps() uint64 {
+	if x != nil {
+		return x.GuaranteedBandwidthKbps
+	}
+	return 0
+}
+
+func (x *QosProfile) GetPriority() QosPriority {
+	if x != nil {
+		return x.Priority
+	}
+	return QosPriority_QOS_PRIORITY_UNSPECIFIED
+}
+
+func (x *QosProfile) GetDscpMark() uint32 {
+	if x != nil {
+		return x.DscpMark
+	}
+	return 0
+}
+
+func (x *QosProfile) GetBurstKbytes() uint32 {
+	if x != nil {
+		return x.BurstKbytes
+	}
+	return 0
+}
+
+// ZoneProtectionProfile declares coarse DoS protection intent for traffic
+// entering a zone. Enforcement is intentionally plan-only in this slice.
+type ZoneProtectionProfile struct {
+	state                    protoimpl.MessageState `protogen:"open.v1"`
+	Name                     string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Description              string                 `protobuf:"bytes,2,opt,name=description,proto3" json:"description,omitempty"`
+	Enabled                  bool                   `protobuf:"varint,3,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	SynFloodPps              uint64                 `protobuf:"varint,4,opt,name=syn_flood_pps,json=synFloodPps,proto3" json:"syn_flood_pps,omitempty"`
+	UdpFloodPps              uint64                 `protobuf:"varint,5,opt,name=udp_flood_pps,json=udpFloodPps,proto3" json:"udp_flood_pps,omitempty"`
+	IcmpFloodPps             uint64                 `protobuf:"varint,6,opt,name=icmp_flood_pps,json=icmpFloodPps,proto3" json:"icmp_flood_pps,omitempty"`
+	MaxConcurrentConnections uint64                 `protobuf:"varint,7,opt,name=max_concurrent_connections,json=maxConcurrentConnections,proto3" json:"max_concurrent_connections,omitempty"`
+	Action                   ZoneProtectionAction   `protobuf:"varint,8,opt,name=action,proto3,enum=openngfw.v1.ZoneProtectionAction" json:"action,omitempty"`
+	AuditLog                 bool                   `protobuf:"varint,9,opt,name=audit_log,json=auditLog,proto3" json:"audit_log,omitempty"`
+	unknownFields            protoimpl.UnknownFields
+	sizeCache                protoimpl.SizeCache
+}
+
+func (x *ZoneProtectionProfile) Reset() {
+	*x = ZoneProtectionProfile{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ZoneProtectionProfile) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ZoneProtectionProfile) ProtoMessage() {}
+
+func (x *ZoneProtectionProfile) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ZoneProtectionProfile.ProtoReflect.Descriptor instead.
+func (*ZoneProtectionProfile) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *ZoneProtectionProfile) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ZoneProtectionProfile) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *ZoneProtectionProfile) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *ZoneProtectionProfile) GetSynFloodPps() uint64 {
+	if x != nil {
+		return x.SynFloodPps
+	}
+	return 0
+}
+
+func (x *ZoneProtectionProfile) GetUdpFloodPps() uint64 {
+	if x != nil {
+		return x.UdpFloodPps
+	}
+	return 0
+}
+
+func (x *ZoneProtectionProfile) GetIcmpFloodPps() uint64 {
+	if x != nil {
+		return x.IcmpFloodPps
+	}
+	return 0
+}
+
+func (x *ZoneProtectionProfile) GetMaxConcurrentConnections() uint64 {
+	if x != nil {
+		return x.MaxConcurrentConnections
+	}
+	return 0
+}
+
+func (x *ZoneProtectionProfile) GetAction() ZoneProtectionAction {
+	if x != nil {
+		return x.Action
+	}
+	return ZoneProtectionAction_ZONE_PROTECTION_ACTION_UNSPECIFIED
+}
+
+func (x *ZoneProtectionProfile) GetAuditLog() bool {
+	if x != nil {
+		return x.AuditLog
+	}
+	return false
+}
+
+// HostInput controls traffic destined to the firewall appliance itself.
+// It is separate from zone-pair forwarding rules so management-plane
+// hardening cannot accidentally change transit traffic behavior.
+type HostInput struct {
+	state protoimpl.MessageState `protogen:"open.v1"`
+	// ACTION_UNSPECIFIED keeps the legacy default of ACTION_ALLOW. Production
+	// policies should set ACTION_DENY and add explicit allow rules.
+	DefaultAction Action           `protobuf:"varint,1,opt,name=default_action,json=defaultAction,proto3,enum=openngfw.v1.Action" json:"default_action,omitempty"`
+	Rules         []*HostInputRule `protobuf:"bytes,2,rep,name=rules,proto3" json:"rules,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HostInput) Reset() {
+	*x = HostInput{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[12]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HostInput) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HostInput) ProtoMessage() {}
+
+func (x *HostInput) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[12]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HostInput.ProtoReflect.Descriptor instead.
+func (*HostInput) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *HostInput) GetDefaultAction() Action {
+	if x != nil {
+		return x.DefaultAction
+	}
+	return Action_ACTION_UNSPECIFIED
+}
+
+func (x *HostInput) GetRules() []*HostInputRule {
+	if x != nil {
+		return x.Rules
+	}
+	return nil
+}
+
+type HostInputRule struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	Name            string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	FromZones       []string               `protobuf:"bytes,2,rep,name=from_zones,json=fromZones,proto3" json:"from_zones,omitempty"`
+	SourceAddresses []string               `protobuf:"bytes,3,rep,name=source_addresses,json=sourceAddresses,proto3" json:"source_addresses,omitempty"`
+	Services        []string               `protobuf:"bytes,4,rep,name=services,proto3" json:"services,omitempty"`
+	Action          Action                 `protobuf:"varint,5,opt,name=action,proto3,enum=openngfw.v1.Action" json:"action,omitempty"`
+	Log             bool                   `protobuf:"varint,6,opt,name=log,proto3" json:"log,omitempty"`
+	Disabled        bool                   `protobuf:"varint,7,opt,name=disabled,proto3" json:"disabled,omitempty"`
+	Description     string                 `protobuf:"bytes,8,opt,name=description,proto3" json:"description,omitempty"`
+	// Durable host-input identity used for custody, targeting, and dataplane
+	// attribution. Names remain operator-facing labels and can change.
+	Id            string `protobuf:"bytes,9,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *HostInputRule) Reset() {
+	*x = HostInputRule{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[13]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *HostInputRule) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*HostInputRule) ProtoMessage() {}
+
+func (x *HostInputRule) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[13]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use HostInputRule.ProtoReflect.Descriptor instead.
+func (*HostInputRule) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *HostInputRule) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *HostInputRule) GetFromZones() []string {
+	if x != nil {
+		return x.FromZones
+	}
+	return nil
+}
+
+func (x *HostInputRule) GetSourceAddresses() []string {
+	if x != nil {
+		return x.SourceAddresses
+	}
+	return nil
+}
+
+func (x *HostInputRule) GetServices() []string {
+	if x != nil {
+		return x.Services
+	}
+	return nil
+}
+
+func (x *HostInputRule) GetAction() Action {
+	if x != nil {
+		return x.Action
+	}
+	return Action_ACTION_UNSPECIFIED
+}
+
+func (x *HostInputRule) GetLog() bool {
+	if x != nil {
+		return x.Log
+	}
+	return false
+}
+
+func (x *HostInputRule) GetDisabled() bool {
+	if x != nil {
+		return x.Disabled
+	}
+	return false
+}
+
+func (x *HostInputRule) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+func (x *HostInputRule) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 type Nat struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Source        []*SourceNat           `protobuf:"bytes,1,rep,name=source,proto3" json:"source,omitempty"`
@@ -643,7 +1773,7 @@ type Nat struct {
 
 func (x *Nat) Reset() {
 	*x = Nat{}
-	mi := &file_openngfw_v1_policy_proto_msgTypes[6]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -655,7 +1785,7 @@ func (x *Nat) String() string {
 func (*Nat) ProtoMessage() {}
 
 func (x *Nat) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_proto_msgTypes[6]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -668,7 +1798,7 @@ func (x *Nat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Nat.ProtoReflect.Descriptor instead.
 func (*Nat) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{6}
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *Nat) GetSource() []*SourceNat {
@@ -697,13 +1827,16 @@ type SourceNat struct {
 	Masquerade bool `protobuf:"varint,4,opt,name=masquerade,proto3" json:"masquerade,omitempty"`
 	// Address reference used as the translated source (SNAT to a fixed IP).
 	TranslatedAddress string `protobuf:"bytes,5,opt,name=translated_address,json=translatedAddress,proto3" json:"translated_address,omitempty"`
-	unknownFields     protoimpl.UnknownFields
-	sizeCache         protoimpl.SizeCache
+	// Durable source-NAT identity used for custody, targeting, and dataplane
+	// attribution. Names remain operator-facing labels and can change.
+	Id            string `protobuf:"bytes,6,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *SourceNat) Reset() {
 	*x = SourceNat{}
-	mi := &file_openngfw_v1_policy_proto_msgTypes[7]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -715,7 +1848,7 @@ func (x *SourceNat) String() string {
 func (*SourceNat) ProtoMessage() {}
 
 func (x *SourceNat) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_proto_msgTypes[7]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -728,7 +1861,7 @@ func (x *SourceNat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use SourceNat.ProtoReflect.Descriptor instead.
 func (*SourceNat) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{7}
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *SourceNat) GetName() string {
@@ -766,6 +1899,13 @@ func (x *SourceNat) GetTranslatedAddress() string {
 	return ""
 }
 
+func (x *SourceNat) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 // DestinationNat rewrites the destination of traffic arriving in from_zone.
 type DestinationNat struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -780,13 +1920,16 @@ type DestinationNat struct {
 	TranslatedAddress string `protobuf:"bytes,5,opt,name=translated_address,json=translatedAddress,proto3" json:"translated_address,omitempty"`
 	// Optional port rewrite; 0 keeps the original port.
 	TranslatedPort uint32 `protobuf:"varint,6,opt,name=translated_port,json=translatedPort,proto3" json:"translated_port,omitempty"`
-	unknownFields  protoimpl.UnknownFields
-	sizeCache      protoimpl.SizeCache
+	// Durable destination-NAT identity used for custody, targeting, and dataplane
+	// attribution. Names remain operator-facing labels and can change.
+	Id            string `protobuf:"bytes,7,opt,name=id,proto3" json:"id,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
 }
 
 func (x *DestinationNat) Reset() {
 	*x = DestinationNat{}
-	mi := &file_openngfw_v1_policy_proto_msgTypes[8]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -798,7 +1941,7 @@ func (x *DestinationNat) String() string {
 func (*DestinationNat) ProtoMessage() {}
 
 func (x *DestinationNat) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_proto_msgTypes[8]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -811,7 +1954,7 @@ func (x *DestinationNat) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DestinationNat.ProtoReflect.Descriptor instead.
 func (*DestinationNat) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{8}
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *DestinationNat) GetName() string {
@@ -856,6 +1999,13 @@ func (x *DestinationNat) GetTranslatedPort() uint32 {
 	return 0
 }
 
+func (x *DestinationNat) GetId() string {
+	if x != nil {
+		return x.Id
+	}
+	return ""
+}
+
 type StaticRoute struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
 	// Destination prefix in CIDR form ("0.0.0.0/0" for default).
@@ -871,7 +2021,7 @@ type StaticRoute struct {
 
 func (x *StaticRoute) Reset() {
 	*x = StaticRoute{}
-	mi := &file_openngfw_v1_policy_proto_msgTypes[9]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -883,7 +2033,7 @@ func (x *StaticRoute) String() string {
 func (*StaticRoute) ProtoMessage() {}
 
 func (x *StaticRoute) ProtoReflect() protoreflect.Message {
-	mi := &file_openngfw_v1_policy_proto_msgTypes[9]
+	mi := &file_openngfw_v1_policy_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -896,7 +2046,7 @@ func (x *StaticRoute) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use StaticRoute.ProtoReflect.Descriptor instead.
 func (*StaticRoute) Descriptor() ([]byte, []int) {
-	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{9}
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *StaticRoute) GetDestination() string {
@@ -927,11 +2077,524 @@ func (x *StaticRoute) GetMetric() uint32 {
 	return 0
 }
 
+// Proxy contains bounded L7 reverse-proxy intent. It is intentionally separate
+// from L3/L4 forwarding rules so operators can review listener, WAF, and
+// backend posture before any active proxy rollout exists.
+type Proxy struct {
+	state           protoimpl.MessageState `protogen:"open.v1"`
+	VirtualServices []*VirtualService      `protobuf:"bytes,1,rep,name=virtual_services,json=virtualServices,proto3" json:"virtual_services,omitempty"`
+	WafPolicies     []*WafPolicy           `protobuf:"bytes,2,rep,name=waf_policies,json=wafPolicies,proto3" json:"waf_policies,omitempty"`
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
+func (x *Proxy) Reset() {
+	*x = Proxy{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Proxy) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Proxy) ProtoMessage() {}
+
+func (x *Proxy) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Proxy.ProtoReflect.Descriptor instead.
+func (*Proxy) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *Proxy) GetVirtualServices() []*VirtualService {
+	if x != nil {
+		return x.VirtualServices
+	}
+	return nil
+}
+
+func (x *Proxy) GetWafPolicies() []*WafPolicy {
+	if x != nil {
+		return x.WafPolicies
+	}
+	return nil
+}
+
+type VirtualService struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Enabled       bool                   `protobuf:"varint,2,opt,name=enabled,proto3" json:"enabled,omitempty"`
+	Hostnames     []string               `protobuf:"bytes,3,rep,name=hostnames,proto3" json:"hostnames,omitempty"`
+	Listener      *ProxyListener         `protobuf:"bytes,4,opt,name=listener,proto3" json:"listener,omitempty"`
+	Routes        []*ProxyRoute          `protobuf:"bytes,5,rep,name=routes,proto3" json:"routes,omitempty"`
+	Description   string                 `protobuf:"bytes,6,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *VirtualService) Reset() {
+	*x = VirtualService{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[19]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *VirtualService) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*VirtualService) ProtoMessage() {}
+
+func (x *VirtualService) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[19]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use VirtualService.ProtoReflect.Descriptor instead.
+func (*VirtualService) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{19}
+}
+
+func (x *VirtualService) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *VirtualService) GetEnabled() bool {
+	if x != nil {
+		return x.Enabled
+	}
+	return false
+}
+
+func (x *VirtualService) GetHostnames() []string {
+	if x != nil {
+		return x.Hostnames
+	}
+	return nil
+}
+
+func (x *VirtualService) GetListener() *ProxyListener {
+	if x != nil {
+		return x.Listener
+	}
+	return nil
+}
+
+func (x *VirtualService) GetRoutes() []*ProxyRoute {
+	if x != nil {
+		return x.Routes
+	}
+	return nil
+}
+
+func (x *VirtualService) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type ProxyListener struct {
+	state       protoimpl.MessageState `protogen:"open.v1"`
+	BindAddress string                 `protobuf:"bytes,1,opt,name=bind_address,json=bindAddress,proto3" json:"bind_address,omitempty"`
+	Port        uint32                 `protobuf:"varint,2,opt,name=port,proto3" json:"port,omitempty"`
+	Tls         bool                   `protobuf:"varint,3,opt,name=tls,proto3" json:"tls,omitempty"`
+	// Secret reference only. Certificate/private-key material is never stored in
+	// policy; production key custody remains an external hardening control.
+	TlsSecretRef  string `protobuf:"bytes,4,opt,name=tls_secret_ref,json=tlsSecretRef,proto3" json:"tls_secret_ref,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProxyListener) Reset() {
+	*x = ProxyListener{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[20]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProxyListener) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProxyListener) ProtoMessage() {}
+
+func (x *ProxyListener) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[20]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProxyListener.ProtoReflect.Descriptor instead.
+func (*ProxyListener) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{20}
+}
+
+func (x *ProxyListener) GetBindAddress() string {
+	if x != nil {
+		return x.BindAddress
+	}
+	return ""
+}
+
+func (x *ProxyListener) GetPort() uint32 {
+	if x != nil {
+		return x.Port
+	}
+	return 0
+}
+
+func (x *ProxyListener) GetTls() bool {
+	if x != nil {
+		return x.Tls
+	}
+	return false
+}
+
+func (x *ProxyListener) GetTlsSecretRef() string {
+	if x != nil {
+		return x.TlsSecretRef
+	}
+	return ""
+}
+
+type ProxyRoute struct {
+	state                protoimpl.MessageState `protogen:"open.v1"`
+	Name                 string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	PathPrefix           string                 `protobuf:"bytes,2,opt,name=path_prefix,json=pathPrefix,proto3" json:"path_prefix,omitempty"`
+	Backends             []*ProxyBackend        `protobuf:"bytes,3,rep,name=backends,proto3" json:"backends,omitempty"`
+	WafPolicy            string                 `protobuf:"bytes,4,opt,name=waf_policy,json=wafPolicy,proto3" json:"waf_policy,omitempty"`
+	RequireMtlsToBackend bool                   `protobuf:"varint,5,opt,name=require_mtls_to_backend,json=requireMtlsToBackend,proto3" json:"require_mtls_to_backend,omitempty"`
+	StripPrefix          bool                   `protobuf:"varint,6,opt,name=strip_prefix,json=stripPrefix,proto3" json:"strip_prefix,omitempty"`
+	unknownFields        protoimpl.UnknownFields
+	sizeCache            protoimpl.SizeCache
+}
+
+func (x *ProxyRoute) Reset() {
+	*x = ProxyRoute{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[21]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProxyRoute) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProxyRoute) ProtoMessage() {}
+
+func (x *ProxyRoute) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[21]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProxyRoute.ProtoReflect.Descriptor instead.
+func (*ProxyRoute) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{21}
+}
+
+func (x *ProxyRoute) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ProxyRoute) GetPathPrefix() string {
+	if x != nil {
+		return x.PathPrefix
+	}
+	return ""
+}
+
+func (x *ProxyRoute) GetBackends() []*ProxyBackend {
+	if x != nil {
+		return x.Backends
+	}
+	return nil
+}
+
+func (x *ProxyRoute) GetWafPolicy() string {
+	if x != nil {
+		return x.WafPolicy
+	}
+	return ""
+}
+
+func (x *ProxyRoute) GetRequireMtlsToBackend() bool {
+	if x != nil {
+		return x.RequireMtlsToBackend
+	}
+	return false
+}
+
+func (x *ProxyRoute) GetStripPrefix() bool {
+	if x != nil {
+		return x.StripPrefix
+	}
+	return false
+}
+
+type ProxyBackend struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Url           string                 `protobuf:"bytes,2,opt,name=url,proto3" json:"url,omitempty"`
+	Weight        uint32                 `protobuf:"varint,3,opt,name=weight,proto3" json:"weight,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProxyBackend) Reset() {
+	*x = ProxyBackend{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[22]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProxyBackend) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProxyBackend) ProtoMessage() {}
+
+func (x *ProxyBackend) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[22]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProxyBackend.ProtoReflect.Descriptor instead.
+func (*ProxyBackend) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{22}
+}
+
+func (x *ProxyBackend) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *ProxyBackend) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *ProxyBackend) GetWeight() uint32 {
+	if x != nil {
+		return x.Weight
+	}
+	return 0
+}
+
+type WafPolicy struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Name               string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Mode               WafMode                `protobuf:"varint,2,opt,name=mode,proto3,enum=openngfw.v1.WafMode" json:"mode,omitempty"`
+	RuleSets           []*WafRuleSet          `protobuf:"bytes,3,rep,name=rule_sets,json=ruleSets,proto3" json:"rule_sets,omitempty"`
+	RequestBodyLimitKb uint32                 `protobuf:"varint,4,opt,name=request_body_limit_kb,json=requestBodyLimitKb,proto3" json:"request_body_limit_kb,omitempty"`
+	AuditLogging       bool                   `protobuf:"varint,5,opt,name=audit_logging,json=auditLogging,proto3" json:"audit_logging,omitempty"`
+	RedactRequestBody  bool                   `protobuf:"varint,6,opt,name=redact_request_body,json=redactRequestBody,proto3" json:"redact_request_body,omitempty"`
+	Description        string                 `protobuf:"bytes,7,opt,name=description,proto3" json:"description,omitempty"`
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
+}
+
+func (x *WafPolicy) Reset() {
+	*x = WafPolicy{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[23]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WafPolicy) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WafPolicy) ProtoMessage() {}
+
+func (x *WafPolicy) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[23]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WafPolicy.ProtoReflect.Descriptor instead.
+func (*WafPolicy) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{23}
+}
+
+func (x *WafPolicy) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *WafPolicy) GetMode() WafMode {
+	if x != nil {
+		return x.Mode
+	}
+	return WafMode_WAF_MODE_UNSPECIFIED
+}
+
+func (x *WafPolicy) GetRuleSets() []*WafRuleSet {
+	if x != nil {
+		return x.RuleSets
+	}
+	return nil
+}
+
+func (x *WafPolicy) GetRequestBodyLimitKb() uint32 {
+	if x != nil {
+		return x.RequestBodyLimitKb
+	}
+	return 0
+}
+
+func (x *WafPolicy) GetAuditLogging() bool {
+	if x != nil {
+		return x.AuditLogging
+	}
+	return false
+}
+
+func (x *WafPolicy) GetRedactRequestBody() bool {
+	if x != nil {
+		return x.RedactRequestBody
+	}
+	return false
+}
+
+func (x *WafPolicy) GetDescription() string {
+	if x != nil {
+		return x.Description
+	}
+	return ""
+}
+
+type WafRuleSet struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Name          string                 `protobuf:"bytes,1,opt,name=name,proto3" json:"name,omitempty"`
+	Version       string                 `protobuf:"bytes,2,opt,name=version,proto3" json:"version,omitempty"`
+	Source        string                 `protobuf:"bytes,3,opt,name=source,proto3" json:"source,omitempty"`
+	Sha256        string                 `protobuf:"bytes,4,opt,name=sha256,proto3" json:"sha256,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *WafRuleSet) Reset() {
+	*x = WafRuleSet{}
+	mi := &file_openngfw_v1_policy_proto_msgTypes[24]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *WafRuleSet) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*WafRuleSet) ProtoMessage() {}
+
+func (x *WafRuleSet) ProtoReflect() protoreflect.Message {
+	mi := &file_openngfw_v1_policy_proto_msgTypes[24]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use WafRuleSet.ProtoReflect.Descriptor instead.
+func (*WafRuleSet) Descriptor() ([]byte, []int) {
+	return file_openngfw_v1_policy_proto_rawDescGZIP(), []int{24}
+}
+
+func (x *WafRuleSet) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *WafRuleSet) GetVersion() string {
+	if x != nil {
+		return x.Version
+	}
+	return ""
+}
+
+func (x *WafRuleSet) GetSource() string {
+	if x != nil {
+		return x.Source
+	}
+	return ""
+}
+
+func (x *WafRuleSet) GetSha256() string {
+	if x != nil {
+		return x.Sha256
+	}
+	return ""
+}
+
 var File_openngfw_v1_policy_proto protoreflect.FileDescriptor
 
 const file_openngfw_v1_policy_proto_rawDesc = "" +
 	"\n" +
-	"\x18openngfw/v1/policy.proto\x12\vopenngfw.v1\x1a\x15openngfw/v1/ids.proto\x1a\x17openngfw/v1/intel.proto\x1a\x19openngfw/v1/network.proto\x1a\x19openngfw/v1/routing.proto\x1a\x1bopenngfw/v1/telemetry.proto\x1a\x15openngfw/v1/vpn.proto\"\xab\x04\n" +
+	"\x18openngfw/v1/policy.proto\x12\vopenngfw.v1\x1a\x15openngfw/v1/ids.proto\x1a\x17openngfw/v1/intel.proto\x1a\x19openngfw/v1/network.proto\x1a\x19openngfw/v1/routing.proto\x1a\x1bopenngfw/v1/telemetry.proto\x1a\x15openngfw/v1/vpn.proto\"\xaf\a\n" +
 	"\x06Policy\x12'\n" +
 	"\x05zones\x18\x01 \x03(\v2\x11.openngfw.v1.ZoneR\x05zones\x122\n" +
 	"\taddresses\x18\x02 \x03(\v2\x14.openngfw.v1.AddressR\taddresses\x120\n" +
@@ -945,13 +2608,21 @@ const file_openngfw_v1_policy_proto_rawDesc = "" +
 	"\x03vpn\x18\n" +
 	" \x01(\v2\x10.openngfw.v1.VpnR\x03vpn\x12(\n" +
 	"\x05intel\x18\v \x01(\v2\x12.openngfw.v1.IntelR\x05intel\x12.\n" +
-	"\anetwork\x18\f \x01(\v2\x14.openngfw.v1.NetworkR\anetwork\"\\\n" +
+	"\anetwork\x18\f \x01(\v2\x14.openngfw.v1.NetworkR\anetwork\x125\n" +
+	"\n" +
+	"host_input\x18\r \x01(\v2\x16.openngfw.v1.HostInputR\thostInput\x12<\n" +
+	"\fapplications\x18\x0e \x03(\v2\x18.openngfw.v1.ApplicationR\fapplications\x12I\n" +
+	"\x11security_profiles\x18\x0f \x03(\v2\x1c.openngfw.v1.SecurityProfileR\x10securityProfiles\x12(\n" +
+	"\x05proxy\x18\x10 \x01(\v2\x12.openngfw.v1.ProxyR\x05proxy\x12:\n" +
+	"\fqos_profiles\x18\x11 \x03(\v2\x17.openngfw.v1.QosProfileR\vqosProfiles\x12\\\n" +
+	"\x18zone_protection_profiles\x18\x12 \x03(\v2\".openngfw.v1.ZoneProtectionProfileR\x16zoneProtectionProfiles\"\x94\x01\n" +
 	"\x04Zone\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1e\n" +
 	"\n" +
 	"interfaces\x18\x02 \x03(\tR\n" +
 	"interfaces\x12 \n" +
-	"\vdescription\x18\x03 \x01(\tR\vdescription\"S\n" +
+	"\vdescription\x18\x03 \x01(\tR\vdescription\x126\n" +
+	"\x17zone_protection_profile\x18\x04 \x01(\tR\x15zoneProtectionProfile\"S\n" +
 	"\aAddress\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x12\n" +
 	"\x04cidr\x18\x02 \x01(\tR\x04cidr\x12 \n" +
@@ -960,10 +2631,20 @@ const file_openngfw_v1_policy_proto_rawDesc = "" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x121\n" +
 	"\bprotocol\x18\x02 \x01(\x0e2\x15.openngfw.v1.ProtocolR\bprotocol\x12,\n" +
 	"\x05ports\x18\x03 \x03(\v2\x16.openngfw.v1.PortRangeR\x05ports\x12 \n" +
-	"\vdescription\x18\x04 \x01(\tR\vdescription\"3\n" +
+	"\vdescription\x18\x04 \x01(\tR\vdescription\"\xdd\x01\n" +
+	"\vApplication\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12!\n" +
+	"\fdisplay_name\x18\x02 \x01(\tR\vdisplayName\x12\x1a\n" +
+	"\bcategory\x18\x03 \x01(\tR\bcategory\x12%\n" +
+	"\x0eengine_signals\x18\x04 \x03(\tR\rengineSignals\x122\n" +
+	"\x05ports\x18\x05 \x03(\v2\x1c.openngfw.v1.ApplicationPortR\x05ports\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\"r\n" +
+	"\x0fApplicationPort\x121\n" +
+	"\bprotocol\x18\x01 \x01(\x0e2\x15.openngfw.v1.ProtocolR\bprotocol\x12,\n" +
+	"\x05ports\x18\x02 \x03(\v2\x16.openngfw.v1.PortRangeR\x05ports\"3\n" +
 	"\tPortRange\x12\x14\n" +
 	"\x05start\x18\x01 \x01(\rR\x05start\x12\x10\n" +
-	"\x03end\x18\x02 \x01(\rR\x03end\"\xcd\x02\n" +
+	"\x03end\x18\x02 \x01(\rR\x03end\"\xa7\x04\n" +
 	"\x04Rule\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
 	"\n" +
@@ -976,10 +2657,62 @@ const file_openngfw_v1_policy_proto_rawDesc = "" +
 	"\x03log\x18\b \x01(\bR\x03log\x12\x1a\n" +
 	"\bdisabled\x18\t \x01(\bR\bdisabled\x12 \n" +
 	"\vdescription\x18\n" +
-	" \x01(\tR\vdescription\"t\n" +
+	" \x01(\tR\vdescription\x12\"\n" +
+	"\fapplications\x18\v \x03(\tR\fapplications\x12\x12\n" +
+	"\x04tags\x18\f \x03(\tR\x04tags\x12+\n" +
+	"\x11security_profiles\x18\r \x03(\tR\x10securityProfiles\x12\x0e\n" +
+	"\x02id\x18\x0e \x01(\tR\x02id\x12B\n" +
+	"\rmatch_context\x18\x0f \x01(\v2\x1d.openngfw.v1.RuleMatchContextR\fmatchContext\x12\x1f\n" +
+	"\vqos_profile\x18\x10 \x01(\tR\n" +
+	"qosProfile\"\x81\x01\n" +
+	"\x10RuleMatchContext\x12\x14\n" +
+	"\x05users\x18\x01 \x03(\tR\x05users\x12\x16\n" +
+	"\x06groups\x18\x02 \x03(\tR\x06groups\x12\x18\n" +
+	"\adevices\x18\x03 \x03(\tR\adevices\x12%\n" +
+	"\x0eposture_labels\x18\x04 \x03(\tR\rpostureLabels\"\xba\x02\n" +
+	"\x0fSecurityProfile\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12E\n" +
+	"\x0etls_inspection\x18\x03 \x01(\x0e2\x1e.openngfw.v1.TlsInspectionModeR\rtlsInspection\x12%\n" +
+	"\x0eurl_categories\x18\x04 \x03(\tR\rurlCategories\x12?\n" +
+	"\fdns_security\x18\x05 \x01(\x0e2\x1c.openngfw.v1.DnsSecurityModeR\vdnsSecurity\x12B\n" +
+	"\rfile_security\x18\x06 \x01(\x0e2\x1d.openngfw.v1.FileSecurityModeR\ffileSecurity\"\xa2\x02\n" +
+	"\n" +
+	"QosProfile\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12,\n" +
+	"\x12max_bandwidth_kbps\x18\x03 \x01(\x04R\x10maxBandwidthKbps\x12:\n" +
+	"\x19guaranteed_bandwidth_kbps\x18\x04 \x01(\x04R\x17guaranteedBandwidthKbps\x124\n" +
+	"\bpriority\x18\x05 \x01(\x0e2\x18.openngfw.v1.QosPriorityR\bpriority\x12\x1b\n" +
+	"\tdscp_mark\x18\x06 \x01(\rR\bdscpMark\x12!\n" +
+	"\fburst_kbytes\x18\a \x01(\rR\vburstKbytes\"\xeb\x02\n" +
+	"\x15ZoneProtectionProfile\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12 \n" +
+	"\vdescription\x18\x02 \x01(\tR\vdescription\x12\x18\n" +
+	"\aenabled\x18\x03 \x01(\bR\aenabled\x12\"\n" +
+	"\rsyn_flood_pps\x18\x04 \x01(\x04R\vsynFloodPps\x12\"\n" +
+	"\rudp_flood_pps\x18\x05 \x01(\x04R\vudpFloodPps\x12$\n" +
+	"\x0eicmp_flood_pps\x18\x06 \x01(\x04R\ficmpFloodPps\x12<\n" +
+	"\x1amax_concurrent_connections\x18\a \x01(\x04R\x18maxConcurrentConnections\x129\n" +
+	"\x06action\x18\b \x01(\x0e2!.openngfw.v1.ZoneProtectionActionR\x06action\x12\x1b\n" +
+	"\taudit_log\x18\t \x01(\bR\bauditLog\"y\n" +
+	"\tHostInput\x12:\n" +
+	"\x0edefault_action\x18\x01 \x01(\x0e2\x13.openngfw.v1.ActionR\rdefaultAction\x120\n" +
+	"\x05rules\x18\x02 \x03(\v2\x1a.openngfw.v1.HostInputRuleR\x05rules\"\x96\x02\n" +
+	"\rHostInputRule\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1d\n" +
+	"\n" +
+	"from_zones\x18\x02 \x03(\tR\tfromZones\x12)\n" +
+	"\x10source_addresses\x18\x03 \x03(\tR\x0fsourceAddresses\x12\x1a\n" +
+	"\bservices\x18\x04 \x03(\tR\bservices\x12+\n" +
+	"\x06action\x18\x05 \x01(\x0e2\x13.openngfw.v1.ActionR\x06action\x12\x10\n" +
+	"\x03log\x18\x06 \x01(\bR\x03log\x12\x1a\n" +
+	"\bdisabled\x18\a \x01(\bR\bdisabled\x12 \n" +
+	"\vdescription\x18\b \x01(\tR\vdescription\x12\x0e\n" +
+	"\x02id\x18\t \x01(\tR\x02id\"t\n" +
 	"\x03Nat\x12.\n" +
 	"\x06source\x18\x01 \x03(\v2\x16.openngfw.v1.SourceNatR\x06source\x12=\n" +
-	"\vdestination\x18\x02 \x03(\v2\x1b.openngfw.v1.DestinationNatR\vdestination\"\xae\x01\n" +
+	"\vdestination\x18\x02 \x03(\v2\x1b.openngfw.v1.DestinationNatR\vdestination\"\xbe\x01\n" +
 	"\tSourceNat\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x17\n" +
 	"\ato_zone\x18\x02 \x01(\tR\x06toZone\x12%\n" +
@@ -987,30 +2720,103 @@ const file_openngfw_v1_policy_proto_rawDesc = "" +
 	"\n" +
 	"masquerade\x18\x04 \x01(\bR\n" +
 	"masquerade\x12-\n" +
-	"\x12translated_address\x18\x05 \x01(\tR\x11translatedAddress\"\xe4\x01\n" +
+	"\x12translated_address\x18\x05 \x01(\tR\x11translatedAddress\x12\x0e\n" +
+	"\x02id\x18\x06 \x01(\tR\x02id\"\xf4\x01\n" +
 	"\x0eDestinationNat\x12\x12\n" +
 	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1b\n" +
 	"\tfrom_zone\x18\x02 \x01(\tR\bfromZone\x12\x18\n" +
 	"\aservice\x18\x03 \x01(\tR\aservice\x12/\n" +
 	"\x13destination_address\x18\x04 \x01(\tR\x12destinationAddress\x12-\n" +
 	"\x12translated_address\x18\x05 \x01(\tR\x11translatedAddress\x12'\n" +
-	"\x0ftranslated_port\x18\x06 \x01(\rR\x0etranslatedPort\"w\n" +
+	"\x0ftranslated_port\x18\x06 \x01(\rR\x0etranslatedPort\x12\x0e\n" +
+	"\x02id\x18\a \x01(\tR\x02id\"w\n" +
 	"\vStaticRoute\x12 \n" +
 	"\vdestination\x18\x01 \x01(\tR\vdestination\x12\x10\n" +
 	"\x03via\x18\x02 \x01(\tR\x03via\x12\x1c\n" +
 	"\tinterface\x18\x03 \x01(\tR\tinterface\x12\x16\n" +
-	"\x06metric\x18\x04 \x01(\rR\x06metric*m\n" +
+	"\x06metric\x18\x04 \x01(\rR\x06metric\"\x8a\x01\n" +
+	"\x05Proxy\x12F\n" +
+	"\x10virtual_services\x18\x01 \x03(\v2\x1b.openngfw.v1.VirtualServiceR\x0fvirtualServices\x129\n" +
+	"\fwaf_policies\x18\x02 \x03(\v2\x16.openngfw.v1.WafPolicyR\vwafPolicies\"\xe7\x01\n" +
+	"\x0eVirtualService\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\aenabled\x18\x02 \x01(\bR\aenabled\x12\x1c\n" +
+	"\thostnames\x18\x03 \x03(\tR\thostnames\x126\n" +
+	"\blistener\x18\x04 \x01(\v2\x1a.openngfw.v1.ProxyListenerR\blistener\x12/\n" +
+	"\x06routes\x18\x05 \x03(\v2\x17.openngfw.v1.ProxyRouteR\x06routes\x12 \n" +
+	"\vdescription\x18\x06 \x01(\tR\vdescription\"~\n" +
+	"\rProxyListener\x12!\n" +
+	"\fbind_address\x18\x01 \x01(\tR\vbindAddress\x12\x12\n" +
+	"\x04port\x18\x02 \x01(\rR\x04port\x12\x10\n" +
+	"\x03tls\x18\x03 \x01(\bR\x03tls\x12$\n" +
+	"\x0etls_secret_ref\x18\x04 \x01(\tR\ftlsSecretRef\"\xf1\x01\n" +
+	"\n" +
+	"ProxyRoute\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x1f\n" +
+	"\vpath_prefix\x18\x02 \x01(\tR\n" +
+	"pathPrefix\x125\n" +
+	"\bbackends\x18\x03 \x03(\v2\x19.openngfw.v1.ProxyBackendR\bbackends\x12\x1d\n" +
+	"\n" +
+	"waf_policy\x18\x04 \x01(\tR\twafPolicy\x125\n" +
+	"\x17require_mtls_to_backend\x18\x05 \x01(\bR\x14requireMtlsToBackend\x12!\n" +
+	"\fstrip_prefix\x18\x06 \x01(\bR\vstripPrefix\"L\n" +
+	"\fProxyBackend\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x10\n" +
+	"\x03url\x18\x02 \x01(\tR\x03url\x12\x16\n" +
+	"\x06weight\x18\x03 \x01(\rR\x06weight\"\xa9\x02\n" +
+	"\tWafPolicy\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12(\n" +
+	"\x04mode\x18\x02 \x01(\x0e2\x14.openngfw.v1.WafModeR\x04mode\x124\n" +
+	"\trule_sets\x18\x03 \x03(\v2\x17.openngfw.v1.WafRuleSetR\bruleSets\x121\n" +
+	"\x15request_body_limit_kb\x18\x04 \x01(\rR\x12requestBodyLimitKb\x12#\n" +
+	"\raudit_logging\x18\x05 \x01(\bR\fauditLogging\x12.\n" +
+	"\x13redact_request_body\x18\x06 \x01(\bR\x11redactRequestBody\x12 \n" +
+	"\vdescription\x18\a \x01(\tR\vdescription\"j\n" +
+	"\n" +
+	"WafRuleSet\x12\x12\n" +
+	"\x04name\x18\x01 \x01(\tR\x04name\x12\x18\n" +
+	"\aversion\x18\x02 \x01(\tR\aversion\x12\x16\n" +
+	"\x06source\x18\x03 \x01(\tR\x06source\x12\x16\n" +
+	"\x06sha256\x18\x04 \x01(\tR\x06sha256*m\n" +
 	"\bProtocol\x12\x18\n" +
 	"\x14PROTOCOL_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fPROTOCOL_TCP\x10\x01\x12\x10\n" +
 	"\fPROTOCOL_UDP\x10\x02\x12\x11\n" +
 	"\rPROTOCOL_ICMP\x10\x03\x12\x10\n" +
-	"\fPROTOCOL_ANY\x10\x04*V\n" +
+	"\fPROTOCOL_ANY\x10\x04*\x8c\x01\n" +
+	"\vQosPriority\x12\x1c\n" +
+	"\x18QOS_PRIORITY_UNSPECIFIED\x10\x00\x12\x14\n" +
+	"\x10QOS_PRIORITY_LOW\x10\x01\x12\x17\n" +
+	"\x13QOS_PRIORITY_MEDIUM\x10\x02\x12\x15\n" +
+	"\x11QOS_PRIORITY_HIGH\x10\x03\x12\x19\n" +
+	"\x15QOS_PRIORITY_CRITICAL\x10\x04*\x81\x01\n" +
+	"\x14ZoneProtectionAction\x12&\n" +
+	"\"ZONE_PROTECTION_ACTION_UNSPECIFIED\x10\x00\x12 \n" +
+	"\x1cZONE_PROTECTION_ACTION_ALERT\x10\x01\x12\x1f\n" +
+	"\x1bZONE_PROTECTION_ACTION_DROP\x10\x02*\xac\x01\n" +
+	"\x11TlsInspectionMode\x12#\n" +
+	"\x1fTLS_INSPECTION_MODE_UNSPECIFIED\x10\x00\x12%\n" +
+	"!TLS_INSPECTION_MODE_METADATA_ONLY\x10\x01\x12+\n" +
+	"'TLS_INSPECTION_MODE_DECRYPTION_REQUIRED\x10\x02\x12\x1e\n" +
+	"\x1aTLS_INSPECTION_MODE_BYPASS\x10\x03*{\n" +
+	"\x0fDnsSecurityMode\x12!\n" +
+	"\x1dDNS_SECURITY_MODE_UNSPECIFIED\x10\x00\x12\x1e\n" +
+	"\x1aDNS_SECURITY_MODE_LOG_ONLY\x10\x01\x12%\n" +
+	"!DNS_SECURITY_MODE_BLOCK_MALICIOUS\x10\x02*\xa9\x01\n" +
+	"\x10FileSecurityMode\x12\"\n" +
+	"\x1eFILE_SECURITY_MODE_UNSPECIFIED\x10\x00\x12\x1f\n" +
+	"\x1bFILE_SECURITY_MODE_LOG_ONLY\x10\x01\x12(\n" +
+	"$FILE_SECURITY_MODE_BLOCK_EXECUTABLES\x10\x02\x12&\n" +
+	"\"FILE_SECURITY_MODE_BLOCK_HIGH_RISK\x10\x03*V\n" +
 	"\x06Action\x12\x16\n" +
 	"\x12ACTION_UNSPECIFIED\x10\x00\x12\x10\n" +
 	"\fACTION_ALLOW\x10\x01\x12\x0f\n" +
 	"\vACTION_DENY\x10\x02\x12\x11\n" +
-	"\rACTION_REJECT\x10\x03B\xaa\x01\n" +
+	"\rACTION_REJECT\x10\x03*L\n" +
+	"\aWafMode\x12\x18\n" +
+	"\x14WAF_MODE_UNSPECIFIED\x10\x00\x12\x13\n" +
+	"\x0fWAF_MODE_DETECT\x10\x01\x12\x12\n" +
+	"\x0eWAF_MODE_BLOCK\x10\x02B\xaa\x01\n" +
 	"\x0fcom.openngfw.v1B\vPolicyProtoP\x01Z=github.com/detailtech/oss-ngfw/api/gen/openngfw/v1;openngfwv1\xa2\x02\x03OXX\xaa\x02\vOpenngfw.V1\xca\x02\vOpenngfw\\V1\xe2\x02\x17Openngfw\\V1\\GPBMetadata\xea\x02\fOpenngfw::V1b\x06proto3"
 
 var (
@@ -1025,51 +2831,97 @@ func file_openngfw_v1_policy_proto_rawDescGZIP() []byte {
 	return file_openngfw_v1_policy_proto_rawDescData
 }
 
-var file_openngfw_v1_policy_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_openngfw_v1_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_openngfw_v1_policy_proto_enumTypes = make([]protoimpl.EnumInfo, 8)
+var file_openngfw_v1_policy_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_openngfw_v1_policy_proto_goTypes = []any{
-	(Protocol)(0),          // 0: openngfw.v1.Protocol
-	(Action)(0),            // 1: openngfw.v1.Action
-	(*Policy)(nil),         // 2: openngfw.v1.Policy
-	(*Zone)(nil),           // 3: openngfw.v1.Zone
-	(*Address)(nil),        // 4: openngfw.v1.Address
-	(*Service)(nil),        // 5: openngfw.v1.Service
-	(*PortRange)(nil),      // 6: openngfw.v1.PortRange
-	(*Rule)(nil),           // 7: openngfw.v1.Rule
-	(*Nat)(nil),            // 8: openngfw.v1.Nat
-	(*SourceNat)(nil),      // 9: openngfw.v1.SourceNat
-	(*DestinationNat)(nil), // 10: openngfw.v1.DestinationNat
-	(*StaticRoute)(nil),    // 11: openngfw.v1.StaticRoute
-	(*Ids)(nil),            // 12: openngfw.v1.Ids
-	(*Telemetry)(nil),      // 13: openngfw.v1.Telemetry
-	(*Routing)(nil),        // 14: openngfw.v1.Routing
-	(*Vpn)(nil),            // 15: openngfw.v1.Vpn
-	(*Intel)(nil),          // 16: openngfw.v1.Intel
-	(*Network)(nil),        // 17: openngfw.v1.Network
+	(Protocol)(0),                 // 0: openngfw.v1.Protocol
+	(QosPriority)(0),              // 1: openngfw.v1.QosPriority
+	(ZoneProtectionAction)(0),     // 2: openngfw.v1.ZoneProtectionAction
+	(TlsInspectionMode)(0),        // 3: openngfw.v1.TlsInspectionMode
+	(DnsSecurityMode)(0),          // 4: openngfw.v1.DnsSecurityMode
+	(FileSecurityMode)(0),         // 5: openngfw.v1.FileSecurityMode
+	(Action)(0),                   // 6: openngfw.v1.Action
+	(WafMode)(0),                  // 7: openngfw.v1.WafMode
+	(*Policy)(nil),                // 8: openngfw.v1.Policy
+	(*Zone)(nil),                  // 9: openngfw.v1.Zone
+	(*Address)(nil),               // 10: openngfw.v1.Address
+	(*Service)(nil),               // 11: openngfw.v1.Service
+	(*Application)(nil),           // 12: openngfw.v1.Application
+	(*ApplicationPort)(nil),       // 13: openngfw.v1.ApplicationPort
+	(*PortRange)(nil),             // 14: openngfw.v1.PortRange
+	(*Rule)(nil),                  // 15: openngfw.v1.Rule
+	(*RuleMatchContext)(nil),      // 16: openngfw.v1.RuleMatchContext
+	(*SecurityProfile)(nil),       // 17: openngfw.v1.SecurityProfile
+	(*QosProfile)(nil),            // 18: openngfw.v1.QosProfile
+	(*ZoneProtectionProfile)(nil), // 19: openngfw.v1.ZoneProtectionProfile
+	(*HostInput)(nil),             // 20: openngfw.v1.HostInput
+	(*HostInputRule)(nil),         // 21: openngfw.v1.HostInputRule
+	(*Nat)(nil),                   // 22: openngfw.v1.Nat
+	(*SourceNat)(nil),             // 23: openngfw.v1.SourceNat
+	(*DestinationNat)(nil),        // 24: openngfw.v1.DestinationNat
+	(*StaticRoute)(nil),           // 25: openngfw.v1.StaticRoute
+	(*Proxy)(nil),                 // 26: openngfw.v1.Proxy
+	(*VirtualService)(nil),        // 27: openngfw.v1.VirtualService
+	(*ProxyListener)(nil),         // 28: openngfw.v1.ProxyListener
+	(*ProxyRoute)(nil),            // 29: openngfw.v1.ProxyRoute
+	(*ProxyBackend)(nil),          // 30: openngfw.v1.ProxyBackend
+	(*WafPolicy)(nil),             // 31: openngfw.v1.WafPolicy
+	(*WafRuleSet)(nil),            // 32: openngfw.v1.WafRuleSet
+	(*Ids)(nil),                   // 33: openngfw.v1.Ids
+	(*Telemetry)(nil),             // 34: openngfw.v1.Telemetry
+	(*Routing)(nil),               // 35: openngfw.v1.Routing
+	(*Vpn)(nil),                   // 36: openngfw.v1.Vpn
+	(*Intel)(nil),                 // 37: openngfw.v1.Intel
+	(*Network)(nil),               // 38: openngfw.v1.Network
 }
 var file_openngfw_v1_policy_proto_depIdxs = []int32{
-	3,  // 0: openngfw.v1.Policy.zones:type_name -> openngfw.v1.Zone
-	4,  // 1: openngfw.v1.Policy.addresses:type_name -> openngfw.v1.Address
-	5,  // 2: openngfw.v1.Policy.services:type_name -> openngfw.v1.Service
-	7,  // 3: openngfw.v1.Policy.rules:type_name -> openngfw.v1.Rule
-	8,  // 4: openngfw.v1.Policy.nat:type_name -> openngfw.v1.Nat
-	11, // 5: openngfw.v1.Policy.static_routes:type_name -> openngfw.v1.StaticRoute
-	12, // 6: openngfw.v1.Policy.ids:type_name -> openngfw.v1.Ids
-	13, // 7: openngfw.v1.Policy.telemetry:type_name -> openngfw.v1.Telemetry
-	14, // 8: openngfw.v1.Policy.routing:type_name -> openngfw.v1.Routing
-	15, // 9: openngfw.v1.Policy.vpn:type_name -> openngfw.v1.Vpn
-	16, // 10: openngfw.v1.Policy.intel:type_name -> openngfw.v1.Intel
-	17, // 11: openngfw.v1.Policy.network:type_name -> openngfw.v1.Network
-	0,  // 12: openngfw.v1.Service.protocol:type_name -> openngfw.v1.Protocol
-	6,  // 13: openngfw.v1.Service.ports:type_name -> openngfw.v1.PortRange
-	1,  // 14: openngfw.v1.Rule.action:type_name -> openngfw.v1.Action
-	9,  // 15: openngfw.v1.Nat.source:type_name -> openngfw.v1.SourceNat
-	10, // 16: openngfw.v1.Nat.destination:type_name -> openngfw.v1.DestinationNat
-	17, // [17:17] is the sub-list for method output_type
-	17, // [17:17] is the sub-list for method input_type
-	17, // [17:17] is the sub-list for extension type_name
-	17, // [17:17] is the sub-list for extension extendee
-	0,  // [0:17] is the sub-list for field type_name
+	9,  // 0: openngfw.v1.Policy.zones:type_name -> openngfw.v1.Zone
+	10, // 1: openngfw.v1.Policy.addresses:type_name -> openngfw.v1.Address
+	11, // 2: openngfw.v1.Policy.services:type_name -> openngfw.v1.Service
+	15, // 3: openngfw.v1.Policy.rules:type_name -> openngfw.v1.Rule
+	22, // 4: openngfw.v1.Policy.nat:type_name -> openngfw.v1.Nat
+	25, // 5: openngfw.v1.Policy.static_routes:type_name -> openngfw.v1.StaticRoute
+	33, // 6: openngfw.v1.Policy.ids:type_name -> openngfw.v1.Ids
+	34, // 7: openngfw.v1.Policy.telemetry:type_name -> openngfw.v1.Telemetry
+	35, // 8: openngfw.v1.Policy.routing:type_name -> openngfw.v1.Routing
+	36, // 9: openngfw.v1.Policy.vpn:type_name -> openngfw.v1.Vpn
+	37, // 10: openngfw.v1.Policy.intel:type_name -> openngfw.v1.Intel
+	38, // 11: openngfw.v1.Policy.network:type_name -> openngfw.v1.Network
+	20, // 12: openngfw.v1.Policy.host_input:type_name -> openngfw.v1.HostInput
+	12, // 13: openngfw.v1.Policy.applications:type_name -> openngfw.v1.Application
+	17, // 14: openngfw.v1.Policy.security_profiles:type_name -> openngfw.v1.SecurityProfile
+	26, // 15: openngfw.v1.Policy.proxy:type_name -> openngfw.v1.Proxy
+	18, // 16: openngfw.v1.Policy.qos_profiles:type_name -> openngfw.v1.QosProfile
+	19, // 17: openngfw.v1.Policy.zone_protection_profiles:type_name -> openngfw.v1.ZoneProtectionProfile
+	0,  // 18: openngfw.v1.Service.protocol:type_name -> openngfw.v1.Protocol
+	14, // 19: openngfw.v1.Service.ports:type_name -> openngfw.v1.PortRange
+	13, // 20: openngfw.v1.Application.ports:type_name -> openngfw.v1.ApplicationPort
+	0,  // 21: openngfw.v1.ApplicationPort.protocol:type_name -> openngfw.v1.Protocol
+	14, // 22: openngfw.v1.ApplicationPort.ports:type_name -> openngfw.v1.PortRange
+	6,  // 23: openngfw.v1.Rule.action:type_name -> openngfw.v1.Action
+	16, // 24: openngfw.v1.Rule.match_context:type_name -> openngfw.v1.RuleMatchContext
+	3,  // 25: openngfw.v1.SecurityProfile.tls_inspection:type_name -> openngfw.v1.TlsInspectionMode
+	4,  // 26: openngfw.v1.SecurityProfile.dns_security:type_name -> openngfw.v1.DnsSecurityMode
+	5,  // 27: openngfw.v1.SecurityProfile.file_security:type_name -> openngfw.v1.FileSecurityMode
+	1,  // 28: openngfw.v1.QosProfile.priority:type_name -> openngfw.v1.QosPriority
+	2,  // 29: openngfw.v1.ZoneProtectionProfile.action:type_name -> openngfw.v1.ZoneProtectionAction
+	6,  // 30: openngfw.v1.HostInput.default_action:type_name -> openngfw.v1.Action
+	21, // 31: openngfw.v1.HostInput.rules:type_name -> openngfw.v1.HostInputRule
+	6,  // 32: openngfw.v1.HostInputRule.action:type_name -> openngfw.v1.Action
+	23, // 33: openngfw.v1.Nat.source:type_name -> openngfw.v1.SourceNat
+	24, // 34: openngfw.v1.Nat.destination:type_name -> openngfw.v1.DestinationNat
+	27, // 35: openngfw.v1.Proxy.virtual_services:type_name -> openngfw.v1.VirtualService
+	31, // 36: openngfw.v1.Proxy.waf_policies:type_name -> openngfw.v1.WafPolicy
+	28, // 37: openngfw.v1.VirtualService.listener:type_name -> openngfw.v1.ProxyListener
+	29, // 38: openngfw.v1.VirtualService.routes:type_name -> openngfw.v1.ProxyRoute
+	30, // 39: openngfw.v1.ProxyRoute.backends:type_name -> openngfw.v1.ProxyBackend
+	7,  // 40: openngfw.v1.WafPolicy.mode:type_name -> openngfw.v1.WafMode
+	32, // 41: openngfw.v1.WafPolicy.rule_sets:type_name -> openngfw.v1.WafRuleSet
+	42, // [42:42] is the sub-list for method output_type
+	42, // [42:42] is the sub-list for method input_type
+	42, // [42:42] is the sub-list for extension type_name
+	42, // [42:42] is the sub-list for extension extendee
+	0,  // [0:42] is the sub-list for field type_name
 }
 
 func init() { file_openngfw_v1_policy_proto_init() }
@@ -1088,8 +2940,8 @@ func file_openngfw_v1_policy_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_openngfw_v1_policy_proto_rawDesc), len(file_openngfw_v1_policy_proto_rawDesc)),
-			NumEnums:      2,
-			NumMessages:   10,
+			NumEnums:      8,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   0,
 		},
