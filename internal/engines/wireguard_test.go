@@ -143,6 +143,41 @@ func TestFRREnableDaemons(t *testing.T) {
 	}
 }
 
+func TestFRRApplyDisablesManagedDaemonsOnCleanup(t *testing.T) {
+	dir := t.TempDir()
+	daemonsFile := dir + "/daemons"
+	configFile := dir + "/frr.conf"
+	orig := "zebra=yes\nbgpd=no\nospfd=no\nripd=no\nvtysh_enable=yes\n"
+	if err := writeFile(daemonsFile, orig); err != nil {
+		t.Fatal(err)
+	}
+	f := &FRR{
+		ConfigPath:  configFile,
+		DaemonsPath: daemonsFile,
+		ReloadCmd:   []string{"true"},
+		StateDir:    dir,
+	}
+	if err := f.Apply(context.Background(), []byte(ModeFRRHeader("bgpd")+"\n")); err != nil {
+		t.Fatal(err)
+	}
+	if got := readFile(t, daemonsFile); !strings.Contains(got, "bgpd=yes") {
+		t.Fatalf("daemons after enable = %q, want bgpd=yes", got)
+	}
+
+	if err := f.Apply(context.Background(), []byte(ModeFRRHeader("none")+"\n")); err != nil {
+		t.Fatal(err)
+	}
+	got := readFile(t, daemonsFile)
+	for _, want := range []string{"bgpd=no", "ospfd=no", "zebra=yes", "vtysh_enable=yes"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("daemons after cleanup missing %q:\n%s", want, got)
+		}
+	}
+	if _, err := os.Stat(f.markerPath()); !os.IsNotExist(err) {
+		t.Fatalf("managed marker still present after cleanup: %v", err)
+	}
+}
+
 func writeFile(path, content string) error {
 	return os.WriteFile(path, []byte(content), 0o644)
 }

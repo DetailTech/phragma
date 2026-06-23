@@ -96,6 +96,9 @@ func (f *FRR) Apply(ctx context.Context, config []byte) error {
 		if _, err := os.Stat(f.markerPath()); err != nil {
 			return nil // we never managed FRR here
 		}
+		if err := f.enableDaemons(nil); err != nil {
+			return err
+		}
 		if err := os.WriteFile(f.configPath(), config, 0o640); err != nil {
 			return err
 		}

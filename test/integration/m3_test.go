@@ -366,13 +366,18 @@ zebra_skip=%s
 bgpd_skip=%s
 
 stop_frr() {
-  for pidfile in "$root/bgpd.pid" "$root/zebra.pid"; do
+  for daemon in bgpd zebra; do
+    pidfile="$root/$daemon.pid"
     if [ -s "$pidfile" ]; then
       pid="$(cat "$pidfile")"
       kill -TERM "$pid" 2>/dev/null || true
+      i=0
+      while [ "$i" -lt 30 ] && kill -0 "$pid" 2>/dev/null; do
+        i=$((i + 1))
+        sleep 0.1
+      done
     fi
   done
-  sleep 1
   for pidfile in "$root/bgpd.pid" "$root/zebra.pid"; do
     if [ -s "$pidfile" ]; then
       pid="$(cat "$pidfile")"
