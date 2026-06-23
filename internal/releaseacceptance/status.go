@@ -1544,7 +1544,9 @@ func approvedMakeEvidenceVars(command, spec []string) bool {
 }
 
 func approvedMakeSpec(spec []string) bool {
-	return spec[0] == "make" || (len(spec) >= 2 && spec[0] == "sudo" && spec[1] == "make")
+	return spec[0] == "make" ||
+		(len(spec) >= 2 && spec[0] == "sudo" && spec[1] == "make") ||
+		(len(spec) >= 3 && spec[0] == "sudo" && spec[1] == "-E" && spec[2] == "make")
 }
 
 func approvedMakeEvidenceVar(arg string) bool {
