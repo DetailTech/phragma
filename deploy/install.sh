@@ -21,6 +21,10 @@ if [[ $EUID -ne 0 ]]; then
   exit 1
 fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+BIN_SOURCE_DIR="${BIN_DIR:-$REPO_ROOT/bin}"
+if [[ "$BIN_SOURCE_DIR" != /* ]]; then
+  BIN_SOURCE_DIR="$REPO_ROOT/$BIN_SOURCE_DIR"
+fi
 
 . /etc/os-release
 FAMILY=""
@@ -180,13 +184,13 @@ if ! command -v vector >/dev/null; then
 fi
 
 echo "[4/8] OpenNGFW binaries"
-if [[ -x "$REPO_ROOT/bin/controld" && -x "$REPO_ROOT/bin/ngfwctl" ]] &&
-   binary_matches_commit "$REPO_ROOT/bin/controld"; then
-  install -m 0755 "$REPO_ROOT/bin/controld" "$REPO_ROOT/bin/ngfwctl" /usr/local/bin/
+if [[ -x "$BIN_SOURCE_DIR/controld" && -x "$BIN_SOURCE_DIR/ngfwctl" ]] &&
+   binary_matches_commit "$BIN_SOURCE_DIR/controld"; then
+  install -m 0755 "$BIN_SOURCE_DIR/controld" "$BIN_SOURCE_DIR/ngfwctl" /usr/local/bin/
 else
   install_build_toolchain
   (cd "$REPO_ROOT" && make build)
-  install -m 0755 "$REPO_ROOT/bin/controld" "$REPO_ROOT/bin/ngfwctl" /usr/local/bin/
+  install -m 0755 "$BIN_SOURCE_DIR/controld" "$BIN_SOURCE_DIR/ngfwctl" /usr/local/bin/
 fi
 
 TUNE_PROFILE="${OPENNGFW_TUNE_PROFILE:-appliance}"

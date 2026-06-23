@@ -273,6 +273,10 @@ check_static() {
     echo "deploy/install.sh must reject stale prebuilt binaries when COMMIT is provided" >&2
     failed=1
   fi
+  if ! grep -q 'BIN_SOURCE_DIR="${BIN_DIR:-$REPO_ROOT/bin}"' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must honor BIN_DIR when release evidence redirects build output" >&2
+    failed=1
+  fi
   check_vector_remote_guard "$REPO_ROOT/deploy/install.sh" || failed=1
   check_admin_token_not_stdout "$REPO_ROOT/deploy/install.sh" || failed=1
   if ! grep -q '/etc/openngfw/admin.token' "$REPO_ROOT/deploy/install.sh"; then
