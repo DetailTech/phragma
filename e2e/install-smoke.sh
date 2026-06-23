@@ -253,6 +253,18 @@ check_static() {
     echo "deploy/install.sh must not run a default remote curl-to-shell installer" >&2
     failed=1
   fi
+  if grep -Eq '^[[:space:]]*(apt-get|dnf)[[:space:]]+install[^#]*[[:space:]]curl([[:space:]]|$)' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must not put curl in an unconditional package-manager install transaction" >&2
+    failed=1
+  fi
+  if ! grep -q 'install_missing_command_packages "engine prerequisites"' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must install only missing engine prerequisite command packages" >&2
+    failed=1
+  fi
+  if ! grep -q 'curl:curl' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must keep curl as a command-satisfied prerequisite mapping" >&2
+    failed=1
+  fi
   check_vector_remote_guard "$REPO_ROOT/deploy/install.sh" || failed=1
   check_admin_token_not_stdout "$REPO_ROOT/deploy/install.sh" || failed=1
   if ! grep -q '/etc/openngfw/admin.token' "$REPO_ROOT/deploy/install.sh"; then
@@ -309,7 +321,7 @@ if [ "${EUID:-$(id -u)}" -ne 0 ]; then
   echo "--run requires root on a disposable host or VM" >&2
   exit 1
 fi
-require_cmds bash systemctl ip sysctl python3 awk sed grep tr || exit 1
+require_cmds bash systemctl ip sysctl python3 awk sed grep tr jq || exit 1
 
 SERVER_PID=""
 OLD_IP_FORWARD="$(sysctl -n net.ipv4.ip_forward 2>/dev/null || echo 0)"
@@ -465,12 +477,60 @@ rules:
 EOF
 }
 
+step_up_token() {
+  local action="$1"
+  local comment="$2"
+  local body
+  local response
+  body="$(jq -n --arg action "$action" --arg comment "$comment" '{action: $action, comment: $comment, ackStepUp: true}')"
+  response="$(curl -k -fsS \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "$body" \
+    "https://$HTTPS_LISTEN/v1/system/access-administration/step-up")"
+  printf '%s' "$response" | jq -r '.token // ""'
+}
+
 commit_policy() {
   local action="$1"
+  local comment="install smoke $action"
+  local status_json
+  local revision
+  local approval_json
+  local approval_id
+  local step_token
   write_policy "$action"
   /usr/local/bin/ngfwctl --server "$GRPC_LISTEN" policy set -f "$POLICY_FILE"
   /usr/local/bin/ngfwctl --server "$GRPC_LISTEN" policy validate
-  /usr/local/bin/ngfwctl --server "$GRPC_LISTEN" commit -m "install smoke $action"
+  status_json="$(/usr/local/bin/ngfwctl --server "$GRPC_LISTEN" policy status --json 2>&1)"
+  revision="$(printf '%s' "$status_json" | jq -r '.candidateRevision // .candidate_revision // ""')"
+  if [ -z "$revision" ] || [ "$revision" = "null" ]; then
+    echo "candidate revision missing before install-smoke commit" >&2
+    exit 1
+  fi
+  approval_json="$(/usr/local/bin/ngfwctl --server "$GRPC_LISTEN" policy approvals create \
+    --candidate-revision "$revision" \
+    --message "install smoke approval $action" \
+    --ack-risk \
+    --ack-runtime \
+    --json 2>&1)"
+  approval_id="$(printf '%s' "$approval_json" | jq -r '.approval.id // ""')"
+  if [ -z "$approval_id" ] || [ "$approval_id" = "null" ]; then
+    echo "approval id missing before install-smoke commit" >&2
+    exit 1
+  fi
+  step_token="$(step_up_token commit "$comment")"
+  if [ -z "$step_token" ] || [ "$step_token" = "null" ]; then
+    echo "step-up token missing before install-smoke commit" >&2
+    exit 1
+  fi
+  /usr/local/bin/ngfwctl --server "$GRPC_LISTEN" commit \
+    --ack-risk \
+    --ack-runtime \
+    --candidate-revision "$revision" \
+    --approval-id "$approval_id" \
+    --step-up-token "$step_token" \
+    -m "$comment"
 }
 
 start_server() {

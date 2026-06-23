@@ -34,20 +34,71 @@ case "${ID}:${ID_LIKE:-}" in
 esac
 echo "Detected ${PRETTY_NAME:-$ID} (${FAMILY} family)"
 
-install_build_toolchain() {
-  local need=()
-  command -v go >/dev/null || need+=(go)
-  command -v make >/dev/null || need+=(make)
-  if [[ ${#need[@]} -eq 0 ]]; then
+EL_EXTRA_REPOS=()
+
+pkg_command_missing() {
+  local cmd="$1"
+  ! command -v "$cmd" >/dev/null 2>&1
+}
+
+deb_package_installed() {
+  local pkg="$1"
+  dpkg-query -W -f='${Status}' "$pkg" 2>/dev/null | grep -q 'install ok installed'
+}
+
+install_missing_command_packages() {
+  local label="$1"
+  shift
+
+  local packages=()
+  local spec cmd pkg
+  for spec in "$@"; do
+    cmd="${spec%%:*}"
+    pkg="${spec#*:}"
+    if pkg_command_missing "$cmd"; then
+      packages+=("$pkg")
+    fi
+  done
+
+  if [[ ${#packages[@]} -eq 0 ]]; then
+    echo "    ${label}: all required commands already present"
     return 0
   fi
 
-  echo "    installing build toolchain for source checkout: ${need[*]}"
+  echo "    ${label}: installing missing packages: ${packages[*]}"
   if [[ $FAMILY == debian ]]; then
     export DEBIAN_FRONTEND=noninteractive
-    apt-get install -y -q golang-go make
+    apt-get install -y -q "${packages[@]}"
   else
-    dnf install -y golang make
+    dnf install -y "${EL_EXTRA_REPOS[@]}" "${packages[@]}"
+  fi
+}
+
+ensure_el_epel_repo() {
+  if [[ $ID == ol ]]; then
+    if ! dnf repolist all ol9_developer_EPEL 2>/dev/null | grep -q '^ol9_developer_EPEL'; then
+      dnf install -y oracle-epel-release-el9
+    fi
+    # Oracle ships the EPEL repo definition disabled by default on OCI
+    # images, so enable it explicitly for the engine package transaction.
+    EL_EXTRA_REPOS=(--enablerepo=ol9_developer_EPEL)
+  else
+    if ! rpm -q epel-release >/dev/null 2>&1; then
+      dnf install -y epel-release
+    fi
+    EL_EXTRA_REPOS=()
+  fi
+}
+
+install_build_toolchain() {
+  if [[ $FAMILY == debian ]]; then
+    install_missing_command_packages "build toolchain for source checkout" \
+      go:golang-go \
+      make:make
+  else
+    install_missing_command_packages "build toolchain for source checkout" \
+      go:golang \
+      make:make
   fi
 }
 
@@ -55,20 +106,33 @@ echo "[1/8] Engine packages"
 if [[ $FAMILY == debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
   apt-get update -q
-  apt-get install -y -q nftables conntrack suricata frr wireguard-tools \
-    strongswan-swanctl charon-systemd ethtool curl jq
+  install_missing_command_packages "engine prerequisites" \
+    nft:nftables \
+    conntrack:conntrack \
+    suricata:suricata \
+    vtysh:frr \
+    wg:wireguard-tools \
+    swanctl:strongswan-swanctl \
+    ethtool:ethtool \
+    curl:curl \
+    jq:jq
+  if ! deb_package_installed charon-systemd; then
+    apt-get install -y -q charon-systemd
+  fi
 else
   # Suricata, strongSwan, and wireguard-tools live in EPEL on EL9.
-  if [[ $ID == ol ]]; then
-    dnf install -y oracle-epel-release-el9
-    # Oracle ships the EPEL repo definition disabled by default on OCI
-    # images, so enable it explicitly for the engine package transaction.
-    EL_EXTRA_REPOS=(--enablerepo=ol9_developer_EPEL)
-  else
-    dnf install -y epel-release
-    EL_EXTRA_REPOS=()
-  fi
-  dnf install -y "${EL_EXTRA_REPOS[@]}" nftables conntrack-tools frr suricata strongswan wireguard-tools ethtool curl jq tar
+  ensure_el_epel_repo
+  install_missing_command_packages "engine prerequisites" \
+    nft:nftables \
+    conntrack:conntrack-tools \
+    vtysh:frr \
+    suricata:suricata \
+    swanctl:strongswan \
+    wg:wireguard-tools \
+    ethtool:ethtool \
+    curl:curl \
+    jq:jq \
+    tar:tar
 fi
 
 echo "[2/8] Host services"

@@ -155,12 +155,13 @@ func TestCommitCommandRejectsWhitespaceAuditCommentBeforeDial(t *testing.T) {
 }
 
 func TestNewCommitRequestIncludesApprovalIDAndReviewedRevision(t *testing.T) {
-	req := newCommitRequest(" approved maintenance ", true, true, " approval-7 ", " sha256:reviewed ")
+	req := newCommitRequest(" approved maintenance ", true, true, " approval-7 ", " sha256:reviewed ", " step-up-1 ")
 	if req.GetComment() != "approved maintenance" ||
 		!req.GetAckRisk() ||
 		!req.GetAckRuntime() ||
 		req.GetApprovalId() != "approval-7" ||
-		req.GetReviewedCandidateRevision() != "sha256:reviewed" {
+		req.GetReviewedCandidateRevision() != "sha256:reviewed" ||
+		req.GetStepUpToken() != "step-up-1" {
 		t.Fatalf("commit request = %+v", req)
 	}
 }

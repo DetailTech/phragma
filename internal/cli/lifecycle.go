@@ -22,6 +22,7 @@ func newCommitCommand(server *string) *cobra.Command {
 	var ackRuntime bool
 	var approvalID string
 	var reviewedCandidateRevision string
+	var stepUpToken string
 	cmd := &cobra.Command{
 		Use:   "commit",
 		Short: "Validate and atomically apply the candidate policy",
@@ -57,7 +58,7 @@ func newCommitCommand(server *string) *cobra.Command {
 			if err := handleCommitPreflight(cmd, validation, runtime, ackRisk, ackRuntime); err != nil {
 				return err
 			}
-			resp, err := client.Commit(ctx, newCommitRequest(comment, ackRisk, ackRuntime, approvalID, revision))
+			resp, err := client.Commit(ctx, newCommitRequest(comment, ackRisk, ackRuntime, approvalID, revision, stepUpToken))
 			if err != nil {
 				return commitError(err)
 			}
@@ -71,6 +72,7 @@ func newCommitCommand(server *string) *cobra.Command {
 	cmd.Flags().StringVar(&approvalID, "approval-id", "", "required server-side change approval id to consume")
 	cmd.Flags().StringVar(&reviewedCandidateRevision, "candidate-revision", "", "candidate revision reviewed before commit (defaults to current candidate status)")
 	cmd.Flags().StringVar(&reviewedCandidateRevision, "expected-candidate-revision", "", "alias for --candidate-revision")
+	cmd.Flags().StringVar(&stepUpToken, "step-up-token", "", "one-time privileged action token for commit")
 	return cmd
 }
 
@@ -97,13 +99,14 @@ func commitReviewedCandidateRevision(ctx context.Context, client commitCandidate
 	return revision, nil
 }
 
-func newCommitRequest(comment string, ackRisk, ackRuntime bool, approvalID string, reviewedCandidateRevision string) *openngfwv1.CommitRequest {
+func newCommitRequest(comment string, ackRisk, ackRuntime bool, approvalID string, reviewedCandidateRevision string, stepUpToken string) *openngfwv1.CommitRequest {
 	return &openngfwv1.CommitRequest{
 		Comment:                   strings.TrimSpace(comment),
 		AckRisk:                   ackRisk,
 		AckRuntime:                ackRuntime,
 		ApprovalId:                strings.TrimSpace(approvalID),
 		ReviewedCandidateRevision: strings.TrimSpace(reviewedCandidateRevision),
+		StepUpToken:               strings.TrimSpace(stepUpToken),
 	}
 }
 
@@ -155,6 +158,7 @@ func newRollbackCommand(server *string) *cobra.Command {
 	var comment string
 	var ackRisk bool
 	var ackRuntime bool
+	var stepUpToken string
 	cmd := &cobra.Command{
 		Use:   "rollback <version>",
 		Short: "Re-apply a historical version as a new commit",
@@ -191,7 +195,7 @@ func newRollbackCommand(server *string) *cobra.Command {
 			if err := handleRollbackPreflight(cmd, validation, runtime, ackRisk, ackRuntime); err != nil {
 				return err
 			}
-			resp, err := client.Rollback(ctx, &openngfwv1.RollbackRequest{Version: ver, Comment: comment, AckRisk: ackRisk, AckRuntime: ackRuntime})
+			resp, err := client.Rollback(ctx, &openngfwv1.RollbackRequest{Version: ver, Comment: comment, AckRisk: ackRisk, AckRuntime: ackRuntime, StepUpToken: strings.TrimSpace(stepUpToken)})
 			if err != nil {
 				return fmt.Errorf("rollback: %w", err)
 			}
@@ -202,6 +206,7 @@ func newRollbackCommand(server *string) *cobra.Command {
 	cmd.Flags().StringVarP(&comment, "message", "m", "", "required rollback audit comment")
 	cmd.Flags().BoolVar(&ackRisk, "ack-risk", false, "acknowledge high-risk policy impact reported by rollback validation")
 	cmd.Flags().BoolVar(&ackRuntime, "ack-runtime", false, "acknowledge runtime readiness warnings before rollback")
+	cmd.Flags().StringVar(&stepUpToken, "step-up-token", "", "one-time privileged action token for rollback")
 	return cmd
 }
 
