@@ -120,6 +120,7 @@ var evidenceCommandPrefixes = map[string][][]string{
 		{"bash", "e2e/install-smoke.sh", "--run"},
 		{"make", "e2e-install"},
 		{"sudo", "make", "e2e-install"},
+		{"sudo", "-E", "make", "e2e-install"},
 	},
 	contentPackageCheckName: {
 		{"make", "content-package-smoke"},
@@ -176,7 +177,7 @@ var recommendedEvidenceCommands = map[string][]string{
 	"deploy-hardening":                  {"make", "deploy-hardening-check"},
 	"policy-restore-drill":              {"make", "policy-restore-drill-check"},
 	haReadinessRecoveryCheckName:        {"make", "ha-readiness-recovery-check"},
-	"e2e-install":                       {"sudo", "make", "e2e-install"},
+	"e2e-install":                       {"sudo", "-E", "make", "e2e-install"},
 	contentPackageCheckName:             {"make", "content-package-smoke"},
 	contentProductionReadinessCheckName: {"make", "content-production-readiness-check"},
 	"release-benchmark":                 {"make", "benchmark-verify-release"},

@@ -451,13 +451,13 @@ func TestAllowedEvidenceCommandAcceptsPinnedMakeBuildVars(t *testing.T) {
 		t.Fatalf("m5-auth-ui rejected pinned make command %#v", command)
 	}
 	command = []string{
-		"sudo", "make", "e2e-install",
+		"sudo", "-E", "make", "e2e-install",
 		"VERSION=8149370",
 		"COMMIT=814937087703f60380a0eaa928fae8e57870d241",
 		"BUILD_DATE=2026-06-18T12:00:00Z",
 	}
 	if !allowedEvidenceCommand("e2e-install", command) {
-		t.Fatalf("e2e-install rejected pinned sudo make command %#v", command)
+		t.Fatalf("e2e-install rejected pinned sudo -E make command %#v", command)
 	}
 	for _, command := range [][]string{
 		{"make", "e2e-auth-runtime-smoke", "RELEASE_NO_PERFORMANCE_CLAIMS=1"},

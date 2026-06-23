@@ -810,7 +810,7 @@ function assertChecklistItemContract(items) {
   assert.match(report, /command: bash release\/deploy-hardening-check\.sh --check/);
   assert.match(report, /- \[REVIEW\] ha-readiness-recovery - HA readiness recovery evidence/);
   assert.match(report, /command: make ha-readiness-recovery-check/);
-  assert.match(report, /command: sudo make e2e-install/);
+  assert.match(report, /command: sudo -E make e2e-install/);
 }
 
 {

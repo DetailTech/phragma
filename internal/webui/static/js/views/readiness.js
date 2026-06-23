@@ -56,7 +56,7 @@ const RELEASE_ACCEPTANCE_NEXT_COMMANDS = Object.freeze({
     ["Record", "COMMIT=\"$(git rev-parse HEAD)\" make release-evidence-ha-readiness-recovery"],
   ],
   "e2e-install": [
-    ["Validate", "sudo make e2e-install"],
+    ["Validate", "sudo -E make e2e-install"],
     ["Record", "COMMIT=\"$(git rev-parse HEAD)\" make release-evidence-e2e-install"],
   ],
   "content-package-verification": [

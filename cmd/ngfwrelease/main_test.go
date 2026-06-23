@@ -357,6 +357,7 @@ func TestEvidenceCommandPrefixesMatchReleaseContract(t *testing.T) {
 			{"bash", "e2e/install-smoke.sh", "--run"},
 			{"make", "e2e-install"},
 			{"sudo", "make", "e2e-install"},
+			{"sudo", "-E", "make", "e2e-install"},
 		},
 		"content-package-verification": {
 			{"make", "content-package-smoke"},

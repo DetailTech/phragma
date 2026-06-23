@@ -91,7 +91,7 @@ const E2E_INSTALL_PACKET = evidencePacket({
   artifactPath: `${RELEASE_EVIDENCE_DIR}/e2e-install.txt`,
   summary: "Disposable Linux host install smoke run proving installed-service commit, allow/deny policy enforcement, and namespace traffic filtering.",
   makeTargets: ["e2e-install", "release-evidence-e2e-install"],
-  validateCommand: "sudo make e2e-install",
+  validateCommand: "sudo -E make e2e-install",
   recordCommand: "COMMIT=\"$(git rev-parse HEAD)\" make release-evidence-e2e-install RELEASE_EVIDENCE_RECORD_FLAGS=--overwrite",
   reference: RELEASE_ACCEPTANCE_DOC,
 });

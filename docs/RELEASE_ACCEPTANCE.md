@@ -630,7 +630,7 @@ release-local path shown for that check.
 | `deploy-hardening` | `bash release/deploy-hardening-check.sh --check`; `./release/deploy-hardening-check.sh --check`; `make deploy-hardening-check` |
 | `policy-restore-drill` | `make policy-restore-drill-check`; `bash release/policy-restore-drill.sh --check` |
 | `ha-readiness-recovery` | `make ha-readiness-recovery-check`; `bash release/ha-readiness-recovery.sh --check` |
-| `e2e-install` | `bash e2e/install-smoke.sh --run`; `make e2e-install`; `sudo make e2e-install` |
+| `e2e-install` | `bash e2e/install-smoke.sh --run`; `make e2e-install`; `sudo make e2e-install`; `sudo -E make e2e-install` |
 | `content-package-verification` | `make content-package-smoke`; `bash e2e/content-package-smoke.sh --check` |
 | `content-production-readiness` | `make content-production-readiness-check`; `bash release/content-production-readiness.sh --evidence-dir release/field-evidence/content-production`; `./release/content-production-readiness.sh --evidence-dir release/field-evidence/content-production` |
 | `release-benchmark` | `make benchmark-verify-release`; `go run ./cmd/ngfwperf verify --strict --publishable perf/release-results` |
