@@ -445,6 +445,22 @@ validate_collected_bundle() {
   fi
 }
 
+finalize_evidence_bundle() {
+  rm -f \
+    "$EVIDENCE_DIR/drill/write-probes.txt" \
+    "$EVIDENCE_DIR/drill/compile-xdp.txt" \
+    "$EVIDENCE_DIR/drill/compile-tc.txt" \
+    "$EVIDENCE_DIR/drill/manifest-generation.txt"
+  (
+    cd "$EVIDENCE_DIR" || exit 1
+    find . -type f ! -name manifest.sha256 | sed 's#^\./##' | LC_ALL=C sort |
+      while IFS= read -r rel; do
+        sha256_file "$rel" | awk -v r="$rel" '{print $1 "  " r}'
+      done > manifest.sha256
+  )
+  chmod 600 "$EVIDENCE_DIR/manifest.sha256" 2>/dev/null || true
+}
+
 main() {
   parse_args "$@"
   cd "$(repo_root)"
@@ -481,6 +497,9 @@ main() {
   fi
   if [ "$failures" -eq 0 ]; then
     run_attach_drill
+  fi
+  if [ "$failures" -eq 0 ]; then
+    finalize_evidence_bundle
   fi
   if [ "$failures" -eq 0 ]; then
     validate_collected_bundle
