@@ -32,6 +32,7 @@ const contentPackageDemoScope = "demo-only"
 const contentProductionReadinessScope = "production"
 const contentPackageSmokeSentinel = "content-package-smoke: scope=demo-only production_content=false mechanics_verified=true production_ready=false"
 const contentPackageDemoRecordDetail = "demo-only signed content package mechanics; does not certify production App-ID, Threat-ID, or intel-feed content"
+const hardeningDeferredStatus = "hardening_deferred"
 
 const (
 	// AcceptanceSchemaVersion identifies release acceptance manifest files.
@@ -84,6 +85,13 @@ var requiredReleaseChecks = []string{
 	samlFieldEvidenceCheckName,
 	"m5-auth-ui",
 	webUIEnterpriseSmokeCheckName,
+}
+
+var hardeningDeferredChecks = map[string]string{
+	contentProductionReadinessCheckName: "hardening-deferred: signed production App-ID, Threat-ID, and intel-feed certification remains required before full production certification",
+	"m3-field-evidence":                 "hardening-deferred: external BGP, IPsec, and WireGuard field certification remains required before full production certification",
+	oidcFieldEvidenceCheckName:          "hardening-deferred: real-provider OIDC browser SSO field certification remains required before full production certification",
+	samlFieldEvidenceCheckName:          "hardening-deferred: real-provider SAML browser SSO field certification remains required before full production certification",
 }
 
 var evidenceCommandPrefixes = map[string][][]string{
@@ -353,6 +361,7 @@ type StatusOptions struct {
 	ExpectedCommit           string
 	ExpectedVersion          string
 	AllowNoPerformanceClaims bool
+	AllowHardeningDeferred   bool
 	IncludeRecordability     bool
 	JSON                     bool
 	Strict                   bool
@@ -377,13 +386,14 @@ type StatusReport struct {
 
 // StatusSummary counts release checks by state.
 type StatusSummary struct {
-	Passed        int `json:"passed"`
-	Recorded      int `json:"recorded"`
-	Missing       int `json:"missing"`
-	Invalid       int `json:"invalid"`
-	ReviewNeeded  int `json:"review_needed"`
-	NotApplicable int `json:"not_applicable"`
-	Todo          int `json:"todo"`
+	Passed            int `json:"passed"`
+	Recorded          int `json:"recorded"`
+	Missing           int `json:"missing"`
+	Invalid           int `json:"invalid"`
+	ReviewNeeded      int `json:"review_needed"`
+	NotApplicable     int `json:"not_applicable"`
+	HardeningDeferred int `json:"hardening_deferred"`
+	Todo              int `json:"todo"`
 }
 
 // CheckStatus reports one release check's current evidence state.
@@ -427,6 +437,7 @@ type verifyOptions struct {
 	ExpectedCommit           string
 	ExpectedVersion          string
 	AllowNoPerformanceClaims bool
+	AllowHardeningDeferred   bool
 }
 
 type evidenceRecord struct {
@@ -480,6 +491,17 @@ func IsRequiredCheck(name string) bool {
 		}
 	}
 	return false
+}
+
+// HardeningDeferredAllowed reports whether name can be deferred in functional release mode.
+func HardeningDeferredAllowed(name string) bool {
+	_, ok := hardeningDeferredChecks[name]
+	return ok
+}
+
+// HardeningDeferredDetail returns the required detail for a functional-mode deferred check.
+func HardeningDeferredDetail(name string) string {
+	return hardeningDeferredChecks[name]
 }
 
 // ApprovedEvidenceCommandPrefixes returns accepted command prefixes for a check.
@@ -681,7 +703,7 @@ func BuildStatusReport(opts StatusOptions) StatusReport {
 		var m acceptanceManifest
 		if err := decodeAcceptanceManifest(raw, &m); err != nil {
 			report.Problems = append(report.Problems, fmt.Sprintf("parse release acceptance manifest: %v", err))
-			report.Checks = evidenceDirCheckStatuses(evidenceDir, normalizeCommit(opts.ExpectedCommit), opts.AllowNoPerformanceClaims)
+			report.Checks = evidenceDirCheckStatuses(evidenceDir, normalizeCommit(opts.ExpectedCommit), opts.AllowNoPerformanceClaims, opts.AllowHardeningDeferred)
 			applyCheckRemediation(report.Checks, evidenceDir, opts.ExpectedCommit)
 			finalizeStatusReport(&report)
 			return report
@@ -691,6 +713,7 @@ func BuildStatusReport(opts StatusOptions) StatusReport {
 			ExpectedCommit:           opts.ExpectedCommit,
 			ExpectedVersion:          opts.ExpectedVersion,
 			AllowNoPerformanceClaims: opts.AllowNoPerformanceClaims,
+			AllowHardeningDeferred:   opts.AllowHardeningDeferred,
 		})...)
 		report.Checks = manifestCheckStatuses(m, filepath.Dir(manifestPath), opts)
 		applyCheckRemediation(report.Checks, evidenceDir, opts.ExpectedCommit)
@@ -700,7 +723,7 @@ func BuildStatusReport(opts StatusOptions) StatusReport {
 	if err != nil && !errors.Is(err, os.ErrNotExist) {
 		report.Problems = append(report.Problems, fmt.Sprintf("read release acceptance manifest %s: %v", manifestPath, err))
 	}
-	report.Checks = evidenceDirCheckStatuses(evidenceDir, normalizeCommit(opts.ExpectedCommit), opts.AllowNoPerformanceClaims)
+	report.Checks = evidenceDirCheckStatuses(evidenceDir, normalizeCommit(opts.ExpectedCommit), opts.AllowNoPerformanceClaims, opts.AllowHardeningDeferred)
 	applyCheckRemediation(report.Checks, evidenceDir, opts.ExpectedCommit)
 	for _, check := range report.Checks {
 		for _, problem := range check.Problems {
@@ -747,11 +770,13 @@ func manifestCheckStatuses(m acceptanceManifest, baseDir string, opts StatusOpti
 		if st.Artifact != "" && !filepath.IsAbs(st.Artifact) {
 			st.EvidencePath = filepath.Join(baseDir, filepath.FromSlash(st.Artifact))
 		}
-		problems := validateCheck(baseDir, name, check, normalizeCommit(m.Commit), m.NoPerformanceClaims, opts.AllowNoPerformanceClaims, seenArtifacts)
+		problems := validateCheck(baseDir, name, check, normalizeCommit(m.Commit), m.NoPerformanceClaims, opts.AllowNoPerformanceClaims, opts.AllowHardeningDeferred, seenArtifacts)
 		if len(problems) > 0 {
 			st.State = "invalid"
 			st.Problems = problems
 			st.ReviewNeeded = checkProblemsNeedReview(problems)
+		} else if strings.EqualFold(strings.TrimSpace(check.Status), hardeningDeferredStatus) {
+			st.State = hardeningDeferredStatus
 		} else if name == "release-benchmark" && m.NoPerformanceClaims {
 			st.State = "not_applicable"
 		}
@@ -795,6 +820,8 @@ func remediationForCheck(check CheckStatus, evidenceDir, expectedCommit string) 
 		return "Evidence is recorded but is not accepted until the release acceptance manifest is assembled and verified.", nil
 	case "not_applicable":
 		return "No evidence artifact is required for this check in the current release acceptance context.", nil
+	case hardeningDeferredStatus:
+		return "Deferred to the hardening pass for full production certification; functional acceptance must still keep all non-deferred release gates recorded.", nil
 	default:
 		return "", nil
 	}
@@ -868,7 +895,7 @@ func recommendedEvidenceCommand(name string) []string {
 	return append([]string(nil), command...)
 }
 
-func evidenceDirCheckStatuses(evidenceDir, expectedCommit string, allowNoPerformanceClaims bool) []CheckStatus {
+func evidenceDirCheckStatuses(evidenceDir, expectedCommit string, allowNoPerformanceClaims, allowHardeningDeferred bool) []CheckStatus {
 	statuses := make([]CheckStatus, 0, len(requiredReleaseChecks))
 	for _, name := range requiredReleaseChecks {
 		path := filepath.Join(evidenceDir, name+".txt")
@@ -886,6 +913,14 @@ func evidenceDirCheckStatuses(evidenceDir, expectedCommit string, allowNoPerform
 					st.Artifact = ""
 					st.EvidencePath = ""
 					st.Detail = defaultNoPerformanceDetail
+					statuses = append(statuses, st)
+					continue
+				}
+				if allowHardeningDeferred && HardeningDeferredAllowed(name) {
+					st.State = hardeningDeferredStatus
+					st.Artifact = ""
+					st.EvidencePath = ""
+					st.Detail = HardeningDeferredDetail(name)
 					statuses = append(statuses, st)
 					continue
 				}
@@ -953,6 +988,8 @@ func finalizeStatusReport(report *StatusReport) {
 			}
 		case "not_applicable":
 			report.Summary.NotApplicable++
+		case hardeningDeferredStatus:
+			report.Summary.HardeningDeferred++
 		default:
 			report.Summary.Todo++
 		}
@@ -984,8 +1021,8 @@ func WriteStatusText(stdout io.Writer, report StatusReport) error {
 			return err
 		}
 	}
-	if _, err := fmt.Fprintf(stdout, "checks: passed=%d recorded=%d missing=%d invalid=%d review_needed=%d not_applicable=%d todo=%d\n",
-		report.Summary.Passed, report.Summary.Recorded, report.Summary.Missing, report.Summary.Invalid, report.Summary.ReviewNeeded, report.Summary.NotApplicable, report.Summary.Todo); err != nil {
+	if _, err := fmt.Fprintf(stdout, "checks: passed=%d recorded=%d missing=%d invalid=%d review_needed=%d not_applicable=%d hardening_deferred=%d todo=%d\n",
+		report.Summary.Passed, report.Summary.Recorded, report.Summary.Missing, report.Summary.Invalid, report.Summary.ReviewNeeded, report.Summary.NotApplicable, report.Summary.HardeningDeferred, report.Summary.Todo); err != nil {
 		return err
 	}
 	if report.Summary.ReviewNeeded > 0 {
@@ -1142,7 +1179,7 @@ func validateAcceptanceManifest(m acceptanceManifest, baseDir string, opts verif
 		if m.NoPerformanceClaims {
 			problems = append(problems, validateNoPerformanceClaimsDetail(name, check.Detail)...)
 		}
-		problems = append(problems, validateCheck(baseDir, name, check, m.Commit, m.NoPerformanceClaims, opts.AllowNoPerformanceClaims, seenArtifacts)...)
+		problems = append(problems, validateCheck(baseDir, name, check, m.Commit, m.NoPerformanceClaims, opts.AllowNoPerformanceClaims, opts.AllowHardeningDeferred, seenArtifacts)...)
 	}
 	return problems
 }
@@ -1159,9 +1196,27 @@ func validateNoPerformanceClaimsDetail(name, detail string) []string {
 	return problems
 }
 
-func validateCheck(baseDir, name string, check acceptanceCheck, manifestCommit string, noPerformanceClaims, allowNoPerformanceClaims bool, seenArtifacts map[string]string) []string {
+func validateCheck(baseDir, name string, check acceptanceCheck, manifestCommit string, noPerformanceClaims, allowNoPerformanceClaims, allowHardeningDeferred bool, seenArtifacts map[string]string) []string {
 	var problems []string
 	status := strings.ToLower(strings.TrimSpace(check.Status))
+	if status == hardeningDeferredStatus {
+		if !allowHardeningDeferred {
+			return []string{fmt.Sprintf("%s is hardening_deferred, but functional hardening-deferred mode was not enabled", name)}
+		}
+		if !HardeningDeferredAllowed(name) {
+			problems = append(problems, fmt.Sprintf("%s is not allowed to be hardening_deferred", name))
+		}
+		if _, err := time.Parse(time.RFC3339, strings.TrimSpace(check.RanAt)); err != nil {
+			problems = append(problems, fmt.Sprintf("%s hardening_deferred ran_at must be RFC3339", name))
+		}
+		if strings.TrimSpace(check.Detail) == "" {
+			problems = append(problems, fmt.Sprintf("%s hardening_deferred requires detail tracking the production certification work", name))
+		}
+		if strings.TrimSpace(check.Artifact) != "" || strings.TrimSpace(check.ArtifactSHA256) != "" || strings.TrimSpace(check.BenchmarkSummary) != "" {
+			problems = append(problems, fmt.Sprintf("%s hardening_deferred must not reference an artifact, artifact digest, or benchmark summary", name))
+		}
+		return problems
+	}
 	if name == "release-benchmark" && noPerformanceClaims {
 		if !allowNoPerformanceClaims {
 			return []string{"release-benchmark is not_applicable, but --allow-no-performance-claims was not set"}

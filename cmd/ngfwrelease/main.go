@@ -25,14 +25,15 @@ type contentReadinessEvidence = releaseacceptance.ContentReadinessEvidence
 type verifyOptions = releaseacceptance.VerifyOptions
 
 type statusOptions struct {
-	ManifestPath             string
-	EvidenceDir              string
-	ExpectedCommit           string
-	ExpectedVersion          string
-	AllowNoPerformanceClaims bool
-	JSON                     bool
-	Strict                   bool
-	Recordability            bool
+	ManifestPath                string
+	EvidenceDir                 string
+	ExpectedCommit              string
+	ExpectedVersion             string
+	AllowNoPerformanceClaims    bool
+	FunctionalHardeningDeferred bool
+	JSON                        bool
+	Strict                      bool
+	Recordability               bool
 }
 
 type recordabilityOptions struct {
@@ -42,15 +43,16 @@ type recordabilityOptions struct {
 }
 
 type assembleOptions struct {
-	ManifestPath        string
-	ReleaseVersion      string
-	Commit              string
-	Operator            string
-	EvidenceDir         string
-	BenchmarkSummary    string
-	NoPerformanceClaims bool
-	NoPerformanceDetail string
-	Overwrite           bool
+	ManifestPath                string
+	ReleaseVersion              string
+	Commit                      string
+	Operator                    string
+	EvidenceDir                 string
+	BenchmarkSummary            string
+	NoPerformanceClaims         bool
+	NoPerformanceDetail         string
+	FunctionalHardeningDeferred bool
+	Overwrite                   bool
 }
 
 type recordOptions struct {
@@ -104,6 +106,7 @@ func runWithIO(args []string, stdout, stderr io.Writer) error {
 		fs.StringVar(&opts.BenchmarkSummary, "benchmark-summary", "", "repository-relative perf/release-results/<run>/summary.json")
 		fs.BoolVar(&opts.NoPerformanceClaims, "no-performance-claims", false, "assemble a release manifest that publishes no performance claims")
 		fs.StringVar(&opts.NoPerformanceDetail, "no-performance-detail", releaseacceptance.DefaultNoPerformanceDetail, "detail text for no-performance-claims mode")
+		fs.BoolVar(&opts.FunctionalHardeningDeferred, "functional-hardening-deferred", false, "assemble functional release acceptance with production-certification hardening gates explicitly deferred")
 		fs.BoolVar(&opts.Overwrite, "overwrite", false, "replace an existing release acceptance manifest")
 		if err := fs.Parse(args[1:]); err != nil {
 			return err
@@ -136,6 +139,7 @@ func runWithIO(args []string, stdout, stderr io.Writer) error {
 		fs.StringVar(&opts.ExpectedCommit, "commit", "", "expected full git commit SHA")
 		fs.StringVar(&opts.ExpectedVersion, "version", "", "expected release version/tag")
 		fs.BoolVar(&opts.AllowNoPerformanceClaims, "allow-no-performance-claims", false, "allow release-benchmark to be not_applicable when the manifest declares no performance claims")
+		fs.BoolVar(&opts.FunctionalHardeningDeferred, "functional-hardening-deferred", false, "treat only allowlisted production-certification gaps as hardening_deferred while reporting functional acceptance status")
 		fs.BoolVar(&opts.JSON, "json", false, "write a machine-readable status report")
 		fs.BoolVar(&opts.Strict, "strict", false, "return non-zero unless release acceptance is ready, and recordability is ready when --recordability is set")
 		fs.BoolVar(&opts.Recordability, "recordability", false, "also report whether ngfwrelease record can write evidence from the current git checkout")
@@ -484,6 +488,15 @@ func assembleAcceptance(stdout io.Writer, opts assembleOptions) error {
 		path := filepath.Join(absEvidence, name+".txt")
 		info, err := os.Stat(path)
 		if err != nil {
+			if errors.Is(err, os.ErrNotExist) && opts.FunctionalHardeningDeferred && releaseacceptance.HardeningDeferredAllowed(name) {
+				checks = append(checks, acceptanceCheck{
+					Name:   name,
+					Status: "hardening_deferred",
+					RanAt:  generatedAt,
+					Detail: releaseacceptance.HardeningDeferredDetail(name),
+				})
+				continue
+			}
 			return fmt.Errorf("release acceptance assembly failed:\n- %s evidence artifact %q is not readable: %v", name, path, err)
 		}
 		digest, err := fileSHA256(path)
@@ -521,6 +534,7 @@ func assembleAcceptance(stdout io.Writer, opts assembleOptions) error {
 		ExpectedCommit:           opts.Commit,
 		ExpectedVersion:          opts.ReleaseVersion,
 		AllowNoPerformanceClaims: opts.NoPerformanceClaims,
+		AllowHardeningDeferred:   opts.FunctionalHardeningDeferred,
 	}
 	if problems := releaseacceptance.ValidateManifest(m, manifestDir, verifyOpts); len(problems) > 0 {
 		return fmt.Errorf("release acceptance assembly failed:\n- %s", strings.Join(problems, "\n- "))
@@ -740,6 +754,7 @@ func reportAcceptanceStatus(stdout io.Writer, opts statusOptions) error {
 		ExpectedCommit:           opts.ExpectedCommit,
 		ExpectedVersion:          opts.ExpectedVersion,
 		AllowNoPerformanceClaims: opts.AllowNoPerformanceClaims,
+		AllowHardeningDeferred:   opts.FunctionalHardeningDeferred,
 		JSON:                     opts.JSON,
 		Strict:                   opts.Strict,
 	}); err != nil {

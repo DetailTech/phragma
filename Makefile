@@ -22,6 +22,7 @@ RELEASE_ACCEPTANCE_MANIFEST ?= release/acceptance.json
 RELEASE_OPERATOR ?= $(USER)
 RELEASE_EVIDENCE_DIR ?= release/evidence
 RELEASE_EVIDENCE_RECORD_FLAGS ?=
+RELEASE_FUNCTIONAL_HARDENING_DEFERRED_FLAGS ?= --functional-hardening-deferred
 RELEASE_BENCHMARK_SUMMARY ?=
 RELEASE_NO_PERFORMANCE_CLAIMS ?= 0
 RELEASE_BUILD_VERSION ?= $(shell git describe --tags --always 2>/dev/null || echo dev)
@@ -50,7 +51,7 @@ PROTOC_GEN_GO_GRPC_VERSION  := v1.5.1
 PROTOC_GEN_GW_VERSION       := v2.27.7
 PROTOC_GEN_OPENAPIV2_VERSION := $(PROTOC_GEN_GW_VERSION)
 
-.PHONY: all build test webui-check webui-visual-smoke webui-visual-smoke-self-check webui-visual-smoke-replay-failures webui-enterprise-smoke lint vet proto proto-status proto-verify tools clean integration-compile integration-test privileged-integration-evidence-check deploy-hardening-check policy-restore-drill-check ha-readiness-recovery-check m3-live-networking-check m3-live-networking m3-field-evidence-check ebpf-ol9-attach-drill-check ebpf-ol9-attach-drill ebpf-ol9-field-evidence-check m5-oidc-field-evidence-check m5-saml-field-evidence-check content-production-readiness-check e2e-install-check e2e-install e2e-auth-runtime-smoke e2e-oidc-runtime-smoke content-package-smoke benchmark-verify benchmark-verify-release benchmark-citation-check benchmark-stage-release benchmark-check benchmark benchmark-netns-check benchmark-netns release-evidence-rootless release-evidence-proto-verify release-evidence-privileged-integration release-evidence-deploy-hardening release-evidence-policy-restore-drill release-evidence-ha-readiness-recovery release-evidence-e2e-install release-evidence-content-package-verification release-evidence-content-production-readiness release-evidence-m3-live-networking release-evidence-m3-field-evidence release-evidence-ebpf-ol9-field-evidence release-evidence-m5-auth-ui release-evidence-m5-oidc-provider release-evidence-m5-oidc-field-evidence release-evidence-m5-saml-field-evidence release-evidence-webui-enterprise-smoke release-evidence-release-benchmark release-acceptance-status release-recordability-check release-recordability-diagnostics release-acceptance-assemble release-acceptance-verify release-check-rootless release-verify
+.PHONY: all build test webui-check webui-visual-smoke webui-visual-smoke-self-check webui-visual-smoke-replay-failures webui-enterprise-smoke lint vet proto proto-status proto-verify tools clean integration-compile integration-test privileged-integration-evidence-check deploy-hardening-check policy-restore-drill-check ha-readiness-recovery-check m3-live-networking-check m3-live-networking m3-field-evidence-check ebpf-ol9-attach-drill-check ebpf-ol9-attach-drill ebpf-ol9-field-evidence-check m5-oidc-field-evidence-check m5-saml-field-evidence-check content-production-readiness-check e2e-install-check e2e-install e2e-auth-runtime-smoke e2e-oidc-runtime-smoke content-package-smoke benchmark-verify benchmark-verify-release benchmark-citation-check benchmark-stage-release benchmark-check benchmark benchmark-netns-check benchmark-netns release-evidence-rootless release-evidence-proto-verify release-evidence-privileged-integration release-evidence-deploy-hardening release-evidence-policy-restore-drill release-evidence-ha-readiness-recovery release-evidence-e2e-install release-evidence-content-package-verification release-evidence-content-production-readiness release-evidence-m3-live-networking release-evidence-m3-field-evidence release-evidence-ebpf-ol9-field-evidence release-evidence-m5-auth-ui release-evidence-m5-oidc-provider release-evidence-m5-oidc-field-evidence release-evidence-m5-saml-field-evidence release-evidence-webui-enterprise-smoke release-evidence-release-benchmark release-acceptance-status release-acceptance-status-functional release-recordability-check release-recordability-diagnostics release-acceptance-assemble release-acceptance-assemble-functional release-acceptance-verify release-check-rootless release-verify
 
 all: build test lint
 
@@ -294,6 +295,13 @@ release-acceptance-status:
 		go run ./cmd/ngfwrelease status --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --evidence-dir $(RELEASE_EVIDENCE_DIR) --commit $(COMMIT) --version $(VERSION) --recordability; \
 	fi
 
+release-acceptance-status-functional:
+	@if [ "$(RELEASE_NO_PERFORMANCE_CLAIMS)" = "1" ]; then \
+		go run ./cmd/ngfwrelease status --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --evidence-dir $(RELEASE_EVIDENCE_DIR) --commit $(COMMIT) --version $(VERSION) --allow-no-performance-claims $(RELEASE_FUNCTIONAL_HARDENING_DEFERRED_FLAGS) --recordability; \
+	else \
+		go run ./cmd/ngfwrelease status --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --evidence-dir $(RELEASE_EVIDENCE_DIR) --commit $(COMMIT) --version $(VERSION) $(RELEASE_FUNCTIONAL_HARDENING_DEFERRED_FLAGS) --recordability; \
+	fi
+
 release-recordability-check:
 	go run ./cmd/ngfwrelease recordability --evidence-dir $(RELEASE_EVIDENCE_DIR) --commit $(COMMIT) --strict
 
@@ -323,6 +331,17 @@ release-acceptance-assemble:
 			exit 1; \
 		fi; \
 		go run ./cmd/ngfwrelease assemble --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --version $(VERSION) --commit $(COMMIT) --operator "$(RELEASE_OPERATOR)" --evidence-dir $(RELEASE_EVIDENCE_DIR) --benchmark-summary $(RELEASE_BENCHMARK_SUMMARY); \
+	fi
+
+release-acceptance-assemble-functional:
+	@if [ "$(RELEASE_NO_PERFORMANCE_CLAIMS)" = "1" ]; then \
+		go run ./cmd/ngfwrelease assemble --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --version $(VERSION) --commit $(COMMIT) --operator "$(RELEASE_OPERATOR)" --evidence-dir $(RELEASE_EVIDENCE_DIR) --no-performance-claims --no-performance-detail "This tag publishes no throughput, latency, connection-rate, or comparison claims." $(RELEASE_FUNCTIONAL_HARDENING_DEFERRED_FLAGS); \
+	else \
+		if [ -z "$(RELEASE_BENCHMARK_SUMMARY)" ]; then \
+			echo "RELEASE_BENCHMARK_SUMMARY is required, for example perf/release-results/<run>/summary.json"; \
+			exit 1; \
+		fi; \
+		go run ./cmd/ngfwrelease assemble --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --version $(VERSION) --commit $(COMMIT) --operator "$(RELEASE_OPERATOR)" --evidence-dir $(RELEASE_EVIDENCE_DIR) --benchmark-summary $(RELEASE_BENCHMARK_SUMMARY) $(RELEASE_FUNCTIONAL_HARDENING_DEFERRED_FLAGS); \
 	fi
 
 lint:

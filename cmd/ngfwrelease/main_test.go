@@ -75,6 +75,58 @@ func TestVerifyAcceptanceRejectsNoPerformanceClaimsWithoutFlag(t *testing.T) {
 	}
 }
 
+func TestVerifyAcceptanceRejectsHardeningDeferredWithoutFunctionalFlag(t *testing.T) {
+	dir := t.TempDir()
+	m := validAcceptanceManifest(t, dir, false)
+	markHardeningDeferred(t, &m, releaseacceptance.ContentProductionReadinessCheckName)
+	manifest := writeManifestJSON(t, dir, m)
+
+	err := verifyAcceptance(verifyOptions{
+		ManifestPath:    manifest,
+		ExpectedCommit:  testReleaseCommit,
+		ExpectedVersion: testReleaseVersion,
+	})
+	if err == nil || !strings.Contains(err.Error(), releaseacceptance.ContentProductionReadinessCheckName) || !strings.Contains(err.Error(), "hardening_deferred") {
+		t.Fatalf("verifyAcceptance() error = %v, want strict rejection for hardening-deferred content-production-readiness", err)
+	}
+}
+
+func TestVerifyAcceptanceAllowsScopedHardeningDeferredInFunctionalMode(t *testing.T) {
+	dir := t.TempDir()
+	m := validAcceptanceManifest(t, dir, false)
+	for _, name := range hardeningDeferredCheckNames() {
+		markHardeningDeferred(t, &m, name)
+	}
+	manifest := writeManifestJSON(t, dir, m)
+
+	err := verifyAcceptance(verifyOptions{
+		ManifestPath:           manifest,
+		ExpectedCommit:         testReleaseCommit,
+		ExpectedVersion:        testReleaseVersion,
+		AllowHardeningDeferred: true,
+	})
+	if err != nil {
+		t.Fatalf("verifyAcceptance() error = %v, want functional mode to accept scoped hardening-deferred checks", err)
+	}
+}
+
+func TestVerifyAcceptanceFunctionalRejectsUnscopedHardeningDeferred(t *testing.T) {
+	dir := t.TempDir()
+	m := validAcceptanceManifest(t, dir, false)
+	markHardeningDeferred(t, &m, "proto-verify")
+	manifest := writeManifestJSON(t, dir, m)
+
+	err := verifyAcceptance(verifyOptions{
+		ManifestPath:           manifest,
+		ExpectedCommit:         testReleaseCommit,
+		ExpectedVersion:        testReleaseVersion,
+		AllowHardeningDeferred: true,
+	})
+	if err == nil || !strings.Contains(err.Error(), "proto-verify") || !strings.Contains(err.Error(), "hardening_deferred") {
+		t.Fatalf("verifyAcceptance() error = %v, want functional mode to reject unscoped hardening-deferred checks", err)
+	}
+}
+
 func TestVerifyAcceptanceRejectsMissingRequiredCheck(t *testing.T) {
 	dir := t.TempDir()
 	m := validAcceptanceManifest(t, dir, false)
@@ -1371,13 +1423,50 @@ func TestStatusCommandReportsEvidencePendingManifest(t *testing.T) {
 	}
 	for _, want := range []string{
 		"release acceptance status: evidence-pending-manifest",
-		fmt.Sprintf("checks: passed=0 recorded=%d missing=0 invalid=0 review_needed=0 not_applicable=0 todo=0", len(releaseacceptance.RequiredChecks())),
+		fmt.Sprintf("checks: passed=0 recorded=%d missing=0 invalid=0 review_needed=0 not_applicable=0 hardening_deferred=0 todo=0", len(releaseacceptance.RequiredChecks())),
 		"content-production-readiness: recorded",
 		"m5-oidc-field-evidence: recorded",
 	} {
 		if !strings.Contains(stdout.String(), want) {
 			t.Fatalf("status stdout = %q, want %q", stdout.String(), want)
 		}
+	}
+}
+
+func TestStatusCommandFunctionalHardeningDeferredReportsDeferredChecks(t *testing.T) {
+	dir := t.TempDir()
+	writeReleaseEvidenceSet(t, dir, true)
+	for _, name := range hardeningDeferredCheckNames() {
+		if err := os.Remove(filepath.Join(dir, "release", "evidence", name+".txt")); err != nil {
+			t.Fatalf("remove deferred evidence %s: %v", name, err)
+		}
+	}
+	manifest := filepath.Join(dir, "release", "acceptance.json")
+	evidenceDir := filepath.Join(dir, "release", "evidence")
+	var stdout bytes.Buffer
+
+	if err := runWithIO([]string{
+		"status",
+		"--manifest", manifest,
+		"--evidence-dir", evidenceDir,
+		"--functional-hardening-deferred",
+	}, &stdout, &bytes.Buffer{}); err != nil {
+		t.Fatalf("runWithIO(status --functional-hardening-deferred) error = %v", err)
+	}
+	for _, want := range []string{
+		"release acceptance status: evidence-pending-manifest",
+		"hardening_deferred=4",
+		"content-production-readiness: hardening_deferred",
+		"m3-field-evidence: hardening_deferred",
+		"m5-oidc-field-evidence: hardening_deferred",
+		"m5-saml-field-evidence: hardening_deferred",
+	} {
+		if !strings.Contains(stdout.String(), want) {
+			t.Fatalf("status stdout = %q, want %q", stdout.String(), want)
+		}
+	}
+	if strings.Contains(stdout.String(), "proto-verify: hardening_deferred") {
+		t.Fatalf("status stdout = %q, proto-verify must not be deferable", stdout.String())
 	}
 }
 
@@ -1480,6 +1569,46 @@ func TestStatusCommandJSONReportsReadyManifest(t *testing.T) {
 	}
 	if len(report.Problems) != 0 {
 		t.Fatalf("problems = %v, want none", report.Problems)
+	}
+}
+
+func TestStatusCommandJSONAllowsFunctionalHardeningDeferred(t *testing.T) {
+	dir := t.TempDir()
+	m := validAcceptanceManifest(t, dir, true)
+	for _, name := range hardeningDeferredCheckNames() {
+		markHardeningDeferred(t, &m, name)
+	}
+	manifest := writeManifestJSON(t, dir, m)
+	var stdout bytes.Buffer
+
+	if err := runWithIO([]string{
+		"status",
+		"--manifest", manifest,
+		"--evidence-dir", filepath.Join(dir, "evidence"),
+		"--allow-no-performance-claims",
+		"--functional-hardening-deferred",
+		"--json",
+	}, &stdout, &bytes.Buffer{}); err != nil {
+		t.Fatalf("runWithIO(status --functional-hardening-deferred --json) error = %v", err)
+	}
+	var report releaseacceptance.StatusReport
+	if err := json.Unmarshal(stdout.Bytes(), &report); err != nil {
+		t.Fatalf("unmarshal status report: %v\n%s", err, stdout.String())
+	}
+	if !report.Ready || report.State != "ready" || report.Summary.HardeningDeferred != len(hardeningDeferredCheckNames()) {
+		t.Fatalf("status report = %+v, want ready functional hardening-deferred summary", report)
+	}
+	for _, name := range hardeningDeferredCheckNames() {
+		check := statusCheckByName(t, report, name)
+		if check.State != "hardening_deferred" {
+			t.Fatalf("%s state = %q, want hardening_deferred", name, check.State)
+		}
+		if check.RanAt == "" || check.Detail != releaseacceptance.HardeningDeferredDetail(name) {
+			t.Fatalf("%s deferred metadata = ran_at %q detail %q, want required functional deferral metadata", name, check.RanAt, check.Detail)
+		}
+		if check.Artifact != "" || check.EvidencePath != "" || check.BenchmarkSummary != "" || len(check.Command) != 0 {
+			t.Fatalf("%s deferred check should not reference evidence: %+v", name, check)
+		}
 	}
 }
 
@@ -2621,6 +2750,82 @@ func TestAssembleCommandRejectsMissingEvidenceBeforeWrite(t *testing.T) {
 	}
 }
 
+func TestAssembleCommandAllowsFunctionalHardeningDeferred(t *testing.T) {
+	dir := t.TempDir()
+	writeReleaseEvidenceSet(t, dir, true)
+	for _, name := range hardeningDeferredCheckNames() {
+		if err := os.Remove(filepath.Join(dir, "release", "evidence", name+".txt")); err != nil {
+			t.Fatalf("remove deferred evidence %s: %v", name, err)
+		}
+	}
+	summary := writePublishableBenchmarkSummary(t, dir)
+	manifest := filepath.Join(dir, "release", "acceptance.json")
+
+	err := runWithIO([]string{
+		"assemble",
+		"--manifest", manifest,
+		"--version", testReleaseVersion,
+		"--commit", testReleaseCommit,
+		"--operator", "release@example.com",
+		"--evidence-dir", filepath.Join(dir, "release", "evidence"),
+		"--benchmark-summary", summary,
+		"--functional-hardening-deferred",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err != nil {
+		t.Fatalf("runWithIO(assemble --functional-hardening-deferred) error = %v", err)
+	}
+
+	var m acceptanceManifest
+	readManifestJSON(t, manifest, &m)
+	for _, name := range hardeningDeferredCheckNames() {
+		check := checkByName(t, &m, name)
+		if check.Status != "hardening_deferred" {
+			t.Fatalf("%s status = %q, want hardening_deferred", name, check.Status)
+		}
+		if check.RanAt == "" || check.Detail != releaseacceptance.HardeningDeferredDetail(name) {
+			t.Fatalf("%s deferred metadata = ran_at %q detail %q, want functional deferral detail", name, check.RanAt, check.Detail)
+		}
+		if check.Artifact != "" || check.ArtifactSHA256 != "" || check.BenchmarkSummary != "" {
+			t.Fatalf("%s deferred check should not reference evidence: %+v", name, *check)
+		}
+	}
+	err = verifyAcceptance(verifyOptions{
+		ManifestPath:    manifest,
+		ExpectedCommit:  testReleaseCommit,
+		ExpectedVersion: testReleaseVersion,
+	})
+	if err == nil || !strings.Contains(err.Error(), "hardening_deferred") {
+		t.Fatalf("verifyAcceptance(strict deferred manifest) error = %v, want production verifier rejection", err)
+	}
+}
+
+func TestAssembleCommandFunctionalRejectsOtherMissingEvidence(t *testing.T) {
+	dir := t.TempDir()
+	writeReleaseEvidenceSet(t, dir, true)
+	if err := os.Remove(filepath.Join(dir, "release", "evidence", "proto-verify.txt")); err != nil {
+		t.Fatalf("remove proto evidence: %v", err)
+	}
+	summary := writePublishableBenchmarkSummary(t, dir)
+	manifest := filepath.Join(dir, "release", "acceptance.json")
+
+	err := runWithIO([]string{
+		"assemble",
+		"--manifest", manifest,
+		"--version", testReleaseVersion,
+		"--commit", testReleaseCommit,
+		"--operator", "release@example.com",
+		"--evidence-dir", filepath.Join(dir, "release", "evidence"),
+		"--benchmark-summary", summary,
+		"--functional-hardening-deferred",
+	}, &bytes.Buffer{}, &bytes.Buffer{})
+	if err == nil || !strings.Contains(err.Error(), "proto-verify evidence artifact") {
+		t.Fatalf("runWithIO(assemble --functional-hardening-deferred missing proto) error = %v, want non-deferred missing evidence refusal", err)
+	}
+	if _, statErr := os.Stat(manifest); !errors.Is(statErr, os.ErrNotExist) {
+		t.Fatalf("manifest stat after failed functional assemble = %v, want not exist", statErr)
+	}
+}
+
 func TestAssembleCommandSupportsNoPerformanceClaims(t *testing.T) {
 	dir := t.TempDir()
 	writeReleaseEvidenceSet(t, dir, false)
@@ -2712,6 +2917,40 @@ func validAcceptanceManifest(t *testing.T, dir string, noPerformanceClaims bool)
 func releaseBenchmarkCheck(t *testing.T, m *acceptanceManifest) *acceptanceCheck {
 	t.Helper()
 	return checkByName(t, m, "release-benchmark")
+}
+
+func hardeningDeferredCheckNames() []string {
+	return []string{
+		releaseacceptance.ContentProductionReadinessCheckName,
+		"m3-field-evidence",
+		releaseacceptance.OIDCFieldEvidenceCheckName,
+		releaseacceptance.SAMLFieldEvidenceCheckName,
+	}
+}
+
+func markHardeningDeferred(t *testing.T, m *acceptanceManifest, name string) {
+	t.Helper()
+	check := checkByName(t, m, name)
+	check.Status = "hardening_deferred"
+	check.Artifact = ""
+	check.ArtifactSHA256 = ""
+	check.BenchmarkSummary = ""
+	check.RanAt = testReleaseTime
+	check.Detail = releaseacceptance.HardeningDeferredDetail(name)
+	if check.Detail == "" {
+		check.Detail = "functional hardening-deferred acceptance for " + name
+	}
+}
+
+func statusCheckByName(t *testing.T, report releaseacceptance.StatusReport, name string) releaseacceptance.CheckStatus {
+	t.Helper()
+	for _, check := range report.Checks {
+		if check.Name == name {
+			return check
+		}
+	}
+	t.Fatalf("%s status missing", name)
+	return releaseacceptance.CheckStatus{}
 }
 
 func checkByName(t *testing.T, m *acceptanceManifest, name string) *acceptanceCheck {

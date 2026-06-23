@@ -10,6 +10,24 @@ bounded functional slice recorded in the row. They do not close the production
 hardening requirement unless the same status also says the production custody,
 field-evidence, scale, or certification requirement is complete.
 
+## Functional Hardening-Deferred Release Items
+
+Enterprise functional acceptance may defer only the four production
+certification items below. Full production verification still requires each of
+them to be completed with passing, release-local evidence. All other release
+acceptance gates remain mandatory for functional acceptance, including eBPF OL9
+field evidence, privileged integration, e2e install, M3 live networking, WebUI
+enterprise smoke, automated auth/provider gates, restore/HA/deploy,
+content-package, proto, and the existing benchmark/no-performance-claims
+contract.
+
+| Release check | Deferred production-certification work | Functional-mode status |
+| --- | --- | --- |
+| `content-production-readiness` | Collect signed production App-ID, Threat-ID, and intel-feed package status plus required evidence bundles, manifest binding, rollout/rollback proof, license/provenance proof, and release-local recorder artifact. | Deferred only for opt-in functional hardening-deferred acceptance; required for production verification |
+| `m3-field-evidence` | Collect redacted external BGP peer, IPsec SA/protected-subnet traffic, WireGuard external-client, bundle-manifest, and global redaction evidence from the field lab. | Deferred only for opt-in functional hardening-deferred acceptance; `m3-live-networking` remains mandatory |
+| `m5-oidc-field-evidence` | Collect redacted real-provider OIDC browser SSO evidence for issuer/client validation, HTTPS callback, secret posture, secure cookies, CSRF/origin negatives, RBAC, logout, and redaction scans. | Deferred only for opt-in functional hardening-deferred acceptance; `m5-auth-ui` and `m5-oidc-provider` remain mandatory |
+| `m5-saml-field-evidence` | Collect redacted real-provider SAML browser SSO evidence for IdP/SP metadata, HTTPS ACS, secure cookies, signature/replay/RelayState negatives, CSRF/origin negatives, RBAC, logout, and redaction scans. | Deferred only for opt-in functional hardening-deferred acceptance; `m5-auth-ui` and `m5-oidc-provider` remain mandatory |
+
 ## Deferred Items
 
 | Area | Requirement | Source | Status |

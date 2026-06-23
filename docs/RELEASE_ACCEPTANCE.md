@@ -144,6 +144,50 @@ assembled for the accepted commit. `not_applicable` is reserved for the
 `release-benchmark` no-performance-claims path only; every other check must
 have passing recorded evidence before release acceptance can be ready.
 
+## Functional Hardening-Deferred Mode
+
+Full production verification remains strict. `make release-verify` and
+`make release-acceptance-verify` continue to require every production
+certification gate, except the existing explicit `release-benchmark`
+`not_applicable` path for releases that publish no performance claims.
+
+The opt-in functional hardening-deferred mode is only for enterprise
+functional acceptance before four production-certification evidence bundles
+are complete. The `ngfwrelease status` and `ngfwrelease assemble` functional
+contract uses `--functional-hardening-deferred` and may defer only these
+checks:
+
+- `content-production-readiness`
+- `m3-field-evidence`
+- `m5-oidc-field-evidence`
+- `m5-saml-field-evidence`
+
+Every other acceptance gate remains mandatory for functional acceptance:
+`proto-verify`, `privileged-integration`, `deploy-hardening`,
+`policy-restore-drill`, `ha-readiness-recovery`, `e2e-install`,
+`content-package-verification`, `release-benchmark` or the explicit
+no-performance-claims path, `m3-live-networking`, `ebpf-ol9-field-evidence`,
+`m5-auth-ui`, `m5-oidc-provider`, and `webui-enterprise-smoke`.
+
+In this checkout, do not assume production `ngfwrelease verify` accepts a
+hardening-deferred manifest unless the CLI help for `verify` explicitly exposes
+that flag. Prefer read-only status and assembly workflows for the functional
+contract:
+
+```sh
+make release-acceptance-status-functional VERSION=<tag> COMMIT=<full-commit>
+make release-acceptance-assemble-functional VERSION=<tag> COMMIT=<full-commit> \
+  RELEASE_OPERATOR="$USER" \
+  RELEASE_EVIDENCE_DIR=release/evidence \
+  RELEASE_BENCHMARK_SUMMARY=perf/release-results/<run>/summary.json
+```
+
+Those Makefile wrappers are intentionally separate from production targets.
+They pass the current `ngfwrelease status` or `assemble`
+`--functional-hardening-deferred` contract; they do not weaken
+`release-acceptance-status`, `release-acceptance-assemble`,
+`release-acceptance-verify`, or `release-verify`.
+
 Record the production content check separately after the signed App-ID,
 Threat-ID, and intel-feed package evidence bundle exists:
 
@@ -837,6 +881,22 @@ make release-acceptance-assemble VERSION=<tag> COMMIT=<full-commit> \
   RELEASE_BENCHMARK_SUMMARY=perf/release-results/<run>/summary.json
 ```
 
+For a functional hardening-deferred enterprise acceptance, use the separate
+functional wrapper for the `ngfwrelease assemble --functional-hardening-deferred`
+contract:
+
+```sh
+make release-acceptance-assemble-functional VERSION=<tag> COMMIT=<full-commit> \
+  RELEASE_OPERATOR="$USER" \
+  RELEASE_EVIDENCE_DIR=release/evidence \
+  RELEASE_BENCHMARK_SUMMARY=perf/release-results/<run>/summary.json
+```
+
+That mode may mark only `content-production-readiness`,
+`m3-field-evidence`, `m5-oidc-field-evidence`, and
+`m5-saml-field-evidence` as deferred functional hardening. It is not a
+production release certificate.
+
 ## Verification Commands
 
 Before assembling or while collecting evidence, inspect the current local
@@ -859,6 +919,20 @@ should fail unless the manifest is fully ready. When `--strict` is combined with
 `--recordability`, the command also fails if the checkout is not recordable.
 `--recordability` is human output and is intentionally not combined with
 `--json`.
+
+The functional inventory wrapper adds the same read-only status and
+recordability reporting for the `ngfwrelease status
+--functional-hardening-deferred` contract:
+
+```sh
+make release-acceptance-status-functional VERSION=<tag> COMMIT=<full-commit>
+```
+
+It may report only the four allowed production-certification items as deferred;
+missing or invalid eBPF OL9 field evidence, privileged integration, install,
+M3 live networking, WebUI enterprise smoke, automated auth/provider gates,
+restore/HA/deploy/content-package/proto evidence, or performance evidence
+still blocks functional acceptance.
 
 The release workflow runs the rootless gate and then verifies the manifest:
 
@@ -896,6 +970,11 @@ verification, and the strict recordability preflight. It is expected to fail
 until source changes are committed or stashed and the release evidence/manifest
 matches the requested tag and commit.
 
+There is intentionally no `release-verify-functional` production substitute in
+this Makefile. Unless `ngfwrelease verify` explicitly exposes a
+hardening-deferred flag, production verification remains the only
+verifier-backed acceptance path.
+
 ## Template Helper
 
 Before a release candidate has evidence, operators can print a deliberately
@@ -922,6 +1001,13 @@ commit, and the verifier recomputes matching artifact digests. The only accepted
 `not_applicable` check is `release-benchmark` in explicit
 `RELEASE_NO_PERFORMANCE_CLAIMS=1` mode; all hardening, install, external field,
 browser, SSO, and production content checks still require real evidence.
+
+Functional hardening-deferred manifests are separate from production manifests.
+They may defer only
+`content-production-readiness`, `m3-field-evidence`,
+`m5-oidc-field-evidence`, and `m5-saml-field-evidence`; the remaining checks
+above still require `passed` evidence or the existing no-performance-claims
+handling for `release-benchmark`.
 
 ## Manifest Schema
 

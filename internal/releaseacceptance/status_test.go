@@ -178,6 +178,116 @@ func TestBuildStatusReportOnlyBenchmarkCanBeNotApplicable(t *testing.T) {
 	}
 }
 
+func TestBuildStatusReportRejectsHardeningDeferredByDefault(t *testing.T) {
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, "release", "acceptance.json")
+	writeStatusJSON(t, manifestPath, map[string]any{
+		"schema_version":  AcceptanceSchemaVersion,
+		"release_version": "v-test",
+		"commit":          testReleaseCommit,
+		"generated_at":    "2026-06-18T12:00:00Z",
+		"operator":        "tester",
+		"checks": []map[string]any{{
+			"name":   ContentProductionReadinessCheckName,
+			"status": hardeningDeferredStatus,
+			"ran_at": "2026-06-18T12:00:00Z",
+			"detail": HardeningDeferredDetail(ContentProductionReadinessCheckName),
+		}},
+	})
+
+	report := BuildStatusReport(StatusOptions{
+		ManifestPath:   manifestPath,
+		EvidenceDir:    filepath.Join(dir, "release", "evidence"),
+		ExpectedCommit: testReleaseCommit,
+	})
+	check := checkStatusByName(t, report, ContentProductionReadinessCheckName)
+	if check.State != "invalid" {
+		t.Fatalf("%s state = %q, want invalid without hardening-deferred mode", check.Name, check.State)
+	}
+	joined := strings.Join(check.Problems, "\n")
+	if !strings.Contains(joined, ContentProductionReadinessCheckName) ||
+		!strings.Contains(joined, hardeningDeferredStatus) {
+		t.Fatalf("%s problems = %v, want default rejection to name deferred status", check.Name, check.Problems)
+	}
+}
+
+func TestBuildStatusReportAllowsScopedHardeningDeferredInFunctionalMode(t *testing.T) {
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, "release", "acceptance.json")
+	for _, name := range []string{
+		ContentProductionReadinessCheckName,
+		"m3-field-evidence",
+		OIDCFieldEvidenceCheckName,
+		SAMLFieldEvidenceCheckName,
+	} {
+		t.Run(name, func(t *testing.T) {
+			writeStatusJSON(t, manifestPath, map[string]any{
+				"schema_version":  AcceptanceSchemaVersion,
+				"release_version": "v-test",
+				"commit":          testReleaseCommit,
+				"generated_at":    "2026-06-18T12:00:00Z",
+				"operator":        "tester",
+				"checks": []map[string]any{{
+					"name":   name,
+					"status": hardeningDeferredStatus,
+					"ran_at": "2026-06-18T12:00:00Z",
+					"detail": HardeningDeferredDetail(name),
+				}},
+			})
+
+			report := BuildStatusReport(StatusOptions{
+				ManifestPath:           manifestPath,
+				EvidenceDir:            filepath.Join(dir, "release", "evidence"),
+				ExpectedCommit:         testReleaseCommit,
+				AllowHardeningDeferred: true,
+			})
+			check := checkStatusByName(t, report, name)
+			if check.State != hardeningDeferredStatus {
+				t.Fatalf("%s state = %q, want %q in functional mode; problems=%v", name, check.State, hardeningDeferredStatus, check.Problems)
+			}
+			if check.RanAt != "2026-06-18T12:00:00Z" || check.Detail != HardeningDeferredDetail(name) {
+				t.Fatalf("%s deferred metadata = ran_at %q detail %q, want required ran_at/detail", name, check.RanAt, check.Detail)
+			}
+			if check.Artifact != "" || check.EvidencePath != "" || check.BenchmarkSummary != "" || len(check.Command) != 0 {
+				t.Fatalf("%s deferred check should not carry evidence references: %+v", name, check)
+			}
+		})
+	}
+}
+
+func TestBuildStatusReportRejectsUnscopedHardeningDeferredInFunctionalMode(t *testing.T) {
+	dir := t.TempDir()
+	manifestPath := filepath.Join(dir, "release", "acceptance.json")
+	writeStatusJSON(t, manifestPath, map[string]any{
+		"schema_version":  AcceptanceSchemaVersion,
+		"release_version": "v-test",
+		"commit":          testReleaseCommit,
+		"generated_at":    "2026-06-18T12:00:00Z",
+		"operator":        "tester",
+		"checks": []map[string]any{{
+			"name":   "proto-verify",
+			"status": hardeningDeferredStatus,
+			"ran_at": "2026-06-18T12:00:00Z",
+			"detail": "attempted deferral for an undeferable check",
+		}},
+	})
+
+	report := BuildStatusReport(StatusOptions{
+		ManifestPath:           manifestPath,
+		EvidenceDir:            filepath.Join(dir, "release", "evidence"),
+		ExpectedCommit:         testReleaseCommit,
+		AllowHardeningDeferred: true,
+	})
+	check := checkStatusByName(t, report, "proto-verify")
+	if check.State != "invalid" {
+		t.Fatalf("proto-verify state = %q, want invalid for unscoped hardening-deferred check", check.State)
+	}
+	joined := strings.Join(check.Problems, "\n")
+	if !strings.Contains(joined, "proto-verify") || !strings.Contains(joined, hardeningDeferredStatus) {
+		t.Fatalf("proto-verify problems = %v, want unscoped deferred rejection", check.Problems)
+	}
+}
+
 func TestBuildStatusReportCarriesBenchmarkSummary(t *testing.T) {
 	dir := t.TempDir()
 	manifestPath := filepath.Join(dir, "release", "acceptance.json")

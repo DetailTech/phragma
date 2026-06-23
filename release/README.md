@@ -28,6 +28,44 @@ does collect `webui-enterprise-smoke`, so run this rootless bundle from a
 supported remote browser validation host or CI job with Node.js, Playwright,
 Chromium, and enough budget for the full desktop enterprise sweep.
 
+## Enterprise Functional Hardening-Deferred Mode
+
+Production release verification remains strict. `make release-verify` and
+`make release-acceptance-verify` still require all production certification
+gates, except the established no-performance-claims handling for
+`release-benchmark`.
+
+The opt-in functional hardening-deferred contract may defer only four
+production-certification items:
+
+- `content-production-readiness`
+- `m3-field-evidence`
+- `m5-oidc-field-evidence`
+- `m5-saml-field-evidence`
+
+Functional acceptance still requires recorded passing evidence for
+`proto-verify`, `privileged-integration`, `deploy-hardening`,
+`policy-restore-drill`, `ha-readiness-recovery`, `e2e-install`,
+`content-package-verification`, `release-benchmark` or explicit
+no-performance-claims mode, `m3-live-networking`, `ebpf-ol9-field-evidence`,
+`m5-auth-ui`, `m5-oidc-provider`, and `webui-enterprise-smoke`.
+
+Do not claim `ngfwrelease verify` accepts a hardening-deferred manifest unless
+the current CLI exposes that flag on `verify`. The Makefile provides separate
+status and assemble wrappers for the current `ngfwrelease status` and
+`ngfwrelease assemble --functional-hardening-deferred` contract:
+
+```sh
+make release-acceptance-status-functional VERSION=<tag> COMMIT=<full-commit>
+make release-acceptance-assemble-functional VERSION=<tag> COMMIT=<full-commit> \
+  RELEASE_OPERATOR="$USER" \
+  RELEASE_EVIDENCE_DIR=release/evidence \
+  RELEASE_BENCHMARK_SUMMARY=perf/release-results/<run>/summary.json
+```
+
+Those wrappers are not production certification shortcuts and do not change the
+strict `release-acceptance-verify` or `release-verify` targets.
+
 Release evidence targets can also be run one at a time. The
 `release-evidence-privileged-integration` target is not rootless; run it only on
 a Linux host or CI runner with the required dataplane privileges.
@@ -512,6 +550,16 @@ Tagged releases verify that manifest with:
 ```sh
 make release-acceptance-verify VERSION=<tag> COMMIT=<full-commit>
 ```
+
+Functional hardening-deferred assemblies use the separate wrapper, not the
+production verifier:
+
+```sh
+make release-acceptance-assemble-functional VERSION=<tag> COMMIT=<full-commit>
+```
+
+That path is acceptable only for enterprise functional acceptance and only when
+the four deferred items above are the missing production-certification gates.
 
 To inspect evidence collection progress before assembly, run:
 

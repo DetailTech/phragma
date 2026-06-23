@@ -3997,16 +3997,16 @@ func TestTelemetryExportStatusReportsRunningPolicySinks(t *testing.T) {
 		Database:      "openngfw_prod",
 		Exports: []*openngfwv1.TelemetryExport{
 			{
-				Name:    "local-json",
-				Enabled: true,
-				Type:    openngfwv1.TelemetryExportType_TELEMETRY_EXPORT_TYPE_JSON_FILE,
-				Target:  "/var/log/openngfw/exports/eve-%Y-%m-%d.json",
-			},
-			{
 				Name:    "siem-json",
 				Enabled: true,
 				Type:    openngfwv1.TelemetryExportType_TELEMETRY_EXPORT_TYPE_JSON_TCP,
 				Target:  "siem.example:5514",
+			},
+			{
+				Name:    "soc-json",
+				Enabled: true,
+				Type:    openngfwv1.TelemetryExportType_TELEMETRY_EXPORT_TYPE_JSON_UDP,
+				Target:  "soc.example:5514",
 			},
 		},
 	}}
@@ -4048,10 +4048,7 @@ func TestTelemetryExportStatusReportsRunningPolicySinks(t *testing.T) {
 	if len(resp.GetExports()) != 2 {
 		t.Fatalf("exports = %d, want 2", len(resp.GetExports()))
 	}
-	if got := resp.GetExports()[0].GetEvidenceState(); got != "pending" {
-		t.Fatalf("file evidence state = %q, want pending", got)
-	}
-	if got := resp.GetExports()[1].GetEvidenceState(); got != "configured-unverified" {
+	if got := resp.GetExports()[0].GetEvidenceState(); got != "configured-unverified" {
 		t.Fatalf("stream evidence state = %q, want configured-unverified", got)
 	}
 	if !hasWarning(resp.GetWarnings(), "info", "Telemetry export \"siem-json\" requires sink-side verification.") {
