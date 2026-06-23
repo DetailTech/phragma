@@ -269,6 +269,10 @@ check_static() {
     echo "deploy/install.sh must restart controld after installing binaries and the systemd unit" >&2
     failed=1
   fi
+  if ! grep -q 'binary_matches_commit' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must reject stale prebuilt binaries when COMMIT is provided" >&2
+    failed=1
+  fi
   check_vector_remote_guard "$REPO_ROOT/deploy/install.sh" || failed=1
   check_admin_token_not_stdout "$REPO_ROOT/deploy/install.sh" || failed=1
   if ! grep -q '/etc/openngfw/admin.token' "$REPO_ROOT/deploy/install.sh"; then

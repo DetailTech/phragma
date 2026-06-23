@@ -102,6 +102,14 @@ install_build_toolchain() {
   fi
 }
 
+binary_matches_commit() {
+  local binary="$1"
+  if [[ -z "${COMMIT:-}" ]]; then
+    return 0
+  fi
+  [[ -x "$binary" ]] && "$binary" --version 2>/dev/null | grep -q "$COMMIT"
+}
+
 echo "[1/8] Engine packages"
 if [[ $FAMILY == debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
@@ -172,7 +180,8 @@ if ! command -v vector >/dev/null; then
 fi
 
 echo "[4/8] OpenNGFW binaries"
-if [[ -x "$REPO_ROOT/bin/controld" && -x "$REPO_ROOT/bin/ngfwctl" ]]; then
+if [[ -x "$REPO_ROOT/bin/controld" && -x "$REPO_ROOT/bin/ngfwctl" ]] &&
+   binary_matches_commit "$REPO_ROOT/bin/controld"; then
   install -m 0755 "$REPO_ROOT/bin/controld" "$REPO_ROOT/bin/ngfwctl" /usr/local/bin/
 else
   install_build_toolchain
