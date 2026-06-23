@@ -219,7 +219,8 @@ fi
 echo "[8/8] systemd unit"
 install -m 0644 "$REPO_ROOT/deploy/systemd/controld.service" /etc/systemd/system/
 systemctl daemon-reload
-systemctl enable --now controld
+systemctl enable controld
+systemctl restart controld
 
 echo
 echo "OpenNGFW installed. Verify with:"

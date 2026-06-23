@@ -265,6 +265,10 @@ check_static() {
     echo "deploy/install.sh must keep curl as a command-satisfied prerequisite mapping" >&2
     failed=1
   fi
+  if ! grep -Eq 'systemctl[[:space:]]+restart[[:space:]]+controld([[:space:]]|$)' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must restart controld after installing binaries and the systemd unit" >&2
+    failed=1
+  fi
   check_vector_remote_guard "$REPO_ROOT/deploy/install.sh" || failed=1
   check_admin_token_not_stdout "$REPO_ROOT/deploy/install.sh" || failed=1
   if ! grep -q '/etc/openngfw/admin.token' "$REPO_ROOT/deploy/install.sh"; then
@@ -420,6 +424,26 @@ wait_for_controld() {
   systemctl status controld --no-pager || true
   echo "controld did not become ready" >&2
   return 1
+}
+
+require_installed_commit() {
+  if [ -z "${COMMIT:-}" ]; then
+    return 0
+  fi
+  local installed_version
+  local remote_version
+  installed_version="$(/usr/local/bin/controld --version 2>&1)"
+  remote_version="$(/usr/local/bin/ngfwctl --server "$GRPC_LISTEN" version --remote 2>&1)"
+  if ! printf '%s\n' "$installed_version" | grep -q "$COMMIT"; then
+    echo "installed controld binary does not report expected commit $COMMIT" >&2
+    printf '%s\n' "$installed_version" >&2
+    exit 1
+  fi
+  if ! printf '%s\n' "$remote_version" | grep -q "$COMMIT"; then
+    echo "running controld service does not report expected commit $COMMIT" >&2
+    printf '%s\n' "$remote_version" >&2
+    exit 1
+  fi
 }
 
 setup_topology() {
@@ -580,6 +604,7 @@ PY
 }
 
 wait_for_controld
+require_installed_commit
 setup_topology
 start_server
 
