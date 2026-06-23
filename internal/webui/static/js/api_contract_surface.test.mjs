@@ -4,6 +4,13 @@ import { readFileSync } from "node:fs";
 import { api, setCSRFTokenForTest, setToken } from "./api.js";
 
 const specText = readFileSync(new URL("../api-spec.yaml", import.meta.url), "utf8");
+const docsSpecText = readFileSync(new URL("../../../../docs/api-spec.yaml", import.meta.url), "utf8");
+const apiSourceText = readFileSync(new URL("./api.js", import.meta.url), "utf8");
+const controldSourceText = readFileSync(new URL("../../../../cmd/controld/main.go", import.meta.url), "utf8");
+const authzSourceTexts = [
+  readFileSync(new URL("../../../../internal/authz/oidc.go", import.meta.url), "utf8"),
+  readFileSync(new URL("../../../../internal/authz/saml.go", import.meta.url), "utf8"),
+];
 
 class MemoryStorage {
   constructor() {
@@ -32,6 +39,150 @@ function installStorage() {
 
 function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function parseSpecRoutes(text) {
+  const routes = new Map();
+  let currentPath = "";
+  for (const line of text.split("\n")) {
+    const pathMatch = line.match(/^  (\/v1\/.*):\s*$/);
+    if (pathMatch) {
+      currentPath = pathMatch[1];
+      routes.set(currentPath, new Set());
+      continue;
+    }
+    const methodMatch = currentPath ? line.match(/^    (get|post|patch|put|delete):\s*$/) : null;
+    if (methodMatch) routes.get(currentPath).add(methodMatch[1].toUpperCase());
+  }
+  return routes;
+}
+
+const webuiSpecRoutes = parseSpecRoutes(specText);
+const docsSpecRoutes = parseSpecRoutes(docsSpecText);
+
+function routePattern(path) {
+  const escaped = escapeRegExp(path);
+  return new RegExp(`^${escaped.replace(/\\\{[^}]+\\\}/g, "[^/:]+")}$`);
+}
+
+function findSpecRoute(path, routes) {
+  if (routes.has(path)) return path;
+  for (const specPath of routes.keys()) {
+    if (routePattern(specPath).test(path)) return specPath;
+  }
+  return "";
+}
+
+function assertSpecRouteIn(routes, sourceName, path, method) {
+  const specPath = findSpecRoute(path, routes);
+  assert.notEqual(specPath, "", `${sourceName} is missing ${method} ${path}`);
+  assert.ok(routes.get(specPath).has(method), `${sourceName} ${specPath} is missing ${method} for ${path}`);
+  return specPath;
+}
+
+function assertRouteInBothSpecs(path, method, sourceName) {
+  const webuiPath = assertSpecRouteIn(webuiSpecRoutes, "internal/webui/static/api-spec.yaml", path, method);
+  const docsPath = assertSpecRouteIn(docsSpecRoutes, "docs/api-spec.yaml", path, method);
+  assert.equal(docsPath, webuiPath, `${sourceName} resolves to different spec paths for ${method} ${path}`);
+}
+
+function assertSpecParity() {
+  assert.deepEqual(
+    new Set(webuiSpecRoutes.keys()),
+    new Set(docsSpecRoutes.keys()),
+    "docs/api-spec.yaml and internal/webui/static/api-spec.yaml path sets differ",
+  );
+  for (const [path, methods] of webuiSpecRoutes) {
+    assert.deepEqual(
+      methods,
+      docsSpecRoutes.get(path),
+      `docs/api-spec.yaml and internal/webui/static/api-spec.yaml methods differ for ${path}`,
+    );
+  }
+}
+
+function normalizeSourcePath(rawPath) {
+  let path = rawPath.replace(/\$\{[^}]+\}/g, "{param}");
+  const queryStart = path.indexOf("?");
+  if (queryStart !== -1) path = path.slice(0, queryStart);
+  return path;
+}
+
+function extractApiWrapperRoutes(source) {
+  const routes = [];
+  const reqCall = /\breq\(\s*"([A-Z]+)"\s*,\s*([`"])(\/v1\/[\s\S]*?)\2/g;
+  for (const match of source.matchAll(reqCall)) {
+    routes.push({
+      method: match[1],
+      path: normalizeSourcePath(match[3]),
+      source: "internal/webui/static/js/api.js req() wrapper",
+    });
+  }
+  const binaryCall = /\bbinaryReq\(\s*([`"])(\/v1\/[\s\S]*?)\1/g;
+  for (const match of source.matchAll(binaryCall)) {
+    routes.push({
+      method: "GET",
+      path: normalizeSourcePath(match[2]),
+      source: "internal/webui/static/js/api.js binaryReq() wrapper",
+    });
+  }
+  return routes;
+}
+
+function extractAuthzConstants(sources) {
+  const constants = new Map();
+  for (const source of sources) {
+    for (const match of source.matchAll(/\b([A-Z][A-Za-z0-9]+Path)\s*=\s*"(\/v1\/[^"]+)"/g)) {
+      constants.set(`authz.${match[1]}`, match[2]);
+    }
+  }
+  return constants;
+}
+
+function extractControldHTTPRegistrations(source, constants) {
+  const registrations = [];
+  const handleCall = /\broot\.Handle(?:Func)?\(\s*([^,\s)]+)/g;
+  for (const match of source.matchAll(handleCall)) {
+    const token = match[1];
+    const path = token.startsWith("\"") ? token.slice(1, -1) : constants.get(token);
+    if (!path || !path.startsWith("/v1/")) continue;
+    if (path.endsWith("/")) {
+      for (const [specPath, methods] of webuiSpecRoutes) {
+        if (specPath.startsWith(path)) {
+          for (const method of methods) registrations.push({ method, path: specPath, source: "cmd/controld/main.go root.Handle prefix" });
+        }
+      }
+      continue;
+    }
+    const specPath = findSpecRoute(path, webuiSpecRoutes);
+    if (!specPath) {
+      registrations.push({ method: "GET", path, source: "cmd/controld/main.go root.Handle" });
+      continue;
+    }
+    for (const method of webuiSpecRoutes.get(specPath)) {
+      registrations.push({ method, path: specPath, source: "cmd/controld/main.go root.Handle" });
+    }
+  }
+  return registrations;
+}
+
+function uniqueRoutes(routes) {
+  const seen = new Set();
+  const unique = [];
+  for (const route of routes) {
+    const key = `${route.method} ${route.path}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    unique.push(route);
+  }
+  return unique.sort((a, b) => `${a.path} ${a.method}`.localeCompare(`${b.path} ${b.method}`));
+}
+
+function assertSourceRoutesAreSpecified(routes) {
+  assert.ok(routes.length > 0, "expected source route enumeration to find routes");
+  for (const route of uniqueRoutes(routes)) {
+    assertRouteInBothSpecs(route.path, route.method, route.source);
+  }
 }
 
 function assertSpecRoute(path, method) {
@@ -143,6 +294,10 @@ async function assertApiContract(contract) {
     recorder.restore();
   }
 }
+
+assertSpecParity();
+assertSourceRoutesAreSpecified(extractApiWrapperRoutes(apiSourceText));
+assertSourceRoutesAreSpecified(extractControldHTTPRegistrations(controldSourceText, extractAuthzConstants(authzSourceTexts)));
 
 await assertApiContract({
   name: "releaseAcceptanceStatus",

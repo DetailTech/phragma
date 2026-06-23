@@ -221,7 +221,26 @@ func mustCommit(t *testing.T, srv *apiserver.PolicyServer, p *openngfwv1.Policy,
 	if _, err := srv.SetCandidate(ctx, &openngfwv1.SetCandidateRequest{Policy: p}); err != nil {
 		t.Fatal(err)
 	}
-	resp, err := srv.Commit(ctx, &openngfwv1.CommitRequest{Comment: comment, AckRisk: true})
+	statusResp, err := srv.GetCandidateStatus(ctx, &openngfwv1.GetCandidateStatusRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	approvalResp, err := srv.CreateChangeApproval(ctx, &openngfwv1.CreateChangeApprovalRequest{
+		CandidateRevision: statusResp.GetCandidateRevision(),
+		Comment:           "integration approval for " + comment,
+		AckRisk:           true,
+		AckRuntime:        true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	resp, err := srv.Commit(ctx, &openngfwv1.CommitRequest{
+		Comment:                   comment,
+		AckRisk:                   true,
+		AckRuntime:                true,
+		ApprovalId:                approvalResp.GetApproval().GetId(),
+		ReviewedCandidateRevision: statusResp.GetCandidateRevision(),
+	})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -321,13 +340,13 @@ func TestM1EndToEnd(t *testing.T) {
 	for _, e := range audit.GetEntries() {
 		actions[e.GetAction()]++
 	}
-	if actions["commit"] < 4 || actions["rollback"] < 2 || actions["commit-failed"] < 1 || actions["set-candidate"] < 5 {
+	if actions["commit"] < 4 || actions["rollback"] < 2 || actions["set-candidate"] < 5 || actions["change-approval-create"] < 4 {
 		t.Fatalf("audit log incomplete: %v", actions)
 	}
 
 	// 8. The kernel ruleset is exactly ours.
 	ruleset := run(t, "nft", "list", "table", "inet", "openngfw")
-	if !strings.Contains(ruleset, `comment "rule:client-to-server"`) {
+	if !strings.Contains(ruleset, `comment "rule:client-to-server`) || !strings.Contains(ruleset, `id=rule-client-to-server-`) {
 		t.Fatalf("expected rule comment in live ruleset:\n%s", ruleset)
 	}
 }

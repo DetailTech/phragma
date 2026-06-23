@@ -8,8 +8,8 @@ package integration
 
 import (
 	"context"
+	"io"
 	"net/http"
-	"net/http/httptest"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -21,6 +21,17 @@ import (
 	"github.com/detailtech/oss-ngfw/internal/renderers"
 	"github.com/detailtech/oss-ngfw/internal/store"
 )
+
+type staticFeedTransport string
+
+func (t staticFeedTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+	return &http.Response{
+		StatusCode: http.StatusOK,
+		Header:     make(http.Header),
+		Body:       io.NopCloser(strings.NewReader(string(t))),
+		Request:    req,
+	}, nil
+}
 
 func TestM4IntelEnforcement(t *testing.T) {
 	requireRoot(t)
@@ -42,18 +53,14 @@ func TestM4IntelEnforcement(t *testing.T) {
 	updater := &intel.Updater{RunningPolicy: func() (*openngfwv1.Policy, error) {
 		p, _, err := st.GetRunning()
 		return p, err
+	}, Client: &http.Client{
+		Transport: staticFeedTransport("# test blocklist\n" + clientIP + "\n"),
 	}}
-
-	// Feed server: blocklists the client's IP.
-	feed := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		_, _ = w.Write([]byte("# test blocklist\n" + clientIP + "\n"))
-	}))
-	defer feed.Close()
 
 	// 1. Allow policy with the custom feed enabled.
 	pol := allowPolicy()
 	pol.Intel = &openngfwv1.Intel{
-		CustomFeeds: []*openngfwv1.CustomFeed{{Name: "test-blocklist", Url: feed.URL}},
+		CustomFeeds: []*openngfwv1.CustomFeed{{Name: "test-blocklist", Url: "https://feeds.example.com/test-blocklist.txt"}},
 	}
 	mustCommit(t, srv, pol, "enable intel")
 
@@ -94,7 +101,26 @@ func TestM4IntelEnforcement(t *testing.T) {
 	if _, err := srv.SetCandidate(ctx, &openngfwv1.SetCandidateRequest{Policy: gated}); err != nil {
 		t.Fatal(err)
 	}
-	_, err = srv.Commit(ctx, &openngfwv1.CommitRequest{Comment: "must fail"})
+	statusResp, err := srv.GetCandidateStatus(ctx, &openngfwv1.GetCandidateStatusRequest{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	approvalResp, err := srv.CreateChangeApproval(ctx, &openngfwv1.CreateChangeApprovalRequest{
+		CandidateRevision: statusResp.GetCandidateRevision(),
+		Comment:           "approve candidate to exercise license gate",
+		AckRisk:           true,
+		AckRuntime:        true,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, err = srv.Commit(ctx, &openngfwv1.CommitRequest{
+		Comment:                   "must fail",
+		AckRisk:                   true,
+		AckRuntime:                true,
+		ApprovalId:                approvalResp.GetApproval().GetId(),
+		ReviewedCandidateRevision: statusResp.GetCandidateRevision(),
+	})
 	if err == nil || !strings.Contains(err.Error(), "forbids commercial use") {
 		t.Fatalf("license gate did not block the commit: %v", err)
 	}

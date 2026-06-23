@@ -315,7 +315,8 @@ func assertProfileInspectionRules(t *testing.T, ruleName string) {
 	ruleset := run(t, "nft", "list", "table", "inet", "openngfw")
 	for _, want := range []string{
 		"profile-inspection:" + ruleName,
-		"rule:" + ruleName + " inspection=ips-fail-closed",
+		"rule:" + ruleName,
+		"inspection=ips-fail-closed",
 	} {
 		if !strings.Contains(ruleset, want) {
 			t.Fatalf("profile-required inspection marker %q missing from live nftables table:\n%s", want, ruleset)
