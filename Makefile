@@ -248,7 +248,7 @@ release-evidence-ha-readiness-recovery:
 	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check ha-readiness-recovery --commit "$(COMMIT)" --detail "rootless release gate: active/passive HA readiness and control-plane recovery evidence for $(COMMIT); does not certify VIP/route promotion, fencing, or connection-state sync" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make ha-readiness-recovery-check $(RELEASE_BUILD_ARGS)
 
 release-evidence-e2e-install:
-	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check e2e-install --commit "$(COMMIT)" --detail "privileged release gate: installed service commit, allow/deny policy enforcement, and namespace traffic filtering for $(COMMIT)" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- sudo make e2e-install $(RELEASE_BUILD_ARGS)
+	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check e2e-install --commit "$(COMMIT)" --detail "privileged release gate: installed service commit, allow/deny policy enforcement, and namespace traffic filtering for $(COMMIT)" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- sudo -E make e2e-install $(RELEASE_BUILD_ARGS)
 
 release-evidence-content-package-verification:
 	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check content-package-verification --commit "$(COMMIT)" --detail "rootless release gate: demo-only signed content package mechanics for $(COMMIT); does not certify production App-ID, Threat-ID, or intel-feed content" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make content-package-smoke $(RELEASE_BUILD_ARGS)
