@@ -35,7 +35,7 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Lint release sources
-        uses: golangci/golangci-lint-action@v8
+        uses: golangci/golangci-lint-action@v9
         with:
           version: v2.5.0
 
