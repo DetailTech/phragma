@@ -116,7 +116,7 @@ export function governanceApprovalModel({
       reviewerRoles,
       riskFactors,
       changeSummary: [],
-      commitReadiness: "nothing to commit",
+      commit: "nothing to commit",
       custodyNote: governanceCustodyNote(),
       diffSummary: summarizeDiff(diff),
     };
@@ -128,7 +128,7 @@ export function governanceApprovalModel({
     reviewerRoles.push("Security reviewer");
   }
   if (runtimeBlocked || runtimeNeedsAck) {
-    riskFactors.push(runtimeBlocked ? "runtime readiness blocker" : "runtime readiness acknowledgement required");
+    riskFactors.push(runtimeBlocked ? "system preflight blocker" : "system preflight acknowledgement required");
     reviewerRoles.push("Platform/runtime owner");
   }
   if (highImpact || mediumImpact) {
@@ -153,7 +153,7 @@ export function governanceApprovalModel({
     reviewerRoles: uniqueStrings(reviewerRoles),
     riskFactors: uniqueStrings(riskFactors),
     changeSummary: changeSummary.slice(0, 8),
-    commitReadiness: validationBlocked || runtimeBlocked ? "blocked" : runtimeNeedsAck || highImpact ? "requires review" : "ready",
+    commit: validationBlocked || runtimeBlocked ? "blocked" : runtimeNeedsAck || highImpact ? "requires review" : "ready",
     custodyNote: governanceCustodyNote(),
     diffSummary: summarizeDiff(diff),
   };
@@ -207,10 +207,10 @@ export function changesLifecycleGuidanceModel({
       consequence: "The browser smoke gate is intentionally refusing direct API fallback because the runtime is not ready for UI apply. The live firewall is unchanged and the candidate remains staged.",
       guidanceTone: "warn",
       guidanceLabel: strictUiApplyRequired ? "strict UI gate active" : "apply blocked",
-      operatorDecision: "Preserve the candidate while fixing readiness blockers, or explicitly discard it if the staged change should not proceed.",
+      operatorDecision: "Preserve the candidate while fixing system preflight items, or explicitly discard it if the staged change should not proceed.",
       runbookTitle: "Strict-block cleanup/preserve runbook",
       steps: [
-        "Preserve: leave the candidate staged and open Readiness for each runtime blocker before retrying UI Commit candidate or Roll back.",
+        "Preserve: leave the candidate staged and resolve each system preflight item before retrying UI Commit candidate or Roll back.",
         "Cleanup: if the candidate is no longer intended, return to Changes > Candidate and select Discard candidate; this resets candidate to the running policy without changing the live firewall.",
         "Verify either path with candidate status and diff before rerunning strict UI apply evidence.",
       ],
@@ -254,7 +254,7 @@ export function changesLifecycleGuidanceModel({
       : "No cleanup is needed while the candidate matches running policy.",
     runbookTitle: blocked ? "Blocked commit preserve runbook" : "Commit cleanup/preserve runbook",
     steps: [
-      dirty ? "Review validation, runtime readiness, impact, and diff before commit." : "Stage a candidate before using commit cleanup guidance.",
+      dirty ? "Review validation, system preflight, impact, and diff before commit." : "Stage a candidate before using commit cleanup guidance.",
       blocked ? "Preserve the staged candidate while fixing validation or runtime blockers; do not discard unless the staged change should be abandoned." : "After commit succeeds, verify the new running version and clean candidate status.",
       "If strict UI apply blocks the action, follow the strict-block runbook instead of using direct API fallback.",
     ],

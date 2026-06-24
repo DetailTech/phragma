@@ -151,7 +151,7 @@ async function appIdQueueData() {
     observations: attachAppIdPackageContext(observations.observations || [], packageContext),
     contentPackages,
     contentError: content.error || "",
-    appIdReadiness: appIdReadinessContext(contentPackages, content.error || "", packageContext),
+    appId: appIdContext(contentPackages, content.error || "", packageContext),
   };
 }
 
@@ -170,10 +170,10 @@ function attachAppIdPackageContext(observations = [], context = {}) {
   }));
 }
 
-function appIdReadinessContext(contentPackages = [], contentError = "", packageContext = {}) {
+function appIdContext(contentPackages = [], contentError = "", packageContext = {}) {
   const posture = buildContentPosture([], {}, contentPackages, contentError);
   const surface = (posture.surfaces || []).find((item) => item.kind === "app-id") || null;
-  const readiness = surface?.contentReadiness || null;
+  const readiness = surface?.content || null;
   const readinessBlockers = Array.isArray(readiness?.blockers) ? readiness.blockers : [];
   const productionReady = Boolean(readiness?.productionReady && readiness.evidenceStatus === "passed" && readinessBlockers.length === 0);
   const blockers = uniqueText([
@@ -223,7 +223,7 @@ function paintFlows(root, data, status = {}) {
     root.appendChild(emptyState("traffic", "No flows yet",
       ids.enabled
         ? "The inspection engine is enabled but hasn't reported flows yet. Generate traffic through the firewall."
-        : "Flow records come from the inspection engine (Suricata). Enable IDS/IPS to start seeing flows here.",
+        : "Flow records come from the inspection engine (IDS/IPS engine). Enable IDS/IPS to start seeing flows here.",
 	      ids.enabled ? null : h("button", { class: "btn primary", type: "button", title: "Open IDS/IPS candidate editor", "aria-label": "Open IDS/IPS candidate editor", dataset: { trafficAction: "enable-ids" }, onclick: () => openIdsEditor(() => location.reload()) }, h("span", { html: icon("threats", 16) }), "Enable IDS/IPS")));
     return;
   }
@@ -320,8 +320,7 @@ function inspectionPostureStrip(status = {}) {
       h("div", { class: "flex wrap" },
         h("strong", {}, "Current inspection posture"),
         pill(posture.label, posture.cls, true),
-        h("span", { class: "tag" }, posture.engineLabel)),
-      h("a", { class: "linklike", href: "#/readiness", title: "Open readiness", "aria-label": "Open readiness", dataset: { trafficAction: "readiness" } }, "Readiness ->")),
+        h("span", { class: "tag" }, posture.engineLabel))),
     h("div", { class: "note" }, posture.detail),
     h("div", { class: "note" }, "Current runtime posture at handoff time; flow and session rows retain their own event policy context when stamped."));
 }
@@ -466,7 +465,7 @@ function appIdObservationFilterBar(root) {
     option("APP_ID_OBSERVATION_KIND_LOW_CONFIDENCE", "Low confidence"),
     option("APP_ID_OBSERVATION_KIND_CONFLICTING_EVIDENCE", "Conflicting evidence"));
   kind.value = state.observationKind;
-  const signal = h("input", { class: "input mono", value: state.engineSignal, placeholder: "suricata signal" });
+  const signal = h("input", { class: "input mono", value: state.engineSignal, placeholder: "ids-ips signal" });
   const protocol = h("select", { class: "input" },
     option("", "Any protocol"),
     option("TCP", "TCP"),
@@ -722,7 +721,7 @@ function renderSessionTable(wrap, sessions) {
 
 function paintAppIdQueue(root, data, status = {}) {
   const observations = data.observations || [];
-  const readiness = data.appIdReadiness || null;
+  const readiness = data.appId || null;
   const clusters = appIdObservationClusters(observations, readiness);
   clear(root);
   root.appendChild(pageHead("Traffic", `${observations.length} App-ID observations`,
@@ -734,7 +733,7 @@ function paintAppIdQueue(root, data, status = {}) {
   root.appendChild(h("div", { class: "alert-box info" },
     h("strong", {}, "Engine labels are evidence. "),
     "Phragma owns canonical App-ID, confidence, explanations, and staged policy objects."));
-  root.appendChild(appIdPackageReadinessStrip(readiness));
+  root.appendChild(appIdPackageStrip(readiness));
 
   if (!observations.length) {
     root.appendChild(emptyState("traffic", "No App-ID observations",
@@ -837,7 +836,7 @@ function appIdClusterReviewPanel(root, clusters = [], readiness = null) {
 function appIdClusterRow(root, cluster, readiness = null) {
   const packet = appIdObservationClusterHandoffPacket(cluster, {
     route: currentRoute(),
-    appIdReadiness: readiness || {},
+    appId: readiness || {},
     policy: session.draft || {},
     status: runtimeStatus || {},
     currentInspectionPosture: inspectionPostureSummary(runtimeStatus),
@@ -857,8 +856,8 @@ function appIdClusterRow(root, cluster, readiness = null) {
       kv("Path type", model.representativePathType),
       kv("Direct stage", appIdDirectStageEligibilityLabel(model)),
       kv("Production evidence", appIdProductionEvidenceLabel(model)),
-      kv("L7 evidence confidence", appIdClusterReadinessRowDetail(model, "l7-evidence-confidence")),
-      kv("Drop-rule staging", appIdClusterReadinessRowDetail(model, "reviewed-drop-rule-staging")),
+      kv("L7 evidence confidence", appIdClusterRowDetail(model, "l7-evidence-confidence")),
+      kv("Drop-rule staging", appIdClusterRowDetail(model, "reviewed-drop-rule-staging")),
       kv("Enforcement readiness", model.blockers.length ? model.blockers[0] : model.detail)),
     h("div", { class: "row-actions" },
       appIdClusterPrimaryAction(root, cluster, model, readiness),
@@ -871,7 +870,7 @@ function appIdClusterRow(root, cluster, readiness = null) {
 function appIdClusterDetail(root, cluster, readiness = null) {
   const packet = appIdObservationClusterHandoffPacket(cluster, {
     route: currentRoute(),
-    appIdReadiness: readiness || {},
+    appId: readiness || {},
     policy: session.draft || {},
     status: runtimeStatus || {},
     currentInspectionPosture: inspectionPostureSummary(runtimeStatus),
@@ -924,13 +923,13 @@ function appIdClusterDetail(root, cluster, readiness = null) {
           h("strong", {}, "Production enforcement decision rows"),
           h("span", {}, "bounded review model")),
         h("dl", { class: "kv" },
-          model.productionReadinessRows.map((row) => kv(row.label, `${row.status} · ${row.detail}`)))),
+          model.productionRows.map((row) => kv(row.label, `${row.status} · ${row.detail}`)))),
       h("div", { class: "profile-strip" },
         h("div", { class: "profile-strip-head" },
           h("strong", {}, "Corpus custody checklist"),
           h("span", {}, "handoff only")),
         h("ul", { class: "trace-list" }, appIdClusterCorpusCustodyChecklist(cluster, model, {
-          appIdReadiness: readiness || {},
+          appId: readiness || {},
         }).map((item) => h("li", {},
           h("strong", {}, item.label),
           " · ",
@@ -1138,7 +1137,7 @@ function appIdConfidenceBand(value) {
 
 export function appIdObservationClusterHandoffPacket(cluster = {}, options = {}) {
   const representative = cluster.representative || appIdObservationRepresentative(cluster.observations || []) || {};
-  const enforcement = appIdClusterEnforcementModel(cluster, options.appIdReadiness || null, {
+  const enforcement = appIdClusterEnforcementModel(cluster, options.appId || null, {
     policy: options.policy || {},
     status: options.status || {},
     inspectionPosture: options.currentInspectionPosture || null,
@@ -1178,7 +1177,8 @@ export function appIdObservationClusterHandoffPacket(cluster = {}, options = {})
       productionEvidence: appIdProductionEvidenceLabel(enforcement),
       reviewBoundary: enforcement.reviewBoundary,
       reviewOnlyBoundary: appIdClusterReviewOnlyBoundary(enforcement),
-      productionReadinessRows: enforcement.productionReadinessRows,
+      productionRows: enforcement.productionRows,
+      productionReadinessRows: enforcement.productionRows,
       corpusCustody: {
         boundary: "Handoff packet only; no signed corpus custody, legal retention, capture execution, policy commit, or true L7/proxy allow claim is created here.",
         corpusRoute: "#/intel?surface=app-id&drawer=review",
@@ -1196,14 +1196,15 @@ export function appIdObservationClusterHandoffPacket(cluster = {}, options = {})
         productionEvidence: appIdProductionEvidenceLabel(enforcement),
         reviewBoundary: enforcement.reviewBoundary,
         reviewOnlyBoundary: appIdClusterReviewOnlyBoundary(enforcement),
-        productionReadinessRows: enforcement.productionReadinessRows,
+        productionRows: enforcement.productionRows,
+        productionReadinessRows: enforcement.productionRows,
         blockers: enforcement.blockers,
         candidateBoundary: enforcement.candidateBoundary,
       },
-      appIdReadiness: options.appIdReadiness ? {
-        productionReady: Boolean(options.appIdReadiness.productionReady),
-        status: noSecretText(options.appIdReadiness.status || ""),
-        blockerCount: Array.isArray(options.appIdReadiness.blockers) ? options.appIdReadiness.blockers.length : 0,
+      appId: options.appId ? {
+        productionReady: Boolean(options.appId.productionReady),
+        status: noSecretText(options.appId.status || ""),
+        blockerCount: Array.isArray(options.appId.blockers) ? options.appId.blockers.length : 0,
       } : undefined,
       currentInspectionPosture: options.currentInspectionPosture || undefined,
     },
@@ -1226,7 +1227,7 @@ export function appIdObservationClusterHandoffPacket(cluster = {}, options = {})
   return trafficWorkflowPacket(packet, trafficCaptureRegressionWorkflow(flowFromObservation(representative), {
     kind: "observation",
     observation: representative,
-    readiness: options.appIdReadiness || {},
+    readiness: options.appId || {},
     caseAction: "app-id-cluster-regression",
   }));
 }
@@ -1245,7 +1246,7 @@ function appIdObservationClusterEvidenceLines(cluster = {}, enforcementModel = n
     `representative_path_type=${model.representativePathType || "unknown"} direct_stage_eligible=${model.directStageEligible ? "true" : "false"}`,
     `direct_stage_eligibility=${noSecretText(appIdDirectStageEligibilityLabel(model))}`,
     `production_evidence=${noSecretText(appIdProductionEvidenceLabel(model))}`,
-    ...appIdClusterProductionReadinessRows(model).map((row) => `readiness_row ${stableKeyPart(row.key)}=${noSecretText(row.status)} detail=${noSecretText(row.detail)}`),
+    ...appIdClusterProductionRows(model).map((row) => `readiness_row ${stableKeyPart(row.key)}=${noSecretText(row.status)} detail=${noSecretText(row.detail)}`),
     `review_boundary=${noSecretText(model.reviewBoundary || "")}`,
     `review_only_boundary=${noSecretText(appIdClusterReviewOnlyBoundary(model))}`,
     "corpus_custody=handoff checklist only; no signed custody or legal retention is created by export",
@@ -1264,12 +1265,12 @@ export function appIdClusterEnforcementModel(cluster = {}, readinessContext = nu
   const confidence = Number(representative.appConfidence || 0);
   const hasQueue = Boolean(representative.queueId);
   const hasConflict = cluster.conflictState === "conflict" || String(representative.kind || "").includes("CONFLICTING");
-  const explicitReadiness = appIdReadinessWasExplicit(readinessContext);
-  const packageReady = Boolean(explicitReadiness && appIdPackageReadyForEnforcement(readinessContext));
-  const packageEvidence = explicitReadiness
+  const explicit = appIdWasExplicit(readinessContext);
+  const packageReady = Boolean(explicit && appIdPackageReadyForEnforcement(readinessContext));
+  const packageEvidence = explicit
     ? packageReady
       ? joinParts("production ready", readinessContext?.version || "", readinessContext?.manifestSha256 ? `manifest ${shortHash(readinessContext.manifestSha256)}` : "")
-      : appIdReadinessReason(readinessContext)
+      : appIdReason(readinessContext)
     : "production-ready App-ID corpus not explicitly reported; candidate validation still required";
   const portDrop = appIdObservationCanStageDrop(representative);
   const signalDrop = appIdObservationCanReviewSignalDrop(representative);
@@ -1277,12 +1278,12 @@ export function appIdClusterEnforcementModel(cluster = {}, readinessContext = nu
   const representativePathType = portDrop
     ? "tcp-udp-port-hint"
     : signalDrop
-      ? "suricata-signal-only-review"
+      ? "ids-ips-signal-only-review"
       : usefulObservationSignal(representative)
         ? "custom-signal-needs-port-boundary"
         : "insufficient-enforcement-context";
   const signalSupport = signalDrop
-    ? "supported Suricata signal-only drop"
+    ? "supported IDS/IPS engine signal-only drop"
     : usefulObservationSignal(representative)
       ? "custom signal requires TCP/UDP port boundary for enforcement"
       : "no supported signal for App-ID enforcement";
@@ -1293,7 +1294,7 @@ export function appIdClusterEnforcementModel(cluster = {}, readinessContext = nu
   if (confidence > 0 && confidence < 50) blockers.push("Representative confidence is below 50%; collect more package or replay evidence first.");
   if (!confidence) blockers.push("Representative confidence is unavailable; review package evidence before enforcement.");
   if (!packageReady) blockers.push(packageEvidence);
-  if (!portDrop && !signalDrop) blockers.push("Representative lacks a TCP/UDP port boundary or supported Suricata signal for bounded drop review.");
+  if (!portDrop && !signalDrop) blockers.push("Representative lacks a TCP/UDP port boundary or supported IDS/IPS engine signal for bounded drop review.");
   if (!portDrop && signalDrop && !idsFailClosed) blockers.push("Signal-only App-ID drop review requires IDS/IPS Prevent with Fail closed.");
   const uniqueBlockers = uniqueText(blockers);
   const baseSafe = hasQueue && !hasConflict && decision.evidenceStrength !== "weak" && (confidence >= 50) && packageReady;
@@ -1341,17 +1342,17 @@ export function appIdClusterEnforcementModel(cluster = {}, readinessContext = nu
     blockers: uniqueBlockers,
     candidateBoundary: "Representative queue action only; candidate validation, review, and commit remain separate. This does not claim true L7/proxy allow enforcement.",
   };
-  model.productionReadinessRows = appIdClusterProductionReadinessRows(model);
+  model.productionRows = appIdClusterProductionRows(model);
   return model;
 }
 
-export function appIdClusterProductionReadinessRows(model = {}) {
+export function appIdClusterProductionRows(model = {}) {
   const blockers = model.blockers || [];
   const hasConfidence = Number(model.confidence || 0) > 0;
   const strongConfidence = Number(model.confidence || 0) >= 50 && model.representativeDecision?.evidenceStrength !== "weak";
   const portHintReady = Boolean(model.portDrop && model.packageReady && strongConfidence && !blockers.some((item) => /conflicting|queue-backed/i.test(item)));
   const reviewedDropReady = Boolean(model.canReviewDrop);
-  const l7Only = model.representativePathType === "suricata-signal-only-review" || model.representativePathType === "custom-signal-needs-port-boundary" || model.representativePathType === "insufficient-enforcement-context";
+  const l7Only = model.representativePathType === "ids-ips-signal-only-review" || model.representativePathType === "custom-signal-needs-port-boundary" || model.representativePathType === "insufficient-enforcement-context";
   return [
     {
       key: "production-appid-corpus",
@@ -1397,15 +1398,17 @@ export function appIdClusterProductionReadinessRows(model = {}) {
   }));
 }
 
-function appIdClusterReadinessRowDetail(model = {}, key = "") {
-  const row = (model.productionReadinessRows || appIdClusterProductionReadinessRows(model)).find((item) => item.key === key);
+export const appIdClusterProductionReadinessRows = appIdClusterProductionRows;
+
+function appIdClusterRowDetail(model = {}, key = "") {
+  const row = (model.productionRows || appIdClusterProductionRows(model)).find((item) => item.key === key);
   return row ? `${row.status}: ${row.detail}` : "unavailable";
 }
 
 export function appIdDirectStageEligibilityLabel(model = {}) {
   if (model.directStageEligible) return "eligible: representative TCP/UDP port-hint queue path";
   if (model.representativePathType === "tcp-udp-port-hint") return "not eligible yet: production evidence, confidence, or blockers must clear first";
-  if (model.representativePathType === "suricata-signal-only-review") return "review-only: supported Suricata signal path, no direct stage";
+  if (model.representativePathType === "ids-ips-signal-only-review") return "review-only: supported IDS/IPS engine signal path, no direct stage";
   if (model.representativePathType === "custom-signal-needs-port-boundary") return "review-only: add TCP/UDP port boundary or corpus evidence";
   return "review-only: insufficient bounded enforcement context";
 }
@@ -1418,7 +1421,7 @@ export function appIdProductionEvidenceLabel(model = {}) {
 
 export function appIdClusterReviewOnlyBoundary(model = {}) {
   if (model.directStageEligible) return "Direct staging remains limited to the representative queue action; validation and commit are separate.";
-  if (model.representativePathType === "suricata-signal-only-review") return "Review-only boundary: supported Suricata signal can be reviewed only with IDS/IPS Prevent fail-closed; no direct stage.";
+  if (model.representativePathType === "ids-ips-signal-only-review") return "Review-only boundary: supported IDS/IPS engine signal can be reviewed only with IDS/IPS Prevent fail-closed; no direct stage.";
   if (model.representativePathType === "custom-signal-needs-port-boundary") return "Review-only boundary: custom signal needs a TCP/UDP port boundary or stronger corpus evidence before drop review.";
   if (model.representativePathType === "tcp-udp-port-hint") return "Review-only boundary until production evidence, confidence, and representative blockers clear.";
   return "Review-only boundary: evidence handoff only; no policy staging.";
@@ -1430,7 +1433,7 @@ export function appIdClusterReviewBoundary(pathType = "", directStageEligible = 
       ? "Direct staging is limited to the representative queue path and TCP/UDP port-hint drop candidate; validation and commit remain separate."
       : "TCP/UDP port-hint path can be reviewed, but this cluster packet does not directly stage policy.";
   }
-  if (pathType === "suricata-signal-only-review") {
+  if (pathType === "ids-ips-signal-only-review") {
     return "Signal-only clusters are review-only handoffs; IDS/IPS Prevent fail-closed is required for candidate review, and export does not create true L7/proxy allow or direct staging.";
   }
   if (pathType === "custom-signal-needs-port-boundary") {
@@ -1458,7 +1461,8 @@ function appIdClusterEnforcementArtifact(model = {}) {
     representativePathType: model.representativePathType || "",
     directStageEligible: Boolean(model.directStageEligible),
     directStageEligibility: noSecretText(appIdDirectStageEligibilityLabel(model)),
-    productionReadinessRows: appIdClusterProductionReadinessRows(model),
+    productionRows: appIdClusterProductionRows(model),
+    productionReadinessRows: appIdClusterProductionRows(model),
     reviewBoundary: noSecretText(model.reviewBoundary || ""),
     reviewOnlyBoundary: noSecretText(appIdClusterReviewOnlyBoundary(model)),
     signalSupport: noSecretText(model.signalSupport || ""),
@@ -1468,7 +1472,7 @@ function appIdClusterEnforcementArtifact(model = {}) {
 
 export function appIdClusterCorpusCustodyChecklist(cluster = {}, model = {}, options = {}) {
   const representative = model.representative || cluster.representative || appIdObservationRepresentative(cluster.observations || []) || {};
-  const readiness = options.appIdReadiness || {};
+  const readiness = options.appId || {};
   const manifest = readiness.manifestSha256 || appIdObservationPackageProvenance(representative).manifestSha256 || "";
   const readinessStatus = readiness.productionReady ? "passed" : noSecretText(readiness.status || "missing");
   return [
@@ -1483,9 +1487,9 @@ export function appIdClusterCorpusCustodyChecklist(cluster = {}, model = {}, opt
       detail: appIdDirectStageEligibilityLabel(model),
     },
     {
-      label: "Production readiness evidence",
+      label: "Package evidence",
       status: readinessStatus,
-      detail: readiness.productionReady ? appIdProductionEvidenceLabel(model) : noSecretText(joinParts(appIdReadinessReason(readiness), "release-grade App-ID package evidence required")),
+      detail: readiness.productionReady ? appIdProductionEvidenceLabel(model) : noSecretText(joinParts(appIdReason(readiness), "App-ID package evidence required")),
     },
     {
       label: "Signed App-ID package manifest",
@@ -1585,14 +1589,14 @@ function stableHash(value) {
   return (hash >>> 0).toString(36);
 }
 
-function appIdPackageReadinessStrip(readiness = null) {
+function appIdPackageStrip(readiness = null) {
   if (!readiness) return null;
   const cls = readiness.productionReady ? "ok" : readiness.status === "unavailable" ? "bad" : "warn";
   return h("div", { class: "alert-box " + cls },
     h("div", { class: "flex wrap", style: { justifyContent: "space-between" } },
       h("div", { class: "flex wrap" },
         h("strong", {}, "App-ID package"),
-        pill(readiness.productionReady ? "production ready" : readiness.status || "not ready", cls, true),
+        pill(readiness.productionReady ? "package ready" : readiness.status || "not ready", cls, true),
         readiness.version ? h("span", { class: "tag" }, readiness.version) : null,
         readiness.manifestSha256 ? h("span", { class: "tag" }, "manifest " + shortHash(readiness.manifestSha256)) : null,
         h("span", { class: "tag" }, readiness.packageState || "unknown")),
@@ -1829,7 +1833,7 @@ export function appIdEvidenceBridgePlan(flow = {}, opts = {}) {
       ? `Existing endpoint supports reviewed draft sample staging for queue ${obs.queueId}; attach the capture SHA-256 before staging.`
       : "Browser-local only from this drawer; capture and pin/export evidence, then select a queued App-ID observation before draft sample staging.",
     corpusStep: readiness.productionReady
-      ? "Review the installed App-ID package corpus and readiness evidence before promotion."
+      ? "Review the installed App-ID package corpus and evidence before promotion."
       : joinParts("Open App-ID corpus package review", readiness.status ? `package ${readiness.status}` : "", decision.evidenceStrength ? `${decision.evidenceStrength} evidence` : ""),
     candidateBoundary: "No direct policy mutation; promotion/drop remains in the existing candidate App-ID and Rules workflows.",
     captureFilter: capturePlan.filter,
@@ -1898,7 +1902,7 @@ function appIdRegressionSamplePacket(obs, readiness = null, decision = appIdObse
     route: currentRoute(),
     reviewAction: decision.label,
     evidenceStrength: decision.evidenceStrength,
-    appIdReadiness: readiness || {},
+    appId: readiness || {},
     currentInspectionPosture: inspectionPostureSummary(runtimeStatus),
   });
   return trafficWorkflowPacket(packet, trafficCaptureRegressionWorkflow(flowFromObservation(obs), {
@@ -2532,7 +2536,7 @@ function openCustomAppDrawer(f, preferredSuggestion = null, initialMode = "", op
 
 function reviewAppDropRule(f, app) {
   if (!appMatchesFlowPort(app, f) && !appSupportsSignalOnlyDrop(app)) {
-    toast("Enforcement evidence required", "Add a TCP/UDP port hint or a supported Suricata signal (dns, http, ssh, tls) before reviewing the drop rule.", "warn");
+    toast("Enforcement evidence required", "Add a TCP/UDP port hint or a supported IDS/IPS engine signal (dns, http, ssh, tls) before reviewing the drop rule.", "warn");
     return;
   }
   const existing = (session.draft.applications || []).find((candidate) => candidate.name === app.name);
@@ -2560,7 +2564,7 @@ function reviewAppDropRule(f, app) {
     } : null,
   });
   toast("Review App-ID drop rule", appSupportsSignalOnlyDrop(reviewedApp)
-    ? `${reviewedApp.name} will use the bounded Suricata signal-only review path; IDS/IPS Prevent fail-closed remains required before staging.`
+    ? `${reviewedApp.name} will use the bounded IDS/IPS engine signal-only review path; IDS/IPS Prevent fail-closed remains required before staging.`
     : `${reviewedApp.name} will use current v1 TCP/UDP port-hint enforcement.`, "info");
 }
 
@@ -2683,7 +2687,7 @@ function maybeOpenSelection(root, data = {}) {
     const key = "queue:" + state.queueId;
     if (obs && key !== lastOpenedSelection) {
       lastOpenedSelection = key;
-      setTimeout(() => observationDetail(root, obs, data.appIdReadiness || null), 0);
+      setTimeout(() => observationDetail(root, obs, data.appId || null), 0);
     }
   } else if (state.mode === "sessions" && state.sessionKey) {
     const s = (data.sessions || []).find((item) => sessionKey(item) === state.sessionKey);
@@ -3045,7 +3049,7 @@ function appMatchesFlowPort(app, f) {
 }
 
 function appSupportsSignalOnlyDrop(app = {}) {
-  return !hasEnforceableAppPorts(app) && hasSupportedSuricataAppSignal(app);
+  return !hasEnforceableAppPorts(app) && hasSupportedIdsIpsEngineAppSignal(app);
 }
 
 function hasEnforceableAppPorts(app = {}) {
@@ -3058,7 +3062,7 @@ function hasEnforceableAppPorts(app = {}) {
     }));
 }
 
-function hasSupportedSuricataAppSignal(app = {}) {
+function hasSupportedIdsIpsEngineAppSignal(app = {}) {
   const supported = new Set(["dns", "http", "ssh", "tls"]);
   return (app.engineSignals || []).some((signal) => supported.has(normalizeSignal(signal)));
 }
@@ -3093,7 +3097,7 @@ export function buildAppDropRulePlan(policy = {}, f = {}, app = {}) {
       log: true,
       disabled: false,
       description: signalOnly
-        ? `Drop observed App-ID ${appName} with supported Suricata signal enforcement. Requires IDS/IPS Prevent fail-closed before staging.`
+        ? `Drop observed App-ID ${appName} with supported IDS/IPS engine signal enforcement. Requires IDS/IPS Prevent fail-closed before staging.`
         : `Drop observed App-ID ${appName} for ${f.srcIp} → ${fmt.endpoint(f.destIp, f.destPort)} using TCP/UDP port-hint enforcement.`,
     },
     dependencies: { addresses: signalOnly ? [] : addresses, services: [], applications },
@@ -3233,11 +3237,11 @@ export function appIdObservationDecision(obs = {}, readinessContext = null) {
         ? "Stage the App-ID object now; a TCP/UDP port-hint candidate drop rule is available after review."
         : canReviewSignalDrop
           ? "Stage the App-ID object only; signal-only drop remains review-only and requires IDS/IPS Prevent fail-closed before candidate review."
-        : appIdReadinessWasExplicit(readinessContext) && !appIdReadyForEnforcement
+        : appIdWasExplicit(readinessContext) && !appIdReadyForEnforcement
           ? "Stage the App-ID object only; drop enforcement waits for production-ready App-ID package evidence."
           : "Stage the App-ID object only; no TCP/UDP port-hint or supported review-only signal context is present.",
-      reason: appIdReadinessWasExplicit(readinessContext) && !appIdReadyForEnforcement
-        ? appIdReadinessReason(readinessContext)
+      reason: appIdWasExplicit(readinessContext) && !appIdReadyForEnforcement
+        ? appIdReason(readinessContext)
         : hasUnknown
         ? "The engine produced an unmapped signal that can become a first-party custom App-ID."
         : "The current App-ID needs a custom object or taxonomy refinement before it is safe policy evidence.",
@@ -3256,15 +3260,15 @@ export function appIdObservationDecision(obs = {}, readinessContext = null) {
 }
 
 function appIdPackageReadyForEnforcement(readinessContext) {
-  if (!appIdReadinessWasExplicit(readinessContext)) return true;
+  if (!appIdWasExplicit(readinessContext)) return true;
   return readinessContext.productionReady === true;
 }
 
-function appIdReadinessWasExplicit(readinessContext) {
+function appIdWasExplicit(readinessContext) {
   return Boolean(readinessContext && readinessContext.explicit);
 }
 
-function appIdReadinessReason(readinessContext = {}) {
+function appIdReason(readinessContext = {}) {
   const blockers = Array.isArray(readinessContext.blockers) ? readinessContext.blockers : [];
   if (blockers.length) return `App-ID package enforcement is waiting on ${blockers[0]}.`;
   return "App-ID package enforcement is waiting on explicit production-ready package evidence.";

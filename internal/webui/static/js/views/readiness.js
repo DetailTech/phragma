@@ -153,7 +153,7 @@ export async function render(ctx = {}) {
   const ebpfDrillEvidence = buildEbpfDrillEvidencePacket({ ebpfHost, releaseItem: releaseEvidence.find((item) => item.id === "ebpf-ol9-field-evidence") });
   maybeOpenRouteDrawer(routeState, { systemEvidence, haEvidence, ha, releaseEvidence, releaseAcceptanceStatus, ebpfDrillEvidence });
   const root = h("div", {},
-    pageHead("Readiness", "Production posture, engine prerequisites, and deployment blockers.",
+    pageHead("Readiness", "Runtime posture, engine prerequisites, and deployment blockers.",
       h("div", { class: "flex wrap" },
         h("button", {
           class: "btn",
@@ -176,8 +176,6 @@ export async function render(ctx = {}) {
       h("div", { class: "readiness-score" },
         h("strong", {}, summary.readyEngines + "/" + summary.engineCount),
         h("span", {}, "engines ready"))),
-
-    releaseEvidenceCard(releaseEvidence, releaseAcceptanceStatus),
 
     h("div", { class: "grid cols-2", style: { marginBottom: "16px" } },
       actionQueueCard(actions, routeState.action),

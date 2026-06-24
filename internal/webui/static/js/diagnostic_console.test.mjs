@@ -83,23 +83,21 @@ assert.match(summary.commands[1].rows[0], /admin · role admin/);
 assert.match(summary.commands[3].rows[0], /frr active · bgp neighbors 1 · ospf neighbors 1/);
 assert.match(summary.commands[3].rows[1], /ipsec active · active tunnels 1\/2/);
 assert.match(summary.commands[3].rows[2], /wireguard active · handshook peers 1\/2/);
-assert.match(summary.commands[4].rows[0], /state blocked/);
-assert.match(summary.commands[4].rows[1], /missing 1/);
-assert.match(summary.commands[5].rows[0], /candidate staged · dirty yes · running v7 · changes 3/);
-assert.match(summary.commands[5].rows[1], /rules: \+1 ~1 -1/);
-assert.match(summary.commands[6].rows[0], /1 session sample\(s\) · protocols TCP:1 · states ESTABLISHED:1/);
-assert.match(summary.commands[6].rows[1], /endpoint values omitted/);
-assert.match(summary.commands[7].rows[0], /1 audit sample\(s\) · actions commit:1/);
-assert.match(summary.commands[7].rows[1], /actor and detail values omitted/);
-assert.match(summary.commands[8].rows[0], /1 runtime warning\(s\) · severities warning:1/);
-assert.match(summary.commands[8].rows[1], /warning text and action detail omitted/);
+assert.match(summary.commands[4].rows[0], /candidate staged · dirty yes · running v7 · changes 3/);
+assert.match(summary.commands[4].rows[1], /rules: \+1 ~1 -1/);
+assert.match(summary.commands[5].rows[0], /1 session sample\(s\) · protocols TCP:1 · states ESTABLISHED:1/);
+assert.match(summary.commands[5].rows[1], /endpoint values omitted/);
+assert.match(summary.commands[6].rows[0], /1 audit sample\(s\) · actions commit:1/);
+assert.match(summary.commands[6].rows[1], /actor and detail values omitted/);
+assert.match(summary.commands[7].rows[0], /1 runtime warning\(s\) · severities warning:1/);
+assert.match(summary.commands[7].rows[1], /warning text and action detail omitted/);
 
 const text = diagnosticSnapshotText(summary);
 assert.match(text, /# Phragma diagnostic snapshot/);
 assert.match(text, /\$ ngfwctl status/);
 assert.match(text, /\$ ngfwctl whoami/);
 assert.match(text, /\$ ngfwctl status # routing-vpn/);
-assert.match(text, /\$ ngfwctl system release-acceptance-status --json/);
+assert.doesNotMatch(text, /\$ ngfwctl system release-acceptance-status --json/);
 assert.match(text, /\$ ngfwctl policy status --json/);
 assert.match(text, /\$ ngfwctl sessions --limit 8/);
 assert.doesNotMatch(text, /\$ phragma\b/);
@@ -118,10 +116,10 @@ const partial = summarizeDiagnosticSnapshot({
   audit: fulfilled({ entries: [] }),
 }, new Date("2026-06-17T20:46:00Z"));
 
-assert.deepEqual(partial.failures.map((f) => f.name), ["version", "identity", "releaseAcceptance", "candidateStatus"]);
+assert.deepEqual(partial.failures.map((f) => f.name), ["version", "identity", "candidateStatus"]);
 assert.match(diagnosticSnapshotText(partial), /\[endpoint failures\]/);
 assert.match(diagnosticSnapshotText(partial), /mode dry-run/);
-assert.match(diagnosticSnapshotText(partial), /release acceptance endpoint unavailable/);
+assert.doesNotMatch(diagnosticSnapshotText(partial), /release acceptance endpoint unavailable/);
 assert.match(diagnosticSnapshotText(partial), /candidate status endpoint unavailable/);
 
 const noStatus = summarizeDiagnosticSnapshot({
@@ -136,7 +134,7 @@ const noStatus = summarizeDiagnosticSnapshot({
 
 assert.match(diagnosticSnapshotText(noStatus), /mode unknown/);
 assert.match(diagnosticSnapshotText(noStatus), /identity endpoint unavailable/);
-assert.match(diagnosticSnapshotText(noStatus), /state ready · ready yes · manifest present/);
+assert.doesNotMatch(diagnosticSnapshotText(noStatus), /release acceptance|manifest present/);
 assert.match(diagnosticSnapshotText(noStatus), /candidate none · dirty no · running v2 · changes 0/);
 
 const pendingManifest = summarizeDiagnosticSnapshot({
@@ -155,5 +153,5 @@ const pendingManifest = summarizeDiagnosticSnapshot({
   audit: fulfilled({ entries: [] }),
 }, new Date("2026-06-17T20:48:00Z"));
 
-assert.match(diagnosticSnapshotText(pendingManifest), /state evidence-pending-manifest · ready no · manifest missing/);
-assert.match(diagnosticSnapshotText(pendingManifest), /manifest assembly pending · recorded evidence is not accepted until the release manifest is assembled and verified/);
+assert.doesNotMatch(diagnosticSnapshotText(pendingManifest), /evidence-pending-manifest|manifest missing/);
+assert.doesNotMatch(diagnosticSnapshotText(pendingManifest), /manifest assembly pending|release manifest/);

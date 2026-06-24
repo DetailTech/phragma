@@ -449,11 +449,11 @@ assert.deepEqual(threatPackageSummary({ surfaces: [] }), {
       version: "1.2.3",
       decision: { checks: [{ key: "production-evidence", status: "passed", cls: "ok" }], blockers: [] },
       contentReadiness: { productionReady: true, blockers: [] },
-      contentReadinessEvidence: [
+      contentEvidence: [
         { type: "pcap-regression-corpus", artifact: "evidence/pcap.json", sha256Short: "abc123" },
         { type: "false-positive-regression", artifact: "evidence/fp.json", sha256Short: "def456" },
       ],
-      keyContentReadinessEvidence: {
+      keyContentEvidence: {
         pcapRegressionCorpus: { type: "pcap-regression-corpus", artifact: "evidence/pcap.json", sha256Short: "abc123" },
       },
       blockers: [],
@@ -463,9 +463,9 @@ assert.deepEqual(threatPackageSummary({ surfaces: [] }), {
   assert.equal(summary.label, "1.2.3 / passed");
   assert.equal(summary.cls, "ok");
   assert.equal(summary.blockerCount, 0);
-  assert.equal(summary.contentReadinessEvidence.length, 2);
-  assert.equal(summary.keyContentReadinessEvidence.pcapRegressionCorpus.artifact, "evidence/pcap.json");
-  assert.match(summary.detail, /Production Threat-ID evidence/);
+  assert.equal(summary.contentEvidence.length, 2);
+  assert.equal(summary.keyContentEvidence.pcapRegressionCorpus.artifact, "evidence/pcap.json");
+  assert.match(summary.detail, /normalized package posture/);
 }
 
 {
@@ -481,7 +481,7 @@ assert.deepEqual(threatPackageSummary({ surfaces: [] }), {
     }],
   });
   assert.equal(summary.cls, "bad");
-  assert.equal(summary.blockerCount, 2);
+  assert.equal(summary.blockerCount, 1);
 }
 
 const alert = {

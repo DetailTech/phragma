@@ -87,8 +87,8 @@ import { currentInspectionPosture, degradedEngineEvidence, inspectionCoverageFor
   assert.equal(evidence.state, "degraded");
   assert.equal(evidence.cls, "bad");
   assert.equal(evidence.degradedRows.length, 3);
-  assert.ok(evidence.degradedRows.some((row) => row.name === "suricata" && row.tone === "bad"));
-  assert.ok(evidence.degradedRows.some((row) => row.name === "vector"));
+  assert.ok(evidence.degradedRows.some((row) => row.name === "IDS/IPS" && row.tone === "bad"));
+  assert.ok(evidence.degradedRows.some((row) => row.name === "Telemetry"));
   assert.ok(evidence.degradedRows.some((row) => row.name === "proxy" && row.state === "not-reported"));
   assert.match(evidence.impact.join(" "), /1 active false-positive exception/);
   assert.match(evidence.impact.join(" "), /1 blocking security profile/);

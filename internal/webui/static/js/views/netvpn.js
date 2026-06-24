@@ -378,7 +378,7 @@ function bgpCard(root, bgp = {}) {
     runtimeRows.length || bgp.enabled ? pill("runtime " + (frrRuntime.state || "unknown"), runtimeStateClass(frrRuntime.state)) : null,
     pill(bgp.enabled ? "enabled" : "disabled", bgp.enabled ? "ok" : "neutral"));
   if (!bgp.enabled) return netvpnSection("bgp", card(header,
-    runtimeRows.length ? h("div", { class: "note", style: { marginBottom: "10px" } }, frrRuntime.detail || "BGP peers are still visible in the running FRR state.") : null,
+    runtimeRows.length ? h("div", { class: "note", style: { marginBottom: "10px" } }, frrRuntime.detail || "BGP peers are still visible in the running routing service state.") : null,
     runtimeRows.length ? bgpRuntimeTable(runtimeRows) : null,
     emptyState("globe", "BGP not enabled", "No BGP configuration in the candidate policy.",
       [
@@ -430,7 +430,7 @@ function openDynamicRouteReviewDrawer(root, kind, opts = {}) {
     : ospfRuntimeSummary(frrRuntime);
   openDrawer({
     title,
-    subtitle: "Candidate configuration and passive FRR status",
+    subtitle: "Candidate configuration and passive routing service status",
     width: "640px",
     onClose: clearNetvpnDrawerState,
     body: h("div", { dataset: { netvpnDynamicRouteDrawer: normalized } },
@@ -503,7 +503,7 @@ function editBgp(root, opts = {}) {
 
   openDrawer({
     title: "Configure BGP",
-    subtitle: "Staged to the candidate and rendered by FRR on commit.",
+    subtitle: "Staged to the candidate and rendered by routing service on commit.",
     width: "760px",
     onClose: clearNetvpnDrawerState,
     body: h("div", { dataset: { netvpnBgpDrawer: "true" } },
@@ -534,13 +534,13 @@ function editBgp(root, opts = {}) {
         d.routing ||= {};
         d.routing.bgp = next.bgp;
       });
-      closeDrawer(); paint(root); toast("BGP staged", "Commit to update FRR.", "ok");
+      closeDrawer(); paint(root); toast("BGP staged", "Commit to update routing service.", "ok");
     } catch (e) { toast("Could not stage BGP", e.message, "bad"); }
   }
 }
 
 async function disableBgp(root) {
-  if (!(await confirmDialog({ title: "Disable BGP?", message: "BGP will be disabled in the candidate. FRR is updated when the candidate is committed.", confirmLabel: "Disable", danger: true }))) return;
+  if (!(await confirmDialog({ title: "Disable BGP?", message: "BGP will be disabled in the candidate. routing service is updated when the candidate is committed.", confirmLabel: "Disable", danger: true }))) return;
   try {
     await session.apply((d) => {
       d.routing ||= {};
@@ -706,7 +706,7 @@ function openRuntimeReviewDrawer(root, opts = {}) {
   const engineRows = runtimeReviewEngineRows(runtimeStatus, engine);
   openDrawer({
     title: "Routing & VPN runtime review",
-    subtitle: engine ? `Route-backed review for ${engine}` : "Route-backed review of FRR, IPsec, and WireGuard posture.",
+    subtitle: engine ? `Route-backed review for ${engine}` : "Route-backed review of routing service, IPsec, and WireGuard posture.",
     width: "820px",
     onClose: clearNetvpnDrawerState,
     body: h("div", { class: "stack", dataset: { netvpnRuntimeReview: "true", netvpnRuntimeEngine: engine } },
@@ -715,7 +715,7 @@ function openRuntimeReviewDrawer(root, opts = {}) {
         h("div", { class: "note" }, "Dashboard and copied handoffs can restore this runtime review without mutating candidate policy or claiming field evidence.")) : null,
       h("div", { class: "note" }, "This review compares candidate Routing/VPN intent with current runtime status. It is an operator drill-through surface; protected-subnet traffic, XFRM state, route install proof, and external peer evidence remain field-evidence work."),
       h("div", { class: "grid cols-3" },
-        metricBlock("FRR", runtimeStatus.routing?.frr?.state || "not observed", runtimeStateClass(runtimeStatus.routing?.frr?.state)),
+        metricBlock("routing service", runtimeStatus.routing?.frr?.state || "not observed", runtimeStateClass(runtimeStatus.routing?.frr?.state)),
         metricBlock("IPsec", runtimeStatus.vpn?.ipsec?.state || "not observed", runtimeStateClass(runtimeStatus.vpn?.ipsec?.state)),
         metricBlock("WireGuard", runtimeStatus.vpn?.wireguard?.state || "not observed", runtimeStateClass(runtimeStatus.vpn?.wireguard?.state))),
       engineRows.length ? h("div", { class: "table-wrap flat" },
@@ -742,7 +742,7 @@ function runtimeReviewEngineRows(status = {}, selectedEngine = "") {
   const frr = status.routing?.frr || {};
   const ipsec = status.vpn?.ipsec || {};
   const wireguard = status.vpn?.wireguard || {};
-  rows.push({ key: "frr", label: "FRR routing", state: frr.state || "not observed", detail: frr.detail || ospfRuntimeSummary(frr) });
+  rows.push({ key: "frr", label: "routing service routing", state: frr.state || "not observed", detail: frr.detail || ospfRuntimeSummary(frr) });
   rows.push({ key: "ipsec", label: "IPsec", state: ipsec.state || "not observed", detail: ipsec.detail || `${ipsecRuntimeByTunnel(ipsec).size} configured tunnel observation(s)` });
   rows.push({ key: "wireguard", label: "WireGuard", state: wireguard.state || "not observed", detail: wireguard.detail || `${wireguardRuntimeByInterface(wireguard).size} interface observation(s)` });
   const selected = cleanRouteToken(selectedEngine).toLowerCase();
@@ -1206,7 +1206,7 @@ export function vpnFieldProofChecklist(model = {}, staticRoutes = []) {
   const routeTargets = targets.filter((target) => target.remoteCidr);
   const matchedRoutes = routeTargets.filter((target) => hasCandidateRoutePosture(staticRoutes, target));
   const pathCount = targets.length;
-  const runtimeLabel = model.kind === "ipsec" ? "strongSwan runtime" : model.kind === "wireguard" ? "WireGuard runtime" : "VPN runtime";
+  const runtimeLabel = model.kind === "ipsec" ? "IPsec service runtime" : model.kind === "wireguard" ? "WireGuard runtime" : "VPN runtime";
   const firstTarget = targets[0] || {};
   const routeDetail = routeTargets.length
     ? `${matchedRoutes.length}/${routeTargets.length} remote prefix route posture item${routeTargets.length === 1 ? "" : "s"} matched in the candidate.`
@@ -1216,7 +1216,7 @@ export function vpnFieldProofChecklist(model = {}, staticRoutes = []) {
       key: "candidate-route",
       label: "Candidate route posture",
       state: routeTargets.length && matchedRoutes.length === routeTargets.length ? "ready" : "review-needed",
-      detail: `${routeDetail} Confirm the committed kernel route or FRR route separately before field use.`,
+      detail: `${routeDetail} Confirm the committed kernel route or routing service route separately before field use.`,
     },
     {
       key: "route-table-vrf",
@@ -1226,9 +1226,9 @@ export function vpnFieldProofChecklist(model = {}, staticRoutes = []) {
     },
     {
       key: "frr-rib-fib",
-      label: "FRR RIB/FIB",
+      label: "routing service RIB/FIB",
       state: "operator-check",
-      detail: "When BGP or OSPF can own the path, collect FRR route and adjacency output alongside the kernel route; FRR alone is not field proof.",
+      detail: "When BGP or OSPF can own the path, collect routing service route and adjacency output alongside the kernel route; routing service alone is not field proof.",
     },
     {
       key: "runtime-status",
@@ -1248,7 +1248,7 @@ export function vpnFieldProofChecklist(model = {}, staticRoutes = []) {
     },
     model.kind === "ipsec" ? {
       key: "strongswan-runtime",
-      label: "strongSwan IKE/CHILD SA",
+      label: "IPsec service IKE/CHILD SA",
       state: runtimeObserved ? "observed" : "required",
       detail: "Confirm IKE SA, CHILD SA, traffic selectors, install state, and packet counters; never export PSK material or secret file paths.",
     } : {
@@ -1309,7 +1309,7 @@ export function vpnFieldProofChecklistText(checklist = []) {
   const rows = (checklist || []).map((item) => `- ${item.label}: ${item.state}; ${item.detail}`);
   return [
     "Routing/VPN field proof checklist is a collection handoff only; it does not claim field evidence.",
-    "Collect route-table, VRF/interface, FRR, XFRM, WireGuard or strongSwan proof separately; remote attestation remains out of band.",
+    "Collect route-table, VRF/interface, routing service, XFRM, WireGuard or IPsec service proof separately; remote attestation remains out of band.",
     ...rows,
   ].join("\n");
 }
@@ -1400,7 +1400,7 @@ function vpnFieldProofChecklistPanel(checklist = []) {
       h("strong", {}, "Field proof checklist"),
       pill("handoff only", "warn")),
     h("div", { class: "note" },
-      "Use this checklist to collect route, FRR/VPN runtime, capture, and session proof. The drawer does not certify field readiness."),
+      "Use this checklist to collect route, routing service/VPN runtime, capture, and session proof. The drawer does not certify field readiness."),
     h("ul", { class: "trace-list" }, checklist.map((item) =>
       h("li", { dataset: { netvpnFieldProofItem: item.key || "" } },
         h("strong", {}, item.label),
@@ -1524,7 +1524,7 @@ function renderNetworkPathProofDrawer(target = {}, proof = {}) {
           proofRow("Route table", route.table || "-"),
           proofRow("Route protocol", route.protocol || "-"),
           proofRow("VRF/interface identity", pathProofInterfaceIdentity(route, proof.evidence || [])),
-          proofRow("FRR route proof", pathProofFrrEvidence(route, proof.evidence || [])),
+          proofRow("routing service route proof", pathProofFrrEvidence(route, proof.evidence || [])),
           proofRow("Masquerade egress", pathProofMasqueradeEvidence(route, proof.evidence || [])),
           proofRow("Route detail", route.detail || "-"),
           proofRow("VPN kind", vpn.kind || target.kind || "-"),
@@ -1723,9 +1723,9 @@ function networkPathActiveProofChecklist(target = {}, proof = {}) {
     },
     {
       key: "frr",
-      label: "FRR RIB/FIB",
+      label: "routing service RIB/FIB",
       state: "verify",
-      detail: `Confirm FRR route selection and adjacency health for ${destination}; FRR output is corroborating evidence, not a replacement for kernel route proof.`,
+      detail: `Confirm routing service route selection and adjacency health for ${destination}; routing service output is corroborating evidence, not a replacement for kernel route proof.`,
       commands: [
         `timeout 8 vtysh -c ${shellArg("show ip route " + destination)}`,
         `timeout 8 vtysh -c ${shellArg("show bgp summary")}`,
@@ -1758,12 +1758,12 @@ function networkPathActiveProofChecklist(target = {}, proof = {}) {
   if (target.kind === "ipsec") {
     items.push({
       key: "strongswan",
-      label: "strongSwan IKE/CHILD SA",
+      label: "IPsec service IKE/CHILD SA",
       state: "required",
       detail: `Confirm IKE and CHILD SA state, traffic selectors, and packet counters for ${target.tunnelName || target.name || "<tunnel>"}; do not export PSK material.`,
       commands: [
-        `sudo timeout 8 swanctl --list-sas --ike ${shellArg(target.tunnelName || target.name || "<tunnel>")}`,
-        "sudo timeout 8 swanctl --list-pols",
+        `sudo timeout 8 IPsec control --list-sas --ike ${shellArg(target.tunnelName || target.name || "<tunnel>")}`,
+        "sudo timeout 8 IPsec control --list-pols",
         "sudo timeout 8 ip -s xfrm state",
       ],
     });
@@ -1785,7 +1785,7 @@ function networkPathActiveProofChecklist(target = {}, proof = {}) {
 }
 
 function networkPathActiveProofAcknowledgements(target = {}) {
-  const kind = target.kind === "ipsec" ? "IPsec/strongSwan" : target.kind === "wireguard" ? "WireGuard" : "network";
+  const kind = target.kind === "ipsec" ? "IPsec/IPsec service" : target.kind === "wireguard" ? "WireGuard" : "network";
   return [
     {
       key: "not-executed",
@@ -1845,7 +1845,7 @@ function networkPathMismatchNextSteps(mismatches = [], proof = {}) {
   }
   return rows.map((row) => {
     const text = row.toLowerCase();
-    if (text.includes("route") || text.includes("dev") || text.includes("gateway")) return `${row}; verify static route, FRR route selection, gateway reachability, and reverse path before probing.`;
+    if (text.includes("route") || text.includes("dev") || text.includes("gateway")) return `${row}; verify static route, routing service route selection, gateway reachability, and reverse path before probing.`;
     if (text.includes("vpn") || text.includes("tunnel") || text.includes("xfrm") || text.includes("sa")) return `${row}; verify tunnel selector, XFRM/IPsec or WireGuard peer state, and endpoint reachability before probing.`;
     if (text.includes("policy") || text.includes("rule")) return `${row}; open candidate Explain and compare running/candidate rule posture before active testing.`;
     return `${row}; resolve or document the mismatch before treating active output as proof.`;
@@ -2273,7 +2273,7 @@ function ospfCard(root, ospf = {}) {
         h("button", { class: "btn", type: "button", title: "Review OSPF route context", "aria-label": "Review OSPF route context", dataset: { netvpnAction: "review-ospf" }, onclick: () => openDynamicRouteReviewDrawer(root, "ospf") }, h("span", { html: icon("search", 16) }), "Review"),
       ])));
   return netvpnSection("ospf", card(header,
-    neighbors.length ? ospfRuntimeEvidence(neighbors) : h("div", { class: "note", style: { margin: "0 0 10px" } }, frrRuntime.detail || "No OSPF neighbor evidence returned by FRR."),
+    neighbors.length ? ospfRuntimeEvidence(neighbors) : h("div", { class: "note", style: { margin: "0 0 10px" } }, frrRuntime.detail || "No OSPF neighbor evidence returned by routing service."),
     h("dl", { class: "kv", style: { marginBottom: "12px" } }, h("dt", {}, "Router ID"), h("dd", { class: "mono" }, ospf.routerId || "—")),
     h("div", { class: "note" }, "Areas"),
     (ospf.areas || []).length ? (ospf.areas || []).map((a) =>
@@ -2322,7 +2322,7 @@ function editOspf(root, opts = {}) {
 
   openDrawer({
     title: "Configure OSPF",
-    subtitle: "Staged to the candidate and rendered by FRR on commit.",
+    subtitle: "Staged to the candidate and rendered by routing service on commit.",
     width: "760px",
     onClose: clearNetvpnDrawerState,
     body: h("div", { dataset: { netvpnOspfDrawer: "true" } },
@@ -2346,13 +2346,13 @@ function editOspf(root, opts = {}) {
         d.routing ||= {};
         d.routing.ospf = next.ospf;
       });
-      closeDrawer(); paint(root); toast("OSPF staged", "Commit to update FRR.", "ok");
+      closeDrawer(); paint(root); toast("OSPF staged", "Commit to update routing service.", "ok");
     } catch (e) { toast("Could not stage OSPF", e.message, "bad"); }
   }
 }
 
 async function disableOspf(root) {
-  if (!(await confirmDialog({ title: "Disable OSPF?", message: "OSPF will be disabled in the candidate. FRR is updated when the candidate is committed.", confirmLabel: "Disable", danger: true }))) return;
+  if (!(await confirmDialog({ title: "Disable OSPF?", message: "OSPF will be disabled in the candidate. routing service is updated when the candidate is committed.", confirmLabel: "Disable", danger: true }))) return;
   try {
     await session.apply((d) => {
       d.routing ||= {};
@@ -2392,7 +2392,7 @@ function ipsecCard(root, tunnels) {
     dirty ? pill("candidate edit", "warn") : null,
     h("span", { class: "muted" }, tunnels.length + " configured"));
   if (!tunnels.length) return card(header,
-    emptyState("vpn", "No IPsec tunnels", "No strongSwan tunnels in the candidate policy.",
+    emptyState("vpn", "No IPsec tunnels", "No IPsec service tunnels in the candidate policy.",
       h("button", { class: "btn primary", type: "button", title: "Add IPsec tunnel", "aria-label": "Add IPsec tunnel to candidate", dataset: { netvpnAction: "add-ipsec" }, onclick: () => editIpsec(root, null) }, h("span", { html: icon("plus", 16) }), "Add tunnel")));
   return card(header,
     responsiveTable(["Name", "Peer", "CIDRs", "Mode", { label: "", attrs: { class: "actions-col" } }],
@@ -2413,7 +2413,7 @@ function ipsecCard(root, tunnels) {
 }
 
 async function delIpsec(root, idx, tunnel) {
-  if (!(await confirmDialog({ title: "Delete IPsec tunnel?", message: `Remove ${tunnel.name || "this tunnel"} from the candidate? strongSwan is updated when the candidate is committed.`, confirmLabel: "Delete", danger: true }))) return;
+  if (!(await confirmDialog({ title: "Delete IPsec tunnel?", message: `Remove ${tunnel.name || "this tunnel"} from the candidate? IPsec service is updated when the candidate is committed.`, confirmLabel: "Delete", danger: true }))) return;
   try {
     await session.apply((d) => {
       d.vpn ||= {};
@@ -2448,7 +2448,7 @@ function editIpsec(root, idx) {
 
   openDrawer({
     title: editing ? "Edit IPsec tunnel" : "Add IPsec tunnel",
-    subtitle: "PSK material stays in a swanctl secrets file; policy stores only the file path.",
+    subtitle: "PSK material stays in a IPsec control secrets file; policy stores only the file path.",
     width: "760px",
     body: h("div", { dataset: { netvpnIpsecDrawer: "true" } },
       h("div", { class: "form-grid two" },

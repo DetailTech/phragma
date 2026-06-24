@@ -620,7 +620,7 @@ const hygienePolicy = {
   const noPortHints = findings.find((finding) => finding.signature === "no-port-hints");
   assert.equal(noPortHints.title, "App-ID without port hints");
   assert.deepEqual(noPortHints.names, ["signal-only", "signal-only-copy"]);
-  assert.match(noPortHints.detail, /TCP\/UDP port hints or a supported Suricata signal/);
+  assert.match(noPortHints.detail, /TCP\/UDP port hints or a supported IDS\/IPS signal/);
 }
 
 {

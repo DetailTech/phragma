@@ -10,11 +10,10 @@ import { policyNeedsBaseline } from "../baseline.js";
 import { pageHead, card, emptyState, pill, metricCard, tag, labeledCell, responsiveTable } from "../ui.js";
 import * as fmt from "../format.js";
 import { area, donut, hbars } from "../charts.js";
-import { releaseAcceptanceAggregateSummary, releaseAcceptanceFromResult, releaseAcceptanceStatusViewModel } from "./readiness.js";
 
 export async function render() {
-  const [statusR, identityR, run, alertsR, flowsR, versR, feedsR, releaseAcceptanceR, candidateStatusR] = await Promise.allSettled([
-    api.status(), api.identity(), api.running(), api.alerts(500), api.flows(500), api.versions(8), api.feeds(), api.releaseAcceptanceStatus(), api.candidateStatus(),
+  const [statusR, identityR, run, alertsR, flowsR, versR, feedsR, candidateStatusR] = await Promise.allSettled([
+    api.status(), api.identity(), api.running(), api.alerts(500), api.flows(500), api.versions(8), api.feeds(), api.candidateStatus(),
   ]);
   throwIfAccessDenied(statusR, identityR, run, alertsR, flowsR, versR, feedsR);
   const status = ok(statusR) || {};
@@ -26,9 +25,8 @@ export async function render() {
   const flows = flowsData.flows || [];
   const versions = ok(versR)?.versions || [];
   const feeds = ok(feedsR)?.feeds || [];
-  const releaseReadiness = dashboardReleaseReadinessModel(releaseAcceptanceFromResult(releaseAcceptanceR), ok(candidateStatusR) || {}, candidateStatusR.status !== "fulfilled");
   const telemetryScope = dashboardTelemetryScopeModel(alertsData, flowsData);
-  const loadIssues = dashboardLoadIssues({ statusR, identityR, run, alertsR, flowsR, versR, feedsR, releaseAcceptanceR, candidateStatusR });
+  const loadIssues = dashboardLoadIssues({ statusR, identityR, run, alertsR, flowsR, versR, feedsR, candidateStatusR });
 
   const rules = policy.rules || [];
   const activeRules = rules.filter((r) => !r.disabled).length;
@@ -48,7 +46,7 @@ export async function render() {
     h("div", { class: "grid" },
       h("div", { class: "grid cols-3" },
         runtimePostureCard(status, policy, identity),
-        releaseReadinessCard(releaseReadiness),
+        changeReadinessCard(dashboardCandidateStatusModel(ok(candidateStatusR) || {}, candidateStatusR.status !== "fulfilled")),
         engineCoverageCard(status)),
 
       h("div", { class: "grid cols-4" },
@@ -83,7 +81,6 @@ function dashboardLoadIssues(results = {}) {
     flowsR: "Traffic",
     versR: "Version history",
     feedsR: "Intel feeds",
-    releaseAcceptanceR: "Release readiness",
     candidateStatusR: "Candidate status",
   };
   return Object.entries(labels)
@@ -95,7 +92,6 @@ function dashboardLoadIssueBanner(issues = []) {
   const routeLinks = [
     ["Traffic", dashboardTrafficHash({ limit: 500 })],
     ["Threats", dashboardThreatHash({ limit: 500 })],
-    ["Readiness", dashboardReleaseGateHash()],
     ["Changes", dashboardHash("/changes", { tab: "audit" })],
   ];
   return h("div", { class: "alert-box warn", dataset: { dashboardLoadIssues: String(issues.length) } },
@@ -127,10 +123,6 @@ export function dashboardThreatHash(filters = {}) {
 
 export function dashboardAuditHash(filters = {}) {
   return dashboardHash("/changes", { tab: "audit", limit: "300", ...filters });
-}
-
-export function dashboardReleaseGateHash(gate) {
-  return dashboardHash("/readiness", gate ? { packet: gate } : { drawer: "release-acceptance" });
 }
 
 export function dashboardRulesRemediationHash() {
@@ -177,15 +169,8 @@ export function dashboardEngineActionLinks(engine = {}) {
   const name = String(engine.name || engine.role || "engine").toLowerCase();
   const detail = String(engine.detail || engine.state || "").slice(0, 120);
   const engineFilter = engine.name || engine.role || "";
-  const links = [
-    {
-      id: "readiness",
-      label: "Readiness",
-      href: dashboardHash("/readiness", { drawer: "system" }),
-      title: "Open readiness evidence for this engine",
-    },
-  ];
-  if (/suricata|ids|ips|threat|inspection/.test(name)) {
+  const links = [];
+  if (/ids-ips|ids|ips|threat|inspection/.test(name)) {
     links.push({
       id: "inspection",
       label: "Inspection",
@@ -235,7 +220,7 @@ export function dashboardCandidateStatusModel(status = {}, unavailable = false) 
       dirty: false,
       changeCount: 0,
       label: "candidate unavailable",
-      detail: "Candidate status could not be loaded; release remediation links stay read-only.",
+      detail: "Candidate status could not be loaded.",
     };
   }
   const hasCandidate = Boolean(status?.hasCandidate ?? status?.has_candidate);
@@ -249,72 +234,48 @@ export function dashboardCandidateStatusModel(status = {}, unavailable = false) 
     changeCount,
     label: pending ? `${changeCount || 1} pending change${(changeCount || 1) === 1 ? "" : "s"}` : "candidate clean",
     detail: pending
-      ? `Review ${changeCount || 1} candidate change${(changeCount || 1) === 1 ? "" : "s"} before release evidence is recorded.`
+      ? `Review ${changeCount || 1} candidate change${(changeCount || 1) === 1 ? "" : "s"} before commit.`
       : runningVersion ? `No staged candidate; running policy v${runningVersion}.` : "No staged candidate.",
   };
 }
 
-export function dashboardReleaseReadinessModel(releaseStatus = {}, candidateStatus = {}, candidateUnavailable = false) {
-  const model = releaseAcceptanceStatusViewModel(releaseStatus);
-  const aggregate = releaseAcceptanceAggregateSummary(model);
-  const unavailable = model.state === "unavailable";
-  const actionable = model.checks.find((check) => check.cls === "bad" || check.nextCommands?.length)
-    || model.checks.find((check) => check.cls === "warn" && check.name)
-    || null;
-  const candidate = dashboardCandidateStatusModel(candidateStatus, candidateUnavailable);
-  const cls = unavailable ? "warn" : model.cls;
-  const stateLabel = unavailable ? "unavailable" : model.ready ? "ready" : model.state || "blocked";
+export function dashboardReleaseReadinessModel(input = {}, candidate = {}, unavailable = false) {
+  const summary = input.summary || {};
+  const checks = Array.isArray(input.checks) ? input.checks : Array.isArray(input.requiredGates) ? input.requiredGates : [];
+  const first = checks.find((item) => item.state && item.state !== "passed") || checks[0] || {};
+  const firstId = first.name || first.id || "";
+  const openCount = Number(summary.missing || 0) + Number(summary.invalid || 0) + Number(summary.todo || 0);
+  const stateLabel = unavailable ? "unavailable" : input.state || "unknown";
   return {
+    ready: Boolean(input.ready),
     stateLabel,
-    cls,
-    title: unavailable ? "Release status unavailable." : model.title,
-    detail: unavailable ? "Release acceptance status could not be loaded. Open Readiness for detailed evidence review." : aggregate.detail,
-    generatedAt: model.generatedAt,
-    summary: model.summary,
-    firstGate: actionable ? {
-      id: actionable.name,
-      label: actionable.name || "release gate",
-      state: actionable.label || actionable.state || "review",
-      detail: "Open Readiness to review evidence details, next actions, and commands for this gate.",
-      href: dashboardReleaseGateHash(actionable.name),
+    cls: unavailable ? "warn" : input.ready ? "ok" : stateLabel === "blocked" ? "bad" : "warn",
+    title: stateLabel === "evidence-pending-manifest" ? "Release manifest assembly is pending" : stateLabel,
+    detail: unavailable ? "Release evidence status could not be loaded." : openCount ? `${openCount} release gate items need attention.` : "All required evidence is recorded.",
+    summary,
+    openCount,
+    firstGate: firstId ? {
+      id: firstId,
+      name: firstId,
+      state: first.state === "recorded" ? "pending manifest" : first.state || "",
+      detail: String(first.detail || "").replace(/\/[^\s]+/g, "[redacted]"),
+      href: firstId ? `#/readiness?packet=${encodeURIComponent(firstId)}` : "",
     } : null,
-    readinessHref: dashboardReleaseGateHash(""),
+    candidate: dashboardCandidateStatusModel(candidate, unavailable),
     rulesHref: dashboardRulesRemediationHash(),
     compareHref: dashboardTroubleshootCompareHash(),
-    candidate,
   };
 }
 
-function releaseReadinessCard(model) {
-  const counts = [
-    ["Passed", model.summary.passed],
-    ["Recorded", model.summary.recorded],
-    ["Missing", model.summary.missing],
-    ["Invalid", model.summary.invalid],
-    ["Todo", model.summary.todo],
-    ["N/A", model.summary.notApplicable],
-  ];
-  return card(h("div", { dataset: { dashboardReleaseReadiness: "true", dashboardReleaseState: model.stateLabel } },
-    h("h2", {}, "Release readiness", h("span", { class: "spacer" }),
-      h("a", { href: model.readinessHref, class: "linklike", title: "Open release readiness evidence", "aria-label": "Open release readiness evidence", dataset: { dashboardLink: "release-readiness" } }, "Readiness →"),
-      pill(model.stateLabel, model.cls, true)),
-    h("div", { class: "runtime-grid" },
-      counts.map(([label, value]) => postureMetric(label, String(value || 0)))),
-    model.generatedAt ? h("div", { class: "note" }, `Generated ${fmt.relTime(model.generatedAt)}.`) : null,
-    h("div", { class: "alert-box " + postureBoxClass(model.cls) },
-      h("strong", {}, model.title),
-      h("div", { class: "note" }, model.detail)),
-    model.firstGate ? h("div", { class: "alert-box warn", dataset: { dashboardReleaseGate: model.firstGate.id } },
-      h("strong", {}, `Next gate: ${model.firstGate.label}`),
-      h("div", { class: "note" }, model.firstGate.detail),
-      h("a", { class: "btn sm", href: model.firstGate.href, title: `Open release gate ${model.firstGate.label}`, "aria-label": `Open release gate ${model.firstGate.label}`, dataset: { dashboardReleaseAction: "open-gate" } }, h("span", { html: icon("check", 14) }), "Open gate")) : null,
-    h("div", { class: "alert-box " + (model.candidate.dirty ? "warn" : "ok"), dataset: { dashboardCandidateState: model.candidate.dirty ? "dirty" : "clean" } },
-      h("strong", {}, model.candidate.label),
-      h("div", { class: "note" }, model.candidate.detail)),
+function changeReadinessCard(candidate) {
+  return card(h("div", { dataset: { dashboardCandidateState: candidate.dirty ? "dirty" : "clean" } },
+    h("h2", {}, "Candidate", h("span", { class: "spacer" }), pill(candidate.label, candidate.dirty ? "warn" : "ok", true)),
+    h("div", { class: "alert-box " + (candidate.dirty ? "warn" : "ok") },
+      h("strong", {}, candidate.label),
+      h("div", { class: "note" }, candidate.detail)),
     h("div", { class: "flex wrap" },
-      h("a", { class: "btn sm", href: model.readinessHref, title: "Open release evidence drawer", "aria-label": "Open release evidence drawer", dataset: { dashboardReleaseDrawer: "true" } }, h("span", { html: icon("shield", 14) }), "Evidence"),
-      h("a", { class: "btn sm", href: model.rulesHref, title: "Open changed rules remediation", "aria-label": "Open changed rules remediation", dataset: { dashboardCandidateRules: "true" } }, h("span", { html: icon("rules", 14) }), "Rules"),
-      model.candidate.dirty ? h("a", { class: "btn sm", href: model.compareHref, title: "Open candidate comparison", "aria-label": "Open candidate comparison", dataset: { dashboardCandidateCompare: "true" } }, h("span", { html: icon("diff", 14) }), "Compare") : null)));
+      h("a", { class: "btn sm", href: "#/changes?tab=candidate", title: "Open candidate review", "aria-label": "Open candidate review", dataset: { dashboardCandidateReview: "true" } }, h("span", { html: icon("diff", 14) }), "Review"),
+      h("a", { class: "btn sm ghost", href: dashboardRulesRemediationHash(), title: "Open rules", "aria-label": "Open rules", dataset: { dashboardCandidateRules: "true" } }, h("span", { html: icon("rules", 14) }), "Rules"))));
 }
 
 function runtimePostureCard(status, policy, identity) {
@@ -331,9 +292,9 @@ function runtimePostureCard(status, policy, identity) {
   const management = managementPlaneSummary(status, identity);
   const workerText = `${rt.inspectionWorkers || 0}/${rt.hostCpus || 0} CPUs`;
   const flowHits = flowRuntime.packets || flowRuntime.bytes ? `${flowRuntime.packets} pkts / ${fmt.bytes(flowRuntime.bytes)}` : "none";
-  return card(h("h2", {}, "Runtime posture", h("span", { class: "spacer" }), h("a", { href: "#/readiness", class: "linklike", title: "Open readiness workbench", "aria-label": "Open readiness workbench", dataset: { dashboardLink: "runtime-readiness" } }, "Readiness →"), pill(label, cls, true)),
+  return card(h("h2", {}, "Runtime posture", h("span", { class: "spacer" }), pill(label, cls, true)),
     h("div", { class: "runtime-grid" },
-      postureMetric("Dataplane", status.dataplane?.activeDataplane || rt.activeDataplane || "—"),
+      postureMetric("Dataplane", displayDataplane(status.dataplane?.activeDataplane || rt.activeDataplane || "—")),
       postureMetric("Throughput path", dp.label),
       postureMetric("Flowtable evidence", flowRuntime.state || "unknown"),
       postureMetric("Flowtable devices", flowRuntime.devices.length ? flowRuntime.devices.join(", ") : "none"),
@@ -359,6 +320,14 @@ function runtimePostureCard(status, policy, identity) {
       h("div", { class: "alert-box " + warningClass(w.severity) },
         h("strong", {}, w.message),
         w.action ? h("div", { class: "note" }, w.action) : null))) : null);
+}
+
+function displayDataplane(value = "") {
+  const text = String(value || "").toLowerCase();
+  if (/ebpf|xdp|tc/.test(text)) return "Advanced dataplane";
+  if (/nft|conntrack|iptables/.test(text)) return "Stateful forwarding";
+  if (/flowtable|offload/.test(text)) return "Forwarding acceleration";
+  return value || "—";
 }
 
 export function managementPlaneSummary(status = {}, identity = {}) {
@@ -392,7 +361,7 @@ export function managementPlaneSummary(status = {}, identity = {}) {
   return {
     cls,
     title: "Management plane controls need review.",
-    detail: `${issues.join(", ")}. Actor: ${actor}. Rate limit: ${rate}. Review Readiness before exposing the UI or API.`,
+    detail: `${issues.join(", ")}. Actor: ${actor}. Rate limit: ${rate}. Review  before exposing the UI or API.`,
   };
 }
 
@@ -626,7 +595,7 @@ function ruleCountersCard(status) {
     color: counterColor(c.kind),
   }));
   return card(h("h2", {}, "Policy counters", tag(version > 0 ? `v${version}` : "version unknown"), h("span", { class: "spacer" }), h("a", { href: "#/rules", class: "linklike", title: "Open rules workbench", "aria-label": "Open rules workbench", dataset: { dashboardLink: "rules" } }, "Rules →")),
-    items.length ? hbars(items) : emptyState("rules", "No counters", "Commit a policy on Linux to collect nftables rule hit counters."));
+    items.length ? hbars(items) : emptyState("rules", "No counters", "Commit a policy on Linux to collect packet filter rule hit counters."));
 }
 
 function counterLabel(c) {

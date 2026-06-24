@@ -1,6 +1,6 @@
 // IDS/IPS configuration editor. Edits policy.ids and stages it to the
-// candidate like every other change; committing starts/stops Suricata.
-// Suricata produces both alerts (Threats) and flow records (Traffic),
+// candidate like every other change; committing starts/stops IDS/IPS engine.
+// IDS/IPS engine produces both alerts (Threats) and flow records (Traffic),
 // so enabling detect mode is what populates the telemetry views.
 
 import { h, icon, clear } from "../core.js";
@@ -178,7 +178,7 @@ function inspectionProfileCard(summary = {}, packageSummary = null) {
 
 function inspectionRuntimeCard(posture = {}, status = {}) {
   const engines = Array.isArray(status.engines) ? status.engines : [];
-  const suricata = engines.find((engine) => /suricata/i.test(engine.name || engine.role || engine.detail || "")) || engines[0] || null;
+  const idsIps = engines.find((engine) => /ids-ips|suricata/i.test(engine.name || engine.role || engine.detail || "")) || engines[0] || null;
   return card(h("h2", {}, "Runtime posture", h("span", { class: "spacer" }), pill(posture.label, posture.cls, true)),
     h("div", { class: "note" }, posture.detail),
     h("dl", { class: "kv compact" },
@@ -188,15 +188,15 @@ function inspectionRuntimeCard(posture = {}, status = {}) {
       kv("Bypass possible", posture.bypassPossible ? "yes" : "no"),
       kv("Bypass reason", posture.bypassReason || "none"),
       kv("Degraded behavior", posture.degradedBehavior || "none")),
-    suricata ? h("div", { class: "alert-box " + (suricata.state === "failed" ? "bad" : suricata.state === "active" || suricata.state === "ready" ? "ok" : "info") },
-      h("strong", {}, suricata.name || "inspection engine"),
-      h("div", { class: "note" }, [suricata.state, suricata.mode, suricata.detail || suricata.role].filter(Boolean).join(" · "))) : null);
+    idsIps ? h("div", { class: "alert-box " + (idsIps.state === "failed" ? "bad" : idsIps.state === "active" || idsIps.state === "ready" ? "ok" : "info") },
+      h("strong", {}, "IDS/IPS"),
+      h("div", { class: "note" }, [idsIps.state, idsIps.mode, idsIps.detail || idsIps.role].filter(Boolean).join(" · "))) : null);
 }
 
 function inspectionRolloutCard(packageSummary = null) {
   const actions = idsRolloutActions(session.draft?.ids || {}, session.running?.ids || {}, packageSummary);
   return card(h("h2", {}, "Threat rollout actions", h("span", { class: "spacer" }), pill(idsRolloutGateLabel(packageSummary), packageSummary?.blockerCount ? "warn" : "info")),
-    h("div", { class: "note" }, "All actions stage the IDS/IPS profile to candidate only. Commit review is required before Suricata runtime changes."),
+    h("div", { class: "note" }, "All actions stage the IDS/IPS profile to candidate only. Commit review is required before IDS/IPS engine runtime changes."),
     h("div", { class: "flex wrap", style: { marginTop: "10px" } },
       actions.map((action) => inspectionRolloutButton(action))));
 }
@@ -243,7 +243,7 @@ function inspectionPackageCard(packageSummary = null, contentError = "") {
 function inspectionExceptionCard(exceptions = [], runningExceptions = []) {
   const summary = exceptionSummary(exceptions);
   return card(h("h2", {}, "False-positive exceptions", h("span", { class: "spacer" }), pill(summary.label, summary.active ? "info" : "neutral")),
-    h("div", { class: "note" }, "Exceptions stage to policy and compile to Suricata suppressions only after validation and commit."),
+    h("div", { class: "note" }, "Exceptions stage to policy and compile to IDS/IPS engine suppressions only after validation and commit."),
     exceptions.length ? h("div", { class: "table-wrap" },
       responsiveTable(["Threat-ID", "Scope", "Reason", "Evidence", "Policy state"], exceptions.map((ex, index) => {
         const scope = exceptionScopeModel(ex);
@@ -384,7 +384,7 @@ export function idsProfileSummary(draftIds = {}, runningIds = {}, packageSummary
     status: "detect",
     cls: changed ? "info" : "ok",
     modeLabel: "Detect (IDS)",
-    detail: "Passive Suricata detection is staged for alerting without inline drops.",
+    detail: "Passive IDS/IPS engine detection is staged for alerting without inline drops.",
     monitorInterfacesLabel: listLabel(draft.monitorInterfaces, "all zone interfaces"),
     homeNetworksLabel: listLabel(draft.homeNetworks, "RFC1918 private ranges"),
     ruleFilesLabel: listLabel(draft.ruleFiles, "local.rules"),
@@ -504,7 +504,7 @@ export async function openIdsEditor(onSaved) {
   const preflightSlot = h("div", { dataset: { idsValidationPreflight: "true" } });
 
   const body = h("div", { dataset: { idsEditor: "true" } },
-    h("div", { class: "alert-box" }, h("strong", {}, "Inspection engine: Suricata. "),
+    h("div", { class: "alert-box" }, h("strong", {}, "Inspection engine: IDS/IPS engine. "),
       "Detect sniffs traffic passively (AF_PACKET). Prevent inspects inline via NFQUEUE and can drop. Failure behavior is explicit policy, not an engine default."),
     field("Enable IDS/IPS", enable, "Off leaves the inspection engine stopped."),
     field("Mode", modeSeg),
@@ -516,7 +516,7 @@ export async function openIdsEditor(onSaved) {
     preflightSlot,
     h("hr", { class: "divider" }),
     h("h3", {}, "False-positive exceptions"),
-    h("div", { class: "note", style: { marginBottom: "10px" } }, "Exceptions are Phragma policy objects. They compile to Suricata suppressions only after validation and commit."),
+    h("div", { class: "note", style: { marginBottom: "10px" } }, "Exceptions are Phragma policy objects. They compile to IDS/IPS engine suppressions only after validation and commit."),
     exceptionsWrap);
   renderExceptions();
 
@@ -852,7 +852,7 @@ export function exceptionPolicyState(ex = {}, runningIds = {}) {
     return {
       label: "candidate",
       cls: "violet",
-      detail: "Staged only; commit before Suricata receives the suppression.",
+      detail: "Staged only; commit before IDS/IPS engine receives the suppression.",
       withDot: false,
     };
   }

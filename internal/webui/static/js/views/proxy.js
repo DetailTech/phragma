@@ -7,7 +7,7 @@ import { throwIfAccessDenied } from "../auth_gate.js";
 import { activeInvestigationServerCaseHref, appendInvestigationPacketToActiveServerCase, pinInvestigationPacket } from "../investigation_case.js";
 import { buildInvestigationPacket } from "../investigation_packet.js";
 import { equal, session } from "../policy.js";
-import { boundedArtifactSnippet, defaultVirtualService, defaultWafPolicy, ensureProxy, listFromValue, modeLabel, normalizeProxy, proxyPlanProofModel, proxyPolicyCouplingModel, proxyRuntimeReadinessModel, proxySummary, validateProxy } from "../proxy_model.js";
+import { boundedArtifactSnippet, defaultVirtualService, defaultWafPolicy, ensureProxy, listFromValue, modeLabel, normalizeProxy, proxyPlanProofModel, proxyPolicyCouplingModel, proxyRuntimeModel, proxySummary, validateProxy } from "../proxy_model.js";
 import { normalizeProxyRoute, proxyHash } from "../proxy_route.js";
 import { pageHead, card, emptyState, pill, toast, openDrawer, closeDrawer, confirmDialog, labeledCell, responsiveTable } from "../ui.js";
 
@@ -60,8 +60,7 @@ function routeUnavailablePanel(title, err, rows = []) {
     h("div", { class: "note" }, errorMessage(err) || "The candidate session could not be loaded. Retry after the API is reachable."),
     h("div", { class: "row-actions", style: { marginTop: "12px" } },
       h("button", { class: "btn sm ghost", type: "button", title: "Retry loading this Proxy/WAF route", "aria-label": "Retry loading this Proxy/WAF route", dataset: { proxyAction: "retry-unavailable-inline" }, onclick: retryRouteLoad }, h("span", { html: icon("refresh", 14) }), "Retry"),
-      h("a", { class: "btn sm ghost", href: "#/changes?tab=candidate", title: "Open Changes candidate review", "aria-label": "Open Changes candidate review", dataset: { proxyAction: "changes" } }, h("span", { html: icon("changes", 14) }), "Changes"),
-      h("a", { class: "btn sm ghost", href: "#/readiness", title: "Open Readiness runtime evidence", "aria-label": "Open Readiness runtime evidence", dataset: { proxyAction: "readiness" } }, h("span", { html: icon("shield", 14) }), "Readiness")),
+      h("a", { class: "btn sm ghost", href: "#/changes?tab=candidate", title: "Open Changes candidate review", "aria-label": "Open Changes candidate review", dataset: { proxyAction: "changes" } }, h("span", { html: icon("changes", 14) }), "Changes")),
     responsiveTable(["Context", "Command / endpoint", "Use"], rows.map((row) => h("tr", {},
       labeledCell("Context", row.label),
       labeledCell("Command / endpoint", { class: "mono" }, row.value),
@@ -87,7 +86,6 @@ function paint(root) {
     h("div", { class: "flex wrap" },
       h("button", { class: "btn", type: "button", title: "Add WAF policy", "aria-label": "Add WAF policy", dataset: { proxyAction: "add-waf" }, onclick: () => openWafEditor(root) }, h("span", { html: icon("plus", 16) }), "Add WAF"),
       h("a", { class: "btn", href: proxyHash({ ...route, drawer: "plan" }), title: "Validate server-rendered Proxy/WAF plan", "aria-label": "Validate server-rendered Proxy/WAF plan", dataset: { proxyAction: "validate-plan" } }, h("span", { html: icon("shield", 16) }), "Validate plan"),
-      h("button", { class: "btn", type: "button", title: "Review Proxy/WAF listener rollout readiness", "aria-label": "Review Proxy/WAF listener rollout readiness", dataset: { proxyAction: "runtime-readiness" }, onclick: () => openRuntimeReadinessDrawer(root) }, h("span", { html: icon("terminal", 16) }), "Runtime review"),
       h("a", { class: "btn", href: proxyHash({ ...route, drawer: "policy" }), title: "Review Proxy/WAF relation to traffic policy", "aria-label": "Review Proxy/WAF relation to traffic policy", dataset: { proxyAction: "policy-coupling" } }, h("span", { html: icon("rules", 16) }), "Policy impact"),
       h("button", { class: "btn primary", type: "button", title: "Add virtual service", "aria-label": "Add virtual service", dataset: { proxyAction: "add-service" }, onclick: () => openServiceEditor(root) }, h("span", { html: icon("plus", 16) }), "Add service"))));
   root.appendChild(summaryCard(summary, errors));
@@ -96,25 +94,24 @@ function paint(root) {
   root.appendChild(route.tab === "waf" ? wafPoliciesCard(root, proxy.wafPolicies) : virtualServicesCard(root, proxy));
 }
 
-async function openRuntimeReadinessDrawer(root) {
-  const body = h("div", { dataset: { proxyRuntimeReadiness: "loading" } },
+async function openRuntimeDrawer(root) {
+  const body = h("div", { dataset: { proxyRuntime: "loading" } },
     h("div", { class: "loading" }, "Validating candidate and reading runtime context..."));
   openDrawer({
-    title: "Proxy / WAF runtime-readiness review",
+    title: "Proxy / WAF runtime review",
     subtitle: "Operator rollout review only; this does not launch a listener or prove active traffic.",
     width: "820px",
     body,
     footer: [
       h("button", { class: "btn ghost", type: "button", title: "Close Proxy/WAF runtime review", "aria-label": "Close Proxy/WAF runtime review", dataset: { proxyRuntimeAction: "close" }, onclick: closeDrawer }, "Close"),
       h("a", { class: "btn", href: "#/changes?tab=candidate", title: "Open Changes candidate review", "aria-label": "Open Changes candidate review", dataset: { proxyRuntimeLink: "changes" } }, h("span", { html: icon("changes", 14) }), "Changes"),
-      h("a", { class: "btn primary", href: "#/readiness", title: "Open Readiness runtime evidence", "aria-label": "Open Readiness runtime evidence", dataset: { proxyRuntimeLink: "readiness" } }, h("span", { html: icon("shield", 14) }), "Readiness"),
     ],
   });
   try {
     const [validationR, statusR] = await Promise.allSettled([session.validate(), api.status()]);
     const validation = validationR.status === "fulfilled" ? validationR.value : { valid: false, errors: [validationR.reason?.message || String(validationR.reason || "Candidate validation failed.")] };
     const status = statusR.status === "fulfilled" ? statusR.value : null;
-    const model = proxyRuntimeReadinessModel({
+    const model = proxyRuntimeModel({
       candidateProxy: session.draft.proxy,
       runningProxy: session.running.proxy,
       candidateStatus: session.candidateStatus,
@@ -125,26 +122,26 @@ async function openRuntimeReadinessDrawer(root) {
     });
     model.artifactManifest = proxyRuntimeArtifactManifest(validation);
     clear(body);
-    body.dataset.proxyRuntimeReadiness = model.readiness;
-    body.appendChild(renderRuntimeReadiness(model));
+    body.dataset.proxyRuntime = model.readiness;
+    body.appendChild(renderRuntime(model));
     toast("Proxy runtime review generated", model.label, model.cls === "bad" ? "warn" : "ok");
     if (root?.isConnected) paint(root);
   } catch (err) {
     clear(body);
-    body.dataset.proxyRuntimeReadiness = "error";
+    body.dataset.proxyRuntime = "error";
     body.appendChild(h("div", { class: "alert-box bad" },
-      h("strong", {}, "Runtime-readiness review failed."),
-      h("div", { class: "note" }, err?.message || String(err || "Unknown runtime-readiness error."))));
+      h("strong", {}, "Runtime review failed."),
+      h("div", { class: "note" }, err?.message || String(err || "Unknown runtime review error."))));
     toast("Proxy runtime review error", err?.message || String(err), "bad");
   }
 }
 
-function renderRuntimeReadiness(model) {
-  const packet = proxyRuntimeReadinessPacket(model);
+function renderRuntime(model) {
+  const packet = proxyRuntimePacket(model);
   const activeChecklist = proxyActiveRolloutChecklist(model);
-  return h("div", { class: "proxy-runtime-readiness-body" },
+  return h("div", { class: "proxy-runtime-review-body" },
     h("div", { class: "alert-box " + (model.cls === "bad" ? "bad" : model.cls === "warn" ? "warn" : "info") },
-      h("strong", {}, `Listener rollout readiness: ${model.label}`),
+      h("strong", {}, `Listener rollout review: ${model.label}`),
       h("div", { class: "note" }, model.boundary)),
     h("div", { class: "runtime-grid", style: { marginTop: "12px" } },
       metric("Candidate proxy", `${model.candidateSummary.virtualServices} service(s) / ${model.candidateSummary.wafPolicies} WAF`),
@@ -156,7 +153,7 @@ function renderRuntimeReadiness(model) {
     h("dl", { class: "kv", style: { marginTop: "12px" } },
       h("dt", {}, "Candidate status"), h("dd", {}, model.candidateDirty ? pill("pending changes", "warn") : pill("matches running", "neutral")),
       h("dt", {}, "Proxy delta"), h("dd", {}, model.proxyChanged ? pill("proxy changed", "warn") : pill("no proxy delta", "neutral")),
-      h("dt", {}, "Active daemon boundary"), h("dd", {}, h("strong", {}, "not started here"), h("div", { class: "note" }, "This review reads validation/status context only; it does not launch, restart, reload, or stop Envoy, Coraza, nftables, load balancers, or health probes.")),
+      h("dt", {}, "Active daemon boundary"), h("dd", {}, h("strong", {}, "not started here"), h("div", { class: "note" }, "This review reads validation/status context only; it does not launch, restart, reload, or stop proxy listener, WAF, packet filter, load balancers, or health probes.")),
       h("dt", {}, "Runtime context"), h("dd", {}, h("span", {}, "reported state: "), pill(model.runtime.state || "not-reported", model.runtime.observed ? "info" : "warn"), h("div", { class: "note" }, "Context only; not accepted as listener traffic proof.")),
       h("dt", {}, "Runtime boundary"), h("dd", {}, model.runtime.proofBoundary)),
     h("div", { class: "impact-section-head" },
@@ -178,18 +175,18 @@ function renderRuntimeReadiness(model) {
       h("span", {}, "planning checklist")),
     h("div", { class: "alert-box warn" },
       h("strong", {}, "No daemon action is started from this drawer."),
-      h("div", { class: "note" }, "Use this checklist as the handoff boundary for the active rollout runbook. Listener health, Envoy/Coraza launch, rollback, traffic cutover, and artifact manifest hashes all require external proof before promotion.")),
+      h("div", { class: "note" }, "Use this checklist as the handoff boundary for the active rollout runbook. Listener health, proxy/WAF launch, rollback, traffic cutover, and artifact manifest hashes all require external proof before promotion.")),
     responsiveTable(["Gate", "Required proof", "Status"], activeChecklist.map((item) => h("tr", { dataset: { proxyActiveRolloutGate: item.id } },
       labeledCell("Gate", h("strong", {}, item.gate), h("div", { class: "note" }, item.boundary)),
       labeledCell("Required proof", item.requiredProof),
       labeledCell("Status", pill(item.statusLabel, item.statusClass)))), { className: "proxy-active-rollout-table" }),
     h("div", { class: "alert-box warn", style: { marginTop: "12px" } },
       h("strong", {}, "Explicit boundary"),
-      h("div", { class: "note" }, "This packet is redacted browser-side review context. It does not prove active listener traffic, WAF enforcement, release evidence, or Envoy/Coraza daemon launch.")),
+      h("div", { class: "note" }, "This packet is redacted browser-side review context. It does not prove active listener traffic, WAF enforcement, release evidence, or proxy/WAF daemon launch.")),
     h("div", { class: "row-actions", style: { marginTop: "12px" } },
-      h("button", { class: "btn sm ghost", type: "button", title: "Pin Proxy/WAF runtime-readiness handoff to the active investigation case", "aria-label": "Pin Proxy/WAF runtime-readiness handoff to the active investigation case", dataset: { proxyRuntimeAction: "pin-packet" }, onclick: () => pinRuntimeReadinessPacket(model) }, h("span", { html: icon("inbox", 14) }), "Pin to case"),
-      h("button", { class: "btn sm ghost", type: "button", title: "Copy Proxy/WAF runtime-readiness packet", "aria-label": "Copy Proxy/WAF runtime-readiness packet", dataset: { proxyRuntimeAction: "copy-packet" }, onclick: () => copyRuntimeReadinessPacket(model) }, h("span", { html: icon("copy", 14) }), "Copy packet"),
-      h("button", { class: "btn sm ghost", type: "button", title: "Export Proxy/WAF runtime-readiness packet", "aria-label": "Export Proxy/WAF runtime-readiness packet", dataset: { proxyRuntimeAction: "export-packet" }, onclick: () => exportRuntimeReadinessPacket(model) }, h("span", { html: icon("download", 14) }), "Export packet"),
+      h("button", { class: "btn sm ghost", type: "button", title: "Pin Proxy/WAF runtime review handoff to the active investigation case", "aria-label": "Pin Proxy/WAF runtime review handoff to the active investigation case", dataset: { proxyRuntimeAction: "pin-packet" }, onclick: () => pinRuntimePacket(model) }, h("span", { html: icon("inbox", 14) }), "Pin to case"),
+      h("button", { class: "btn sm ghost", type: "button", title: "Copy Proxy/WAF runtime review packet", "aria-label": "Copy Proxy/WAF runtime review packet", dataset: { proxyRuntimeAction: "copy-packet" }, onclick: () => copyRuntimePacket(model) }, h("span", { html: icon("copy", 14) }), "Copy packet"),
+      h("button", { class: "btn sm ghost", type: "button", title: "Export Proxy/WAF runtime review packet", "aria-label": "Export Proxy/WAF runtime review packet", dataset: { proxyRuntimeAction: "export-packet" }, onclick: () => exportRuntimePacket(model) }, h("span", { html: icon("download", 14) }), "Export packet"),
       h("a", { class: "btn sm ghost", href: activeInvestigationServerCaseHref(), title: "Open active investigation case", "aria-label": "Open active investigation case", dataset: { proxyRuntimeAction: "open-active-case" } }, h("span", { html: icon("search", 14) }), "Open active case")),
     h("pre", { class: "mono", style: { maxHeight: "260px", overflow: "auto", whiteSpace: "pre-wrap", overflowWrap: "anywhere", marginTop: "12px" }, dataset: { proxyRuntimePacketPreview: "true" } }, JSON.stringify(packet, null, 2)));
 }
@@ -239,7 +236,7 @@ function summaryCard(summary, errors) {
   return card(h("h2", {}, "Plan summary", h("span", { class: "spacer" }), pill("planned only", "warn", true)),
     h("div", { class: "alert-box warn" },
       h("strong", {}, "This workspace authors candidate policy only."),
-      h("div", { class: "note" }, "Validation renders an Envoy/Coraza-style proxy plan artifact. Running traffic redirection, TLS key custody, backend mTLS proof, and HA listener proof remain separate production work.")),
+      h("div", { class: "note" }, "Validation renders an proxy/WAF-style proxy plan artifact. Running traffic redirection, TLS key custody, backend mTLS proof, and HA listener proof remain separate production work.")),
     h("div", { class: "runtime-grid", style: { marginTop: "12px" } },
       metric("Candidate state", dirty ? pill("pending proxy change", "warn") : pill("matches running", "neutral")),
       metric("Virtual services", String(summary.virtualServices)),
@@ -329,8 +326,7 @@ function tabBar() {
   return h("div", { class: "tabs", style: { marginBottom: "16px" } },
     tabLink("services", "Virtual services"),
     tabLink("waf", "WAF policies"),
-    h("a", { class: "btn sm ghost", href: "#/changes?tab=candidate", title: "Open candidate review", "aria-label": "Open candidate review", dataset: { proxyAction: "candidate-review" } }, h("span", { html: icon("changes", 14) }), "Candidate review"),
-    h("a", { class: "btn sm ghost", href: "#/readiness", title: "Open readiness", "aria-label": "Open readiness", dataset: { proxyAction: "readiness" } }, h("span", { html: icon("shield", 14) }), "Readiness"));
+    h("a", { class: "btn sm ghost", href: "#/changes?tab=candidate", title: "Open candidate review", "aria-label": "Open candidate review", dataset: { proxyAction: "candidate-review" } }, h("span", { html: icon("changes", 14) }), "Candidate review"));
 }
 
 async function openPlanProofDrawer(root, { routeBacked = false } = {}) {
@@ -345,7 +341,6 @@ async function openPlanProofDrawer(root, { routeBacked = false } = {}) {
     footer: [
       h("button", { class: "btn ghost", type: "button", title: "Close proxy plan proof", "aria-label": "Close proxy plan proof", dataset: { proxyAction: "close-plan-proof" }, onclick: closeDrawer }, "Close"),
       h("a", { class: "btn", href: "#/changes?tab=candidate", title: "Open Changes candidate review for Proxy/WAF plan", "aria-label": "Open Changes candidate review for Proxy/WAF plan", dataset: { proxyPlanLink: "changes" } }, h("span", { html: icon("changes", 14) }), "Changes"),
-      h("a", { class: "btn primary", href: "#/readiness", title: "Open Readiness evidence for Proxy/WAF plan", "aria-label": "Open Readiness evidence for Proxy/WAF plan", dataset: { proxyPlanLink: "readiness" } }, h("span", { html: icon("shield", 14) }), "Readiness"),
     ],
   });
 
@@ -534,14 +529,14 @@ export function proxyPreviewInvestigationPacket(model = {}, options = {}) {
   }, { route: options.route || currentProxyRouteHash() });
 }
 
-export function proxyRuntimeReadinessInvestigationPacket(model = {}, options = {}) {
-  const runtimePacket = proxyRuntimeReadinessPacket(model);
+export function proxyRuntimeInvestigationPacket(model = {}, options = {}) {
+  const runtimePacket = proxyRuntimePacket(model);
   return buildInvestigationPacket({
-    kind: "proxy-waf-runtime-readiness",
-    title: "Proxy/WAF runtime-readiness handoff",
+    kind: "proxy-waf-runtime-review",
+    title: "Proxy/WAF runtime review handoff",
     subject: {
-      id: runtimePacket.candidateRevision || "proxy-waf-runtime-readiness",
-      label: "Proxy/WAF listener rollout readiness review",
+      id: runtimePacket.candidateRevision || "proxy-waf-runtime-review",
+      label: "Proxy/WAF listener rollout review",
     },
     summary: {
       readiness: model.readiness || "unknown",
@@ -552,7 +547,7 @@ export function proxyRuntimeReadinessInvestigationPacket(model = {}, options = {
       proxyChanged: Boolean(model.proxyChanged),
       blockerCount: model.blockers?.length || 0,
       functionalProofArtifactCount: runtimePacket.functionalProofArtifacts?.length || 0,
-      custodyBoundary: runtimePacket.workflow || "runtime-readiness review only; not active listener traffic proof or daemon launch",
+      custodyBoundary: runtimePacket.workflow || "runtime review only; not active listener traffic proof or daemon launch",
     },
     evidence: [
       `readiness=${model.readiness || "unknown"}`,
@@ -566,13 +561,15 @@ export function proxyRuntimeReadinessInvestigationPacket(model = {}, options = {
       "workflow_boundary=no active listener traffic proof, WAF enforcement proof, daemon launch, TLS key custody, backend mTLS handshake, HA listener failover, signing custody, or traffic cutover evidence",
     ],
     artifacts: {
-      runtimeReadiness: runtimePacket,
+      runtime: runtimePacket,
       functionalProofArtifacts: runtimePacket.functionalProofArtifacts || [],
       handoffLinks: runtimePacket.handoffLinks || [],
       reviewCommands: runtimePacket.reviewCommands || [],
     },
   }, { route: options.route || currentProxyRouteHash() });
 }
+
+export const proxyRuntimeReadinessInvestigationPacket = proxyRuntimeInvestigationPacket;
 
 function proxyPreviewPacket(model) {
   return {
@@ -607,12 +604,12 @@ function proxyPreviewPacket(model) {
   };
 }
 
-function proxyRuntimeReadinessPacket(model = {}) {
+function proxyRuntimePacket(model = {}) {
   const activeRolloutChecklist = proxyActiveRolloutChecklist(model);
   const functionalProofArtifacts = proxyFunctionalRuntimeProofArtifacts(model);
   return {
-    schemaVersion: model.schemaVersion || "openngfw.proxy.runtime-readiness.v1",
-    workflow: safeRuntimePacketText(model.boundary || "Runtime-readiness review only; not active listener traffic proof or daemon launch."),
+    schemaVersion: model.schemaVersion || "openngfw.proxy.runtime-review.v1",
+    workflow: safeRuntimePacketText(model.boundary || "Runtime review only; not active listener traffic proof or daemon launch."),
     readiness: model.readiness || "unknown",
     label: safeRuntimePacketText(model.label || "unknown", { maxChars: 240, maxLines: 4 }),
     candidateRevision: safeRuntimePacketText(model.candidateRevision || "", { maxChars: 240, maxLines: 4 }),
@@ -696,7 +693,7 @@ function proxyFunctionalRuntimeProofArtifacts(model = {}) {
         ...hashes,
         "launch command must be captured by the rollout owner",
       ].map((entry) => safeRuntimePacketText(entry, { maxChars: 300, maxLines: 3 })),
-      boundary: "No Envoy/Coraza process is started, supervised, reloaded, or stopped by this review.",
+      boundary: "No proxy/WAF process is started, supervised, reloaded, or stopped by this review.",
     },
     {
       id: "proxy-listener-plan",
@@ -743,15 +740,15 @@ function proxyActiveRolloutChecklist(model = {}) {
     {
       id: "listener-health",
       gate: "Listener health",
-      requiredProof: "Per-service host:port listener bind, process owner, readiness probe result, health endpoint response, and timestamped screenshot/log excerpt for every planned virtual service.",
+      requiredProof: "Per-service host:port listener bind, process owner, health probe result, health endpoint response, and timestamped screenshot/log excerpt for every planned virtual service.",
       boundary: "Status context in this drawer is not accepted as listener health proof, process proof, or active daemon evidence.",
       status: runtimeObserved ? "external-proof-required" : "missing-runtime-context",
     },
     {
       id: "envoy-coraza-launch",
-      gate: "Envoy/Coraza launch proof",
-      requiredProof: "Process manager output, rendered config digest, Coraza ruleset digest, and startup log excerpt captured by the rollout owner.",
-      boundary: "Validation proves render-plan metadata only; it does not launch Envoy or Coraza.",
+      gate: "proxy/WAF launch proof",
+      requiredProof: "Process manager output, rendered config digest, WAF ruleset digest, and startup log excerpt captured by the rollout owner.",
+      boundary: "Validation proves render-plan metadata only; it does not launch proxy listener or WAF.",
       status: validationReady ? "external-proof-required" : "blocked-by-plan-validation",
     },
     {
@@ -772,7 +769,7 @@ function proxyActiveRolloutChecklist(model = {}) {
       id: "hardening-boundary",
       gate: "Current hardening boundary",
       requiredProof: "TLS key custody, backend mTLS handshake, WAF supply-chain signing, request-body privacy custody, HA failover evidence, and active daemon lifecycle proof.",
-      boundary: model.boundary || "Runtime-readiness review only; active hardening proof remains outside this drawer.",
+      boundary: model.boundary || "Runtime review only; active hardening proof remains outside this drawer.",
       status: "required-before-active-rollout",
     },
   ];
@@ -855,9 +852,9 @@ function normalizedArtifactSha(artifact = {}) {
   return "";
 }
 
-async function copyRuntimeReadinessPacket(model) {
-  const packet = proxyRuntimeReadinessPacket(model);
-  if (await copyText(JSON.stringify(packet, null, 2))) toast("Runtime packet copied", "Bounded Proxy/WAF runtime-readiness packet copied to clipboard.", "ok");
+async function copyRuntimePacket(model) {
+  const packet = proxyRuntimePacket(model);
+  if (await copyText(JSON.stringify(packet, null, 2))) toast("Runtime packet copied", "Bounded Proxy/WAF runtime review packet copied to clipboard.", "ok");
   else toast("Copy failed", "Export the packet or copy the preview text manually.", "warn");
 }
 
@@ -867,19 +864,19 @@ async function copyPolicyCouplingPacket(model) {
   else toast("Copy failed", "Select the packet preview and copy it manually.", "warn");
 }
 
-function exportRuntimeReadinessPacket(model) {
-  downloadText("proxy-waf-runtime-readiness.json", JSON.stringify(proxyRuntimeReadinessPacket(model), null, 2) + "\n", "application/json");
-  toast("Runtime packet exported", "proxy-waf-runtime-readiness.json", "ok");
+function exportRuntimePacket(model) {
+  downloadText("proxy-waf-runtime-review.json", JSON.stringify(proxyRuntimePacket(model), null, 2) + "\n", "application/json");
+  toast("Runtime packet exported", "proxy-waf-runtime-review.json", "ok");
 }
 
-async function pinRuntimeReadinessPacket(model) {
-  const packet = proxyRuntimeReadinessInvestigationPacket(model);
+async function pinRuntimePacket(model) {
+  const packet = proxyRuntimeInvestigationPacket(model);
   try {
     const serverResult = await appendInvestigationPacketToActiveServerCase(packet, {
       appendEvidence: (id, evidence) => api.addInvestigationCaseEvidence(id, evidence),
     });
     if (serverResult.appended) {
-      toast("Evidence appended", `Proxy/WAF runtime-readiness handoff appended to ${serverResult.activeCaseId}.`, "ok");
+      toast("Evidence appended", `Proxy/WAF runtime review handoff appended to ${serverResult.activeCaseId}.`, "ok");
       return;
     }
   } catch {
@@ -887,7 +884,7 @@ async function pinRuntimeReadinessPacket(model) {
       const result = pinInvestigationPacket(packet);
       toast("Server append unavailable", `${result.toastDetail} Local fallback was used.`, "warn");
     } catch (fallbackError) {
-      toast("Pin failed", fallbackError.message || "Proxy/WAF runtime-readiness handoff could not be pinned.", "bad");
+      toast("Pin failed", fallbackError.message || "Proxy/WAF runtime review handoff could not be pinned.", "bad");
     }
     return;
   }
@@ -895,7 +892,7 @@ async function pinRuntimeReadinessPacket(model) {
     const result = pinInvestigationPacket(packet);
     toast(result.toastTitle, result.toastDetail, "ok");
   } catch (e) {
-    toast("Pin failed", e.message || "Proxy/WAF runtime-readiness handoff could not be pinned.", "bad");
+    toast("Pin failed", e.message || "Proxy/WAF runtime review handoff could not be pinned.", "bad");
   }
 }
 

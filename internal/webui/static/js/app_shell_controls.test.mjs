@@ -45,10 +45,6 @@ for (const action of ["diff", "validate", "discard", "reload", "review-commit"])
   assertControl(appSource, new RegExp(`"data-candidate-bar-action": "${action}"`), `candidate bar ${action}`);
 }
 
-for (const action of ["retry"]) {
-  assertControl(appSource, new RegExp(`"data-runtime-banner-action": "${action}"`), `runtime banner ${action}`);
-}
-
 for (const action of [
   "close-diff",
   "review-commit",

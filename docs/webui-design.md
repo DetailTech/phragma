@@ -49,8 +49,9 @@ records release evidence through the repo-local release tooling.
 
 The WebUI uses the local Phragma design system as the canonical visual style:
 a cold holographic firewall console with a near-black blue canvas, electric
-cyan signal color, angular panel geometry, tight radii, faint HUD grid and
-scanline texture, and sharp evidence-first hierarchy.
+cyan signal color, rounded translucent panel geometry, and evidence-first
+hierarchy. The background should stay clean and atmospheric; avoid global HUD
+grids or scanline textures behind the working UI.
 
 Implementation guardrails:
 
@@ -65,15 +66,16 @@ Implementation guardrails:
   semantics stay explicit: green = allow/healthy/up, amber = warn/reject or
   degraded, red = drop/threat/down, blue = informational, violet =
   unpublished change.
-- Prefer angular, compact panels and dense evidence surfaces over decorative
+- Prefer rounded, compact panels and dense evidence surfaces over decorative
   cards. Every screen should feel like an operational firewall console, not a
   marketing dashboard.
 - Dense operator controls must remain keyboard-operable: modal surfaces trap
   focus and return it to the opener, icon-only controls carry accessible names,
   secondary chips/options get visible focus states, and mobile topbar controls
   keep stable tap targets.
-- Phragma is dark-first. A future light theme may exist, but it must preserve
-  contrast, status semantics, and the evidence-console visual hierarchy.
+- Phragma is dark-first, but light mode is a real bright operational theme:
+  white/blue-gray surfaces, dark readable text, restrained cyan accents, and
+  the same status semantics and evidence-console hierarchy as dark mode.
 
 ## 1. What we learned from the incumbents
 

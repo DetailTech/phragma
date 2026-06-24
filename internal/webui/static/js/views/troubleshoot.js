@@ -992,7 +992,7 @@ function engineHealthRows(status = null) {
   return (Array.isArray(status?.engines) ? status.engines : [])
     .filter((engine) => {
       const text = [field(engine, "name"), field(engine, "role"), field(engine, "detail")].join(" ").toLowerCase();
-      return /suricata|vector|eve|inspection|telemetry/.test(text);
+      return /ids-ips|vector|eve|inspection|telemetry/.test(text);
     })
     .slice(0, 4)
     .map((engine) => ({
@@ -1008,7 +1008,7 @@ function engineHealthWarnings(status = null) {
   return (Array.isArray(status?.warnings) ? status.warnings : [])
     .map((warning) => typeof warning === "string" ? warning : field(warning, "detail") || field(warning, "message") || field(warning, "summary"))
     .map((warning) => String(warning || "").trim())
-    .filter((warning) => /engine|inspection|suricata|vector|runtime|ids|ips|eve/i.test(warning))
+    .filter((warning) => /engine|inspection|ids-ips|vector|runtime|ids|ips|eve/i.test(warning))
     .slice(0, 5);
 }
 

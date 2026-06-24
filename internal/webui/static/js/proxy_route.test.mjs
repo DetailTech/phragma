@@ -32,13 +32,13 @@ assert.match(proxyViewSource, /api\.addInvestigationCaseEvidence\(id, evidence\)
 assert.match(proxyViewSource, /activeInvestigationServerCaseHref\(\)/);
 assert.match(proxyViewSource, /schemaVersion: "openngfw\.proxy\.artifact-preview\.v1"/);
 assert.match(proxyViewSource, /not live listener, WAF enforcement, daemon launch, signing, or traffic cutover evidence/);
-assert.match(proxyViewSource, /dataset: \{ proxyAction: "runtime-readiness" \}/);
-assert.match(proxyViewSource, /dataset: \{ proxyRuntimeReadiness: "loading" \}/);
-assert.match(proxyViewSource, /does not prove active listener traffic, WAF enforcement, release evidence, or Envoy\/Coraza daemon launch/);
+assert.doesNotMatch(proxyViewSource, /proxyAction: "runtime-readiness"/);
+assert.match(proxyViewSource, /dataset: \{ proxyRuntime: "loading" \}/);
+assert.match(proxyViewSource, /does not launch a listener or prove active traffic/);
 assert.match(proxyViewSource, /dataset: \{ proxyRuntimeAction: "pin-packet" \}/);
 assert.match(proxyViewSource, /dataset: \{ proxyRuntimeAction: "copy-packet" \}/);
 assert.match(proxyViewSource, /dataset: \{ proxyRuntimeAction: "export-packet" \}/);
-assert.match(proxyViewSource, /schemaVersion: model\.schemaVersion \|\| "openngfw\.proxy\.runtime-readiness\.v1"/);
+assert.match(proxyViewSource, /schemaVersion: model\.schemaVersion \|\| "openngfw\.proxy\.runtime-review\.v1"/);
 assert.match(proxyViewSource, /Active runtime rollout handoff/);
 assert.match(proxyViewSource, /dataset: \{ proxyActiveRolloutGate: item\.id \}/);
 assert.match(proxyViewSource, /function proxyActiveRolloutChecklist\(model = \{\}\)/);
@@ -133,10 +133,10 @@ assert.equal(unsafeText.includes("/etc/phragma/proxy/key.pem"), false);
 assert.equal(unsafeText.includes("eyJhbGci"), false);
 
 const runtimePacket = proxyRuntimeReadinessInvestigationPacket({
-  schemaVersion: "openngfw.proxy.runtime-readiness.v1",
+  schemaVersion: "openngfw.proxy.runtime-review.v1",
   readiness: "review",
   label: "review required",
-  boundary: "Runtime-readiness review only; does not prove active listener traffic, WAF enforcement, daemon launch, TLS key custody, backend mTLS handshake, HA listener failover, signing custody, or traffic cutover.",
+  boundary: "Runtime review only; does not prove active listener traffic, WAF enforcement, daemon launch, TLS key custody, backend mTLS handshake, HA listener failover, signing custody, or traffic cutover.",
   candidateRevision: "sha256:candidate",
   runningVersion: 9,
   candidateDirty: true,
@@ -156,62 +156,62 @@ const runtimePacket = proxyRuntimeReadinessInvestigationPacket({
       { name: "nftables", engine: "nftables", sizeBytes: 440, sha256: "", hashPresent: false, proxy: false },
     ],
   },
-  blockers: [{ id: "hardening", title: "Production hardening required", detail: "Active Envoy/Coraza traffic rollout remains separate. client_secret=hunter2" }],
-  handoffLinks: [{ label: "Readiness", href: "#/readiness" }],
+  blockers: [{ id: "hardening", title: "Production hardening required", detail: "Active proxy/WAF traffic rollout remains separate. client_secret=hunter2" }],
+  handoffLinks: [{ label: "Changes", href: "#/changes?tab=candidate" }],
   reviewCommands: ["ngfwctl system status --json"],
 }, { route: "#/proxy" });
 
 assert.equal(runtimePacket.schemaVersion, "phragma.investigation.handoff.v1");
-assert.equal(runtimePacket.kind, "proxy-waf-runtime-readiness");
+assert.equal(runtimePacket.kind, "proxy-waf-runtime-review");
 assert.equal(runtimePacket.source.route, "#/proxy");
 assert.equal(runtimePacket.summary.readiness, "review");
 assert.equal(runtimePacket.summary.candidateRevision, "sha256:candidate");
 assert.match(runtimePacket.evidence.join("\n"), /workflow_boundary=no active listener traffic proof/);
 assert.match(runtimePacket.evidence.join("\n"), /functional_proof_artifacts=4/);
-assert.equal(runtimePacket.artifacts.runtimeReadiness.schemaVersion, "openngfw.proxy.runtime-readiness.v1");
-assert.match(runtimePacket.artifacts.runtimeReadiness.redactionBoundary, /No secrets/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.redactionBoundary, /traffic samples/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.workflow, /does not prove active listener traffic/);
+assert.equal(runtimePacket.artifacts.runtime.schemaVersion, "openngfw.proxy.runtime-review.v1");
+assert.match(runtimePacket.artifacts.runtime.redactionBoundary, /No secrets/);
+assert.match(runtimePacket.artifacts.runtime.redactionBoundary, /traffic samples/);
+assert.match(runtimePacket.artifacts.runtime.workflow, /does not prove active listener traffic/);
 assert.equal(runtimePacket.summary.functionalProofArtifactCount, 4);
-assert.deepEqual(runtimePacket.artifacts.runtimeReadiness.functionalProofArtifacts.map((item) => item.id), [
+assert.deepEqual(runtimePacket.artifacts.runtime.functionalProofArtifacts.map((item) => item.id), [
   "proxy-daemon-plan",
   "proxy-listener-plan",
   "proxy-cutover-plan",
   "proxy-rollback-plan",
 ]);
-assert.deepEqual(runtimePacket.artifacts.runtimeReadiness.functionalProofArtifacts.map((item) => item.status), [
+assert.deepEqual(runtimePacket.artifacts.runtime.functionalProofArtifacts.map((item) => item.status), [
   "planned-not-executed",
   "planned-not-executed",
   "planned-not-executed",
   "planned-not-executed",
 ]);
-assert.match(runtimePacket.artifacts.runtimeReadiness.functionalProofArtifacts[0].evidence.join("\n"), /proxyArtifacts=1/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.functionalProofArtifacts[1].boundary, /HA listener proof are not claimed/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.functionalProofArtifacts[2].boundary, /No production route/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.functionalProofArtifacts[3].boundary, /no restore/);
+assert.match(runtimePacket.artifacts.runtime.functionalProofArtifacts[0].evidence.join("\n"), /proxyArtifacts=1/);
+assert.match(runtimePacket.artifacts.runtime.functionalProofArtifacts[1].boundary, /HA listener proof are not claimed/);
+assert.match(runtimePacket.artifacts.runtime.functionalProofArtifacts[2].boundary, /No production route/);
+assert.match(runtimePacket.artifacts.runtime.functionalProofArtifacts[3].boundary, /no restore/);
 assert.equal(runtimePacket.artifacts.functionalProofArtifacts.length, 4);
-assert.deepEqual(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist.map((item) => item.id), [
+assert.deepEqual(runtimePacket.artifacts.runtime.activeRolloutChecklist.map((item) => item.id), [
   "listener-health",
   "envoy-coraza-launch",
   "rollback-controls",
   "traffic-cutover",
   "hardening-boundary",
 ]);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[0].requiredProof, /listener bind/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[0].requiredProof, /health endpoint response/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[0].boundary, /active daemon evidence/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[1].requiredProof, /Coraza ruleset digest/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[2].requiredProof, /restore command/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[2].requiredProof, /artifact manifest hash set/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[3].boundary, /No live packet data/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[3].requiredProof, /cutover timestamp/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[4].requiredProof, /TLS key custody/);
-assert.match(runtimePacket.artifacts.runtimeReadiness.activeRolloutChecklist[4].requiredProof, /active daemon lifecycle proof/);
-assert.equal(runtimePacket.artifacts.runtimeReadiness.artifactManifest.proxyArtifactPresent, true);
-assert.equal(runtimePacket.artifacts.runtimeReadiness.artifactManifest.artifacts[0].sha256, "sha256:" + "b".repeat(64));
-assert.equal(runtimePacket.artifacts.runtimeReadiness.artifactManifest.artifacts[1].hashPresent, false);
-assert.equal(runtimePacket.artifacts.runtimeReadiness.packetBounds.maxBlockers, 20);
-assert.equal(runtimePacket.artifacts.runtimeReadiness.packetBounds.functionalProofArtifacts, 4);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[0].requiredProof, /listener bind/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[0].requiredProof, /health endpoint response/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[0].boundary, /active daemon evidence/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[1].requiredProof, /WAF ruleset digest/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[2].requiredProof, /restore command/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[2].requiredProof, /artifact manifest hash set/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[3].boundary, /No live packet data/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[3].requiredProof, /cutover timestamp/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[4].requiredProof, /TLS key custody/);
+assert.match(runtimePacket.artifacts.runtime.activeRolloutChecklist[4].requiredProof, /active daemon lifecycle proof/);
+assert.equal(runtimePacket.artifacts.runtime.artifactManifest.proxyArtifactPresent, true);
+assert.equal(runtimePacket.artifacts.runtime.artifactManifest.artifacts[0].sha256, "sha256:" + "b".repeat(64));
+assert.equal(runtimePacket.artifacts.runtime.artifactManifest.artifacts[1].hashPresent, false);
+assert.equal(runtimePacket.artifacts.runtime.packetBounds.maxBlockers, 20);
+assert.equal(runtimePacket.artifacts.runtime.packetBounds.functionalProofArtifacts, 4);
 assert.equal(JSON.stringify(runtimePacket).includes("hunter2"), false);
 assert.equal(JSON.stringify(runtimePacket).includes("secret-runtime-token"), false);
-assert.match(JSON.stringify(runtimePacket.artifacts.runtimeReadiness), /\[redacted\]/);
+assert.match(JSON.stringify(runtimePacket.artifacts.runtime), /\[redacted\]/);

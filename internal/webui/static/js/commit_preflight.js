@@ -1,6 +1,5 @@
 // commit_preflight.js - pure commit-review posture decisions.
-// The drawer should use the same production-readiness language as Readiness,
-// but evaluate the staged candidate so operators see host/runtime blockers
+// Evaluate the staged candidate so operators see system preflight blockers
 // before applying a policy to the live firewall.
 
 import {
@@ -93,8 +92,8 @@ export function serverRuntimePreflight(preflight = {}, { operation = "commit" } 
     cls,
     requiresAck,
     detail: String(preflight?.detail || (requiresAck
-      ? `Runtime readiness reported warnings before ${op}.`
-      : `Runtime readiness checks passed for ${op}.`)).trim(),
+      ? `system preflight reported warnings before ${op}.`
+      : `system preflight checks passed for ${op}.`)).trim(),
     items,
     warnings: Array.isArray(preflight?.warnings) ? preflight.warnings.map((item) => String(item).trim()).filter(Boolean) : [],
     source: "server",
@@ -114,10 +113,10 @@ function normalizeRuntimeItem(item = {}) {
   const detail = String(item?.detail || "").trim();
   if (!title && !detail) return null;
   return {
-    id: String(item?.id || title || "runtime-readiness-warning").trim(),
+    id: String(item?.id || title || "system-preflight-warning").trim(),
     level: normalizeRuntimeLevel(item?.level),
     badge: String(item?.badge || "runtime").trim(),
-    title: title || "Runtime readiness warning",
+    title: title || "system preflight warning",
     detail,
     href: String(item?.href || "").trim(),
     command: String(item?.command || "").trim(),
@@ -144,14 +143,13 @@ function commitRoutingRuntimeEvidence(status, draftPolicy, runningPolicy) {
   if (runningEnabled || live.state === "active") return live;
 
   // A candidate that newly enables BGP or OSPF cannot have live neighbor
-  // evidence yet. FRR command prerequisites still appear through engine and
-  // capability readiness; live adjacency evidence becomes a Readiness and
-  // field-evidence gate after commit.
+  // evidence yet. Routing prerequisites are checked before commit; live
+  // adjacency evidence is verified after commit.
   return {
     ...live,
     state: "active",
     active: true,
-    detail: live.detail || "FRR runtime evidence is verified after commit.",
+    detail: live.detail || "routing service runtime evidence is verified after commit.",
   };
 }
 
@@ -160,10 +158,9 @@ function commitFlowtableRuntimeEvidence(flowRuntime, policyDp, runningDp) {
   if (runningDp?.accelerated) return flowRuntime;
   if (flowRuntime?.state === "active") return flowRuntime;
 
-  // A candidate that newly enables flowtable acceleration cannot have live
-  // ruleset counters yet. Host readiness is still checked before commit; live
-  // runtime evidence becomes a Readiness/benchmark gate after the candidate is
-  // applied.
+  // A candidate that newly enables acceleration cannot have live counters yet.
+  // Host prerequisites are still checked before commit; live runtime evidence
+  // is verified after the candidate is applied.
   return {
     ...flowRuntime,
     active: true,

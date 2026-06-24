@@ -196,14 +196,14 @@ export function changeImpact(running = {}, draft = {}) {
 
   if (!equal(running.nat, draft.nat)) addRisk(items, "high", "NAT changed", "Source or destination translation can redirect production traffic.");
   if (!equal(running.staticRoutes, draft.staticRoutes)) addRisk(items, "high", "Static routes changed", "Routing changes can redirect or blackhole traffic.");
-  if (!equal(running.routing, draft.routing)) addRisk(items, "high", "Dynamic routing changed", "FRR/BGP/OSPF behavior can change forwarding paths.");
+  if (!equal(running.routing, draft.routing)) addRisk(items, "high", "Dynamic routing changed", "Dynamic routing behavior can change forwarding paths.");
   if (!equal(running.vpn, draft.vpn)) addRisk(items, "high", "VPN changed", "Tunnel, peer, or cryptographic settings changed.");
   if (!equal(running.network, draft.network)) {
     addRisk(items, "high", "Interface/network changed", "Interface ownership, MTU, offload, or forwarding acceleration changed.");
     if (!running.network?.enableFlowOffload && draft.network?.enableFlowOffload) {
-      addRisk(items, "high", "Flowtable fast path enabled", "Established L3/L4 flows can use nftables flowtable acceleration; this profile must not use IDS/IPS inspection.");
+      addRisk(items, "high", "Forwarding acceleration enabled", "Established L3/L4 flows can use acceleration; this profile must not use IDS/IPS inspection.");
     } else if (running.network?.enableFlowOffload && !draft.network?.enableFlowOffload) {
-      addRisk(items, "medium", "Flowtable fast path disabled", "Forwarding returns to the standard nftables/conntrack path.");
+      addRisk(items, "medium", "Forwarding acceleration disabled", "Forwarding returns to the standard inspected path.");
     }
   }
   if (!equal(running.hostInput, draft.hostInput)) {

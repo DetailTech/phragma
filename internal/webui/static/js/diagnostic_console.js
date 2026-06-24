@@ -6,9 +6,8 @@ import { h, icon, mount } from "./core.js";
 import { api } from "./api.js";
 import { handleFocusTrap, toast } from "./ui.js";
 import * as fmt from "./format.js";
-import { redactReadinessDisclosureText } from "./views/readiness.js";
 
-const ENDPOINTS = ["version", "status", "identity", "releaseAcceptance", "candidateStatus", "sessions", "audit"];
+const ENDPOINTS = ["version", "status", "identity", "candidateStatus", "sessions", "audit"];
 let diagnosticReturnFocus = null;
 
 export function openDiagnosticConsole() {
@@ -51,7 +50,6 @@ export function openDiagnosticConsole() {
       h("footer", { class: "diag-foot" },
         refreshButton,
         copyButton,
-        h("a", { class: "btn sm ghost", href: "#/readiness", title: "Open readiness workbench", "aria-label": "Open readiness workbench", dataset: { action: "readiness", sharedControl: "diagnostic-readiness" }, onclick: close }, h("span", { html: icon("shield", 15) }), "Readiness"),
         h("a", { class: "btn sm ghost", href: "#/traffic?mode=sessions", title: "Open traffic sessions", "aria-label": "Open traffic sessions", dataset: { action: "sessions", sharedControl: "diagnostic-sessions" }, onclick: close }, h("span", { html: icon("traffic", 15) }), "Sessions"))));
   document.body.appendChild(scrim);
   document.addEventListener("keydown", diagnosticKeydown);
@@ -92,7 +90,6 @@ export async function collectDiagnosticSnapshot() {
     api.version(),
     api.status(),
     api.identity(),
-    api.releaseAcceptanceStatus(),
     api.candidateStatus(),
     api.sessions({ limit: 8 }),
     api.audit({ limit: 8 }),
@@ -107,7 +104,6 @@ export function summarizeDiagnosticSnapshot(results, now = new Date()) {
   const version = settledValue(results.version) || {};
   const status = settledValue(results.status) || {};
   const identity = settledValue(results.identity) || {};
-  const releaseAcceptance = settledValue(results.releaseAcceptance) || {};
   const candidateStatus = settledValue(results.candidateStatus) || {};
   const sessionsData = settledValue(results.sessions) || {};
   const auditData = settledValue(results.audit) || {};
@@ -151,10 +147,6 @@ export function summarizeDiagnosticSnapshot(results, now = new Date()) {
       {
         name: "ngfwctl status # routing-vpn",
         rows: routingVpnRows(status, statusAvailable),
-      },
-      {
-        name: "ngfwctl system release-acceptance-status --json",
-        rows: releaseAcceptanceRows(releaseAcceptance, results.releaseAcceptance?.status === "fulfilled"),
       },
       {
         name: "ngfwctl policy status --json",
@@ -264,25 +256,6 @@ function auditSummaryRows(entries = []) {
   ];
 }
 
-function releaseAcceptanceRows(status, available) {
-  if (!available) return ["release acceptance endpoint unavailable"];
-  const summary = status.summary || {};
-  const count = (snake, camel) => Number(summary?.[snake] ?? summary?.[camel] ?? 0);
-  const state = safeDiagnosticToken(status.state || (status.ready ? "ready" : "unknown"));
-  const manifest = status.manifestPresent ?? status.manifest_present ? "present" : "missing";
-  const problems = Array.isArray(status.problems) ? status.problems.length : 0;
-  const rows = [
-    `state ${state} · ready ${yesNo(Boolean(status.ready))} · manifest ${manifest}`,
-    `checks passed ${count("passed", "passed")} · recorded ${count("recorded", "recorded")} · missing ${count("missing", "missing")} · invalid ${count("invalid", "invalid")} · todo ${count("todo", "todo")} · n/a ${count("not_applicable", "notApplicable")}`,
-    `problem count ${problems}`,
-    "release paths, problem text, and commands omitted from summary snapshot; open Readiness for redacted gate-level detail",
-  ];
-  if (state === "evidence-pending-manifest") {
-    rows.push("manifest assembly pending · recorded evidence is not accepted until the release manifest is assembled and verified");
-  }
-  return rows;
-}
-
 function routingVpnRows(status, available) {
   if (!available) return ["routing and VPN status endpoint unavailable"];
   const frr = status.routing?.frr || {};
@@ -325,7 +298,7 @@ function warningSummaryRows(warnings = []) {
   const severities = countBy(warnings, (warning) => safeDiagnosticToken(warning.severity || "warning"));
   return [
     `${warnings.length} runtime warning(s) · severities ${formatCounts(severities)}`,
-    "warning text and action detail omitted from summary snapshot; open Readiness or Logs for operator-scoped detail",
+    "warning text and action detail omitted from summary snapshot; open Logs for operator-scoped detail",
   ];
 }
 
@@ -354,11 +327,34 @@ function safeDiagnosticToken(value = "") {
 }
 
 function safeDiagnosticText(value = "") {
-  return redactReadinessDisclosureText(String(value ?? ""))
+  return redactDiagnosticDisclosureText(String(value ?? ""))
     .replace(/[\r\n\t]+/g, " ")
     .replace(/\s{2,}/g, " ")
     .trim()
     .slice(0, 220) || "request failed";
+}
+
+function redactDiagnosticDisclosureText(value = "") {
+  return String(value ?? "")
+    .replace(/(^|[\s"'({=,;])\/(?:var\/lib|var\/log(?:\/openngfw)?|etc\/(?:openngfw|phragma)|tmp|private\/tmp|var\/folders|private\/var\/folders|home\/[^'"\s,;}]+|Users\/[^'"\s,;}]+|opt\/[^'"\s,;}]+|data\/[^'"\s,;}]+)[^'"\s,;}]*/gi, "$1[server-local path redacted]")
+    .replace(/\b(token|password|secret|authorization|cookie|api[-_ ]?key|private[-_ ]?key|psk)\s*[:=]\s*[^,\s;}]*/gi, "$1=[redacted]")
+    .replace(/https?:\/\/[^\s"'<>]+/gi, (raw) => redactDiagnosticURL(raw));
+}
+
+function redactDiagnosticURL(raw) {
+  try {
+    const parsed = new URL(raw);
+    if (parsed.username || parsed.password) {
+      parsed.username = "";
+      parsed.password = "";
+    }
+    for (const key of Array.from(parsed.searchParams.keys())) {
+      if (/token|password|secret|authorization|cookie|api[-_]?key|private[-_]?key|psk/i.test(key)) parsed.searchParams.set(key, "[redacted]");
+    }
+    return parsed.toString();
+  } catch {
+    return "[url redacted]";
+  }
 }
 
 function yesNo(value) {

@@ -21,11 +21,8 @@ assert.match(changesSource, /function candidatePreservationActions/);
 assert.match(changesSource, /candidatePreservationPacket: "true"/);
 assert.match(changesSource, /function strictUiEvidencePanel/);
 assert.match(changesSource, /changesStrictUiEvidence/);
-assert.match(changesSource, /changesStrictEvidenceAction: "release-acceptance"/);
-assert.match(changesSource, /changesStrictEvidenceAction: "runtime-field-evidence"/);
 assert.match(changesSource, /Field evidence claim/);
 assert.match(changesSource, /not claimed by Changes/);
-assert.match(changesSource, /api\.releaseAcceptanceStatus\(\)/);
 assert.match(changesSource, /releaseAcceptance, strictEvidence/);
 assert.match(changesSource, /candidatePreservationAction: "pin"/);
 assert.match(changesSource, /candidatePreservationAction: "copy"/);
@@ -67,7 +64,6 @@ assert.match(changesSource, /snapshotRestoreReviewPacket/);
 assert.match(changesSource, /snapshotRestoreAction: "copy-packet"/);
 assert.match(changesSource, /snapshotRestoreAction: "export-packet"/);
 assert.match(changesSource, /changesAction: "copy-snapshot-review-link"/);
-assert.match(changesSource, /changesLink: "readiness"/);
 {
   const restorePreviewSource = changesSource.slice(
     changesSource.indexOf("function openSnapshotRestorePreview"),
@@ -84,19 +80,18 @@ assert.match(changesSource, /title: `Compare version \$\{v\.id\} to running`/);
 assert.match(changesSource, /title: `Download version \$\{v\.id\} as JSON`/);
 assert.match(changesSource, /title: `Open rollback review for version \$\{v\.id\}`/);
 assert.match(changesSource, /governanceApprovalDrawer: "true"/);
-assert.match(changesSource, /import \{ readinessActionHash \}/);
+assert.doesNotMatch(changesSource, /readinessActionHash/);
 assert.match(changesSource, /function runtimePreflightActionRow/);
-assert.match(changesSource, /Open this runtime blocker in Readiness/);
+assert.doesNotMatch(changesSource, /Open this runtime blocker in Readiness/);
 assert.match(changesSource, /runtimePreflightActionRow\(it, "candidate"\)/);
 assert.match(changesSource, /runtimePreflightActionRow\(it, "rollback"\)/);
-assert.match(changesSource, /api\.runtimeReadinessPreflight\(\{ targetPolicy: session\.draft, runningPolicy: session\.running, operation: "commit" \}\)/);
-assert.match(changesSource, /api\.runtimeReadinessPreflight\(\{ targetPolicy: target, runningPolicy: session\.running, operation: "rollback" \}\)/);
+assert.match(changesSource, /commitRuntimePreflight\(\{/);
 assert.match(candidateReviewSource, /Rollback re-applies/);
 assert.match(candidateReviewSource, /candidate will be cleared/);
 assert.match(candidateReviewSource, /Strict UI apply is blocking direct apply fallback/);
 assert.match(candidateReviewSource, /WEBUI_SMOKE_REQUIRE_CHANGES_UI_APPLY=1 make webui-enterprise-smoke/);
 assert.match(changesSource, /preflight: runtimePreflight/);
-assert.match(appSource, /api\.runtimeReadinessPreflight\(\{ targetPolicy: session\.draft, runningPolicy: session\.running, operation: "commit" \}\)/);
+assert.match(appSource, /commitRuntimePreflight\(\{/);
 assert.match(appSource, /preflight: runtimePreflight/);
 assert.match(changesSource, /impact-list impact-list-scroll/);
 assert.match(validationSource, /impact-list impact-list-scroll/);
@@ -209,9 +204,9 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
   assert.equal(model.operation, "commit");
   assert.equal(model.state, "ready");
   assert.equal(model.canClickUiApply, true);
-  assert.equal(model.release.ready, true);
+  assert.equal(model.release.ready, false);
   assert.equal(model.release.openCount, 0);
-  assert.equal(model.fieldEvidenceHref, "#/readiness?packet=e2e-install");
+  assert.equal(model.fieldEvidenceHref, "");
   assert.match(model.detail, /not field certification/);
   assert.ok(model.handoff.some((line) => /not treat this panel as ready-runtime field evidence/.test(line)));
 }
@@ -232,8 +227,8 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
   assert.equal(model.state, "review");
   assert.equal(model.canClickUiApply, true);
   assert.equal(model.runtimeRequiresAck, true);
-  assert.equal(model.release.openCount, 11);
-  assert.ok(model.blockers.some((item) => /release evidence/.test(item)));
+  assert.equal(model.release.openCount, 0);
+  assert.doesNotMatch(model.blockers.join("\n"), /release evidence/);
 }
 
 {
@@ -246,7 +241,7 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
   assert.equal(model.canClickUiApply, false);
   assert.equal(model.release.available, false);
   assert.ok(model.blockers.includes("validation failed"));
-  assert.ok(model.blockers.includes("runtime readiness blocks UI apply"));
+  assert.ok(model.blockers.includes("system preflight blocks UI apply"));
 }
 
 {
@@ -425,8 +420,8 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
   assert.equal(packet.summary.validation, "passed");
   assert.equal(packet.summary.runtimeRequiresAck, true);
   assert.equal(packet.summary.strictUiApply, "strict evidence review");
-  assert.equal(packet.summary.releaseAcceptance, "review-needed");
-  assert.equal(packet.summary.releaseOpenItems, 10);
+  assert.equal(packet.summary.releaseAcceptance, "unknown");
+  assert.equal(packet.summary.releaseOpenItems, 0);
   assert.equal(packet.summary.diffChanged, true);
   assert.match(packet.summary.status, /dirty; 2 pending changes; running v9/);
   assert.match(packet.summary.custody, /no policy mutation/);
@@ -435,8 +430,8 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
   assert.equal(packet.artifacts.validation.warningCount, 1);
   assert.equal(packet.artifacts.runtime.items[0].title, "FRR reload");
   assert.equal(packet.artifacts.strictUiEvidence.fieldEvidenceClaim, "not-claimed-by-changes");
-  assert.equal(packet.artifacts.strictUiEvidence.release.openCount, 10);
-  assert.equal(packet.artifacts.strictUiEvidence.readinessHref, "#/readiness?drawer=release-acceptance");
+  assert.equal(packet.artifacts.strictUiEvidence.release.openCount, 0);
+  assert.equal(packet.artifacts.strictUiEvidence.readinessHref, undefined);
   assert.equal(packet.artifacts.impact.items[0].level, "high");
   assert.equal(packet.artifacts.diff.preview[0], "+ allow-web");
   assert.ok(packet.evidence.some((line) => /operator decision/.test(line)));
@@ -477,7 +472,7 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
   });
   assert.equal(model.state, "approval-required");
   assert.equal(model.ticketRequired, true);
-  assert.equal(model.commitReadiness, "requires review");
+  assert.equal(model.commitReadiness, undefined);
   assert.ok(model.reviewerRoles.includes("Security change approver"));
   assert.ok(model.reviewerRoles.includes("Platform/runtime owner"));
   assert.ok(model.riskFactors.includes("high policy impact"));

@@ -96,7 +96,7 @@ const assertSourceIncludes = (snippet) => {
   });
   assertSourceIncludes('proofRow("Route table", route.table || "-")');
   assertSourceIncludes('proofRow("VRF/interface identity", pathProofInterfaceIdentity(route, proof.evidence || []))');
-  assertSourceIncludes('proofRow("FRR route proof", pathProofFrrEvidence(route, proof.evidence || []))');
+  assertSourceIncludes('proofRow("routing service route proof", pathProofFrrEvidence(route, proof.evidence || []))');
   assertSourceIncludes('proofRow("Masquerade egress", pathProofMasqueradeEvidence(route, proof.evidence || []))');
   assertSourceIncludes('proofRow("VPN correlation", vpn.correlation || "-")');
   assertSourceIncludes('proofRow("Mismatches", pathProofMismatchText(proof.mismatches || []) || "none")');
@@ -237,7 +237,7 @@ const assertSourceIncludes = (snippet) => {
   assert.equal(plan.checklist.find((item) => item.key === "strongswan").state, "required");
   assert.equal(plan.checklist.find((item) => item.key === "xfrm").state, "required");
   assert.match(plan.checklist.find((item) => item.key === "strongswan").detail, /traffic selectors/);
-  assert.match(plan.acknowledgementRequirements.find((item) => item.key === "secret-redaction").text, /IPsec\/strongSwan key paths/);
+  assert.match(plan.acknowledgementRequirements.find((item) => item.key === "secret-redaction").text, /IPsec\/IPsec service key paths/);
   assert.match(networkPathActiveProofPlanText(plan), /No passive mismatches were reported/);
 }
 
@@ -685,7 +685,7 @@ const assertSourceIncludes = (snippet) => {
   });
   const checklist = vpnFieldProofChecklist(ipsec, [{ destination: "10.20.0.0/24" }]);
   assert.equal(checklist.find((item) => item.key === "candidate-route").state, "ready");
-  assert.match(checklist.find((item) => item.key === "candidate-route").detail, /Confirm the committed kernel route or FRR route separately/);
+  assert.match(checklist.find((item) => item.key === "candidate-route").detail, /Confirm the committed kernel route or routing service route separately/);
   assert.equal(checklist.find((item) => item.key === "route-table-vrf").state, "operator-check");
   assert.match(checklist.find((item) => item.key === "route-table-vrf").detail, /route table, preferred source, VRF\/network namespace/);
   assert.equal(checklist.find((item) => item.key === "frr-rib-fib").state, "operator-check");
@@ -700,7 +700,7 @@ const assertSourceIncludes = (snippet) => {
   const note = vpnFieldProofChecklistText(checklist);
   assert.match(note, /collection handoff only/);
   assert.match(note, /does not claim field evidence/);
-  assert.match(note, /route-table, VRF\/interface, FRR, XFRM, WireGuard or strongSwan proof separately/);
+  assert.match(note, /route-table, VRF\/interface, routing service, XFRM, WireGuard or IPsec service proof separately/);
   assert.match(note, /remote attestation remains out of band/);
   assert.match(note, /raw command output, captures, local paths, tokens, and secrets stay out/);
   assert.equal(note.includes("/etc/phragma/secrets/site-b.conf"), false);

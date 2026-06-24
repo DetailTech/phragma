@@ -75,7 +75,7 @@ export async function render(ctx = {}) {
 
 function fleetView(model) {
   return h("div", { dataset: { fleetWorkspace: "true" } },
-    pageHead("Fleet operations", "Appliance posture, policy drift, content package state, and template readiness.",
+    pageHead("Fleet operations", "Appliance posture, policy drift, content package state, and templates.",
       h("button", { class: "btn", type: "button", title: "Open Fleet API and CLI context", "aria-label": "Open Fleet API and CLI context", dataset: { fleetAction: "api-cli" }, onclick: () => openAutomationContext("#/fleet") },
         h("span", { html: icon("terminal", 16) }), "API / CLI")),
     summaryBand(model),
@@ -95,8 +95,7 @@ function summaryBand(model) {
   return h("div", { class: "runtime-grid", dataset: { fleetSummary: "true" } },
     metric("Managed nodes", String(model.nodes.length), model.scopeLabel, "info"),
     metric("Policy drift", model.drift.label, model.drift.detail, model.drift.tone),
-    metric("Content posture", model.content.label, model.content.detail, model.content.tone),
-    metric("Release gates", model.release.label, model.release.detail, model.release.tone));
+    metric("Content posture", model.content.label, model.content.detail, model.content.tone));
 }
 
 function boundaryCard(model) {
@@ -188,7 +187,7 @@ function templateCard(model) {
       item.href ? h("a", { class: "btn sm ghost", href: item.href, title: `${item.action}: ${item.label}`, "aria-label": `${item.action}: ${item.label}`, dataset: { fleetTemplateAction: "open", fleetTemplateKey: item.key } }, h("span", { html: icon("arrowRight", 14) }), item.action) : h("span", { class: "muted" }, item.action))));
   return card(h("h2", {}, "Template and drift"),
     h("div", { class: "split-line", style: { marginBottom: "10px" } },
-      h("div", { class: "note" }, "Template posture is derived from running policy, candidate state, content packages, release gates, and the local Fleet template API; staging still uses the normal candidate/import workflow."),
+      h("div", { class: "note" }, "Template posture is derived from running policy, candidate state, content packages, and the local Fleet template API; staging still uses the normal candidate/import workflow."),
       h("button", {
         class: "btn sm",
         type: "button",
@@ -1105,7 +1104,7 @@ function orchestrationNodeModel(node = {}) {
     reason: reasons.join("; "),
     positiveEvidence: evidence.positiveEvidence,
     missingEvidence: evidence.missingEvidence,
-    previewAction: eligible ? "validate + apply-preview only" : "hold; collect readiness evidence",
+    previewAction: eligible ? "validate + apply-preview only" : "hold; review appliance evidence",
   };
 }
 
@@ -1121,13 +1120,13 @@ export function fleetNodeEvidenceModel(node = {}) {
   if (hasPolicy) positiveEvidence.push(`running policy ${policyVersion}`);
   else missingEvidence.push("running policy version unknown");
   if (runtimeTone === "ok") positiveEvidence.push(`runtime ${runtime || "ready"}`);
-  else missingEvidence.push("runtime readiness needs positive evidence");
+  else missingEvidence.push("system preflight needs positive evidence");
   if (role === "standalone") {
     positiveEvidence.push("standalone boundary acknowledged");
   } else if (haTone === "ok" || node.haReady === true) {
-    positiveEvidence.push("HA readiness evidence ready");
+    positiveEvidence.push("HA evidence ready");
   } else {
-    missingEvidence.push("HA/readiness evidence needs review");
+    missingEvidence.push("HA evidence needs review");
   }
   return {
     ready: missingEvidence.length === 0,
@@ -1164,12 +1163,11 @@ function orchestrationBlockers({ nodes = [], selectedTemplate = {}, candidateDir
   const blockers = [];
   if (!selectedTemplate.serverBacked) blockers.push(orchestrationBlocker("template", "template", "No server-backed template selected", "Save or load a local Fleet template draft before treating this as a distributable preview packet.", "warn"));
   if (candidateDirty) blockers.push(orchestrationBlocker("candidate", "candidate", "Candidate drift blocks clean fanout planning", `${candidateStatus.changeCount || "Existing"} staged change${candidateStatus.changeCount === 1 ? "" : "s"} must be reviewed before another template is staged.`, "warn"));
-  if (release.tone !== "ok") blockers.push(orchestrationBlocker("release", release.label || "release", "Release readiness blocks production orchestration claims", release.detail || "Release acceptance evidence is incomplete.", release.tone || "warn"));
-  if (content.tone === "bad" || content.tone === "warn") blockers.push(orchestrationBlocker("content", content.label || "content", "Content readiness blocks rollout confidence", content.detail || "Content package evidence needs review.", content.tone));
+  if (content.tone === "bad" || content.tone === "warn") blockers.push(orchestrationBlocker("content", content.label || "content", "Content package review needed", content.detail || "Content package evidence needs review.", content.tone));
   if (nodes.length < 2) blockers.push(orchestrationBlocker("inventory", "inventory", "No durable multi-node inventory", "Only the connected appliance is visible, so Fleet can model fanout shape but cannot prove distributed eligibility.", "info"));
   const blockedNodes = nodes.filter((node) => !node.eligible);
   if (blockedNodes.length) blockers.push(orchestrationBlocker("nodes", "nodes", "One or more nodes are not eligible", blockedNodes.map((node) => `${node.label}: ${node.reason}`).join("; "), "warn"));
-  if (ha && Object.keys(ha).length && haBoundaryFacts(ha).tone === "warn") blockers.push(orchestrationBlocker("ha", "HA", "HA evidence is not a traffic-control authorization", "Review HA readiness before any failover, fencing, VIP, or conntrack claim.", "warn"));
+  if (ha && Object.keys(ha).length && haBoundaryFacts(ha).tone === "warn") blockers.push(orchestrationBlocker("ha", "HA", "HA evidence is not a traffic-control authorization", "Review HA state before any failover, fencing, VIP, or connection-state claim.", "warn"));
   return blockers;
 }
 
@@ -1292,14 +1290,8 @@ function templateDrillthroughContext(key, { release }) {
   const context = [];
   if (key === "ha") {
     context.push(
-      { key: "ha-route", label: "HA cockpit", value: "#/readiness?drawer=ha-cockpit", detail: "Read-only HA readiness and recovery drill-through" },
+      { key: "ha-route", label: "HA", value: "#/fleet", detail: "Read-only HA and recovery context" },
       { key: "ha-cli", label: "CLI HA status", value: "ngfwctl system ha status", detail: "Focused local HA evidence handoff" },
-    );
-  }
-  if (key === "release" || release.tone !== "ok") {
-    context.push(
-      { key: "release-route", label: "Release packet", value: "#/readiness?drawer=release-acceptance", detail: "Route-backed release acceptance drill-through" },
-      { key: "release-cli", label: "CLI release status", value: "ngfwctl system release-acceptance-status", detail: "Headless release gate review" },
     );
   }
   return context;
@@ -1308,10 +1300,9 @@ function templateDrillthroughContext(key, { release }) {
 function templateIntent(key) {
   const intents = {
     "edge-policy": { title: "edge firewall baseline", detail: "Zones, ordered security rules, NAT publish/egress posture, and host-input guardrails." },
-    content: { title: "content readiness baseline", detail: "App-ID, Threat-ID, and feed packages ready with rollback evidence before rollout." },
+    content: { title: "content package baseline", detail: "App-ID, Threat-ID, and feed packages ready with rollback evidence before rollout." },
     "routing-vpn": { title: "branch routing template", detail: "Static route, dynamic routing, and VPN posture ready for candidate review." },
-    ha: { title: "HA readiness template", detail: "Local role, peer evidence, and recovery gate visibility before any operational failover claim." },
-    release: { title: "release evidence template", detail: "Release gates complete before treating a staged template as production-ready." },
+    ha: { title: "HA template", detail: "Local role, peer evidence, and recovery visibility before any operational failover claim." },
   };
   return intents[key] || { title: "local template intent", detail: "Example template intent compared with current local appliance posture." };
 }
@@ -1324,7 +1315,7 @@ function templatePreviewChanges(key, posture, { release, content, candidateDirty
     if (!posture.nat) changes.push(previewChange("nat", "review", "Review NAT intent", "No NAT entries are visible; stage SNAT/DNAT only through candidate import or editors.", "info"));
     if (!posture.hostInput) changes.push(previewChange("host-input", "review", "Review management access", "Host-input rules are not visible in the running policy posture.", "info"));
   } else if (key === "content") {
-    if (content.tone !== "ok") changes.push(previewChange("content", content.label, "Resolve content readiness", content.detail, content.tone));
+    if (content.tone !== "ok") changes.push(previewChange("content", content.label, "Resolve content package review", content.detail, content.tone));
   } else if (key === "routing-vpn") {
     if (!posture.staticRoutes && !posture.bgp && !posture.ospf) changes.push(previewChange("routing", "review", "No routing template posture visible", "Static routes, BGP, or OSPF would need candidate review before import.", "info"));
     if (!posture.vpn) changes.push(previewChange("vpn", "optional", "No VPN entries visible", "VPN tunnel intent remains an example until staged through Routing & VPN.", "neutral"));
@@ -1332,8 +1323,6 @@ function templatePreviewChanges(key, posture, { release, content, candidateDirty
     const haBoundary = haBoundaryFacts(ha, posture.runningVersion);
     changes.push(previewChange("ha-boundary", haBoundary.label, haBoundary.title, haBoundary.detail, haBoundary.tone));
     if (!posture.haVisible) changes.push(previewChange("ha", "local", "HA evidence is local-only", "No peer inventory is reported by this control plane.", "neutral"));
-  } else if (key === "release") {
-    if (release.tone !== "ok") changes.push(previewChange("release", release.label, "Close release evidence gates", release.detail, release.tone));
   }
   if (candidateDirty) changes.unshift(previewChange("candidate", "staged", "Candidate already has pending changes", "Review the existing candidate before importing another template intent.", "warn"));
   if (!changes.length) changes.push(previewChange("aligned", "aligned", "No immediate local delta", "The loaded posture signals satisfy this example intent at preview depth.", "ok"));
@@ -1347,7 +1336,7 @@ function boundaryModels({ ha, release, candidateDirty }) {
       key: "authority",
       label: "local",
       title: "Connected appliance is the authority boundary",
-      detail: "Fleet summarizes the current management API, running policy, candidate state, content posture, and release gates for this appliance only. It is not durable fleet inventory or peer orchestration.",
+      detail: "Fleet summarizes the current management API, running policy, candidate state, and content posture for this appliance only. It is not durable fleet inventory or peer orchestration.",
       tone: "info",
       href: "#/fleet",
       action: "Stay here",
@@ -1367,17 +1356,8 @@ function boundaryModels({ ha, release, candidateDirty }) {
       title: haFacts.title,
       detail: haFacts.detail,
       tone: haFacts.tone,
-      href: "#/readiness?drawer=ha-cockpit",
+      href: "#/fleet",
       action: "Open HA",
-    },
-    {
-      key: "release",
-      label: release.label,
-      title: release.tone === "ok" ? "Release gates are available for drill-through" : "Release gates remain the production readiness boundary",
-      detail: release.tone === "ok" ? "Fleet links to the release acceptance packet but does not record durable release evidence." : release.detail,
-      tone: release.tone,
-      href: "#/readiness?drawer=release-acceptance",
-      action: "Open gates",
     },
   ];
 }
@@ -1402,15 +1382,15 @@ function haBoundaryFacts(ha = {}, runningVersion = 0) {
   if (synchronized) {
     return {
       label: "evidence",
-      title: "HA readiness evidence is visible, not traffic authority",
-      detail: "Policy/role evidence can drill into Readiness, but Fleet still does not move traffic, fence peers, elect nodes, or synchronize connection state." + evidenceSuffix,
+      title: "HA evidence is visible, not traffic authority",
+      detail: "Policy/role evidence is visible, but Fleet still does not move traffic, fence peers, elect nodes, or synchronize connection state." + evidenceSuffix,
       tone: "info",
     };
   }
   return {
     label: "review",
     title: "HA peer evidence needs review before failover claims",
-    detail: "Visible HA status is not synchronized enough for an operator failover claim; inspect Readiness before any traffic-control procedure." + evidenceSuffix,
+    detail: "Visible HA status is not synchronized enough for an operator failover claim; inspect  before any traffic-control procedure." + evidenceSuffix,
     tone: "warn",
   };
 }
@@ -1474,7 +1454,6 @@ function driftModel({ candidateDirty, candidateStatus, runningVersion, release, 
     });
   }
   if (content.tone !== "ok") items.push({ key: "content", label: "content", title: "Content package review needed", detail: content.detail, tone: content.tone, href: "#/intel", action: "Review content" });
-  if (release.tone !== "ok") items.push({ key: "release", label: "release", title: "Release gates are not complete", detail: release.detail, tone: release.tone, href: "#/readiness?drawer=release-acceptance", action: "Open gates" });
   const worst = worstTone(items.map((item) => item.tone));
   return {
     label: candidateDirty ? "candidate drift" : worst === "ok" ? "aligned" : "review",
@@ -1544,19 +1523,9 @@ function templateModels({ policy, draft, candidateDirty, release, content, ha, a
       detail: ha && Object.keys(ha).length ? "HA status is visible for this node." : "No peer inventory reported by this control plane.",
       state: ha && Object.keys(ha).length ? "visible" : "local only",
       tone: ha && Object.keys(ha).length ? "info" : "neutral",
-      scope: "active/passive readiness",
-      href: "#/readiness?drawer=ha-cockpit",
+      scope: "active/passive",
+      href: "#/fleet",
       action: "Open HA",
-    },
-    {
-      key: "release",
-      label: "Release evidence template",
-      detail: release.detail,
-      state: release.label,
-      tone: release.tone,
-      scope: "release gates",
-      href: "#/readiness?drawer=release-acceptance",
-      action: "Open gates",
     },
   ];
   return [
@@ -1588,8 +1557,7 @@ function actionModels({ drift, release, content, candidateDirty }) {
   const actions = [];
   if (candidateDirty) actions.push({ key: "candidate", badge: "candidate", title: "Review staged candidate", detail: "Validate and compare the candidate before promoting it to the running appliance.", tone: "warn", href: "#/changes?tab=candidate", action: "Review" });
   if (content.tone !== "ok") actions.push({ key: "content", badge: "content", title: "Resolve content posture", detail: content.detail, tone: content.tone, href: "#/intel", action: "Open Intel" });
-  if (release.tone !== "ok") actions.push({ key: "release", badge: "release", title: "Close release evidence gates", detail: release.detail, tone: release.tone, href: "#/readiness?drawer=release-acceptance", action: "Open gates" });
-  if (!actions.length && drift.tone === "ok") actions.push({ key: "monitor", badge: "monitor", title: "Monitor appliance posture", detail: "No immediate fleet action is pending for the managed appliance.", tone: "ok", href: "#/readiness", action: "Readiness" });
+  if (!actions.length && drift.tone === "ok") actions.push({ key: "monitor", badge: "monitor", title: "Monitor appliance posture", detail: "No immediate fleet action is pending for the managed appliance.", tone: "ok", href: "#/", action: "" });
   return actions;
 }
 
@@ -1597,8 +1565,7 @@ function evidenceModels({ errors, release, content, candidateDirty, apiTemplates
   return [
     { key: "status", label: "Runtime and HA posture", detail: "System status and HA status shape the managed-node row.", source: "/v1/system/status, /v1/system/ha/status", state: errors.length ? "partial" : "loaded", tone: errors.length ? "warn" : "ok" },
     { key: "policy", label: "Policy drift", detail: "Running policy, candidate policy, and candidate status drive template drift.", source: "/v1/policy, /v1/candidate/status", state: candidateDirty ? "drift" : "aligned", tone: candidateDirty ? "warn" : "ok" },
-    { key: "content", label: "Content readiness", detail: content.detail, source: "/v1/intel/feeds, /v1/intel/content/packages", state: content.label, tone: content.tone },
-    { key: "release", label: "Release gates", detail: release.detail, source: "/v1/system/release-acceptance/status", state: release.label, tone: release.tone },
+    { key: "content", label: "Content packages", detail: content.detail, source: "/v1/intel/feeds, /v1/intel/content/packages", state: content.label, tone: content.tone },
     { key: "fleet-api", label: "Fleet inventory and templates", detail: `${apiTemplates.length} local template draft${apiTemplates.length === 1 ? "" : "s"} loaded from the Fleet API.`, source: "/v1/fleet/nodes, /v1/fleet/templates", state: errors.some((item) => /fleet/i.test(item)) ? "partial" : "loaded", tone: errors.some((item) => /fleet/i.test(item)) ? "warn" : "ok" },
     { key: "fleet-results", label: "Fleet apply result custody", detail: `${applyResults.length} retained apply result${applyResults.length === 1 ? "" : "s"} loaded.`, source: "/v1/fleet/template-results", state: applyResults.length ? "retained" : "empty", tone: applyResults.length ? "info" : "neutral" },
   ];

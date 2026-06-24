@@ -3,7 +3,6 @@
 // controld.
 
 import { h, icon, clear } from "../core.js";
-import { api } from "../api.js";
 import { openAutomationContext } from "../automation_context.js";
 import { activeInvestigationServerCaseHref, appendInvestigationPacketToActiveServerCase, pinInvestigationPacket } from "../investigation_case.js";
 import { buildInvestigationPacket, investigationPacketFilename, investigationPacketJson, investigationPacketText } from "../investigation_packet.js";
@@ -24,7 +23,6 @@ export async function render() {
   let compareRaw = "";
   let compareRunName = "";
   let compareResult = null;
-  let releaseAcceptanceStatus = { unavailable: true, detail: "release acceptance status has not loaded yet" };
   let strict = false;
 
   const paint = () => {
@@ -34,7 +32,6 @@ export async function render() {
         h("span", { html: icon("terminal", 16) }), "API / CLI"),
     ]));
     root.appendChild(collectionRunbookCard());
-    root.appendChild(publishableClaimWorkbench(result, strict, releaseAcceptanceStatus, compareResult));
     root.appendChild(h("div", { class: "perf-layout" },
       inputCard(),
       resultCard(result, strict)));
@@ -93,16 +90,16 @@ export async function render() {
       paint();
       toast("Status evidence loaded", f.name, "ok");
     } });
-    const nftFile = h("input", { class: "input", type: "file", accept: ".txt,text/plain", dataset: { perfFile: "nft" }, onchange: async (e) => {
+    const nftFile = h("input", { class: "input", type: "file", accept: ".txt,text/plain", dataset: { perfFile: "packet-filter" }, onchange: async (e) => {
       const f = e.target.files?.[0];
       if (!f) return;
-      const sizeProblem = artifactSizeProblem(f, "nft");
-      if (sizeProblem) { toast("nftables evidence not loaded", sizeProblem, "bad"); return; }
+      const sizeProblem = artifactSizeProblem(f, "packet-filter");
+      if (sizeProblem) { toast("packet filter evidence not loaded", sizeProblem, "bad"); return; }
       nftRaw = await f.text();
       nftName = f.name;
       if (raw.trim()) result = validateSummaryText(raw, { strict, iperfText: iperfRaw, statusText: statusRaw, nftText: nftRaw });
       paint();
-      toast("nftables evidence loaded", f.name, "ok");
+      toast("packet filter evidence loaded", f.name, "ok");
     } });
     return card(h("h2", {}, "Benchmark summary"),
       h("div", { class: "perf-run-loader" },
@@ -110,19 +107,19 @@ export async function render() {
           h("span", {}, "result directory"),
           directory),
         h("div", { class: "note" },
-          "Select a `perf/results/<run>` folder to auto-load summary, iperf3, status, and nftables evidence.")),
+          "Select a `perf/results/<run>` folder to auto-load summary, iperf3, status, and packet filter evidence.")),
       h("div", { class: "form-grid two" },
         h("label", { class: "field" }, h("span", {}, "summary.json"), file),
         h("label", { class: "field" }, h("span", {}, "iperf3.json"), iperfFile),
         h("label", { class: "field" }, h("span", {}, "status artifact"), statusFile),
-        h("label", { class: "field" }, h("span", {}, "nft artifact"), nftFile),
-        h("label", { class: "field flex strict-row" }, strictBox, h("span", {}, "Strict release gate"))),
+        h("label", { class: "field" }, h("span", {}, "packet-filter artifact"), nftFile),
+        h("label", { class: "field flex strict-row" }, strictBox, h("span", {}, "Strict verification"))),
       h("label", { class: "field" }, h("span", {}, "JSON"), text),
       h("div", { class: "artifact-strip" },
         runName ? artifactTag("run", `run: ${runName}`) : null,
         artifactTag("iperf", iperfName ? `raw iperf: ${iperfName}` : "raw iperf: not loaded"),
         artifactTag("status", statusName ? `status: ${statusName}` : "status: not loaded"),
-        artifactTag("nft", nftName ? `nft: ${nftName}` : "nft: not loaded")),
+        artifactTag("packet-filter", nftName ? `packet-filter: ${nftName}` : "packet-filter: not loaded")),
       h("div", { class: "flex wrap" },
         h("button", { class: "btn primary", type: "button", title: "Verify benchmark evidence", "aria-label": "Verify benchmark evidence", dataset: { perfAction: "verify" }, onclick: verify }, h("span", { html: icon("check", 16) }), "Verify"),
         h("button", { class: "btn", type: "button", title: "Load current runtime status evidence", "aria-label": "Load current runtime status evidence", dataset: { perfAction: "use-live-status" }, onclick: loadLiveStatus }, h("span", { html: icon("refresh", 16) }), "Use live status"),
@@ -170,17 +167,7 @@ export async function render() {
   };
 
   paint();
-  loadReleaseAcceptanceStatus();
   return root;
-
-  async function loadReleaseAcceptanceStatus() {
-    try {
-      releaseAcceptanceStatus = await api.releaseAcceptanceStatus();
-    } catch (e) {
-      releaseAcceptanceStatus = { unavailable: true, detail: e.message || String(e || "release acceptance status unavailable") };
-    }
-    paint();
-  }
 
   async function loadLiveStatus() {
     try {
@@ -214,8 +201,8 @@ export async function render() {
     iperfName = detected.iperf?.name || "";
     statusRaw = detected.status ? await detected.status.file.text() : "";
     statusName = detected.status?.name || "";
-    nftRaw = detected.nft ? await detected.nft.file.text() : "";
-    nftName = detected.nft?.name || "";
+    nftRaw = detected["packet-filter"] ? await detected["packet-filter"].file.text() : "";
+    nftName = detected["packet-filter"]?.name || "";
     runName = detected.runName || "";
     result = validateSummaryText(raw, { strict, iperfText: iperfRaw, statusText: statusRaw, nftText: nftRaw });
     compareResult = null;
@@ -331,7 +318,6 @@ function resultCard(result, strict) {
   }
   const verdict = evidenceVerdict(result);
   const gate = benchmarkGate(result);
-  const release = releaseGateSummary(result);
   const summary = result.summary || {};
   const rows = [
     metric("Profile", summary.profile || "-"),
@@ -341,7 +327,7 @@ function resultCard(result, strict) {
     metric("Throughput", formatGbps(summary.tcp_gbps)),
     metric("Raw iperf", rawIperfLabel(result.artifacts?.iperf)),
     metric("Raw status", rawStatusLabel(result.artifacts?.status)),
-    metric("Raw nft", rawNftLabel(result.artifacts?.nft)),
+    metric("Raw packet-filter", rawNftLabel(result.artifacts?.["packet-filter"])),
     metric("Retransmits", valueOrDash(summary.tcp_retransmits)),
     metric("Latency", summary.ping_avg_ms == null ? "-" : `${summary.ping_avg_ms} ms`),
     metric("Host tuning", hostTuningLabel(summary.host_tuning_evidence)),
@@ -365,9 +351,6 @@ function resultCard(result, strict) {
       h("dt", {}, "Generated"), h("dd", { class: "mono" }, summary.generated_at || "-"),
       h("dt", {}, "Target"), h("dd", { class: "mono" }, target(summary.target)),
       h("dt", {}, "Claim scope"), h("dd", {}, summary.claim_scope || "-")),
-    releasePanel(release),
-    readinessParityPanel(release),
-    releaseDecisionPanel(result, strict),
     performanceHandoffPanel(result, strict),
     gatePanel(gate),
     repairPanel(result),
@@ -461,7 +444,7 @@ export function performanceEvidenceHandoffPacket(result = {}, strict = false, ro
       claimScope: summary.claim_scope || "",
       rawIperf: rawIperfLabel(artifacts.iperf),
       rawStatus: rawStatusLabel(artifacts.status),
-      rawNft: rawNftLabel(artifacts.nft),
+      rawNft: rawNftLabel(artifacts["packet-filter"]),
       operatorDecision: decision.title,
       releaseDecisionState: decision.cls,
       releaseEvidenceHref: decision.releaseEvidenceHref,
@@ -479,7 +462,7 @@ export function performanceEvidenceHandoffPacket(result = {}, strict = false, ro
       summary.claim_scope ? `claim scope: ${summary.claim_scope}` : "",
       `raw iperf: ${rawIperfLabel(artifacts.iperf)}`,
       `raw status: ${rawStatusLabel(artifacts.status)}`,
-      `raw nft: ${rawNftLabel(artifacts.nft)}`,
+      `raw packet-filter: ${rawNftLabel(artifacts["packet-filter"])}`,
       ...errors.map((message) => `error: ${message}`),
       ...warnings.map((message) => `warning: ${message}`),
     ],
@@ -493,7 +476,7 @@ export function performanceEvidenceHandoffPacket(result = {}, strict = false, ro
       loadedArtifacts: {
         iperf: artifacts.iperf || {},
         status: artifacts.status || {},
-        nft: artifacts.nft || {},
+        packetFilter: artifacts["packet-filter"] || {},
       },
       releaseGate: release,
       claimUseGate: gate,
@@ -517,7 +500,7 @@ export function performanceReleaseDecisionModel(result = {}, strict = false) {
   const rawPosture = [
     `iperf ${rawIperfLabel(artifacts.iperf)}`,
     `status ${rawStatusLabel(artifacts.status)}`,
-    `nft ${rawNftLabel(artifacts.nft)}`,
+    `packet-filter ${rawNftLabel(artifacts["packet-filter"])}`,
   ].join("; ");
   const decisions = [
     {
@@ -540,8 +523,8 @@ export function performanceReleaseDecisionModel(result = {}, strict = false) {
       key: "support-readiness",
       cls: "info",
       label: "handoff",
-      title: "Support bundle and Readiness carry posture, not raw benchmark custody",
-      detail: "Preview the support bundle or Readiness release-benchmark packet for operator context; keep raw benchmark artifacts with the measured run.",
+      title: "Support bundle and  carry posture, not raw benchmark custody",
+      detail: "Preview the support bundle or  release-benchmark packet for operator context; keep raw benchmark artifacts with the measured run.",
     },
     {
       key: "unsupported-scope",
@@ -562,9 +545,9 @@ export function performanceReleaseDecisionModel(result = {}, strict = false) {
       : blocked
         ? "This benchmark cannot support release notes, comparison claims, or customer-facing throughput statements in its current state."
         : "The artifact may help triage performance, but warnings must be reviewed before any external or release use.",
-    releaseEvidenceHref: "#/readiness?packet=release-benchmark",
-    releaseAcceptanceHref: "#/readiness?drawer=release-acceptance",
-    supportBundleHref: "#/readiness?drawer=support-bundle",
+    releaseEvidenceHref: "",
+    releaseAcceptanceHref: "",
+    supportBundleHref: "",
     verifyCommand: "make benchmark-verify-release",
     recordCommand: "COMMIT=\"$(git rev-parse HEAD)\" make release-evidence-release-benchmark",
     noPerformanceClaimsCommand: "RELEASE_NO_PERFORMANCE_CLAIMS=1 make benchmark-verify-release",
@@ -837,19 +820,14 @@ function readinessParityPanel(release) {
   const localReady = state === "ok";
   return h("div", {
     class: "alert-box " + state,
-    dataset: { perfReadinessParity: state },
+    dataset: { perfParity: state },
   },
-    h("strong", {}, localReady ? "Matches Readiness release-benchmark input" : "Readiness release-benchmark still needs evidence"),
+    h("strong", {}, localReady ? "Matches  release-benchmark input" : " release-benchmark still needs evidence"),
     h("div", { class: "note" },
       localReady
-        ? "This browser-local verdict is the same publishable artifact shape that Readiness expects for release-benchmark, but it does not record backend release evidence."
-        : "Readiness keeps release-benchmark blocked until a publishable benchmark artifact is verified or the release manifest explicitly declares no performance claims."),
+        ? "This browser-local verdict is the same publishable artifact shape that  expects for release-benchmark, but it does not record backend release evidence."
+        : " keeps release-benchmark blocked until a publishable benchmark artifact is verified or the release manifest explicitly declares no performance claims."),
     h("div", { class: "warning-actions" },
-      h("a", {
-        class: "btn sm ghost",
-        href: "#/readiness?packet=release-benchmark",
-        dataset: { perfReadinessLink: "release-benchmark" },
-      }, h("span", { html: icon("arrowRight", 14) }), "Readiness gate"),
       h("code", {}, "make benchmark-verify-release")));
 }
 
@@ -869,13 +847,7 @@ function releaseDecisionPanel(result, strict) {
         h("div", {},
           h("strong", {}, item.title),
           h("div", { class: "note" }, item.detail))))),
-    h("div", { class: "warning-actions" },
-      h("a", { class: "btn sm", href: model.releaseEvidenceHref, title: "Open release-benchmark evidence packet", "aria-label": "Open release-benchmark evidence packet", dataset: { perfDecisionAction: "release-benchmark" } },
-        h("span", { html: icon("shield", 14) }), "Release packet"),
-      h("a", { class: "btn sm ghost", href: model.releaseAcceptanceHref, title: "Open release acceptance status", "aria-label": "Open release acceptance status", dataset: { perfDecisionAction: "release-acceptance" } },
-        h("span", { html: icon("check", 14) }), "Release gates"),
-      h("a", { class: "btn sm ghost", href: model.supportBundleHref, title: "Preview support bundle posture", "aria-label": "Preview support bundle posture", dataset: { perfDecisionAction: "support-bundle" } },
-        h("span", { html: icon("download", 14) }), "Support bundle")));
+    null);
 }
 
 function gatePanel(gate) {
@@ -995,8 +967,8 @@ function comparisonClass(state) {
 function flowtableLabel(e) {
   if (!e) return "-";
   const runtime = e.runtime_state || "unknown";
-  const nft = e.flowtable_declared && e.offload_rule_present ? "nft proven" : "nft incomplete";
-  return `${runtime} / ${nft}`;
+  const packetFilter = e.flowtable_declared && e.offload_rule_present ? "packet filter proven" : "packet filter incomplete";
+  return `${runtime} / ${packetFilter}`;
 }
 
 function conntrackLabel(e) {

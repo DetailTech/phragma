@@ -536,7 +536,7 @@ function applicationFindings(apps = []) {
       kind: "applications",
       severity: "warn",
       title: "App-ID without port hints",
-      detail: `${noPortHints.slice(0, 4).join(", ")} can classify traffic; enforcement requires either TCP/UDP port hints or a supported Suricata signal on a broad Drop rule with IDS/IPS Prevent fail closed.`,
+      detail: `${noPortHints.slice(0, 4).join(", ")} can classify traffic; enforcement requires either TCP/UDP port hints or a supported IDS/IPS signal on a broad Drop rule with IDS/IPS Prevent fail closed.`,
       names: noPortHints,
       signature: "no-port-hints",
     });
@@ -1277,7 +1277,7 @@ function trafficControlTable(wrap, root) {
   const qos = session.draft.qosProfiles || [];
   const zoneProfiles = session.draft.zoneProtectionProfiles || [];
   if (!qos.length && !zoneProfiles.length) {
-    return void wrap.appendChild(emptyState("traffic", "No traffic-control profiles", "Define QoS shaping and DoS zone-protection intent without claiming live tc/nft enforcement."));
+    return void wrap.appendChild(emptyState("traffic", "No traffic-control profiles", "Define QoS shaping and DoS zone-protection intent without claiming live enforcement."));
   }
   const rows = [
     ...qos.map((profile, i) => trafficControlRow("qos", profile, i, root)),
@@ -1464,7 +1464,7 @@ function editObject(kind, idx, root) {
       fld("App-ID", name),
       fld("Display name", displayName),
       fld("Category", category),
-      fld("Engine signals", signals, "comma-separated Suricata/nDPI-style aliases"),
+      fld("Inspection signals", signals, "comma-separated inspection or application aliases"),
       fld("TCP ports", tcpPorts, "low-confidence fallback only"),
       fld("UDP ports", udpPorts, "low-confidence fallback only"),
       fld("Description", desc));
@@ -1598,7 +1598,7 @@ function editObject(kind, idx, root) {
     body = h("div", { dataset: { trafficControlEditor: "true" } },
       h("div", { class: "alert-box info" },
         h("strong", {}, "Plan-only traffic control intent. "),
-        "This slice stages bounded QoS and DoS policy intent and render-plan posture; live tc/nft enforcement certification is tracked separately."),
+        "This slice stages bounded QoS and DoS policy intent and render-plan posture; live enforcement certification is tracked separately."),
       fld("Type", typeSel),
       fld("Name", name),
       fld("Description", desc),

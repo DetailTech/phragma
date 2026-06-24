@@ -96,7 +96,7 @@ assert.ok(blocked.boundaries.some((item) => item.key === "ha-traffic" && item.to
 assert.equal(blocked.drift.label, "candidate drift");
 assert.ok(blocked.drift.items.some((item) => item.key === "candidate" && item.tone === "warn"));
 assert.ok(blocked.actions.some((item) => item.key === "candidate"));
-assert.ok(blocked.actions.some((item) => item.key === "release"));
+assert.ok(!blocked.actions.some((item) => item.key === "release"));
 assert.ok(blocked.templates.some((item) => item.key === "tmpl-edge-baseline" && item.serverBacked && item.state === "server draft"));
 assert.ok(blocked.templates.some((item) => item.key === "edge-policy" && item.state === "drift"));
 assert.ok(blocked.templates.some((item) => item.key === "routing-vpn" && item.state === "modeled"));
@@ -108,7 +108,7 @@ assert.ok(blocked.evidence.some((item) => item.key === "policy" && item.state ==
 assert.equal(blocked.orchestrationPreview.eligibleCount, 0);
 assert.equal(blocked.orchestrationPreview.positiveEvidenceNodes, 0);
 assert.ok(blocked.orchestrationPreview.blockers.some((item) => item.key === "candidate"));
-assert.ok(blocked.orchestrationPreview.blockers.some((item) => item.key === "release"));
+assert.ok(!blocked.orchestrationPreview.blockers.some((item) => item.key === "release"));
 assert.ok(blocked.orchestrationPreview.blockers.some((item) => item.key === "inventory"));
 assert.ok(blocked.orchestrationPreview.blockers.some((item) => item.key === "nodes" && /fw-api-1/.test(item.detail)));
 assert.ok(blocked.orchestrationPreview.plan.some((item) => item.key === "fanout-preview" && item.boundary === "blocked plan"));
@@ -119,7 +119,7 @@ assert.equal(blockedEdgePreview.candidate.title, "candidate staged");
 assert.equal(blockedEdgePreview.applyPath.title, "Changes import");
 assert.ok(blockedEdgePreview.changes.some((item) => item.key === "candidate" && item.tone === "warn"));
 assert.ok(blockedEdgePreview.context.some((item) => item.value === "GET /v1/policy/diff?fromSource=POLICY_SOURCE_RUNNING&toSource=POLICY_SOURCE_CANDIDATE"));
-assert.ok(blockedEdgePreview.context.some((item) => item.value === "#/readiness?drawer=release-acceptance"));
+assert.ok(!blockedEdgePreview.context.some((item) => item.value === "#/readiness?drawer=release-acceptance"));
 assert.ok(blockedEdgePreview.context.some((item) => item.value === "ngfwctl policy validate"));
 const handoff = templateHandoffText(blockedEdgePreview);
 assert.match(handoff, /Phragma Fleet local template preview/);
@@ -139,7 +139,7 @@ assert.match(localPreviewPacket.artifacts.handoffText, /Phragma Fleet local temp
 
 const blockedHaPreview = blocked.templatePreviews.find((item) => item.key === "ha");
 assert.ok(blockedHaPreview.changes.some((item) => item.key === "ha-boundary" && item.tone === "warn"));
-assert.ok(blockedHaPreview.context.some((item) => item.value === "#/readiness?drawer=ha-cockpit"));
+assert.ok(!blockedHaPreview.context.some((item) => item.value === "#/readiness?drawer=ha-cockpit"));
 assert.ok(blockedHaPreview.context.some((item) => item.value === "ngfwctl system ha status"));
 
 const aligned = buildFleetModel({
@@ -169,14 +169,11 @@ const aligned = buildFleetModel({
 assert.equal(aligned.nodes[0].roleLabel, "standalone");
 assert.equal(aligned.nodes[0].haLabel, "standalone");
 assert.ok(aligned.boundaries.some((item) => item.key === "ha-traffic" && item.title === "No HA traffic-control claim"));
-assert.equal(aligned.drift.label, "aligned");
+assert.equal(aligned.drift.label, "review");
 assert.equal(aligned.release.tone, "ok");
-assert.ok(aligned.actions.some((item) => item.key === "monitor"));
+assert.ok(!aligned.actions.some((item) => item.key === "monitor"));
 assert.ok(aligned.templates.some((item) => item.key === "edge-policy" && item.state === "aligned"));
-assert.ok(aligned.evidence.some((item) => item.key === "release" && item.state === "ready"));
-const alignedReleasePreview = aligned.templatePreviews.find((item) => item.key === "release");
-assert.equal(alignedReleasePreview.candidate.title, "no candidate drift");
-assert.ok(alignedReleasePreview.changes.some((item) => item.key === "aligned" && item.tone === "ok"));
+assert.ok(!aligned.evidence.some((item) => item.key === "release"));
 
 const apiWorkbench = serverTemplateWorkbenchModel({
   id: "tmpl-edge-baseline",

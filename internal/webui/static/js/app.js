@@ -8,13 +8,10 @@ import { accessDetail, accessTitle, isAuthError, isPermissionError, oidcLoginTar
 import { API_CONTRACT, openAutomationContext } from "./automation_context.js";
 import { candidateBarModel } from "./candidate_bar.js";
 import { commitRuntimePreflight } from "./commit_preflight.js";
-import { buildContentPosture } from "./content_posture.js";
-import { conntrackCapacity, dataplanePosture, ebpfHostReadiness, flowtableHostReadiness, flowtableRuntimeEvidence, kernelTuningRollup } from "./dataplane.js";
 import { openDiagnosticConsole } from "./diagnostic_console.js";
 import { normalizePolicyDiffLines, policyDiffLabels, renderDiffLines } from "./diff_view.js";
 import { applyNetworkProfileToPolicy } from "./network_profiles.js";
 import { session, diffLines, changeImpact, normalizeServerImpact } from "./policy.js";
-import { readinessActionHash, remediationSteps, summarizeReadiness } from "./readiness_model.js";
 import { toast, openDrawer, closeDrawer, confirmDialog, pill, handleFocusTrap } from "./ui.js";
 import { renderValidationEvidence } from "./validation_view.js";
 
@@ -36,7 +33,6 @@ import * as netvpn from "./views/netvpn.js";
 import * as proxy from "./views/proxy.js";
 import * as compliance from "./views/compliance.js";
 import * as changes from "./views/changes.js";
-import * as readiness from "./views/readiness.js";
 import * as settings from "./views/settings.js";
 
 const NAV = [
@@ -57,7 +53,6 @@ const NAV = [
   { path: "/netvpn", title: "Routing & VPN", icon: "vpn", view: netvpn },
   { path: "/proxy", title: "Proxy / WAF", icon: "globe", view: proxy },
   { path: "/compliance", title: "Compliance", icon: "shield", view: compliance },
-  { path: "/readiness", title: "Readiness", icon: "shield", view: readiness },
   { path: "/changes", title: "Changes", icon: "changes", view: changes },
   { path: "/settings", title: "Settings", icon: "settings", view: settings },
 ];
@@ -258,7 +253,6 @@ function renderCandidateBar() {
       h("small", {}, model.detail)),
     h("div", { class: "cb-actions" },
       h("a", { class: "btn sm ghost", href: "#/changes", title: "Open candidate changes", "aria-label": "Open candidate changes", "data-candidate-bar-action": "changes" }, h("span", { html: icon("changes", 15) }), "Changes"),
-      h("a", { class: "btn sm ghost", href: "#/readiness", title: "Open readiness", "aria-label": "Open readiness", "data-candidate-bar-action": "readiness" }, h("span", { html: icon("shield", 15) }), "Readiness"),
       h("button", { class: "btn sm ghost", type: "button", title: "Review pending candidate diff", "aria-label": "Review pending candidate diff", "data-candidate-bar-action": "diff", disabled: model.state !== "dirty", onclick: showDiff }, h("span", { html: icon("diff", 15) }), "Diff"),
       h("button", { class: "btn sm", type: "button", title: "Validate candidate policy", "aria-label": "Validate candidate policy", "data-candidate-bar-action": "validate", disabled: model.state === "blocked", onclick: validate }, h("span", { html: icon("check", 15) }), "Validate"),
       model.state === "dirty" ? h("button", { class: "btn sm danger", type: "button", title: "Discard pending candidate changes", "aria-label": "Discard pending candidate changes", "data-candidate-bar-action": "discard", onclick: discard }, "Discard") : null,
@@ -277,87 +271,6 @@ async function reloadCandidateState() {
     toast("Reload failed", e.message, "bad");
     renderCandidateBar();
   }
-}
-
-// ---------- Runtime readiness banner ----------
-async function refreshRuntimeBanner() {
-  const bar = $("#runtime-banner");
-  if (!bar) return;
-  try {
-    const [statusR, runningR, feedsR, contentR] = await Promise.allSettled([
-      api.status(),
-      api.running(),
-      api.feeds(),
-      api.contentPackages(),
-    ]);
-    if (statusR.status !== "fulfilled") throw statusR.reason;
-    const status = statusR.value || {};
-    const policy = runningR.status === "fulfilled" ? (runningR.value?.policy || {}) : {};
-    const feeds = feedsR.status === "fulfilled" ? (feedsR.value?.feeds || []) : [];
-    const contentPackages = contentR.status === "fulfilled" ? (contentR.value?.packages || []) : [];
-    const contentError = [
-      runningR.status === "rejected" ? `running policy: ${runtimeErrorText(runningR.reason)}` : "",
-      feedsR.status === "rejected" ? `feed registry: ${runtimeErrorText(feedsR.reason)}` : "",
-      contentR.status === "rejected" ? `content packages: ${runtimeErrorText(contentR.reason)}` : "",
-    ].filter(Boolean).join("; ");
-    const contentPosture = buildContentPosture(feeds, policy, contentPackages, contentError);
-    const flowCap = flowtableHostReadiness(status);
-    const flowRuntime = flowtableRuntimeEvidence(status);
-    const ebpfHost = ebpfHostReadiness(status);
-    const conntrack = conntrackCapacity(status);
-    const policyDp = dataplanePosture(policy, status);
-    const tuning = kernelTuningRollup(status);
-    const summary = summarizeReadiness(status, policyDp, flowCap, flowRuntime, ebpfHost, conntrack, contentPosture);
-    const actions = remediationSteps(status, policyDp, flowCap, flowRuntime, ebpfHost, conntrack, tuning, contentPosture);
-    renderRuntimeBanner(bar, summary, actions);
-  } catch (e) {
-    if (isAuthError(e) || isPermissionError(e)) {
-      bar.hidden = true;
-      clear(bar);
-      return;
-    }
-    renderRuntimeBannerError(bar, e);
-  }
-}
-
-function renderRuntimeBanner(bar, summary, actions = []) {
-  if (!summary || summary.cls === "ok") {
-    bar.hidden = true;
-    clear(bar);
-    return;
-  }
-  const cls = summary.cls === "bad" ? "bad" : "warn";
-  const high = actions.filter((item) => item.level === "high").length;
-  const medium = actions.filter((item) => item.level === "medium").length;
-  const primary = actions[0] || null;
-  bar.hidden = false;
-  mount(bar,
-    h("span", { class: "rb-icon", html: icon(cls === "bad" ? "block" : "shield", 18) }),
-    h("div", { class: "rb-text" },
-      h("strong", {}, summary.title),
-      h("small", {}, primary ? `${summary.detail} Next: ${primary.title}.` : summary.detail)),
-    h("div", { class: "rb-meta" },
-      high ? pill(`${high} critical`, "bad", true) : null,
-      medium ? pill(`${medium} warning${medium === 1 ? "" : "s"}`, "warn", true) : null),
-    h("div", { class: "rb-actions" },
-      primary?.href ? h("a", { class: "btn sm ghost", href: primary.href, title: `Open fix for ${summary.title}`, "aria-label": `Open fix for ${summary.title}`, dataset: { runtimeBlockerAction: "open-fix" } },
-        h("span", { html: icon("arrowRight", 15) }), "Open fix") : null,
-      h("a", { class: "btn sm primary", href: "#/readiness", title: "Open readiness", "aria-label": "Open readiness", "data-runtime-banner-action": "readiness" },
-        h("span", { html: icon("shield", 15) }), "Readiness")));
-}
-
-function renderRuntimeBannerError(bar, err) {
-  bar.hidden = false;
-  mount(bar,
-    h("span", { class: "rb-icon", html: icon("block", 18) }),
-    h("div", { class: "rb-text" },
-      h("strong", {}, "Runtime readiness unavailable"),
-      h("small", {}, runtimeErrorText(err))),
-    h("div", { class: "rb-actions" },
-      h("button", { class: "btn sm ghost", type: "button", title: "Retry runtime readiness status", "aria-label": "Retry runtime readiness status", "data-runtime-banner-action": "retry", onclick: refreshRuntimeBanner },
-        h("span", { html: icon("refresh", 15) }), "Retry"),
-      h("a", { class: "btn sm primary", href: "#/readiness", title: "Open readiness", "aria-label": "Open readiness", "data-runtime-banner-action": "readiness-error" },
-        h("span", { html: icon("shield", 15) }), "Readiness")));
 }
 
 function runtimeErrorText(err) {
@@ -390,7 +303,7 @@ async function validate() {
     if (r.valid) toast("Validation passed", "The candidate is valid and renderable.", "ok");
     openDrawer({ title: r.valid ? "Validation passed" : "Validation failed", width: "620px",
       body: renderValidationEvidence(r, {
-        validText: "Candidate validated successfully. Engine syntax checks passed.",
+        validText: "Candidate validated successfully. Policy checks passed.",
         invalidLead: "Fix these before committing:",
       }),
       footer: [h("button", { class: "btn ghost", type: "button", title: "Close validation drawer", "aria-label": "Close validation drawer", "data-app-drawer-action": "close-validation", onclick: closeDrawer }, "Close")] });
@@ -402,9 +315,9 @@ async function commit() {
   if (!session.dirty) { toast("Nothing to commit", "No pending changes.", "warn"); return; }
   openDrawer({
     title: "Preparing commit review",
-    subtitle: "Validating the candidate and runtime posture before live apply.",
+    subtitle: "Validating the candidate and system preflight before live apply.",
     width: "560px",
-    body: h("div", { class: "loading" }, "Running policy and runtime preflight…"),
+    body: h("div", { class: "loading" }, "Running policy and system preflight..."),
     footer: [h("button", { class: "btn ghost", type: "button", title: "Cancel commit review preparation", "aria-label": "Cancel commit review preparation", "data-app-drawer-action": "cancel-commit-prep", onclick: closeDrawer }, "Cancel")],
   });
 
@@ -441,7 +354,7 @@ async function commit() {
   const commitBlocked = () => Boolean(validationError || !validation?.valid || (needsAck && !acknowledge.checked));
   const commitBtn = h("button", { class: "btn primary", type: "button", title: "Commit candidate to running policy", "aria-label": "Commit candidate to running policy", "data-app-drawer-action": "commit-candidate", disabled: commitBlocked(), onclick: async (e) => {
     if (!comment.value.trim()) { toast("Comment required", "Add an audit comment before committing.", "warn"); comment.focus(); return; }
-    if (needsAck && !acknowledge.checked) { toast("Review required", "Acknowledge the risk and runtime posture before committing.", "warn"); return; }
+    if (needsAck && !acknowledge.checked) { toast("Review required", "Acknowledge the risk and system preflight before committing.", "warn"); return; }
     const btn = e.target.closest("button"); btn.disabled = true; btn.textContent = "Committing…";
     try {
       const r = await session.commit(
@@ -468,10 +381,10 @@ async function commit() {
         h("div", {}, h("span", {}, "Pending changes"), h("strong", {}, String(session.changeCount()))),
         h("div", {}, h("span", {}, "Validation"), validationError ? pill("error", "bad") : validation?.valid ? pill("passed", "ok") : pill("failed", "bad")),
         h("div", {}, h("span", {}, "Impact"), pill(impact.level, impact.level === "high" ? "bad" : impact.level === "medium" ? "warn" : "ok")),
-        h("div", {}, h("span", {}, "Runtime"), pill(runtime.label, runtime.cls))),
+        h("div", {}, h("span", {}, "System preflight"), pill(runtime.label, runtime.cls))),
       validationError ? h("div", { class: "alert-box bad" }, validationError.message) :
         renderValidationEvidence(validation, {
-          validText: "Candidate validated successfully. Engine syntax checks passed.",
+          validText: "Candidate validated successfully. Policy checks passed.",
           invalidLead: "Fix these before committing:",
         }),
       runtimePreflightPanel(runtime),
@@ -525,7 +438,7 @@ function runtimePreflightPanel(runtime) {
   return h("div", { class: "runtime-preflight" },
     h("div", { class: "alert-box " + runtime.cls },
       h("strong", {}, runtime.detail),
-      h("div", { class: "note" }, "Review the action queue before applying this candidate.")),
+      h("div", { class: "note" }, "Resolve the listed items before applying this candidate.")),
     h("div", { class: "impact-list impact-list-scroll" }, runtime.items.map((it) =>
       runtimePreflightActionRow(it))));
 }
@@ -536,23 +449,16 @@ function runtimePreflightActionRow(it) {
     h("div", {},
       h("strong", {}, it.title),
       h("span", {}, it.detail || "No action detail returned."),
-      h("div", { class: "warning-actions" },
-        h("a", {
-          class: "btn sm ghost",
-          href: readinessActionHash(it.id || it.title),
-          title: "Open this runtime blocker in Readiness",
-          "aria-label": "Open this runtime blocker in Readiness",
-          dataset: { runtimeBlockerAction: "readiness" },
-        }, h("span", { html: icon("shield", 15) }), "Readiness"),
-        it.href ? h("a", { class: "btn sm ghost", href: it.href, title: `Open fix for ${it.title || "runtime blocker"}`, "aria-label": `Open fix for ${it.title || "runtime blocker"}`, dataset: { runtimeBlockerAction: "open-fix", runtimeBlockerId: it.id || it.title || "" } }, "Open fix") : null)));
+      it.href ? h("div", { class: "warning-actions" },
+        h("a", { class: "btn sm ghost", href: it.href, title: `Open fix for ${it.title || "system preflight item"}`, "aria-label": `Open fix for ${it.title || "system preflight item"}`, dataset: { runtimeBlockerAction: "open-fix", runtimeBlockerId: it.id || it.title || "" } }, "Open fix")) : null));
 }
 
 function ackText(impact, runtime) {
   if (impact.level === "high" && runtime.requiresAck) {
-    return "I reviewed the high-risk policy impact and the runtime readiness warnings, and intend to apply this candidate.";
+    return "I reviewed the high-risk policy impact and the system preflight warnings, and intend to apply this candidate.";
   }
   if (runtime.requiresAck) {
-    return "I reviewed the runtime readiness warnings and intend to apply this candidate.";
+    return "I reviewed the system preflight warnings and intend to apply this candidate.";
   }
   return "I reviewed the high-risk policy impact and intend to apply it to the live firewall.";
 }
@@ -600,13 +506,11 @@ function buildPalette(q) {
     { kind: "Action", icon: "copy", label: "Show API / CLI context", sub: "REST endpoints and ngfwctl equivalents for this screen", run: () => openAutomationContext(automationRoute()) },
     { kind: "Action", icon: "download", label: "Open API contract", sub: "generated Swagger YAML for CLI, SDK, and automation review", run: () => globalThis.open?.(API_CONTRACT.path, "_blank", "noopener,noreferrer") },
     { kind: "Action", icon: "threats", label: "Configure IDS/IPS", run: () => import("./views/ids.js").then((m) => m.openIdsEditor(() => location.reload())) },
-    { kind: "Action", icon: "settings", label: "Open dataplane settings", sub: "MTU, MSS clamp, NIC offload, flowtable", run: () => { location.hash = "#/settings"; } },
-    { kind: "Action", icon: "shield", label: "Open readiness action queue", sub: "production blockers, host tuning, support bundle", run: () => { location.hash = "#/readiness"; } },
-    { kind: "Action", icon: "traffic", label: "Open performance evidence verifier", sub: "benchmark summary, raw iperf3, status, nftables evidence", run: () => { location.hash = "#/performance"; } },
+    { kind: "Action", icon: "settings", label: "Open dataplane settings", sub: "MTU, MSS clamp, NIC offload, acceleration", run: () => { location.hash = "#/settings"; } },
+    { kind: "Action", icon: "traffic", label: "Open performance evidence verifier", sub: "benchmark summary and traffic evidence", run: () => { location.hash = "#/performance"; } },
     { kind: "Action", icon: "traffic", label: "Stage forwarding throughput profile", sub: "jumbo MTU, MSS clamp, flowtable fast path", run: () => stageNetworkProfileFromPalette("throughput") },
     { kind: "Action", icon: "shield", label: "Stage IDS/IPS inspected network profile", sub: "disable flowtable, manage NIC offloads for inspection", run: () => stageNetworkProfileFromPalette("inspection") },
     { kind: "Action", icon: "vpn", label: "Stage edge/VPN network profile", sub: "standard MTU and MSS clamp for tunnels", run: () => stageNetworkProfileFromPalette("edge-vpn") },
-    { kind: "Action", icon: "download", label: "Export support bundle", run: () => readiness.exportSupportBundle() },
     { kind: "Action", icon: "refresh", label: "Refresh threat intel feeds", run: async () => { try { const r = await api.refreshFeeds(); toast("Feeds refreshed", `${r.entries || 0} entries.`, "ok"); } catch (e) { toast("Failed", e.message, "bad"); } } },
     { kind: "Action", icon: "diff", label: "Commit pending changes", run: () => { if (session.dirty) commit(); else toast("Nothing to commit", "No pending changes.", "warn"); } },
     { kind: "Action", icon: "globe", label: "Toggle theme", run: () => setTheme(getTheme() === "dark" ? "light" : "dark") });
@@ -724,9 +628,7 @@ function boot() {
 
   router.start(renderRoute);
   pingConnection();
-  refreshRuntimeBanner();
   setInterval(pingConnection, 30000);
-  setInterval(refreshRuntimeBanner, 60000);
 }
 
 boot();

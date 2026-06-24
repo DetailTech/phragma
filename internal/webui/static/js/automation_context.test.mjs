@@ -21,7 +21,6 @@ import {
   emptyAutomationRecording,
   workflowRunbookText,
 } from "./automation_context.js";
-import { releaseEvidencePacketDefinition, releaseEvidencePacketIds } from "./readiness_model.js";
 
 const automationContextSource = readFileSync("internal/webui/static/js/automation_context.js", "utf8");
 assert.match(automationContextSource, /import \{ closeDrawer, openDrawer, toast \}/);
@@ -84,7 +83,6 @@ const routes = [
   "/compliance",
   "/intel",
   "/netvpn",
-  "/readiness",
   "/changes",
   "/settings",
 ];
@@ -127,12 +125,10 @@ assert.match(setupCustom.notes.join("\n"), /corp -> wan/);
 const dashboard = contextForPath("/");
 assert.ok(dashboard.endpoints.some((endpoint) => endpoint.path === "/v1/system/status"));
 assert.ok(dashboard.endpoints.some((endpoint) => endpoint.path === "/v1/system/identity"));
-assert.ok(dashboard.endpoints.some((endpoint) => endpoint.path === "/v1/system/release-acceptance/status"));
 assert.ok(dashboard.endpoints.some((endpoint) => endpoint.path === "/v1/candidate/status"));
 assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl status"));
 assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl whoami"));
 assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl status # routing-vpn"));
-assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl system release-acceptance-status --json"));
 assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl policy status --json"));
 
 const trafficSessionKey = "ct1%7Cipv4%7Ctcp%7C10.0.1.20%7C51515%7C203.0.113.20%7C443%7C203.0.113.20%7C443%7C10.0.1.20%7C51515";
@@ -394,13 +390,13 @@ assert.ok(inspection.endpoints.some((endpoint) => endpoint.path === "/v1/intel/c
 assert.ok(inspection.endpoints.some((endpoint) => endpoint.path === "/v1/alerts?limit=200"));
 assert.ok(inspection.cli.some((item) => item.command === "ngfwctl status"));
 assert.ok(inspection.cli.some((item) => item.command === "ngfwctl intel content"));
-assert.match(inspection.notes.join("\n"), /Suricata detect\/prevent runtime changes after validation and commit/);
+assert.match(inspection.notes.join("\n"), /IDS\/IPS engine detect\/prevent runtime changes after validation and commit/);
 
 const proxy = contextForPath("/proxy");
-assert.match(proxy.summary, /runtime-readiness evidence/);
+assert.match(proxy.summary, /proxy\/WAF artifacts/);
 assert.match(proxy.summary, /active listener\/cutover execution remains external/);
-assert.ok(proxy.endpoints.some((endpoint) => endpoint.method === "POST" && endpoint.path === "/v1/system/runtime-readiness:check" && /planned-not-executed proxy daemon/.test(endpoint.purpose)));
-assert.ok(proxy.cli.some((item) => item.command === "ngfwctl status" && /proxy engine readiness/.test(item.purpose)));
+assert.ok(proxy.notes.some((note) => /planned-not-executed proof artifacts/.test(note)));
+assert.ok(proxy.cli.some((item) => item.command === "ngfwctl status" && /proxy status/.test(item.purpose)));
 assert.match(proxy.notes.join("\n"), /planned-only/);
 assert.match(proxy.notes.join("\n"), /execute listener cutover\/rollback/);
 assert.match(proxy.notes.join("\n"), /active traffic proof and packet inspection execution remain hardening/);
@@ -865,121 +861,11 @@ assert.equal(selectedCompliance.cli[1].command, `ngfwctl compliance reports expo
 assert.match(selectedCompliance.notes.join("\n"), /signing, legal hold, and external verification remain hardening work/);
 assert.doesNotMatch(automationContextText(selectedCompliance, { origin: "https://fw.example.com" }), /Bearer-secret-token|\/etc\/passwd|token =|path =/i);
 
-const readiness = contextForPath("/readiness");
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.path === "/v1/system/status"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.path === "/v1/system/ha/status"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.method === "POST" && endpoint.path === "/v1/system/ha/policy:pull"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.method === "POST" && endpoint.path === "/v1/system/ha/failover:activate"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.path === "/v1/system/identity"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.path === "/v1/system/release-acceptance/status"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.path === "/v1/candidate/status"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.method === "POST" && endpoint.path === "/v1/system/runtime-readiness:check"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.path === "/v1/intel/feeds"));
-assert.ok(readiness.endpoints.some((endpoint) => endpoint.path === "/v1/intel/content/packages"));
-assert.ok(readiness.cli.some((item) => item.command === "ngfwctl system release-acceptance-status --json"));
-assert.ok(readiness.cli.some((item) => item.command.includes("ngfwrelease status --json")));
-assert.ok(readiness.cli.some((item) => item.command === "make release-acceptance-status RELEASE_NO_PERFORMANCE_CLAIMS=1"));
-assert.ok(readiness.cli.some((item) => item.command === "make release-recordability-check COMMIT=<full-commit> VERSION=<tag>"));
-assert.ok(readiness.cli.some((item) => item.command.includes("ngfwctl system ha pull-policy --ack-pull")));
-assert.ok(readiness.cli.some((item) => item.command.includes("ngfwctl system ha activate-passive --ack-failover")));
-assert.ok(readiness.cli.some((item) => item.command.includes("ngfwctl support-bundle")));
-assert.ok(readiness.cli.some((item) => item.command === "ngfwctl support-bundle --output-dir ."));
-assert.match(readiness.notes.join("\n"), /recordability is human guidance/);
-assert.match(readiness.notes.join("\n"), /artifact-matching workbench commands/);
-assert.match(readiness.notes.join("\n"), /VIP\/route cutover/);
-const readinessSupportBundle = contextForPath("#/readiness?drawer=support-bundle");
-assert.equal(readinessSupportBundle.routeState.hash, "#/readiness?drawer=support-bundle");
-assert.equal(readinessSupportBundle.endpoints[0].path, "/v1/system/support-bundle?versionLimit=100&auditLimit=300&eventLimit=500");
-assert.equal(readinessSupportBundle.cli[0].command, "ngfwctl support-bundle --output-dir .");
-assert.match(readinessSupportBundle.notes.join("\n"), /Current Readiness drawer: support-bundle/);
-assert.match(readinessSupportBundle.notes.join("\n"), /does not stage policy or close release gates/);
-const readinessReleaseAcceptance = contextForPath("#/readiness?drawer=release-acceptance");
-assert.equal(readinessReleaseAcceptance.routeState.hash, "#/readiness?drawer=release-acceptance");
-assert.equal(readinessReleaseAcceptance.endpoints[0].path, "/v1/system/release-acceptance/status");
-assert.equal(readinessReleaseAcceptance.cli[0].command, "ngfwctl system release-acceptance-status --json");
-assert.equal(readinessReleaseAcceptance.cli[1].command, "make release-acceptance-status RELEASE_NO_PERFORMANCE_CLAIMS=1");
-assert.match(readinessReleaseAcceptance.notes.join("\n"), /Current Readiness drawer: release-acceptance/);
-const readinessHA = contextForPath("#/readiness?drawer=ha");
-assert.equal(readinessHA.routeState.hash, "#/readiness?drawer=ha");
-assert.equal(readinessHA.endpoints[0].path, "/v1/system/ha/status");
-assert.equal(readinessHA.endpoints[0].purpose, "Exact active/passive HA status request for the current Readiness drawer");
-assert.equal(readinessHA.cli[0].command, "ngfwctl status");
-assert.match(readinessHA.cli[0].purpose, /Headless HA posture/);
-assert.match(readinessHA.notes.join("\n"), /Current Readiness drawer: HA evidence/);
-assert.match(readinessHA.notes.join("\n"), /does not execute peer sync, replication, or failover/);
-const readinessHAText = automationContextText(readinessHA, { origin: "https://fw.example.com" });
-assert.match(readinessHAText, /Current view:\n- #\/readiness\?drawer=ha/);
-assert.match(readinessHAText, /GET \/v1\/system\/ha\/status - Exact active\/passive HA status request/);
-assert.match(readinessHAText, /curl .*https:\/\/fw\.example\.com\/v1\/system\/ha\/status/);
-assert.match(readinessHAText, /ngfwctl status - Headless HA posture/);
-const readinessHACockpit = contextForPath("#/readiness?drawer=ha-cockpit");
-assert.equal(readinessHACockpit.routeState.hash, "#/readiness?drawer=ha-cockpit");
-assert.equal(readinessHACockpit.endpoints[0].path, "/v1/system/ha/status");
-assert.equal(readinessHACockpit.endpoints[1].path, "/v1/system/ha/policy:pull");
-assert.equal(readinessHACockpit.endpoints[1].method, "POST");
-assert.equal(readinessHACockpit.endpoints[2].path, "/v1/system/ha/failover:activate");
-assert.equal(readinessHACockpit.endpoints[2].method, "POST");
-assert.equal(readinessHACockpit.cli[0].command, "ngfwctl status");
-assert.match(readinessHACockpit.cli[1].command, /ngfwctl system ha pull-policy --ack-pull --ack-risk --ack-runtime/);
-assert.match(readinessHACockpit.cli[2].command, /ngfwctl system ha activate-passive --ack-failover --ack-external-cutover --ack-external-fencing/);
-assert.match(readinessHACockpit.notes.join("\n"), /Current Readiness drawer: HA operations cockpit/);
-assert.match(readinessHACockpit.notes.join("\n"), /acknowledgement, audit comments/);
-assert.match(readinessHACockpit.notes.join("\n"), /VIP\/route cutover/);
-const readinessHACockpitText = automationContextText(readinessHACockpit, { origin: "https://fw.example.com" });
-assert.match(readinessHACockpitText, /Current view:\n- #\/readiness\?drawer=ha-cockpit/);
-assert.match(readinessHACockpitText, /POST \/v1\/system\/ha\/policy:pull/);
-assert.match(readinessHACockpitText, /POST \/v1\/system\/ha\/failover:activate/);
-assert.match(readinessHACockpitText, /ngfwctl system ha pull-policy --ack-pull/);
-assert.match(readinessHACockpitText, /ngfwctl system ha activate-passive --ack-failover/);
-const readinessProtoPacket = contextForPath("#/readiness?packet=proto-verify");
-assert.equal(readinessProtoPacket.endpoints[0].path, "/v1/system/release-acceptance/status");
-assert.equal(readinessProtoPacket.cli[0].command, "make proto-status");
-assert.match(readinessProtoPacket.notes.join("\n"), /Current Readiness release packet: proto-verify/);
-const readinessEbpfPacket = contextForPath("#/readiness?packet=ebpf-ol9-field-evidence");
-assert.equal(readinessEbpfPacket.endpoints[0].path, "/v1/system/release-acceptance/status");
-assert.equal(readinessEbpfPacket.endpoints[1].path, "/v1/system/status");
-assert.deepEqual(readinessEbpfPacket.cli.slice(0, 4).map((item) => item.command), [
-  "make ebpf-ol9-attach-drill-check",
-  "sudo -E EBPF_OL9_ATTACH_IFACE=<disposable-interface> EBPF_OL9_STATUS_JSON_COMMAND='<command that prints /v1/system/status eBPF JSON>' make ebpf-ol9-attach-drill EBPF_OL9_FIELD_EVIDENCE_DIR=release/field-evidence/ebpf-ol9",
-  "make ebpf-ol9-field-evidence-check EBPF_OL9_FIELD_EVIDENCE_DIR=release/field-evidence/ebpf-ol9",
-  "COMMIT=\"$(git rev-parse HEAD)\" make release-evidence-ebpf-ol9-field-evidence EBPF_OL9_FIELD_EVIDENCE_DIR=release/field-evidence/ebpf-ol9",
-]);
-assert.match(readinessEbpfPacket.notes.join("\n"), /Current Readiness release packet: ebpf-ol9-field-evidence/);
-assert.match(readinessEbpfPacket.notes.join("\n"), /required_drill_evidence=drill-manifest/);
-const readinessReleasePacketIds = releaseEvidencePacketIds();
-for (const packetId of readinessReleasePacketIds) {
-  const definition = releaseEvidencePacketDefinition(packetId);
-  const context = contextForPath(`#/readiness?packet=${packetId}`);
-  assert.equal(context.routeState.hash, `#/readiness?packet=${packetId}`);
-  assert.equal(context.endpoints[0].path, "/v1/system/release-acceptance/status", `${packetId} release status endpoint`);
-  assert.deepEqual(
-    context.cli.slice(0, definition.packet.commands.length).map((item) => item.command),
-    definition.packet.commands,
-    `${packetId} CLI commands should match release packet commands`,
-  );
-  assert.match(context.notes.join("\n"), new RegExp(`Current Readiness release packet: ${packetId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`));
-  assert.match(automationContextText(context, { origin: "https://fw.example.com" }), new RegExp(`GET /v1/system/release-acceptance/status - Release gate state used by the ${packetId.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")} readiness packet`));
-}
-const readinessInvalidPacket = contextForPath("#/readiness?packet=../../etc/passwd&action=dry-run");
-assert.equal(readinessInvalidPacket.routeState.hash, "#/readiness?action=dry-run");
-assert.deepEqual(readinessInvalidPacket.routeState.queryEntries, [["action", "dry-run"]]);
-assert.match(readinessInvalidPacket.notes.join("\n"), /Current Readiness action focus: dry-run/);
-const readinessUnknownPacket = contextForPath("#/readiness?packet=not-a-release-gate");
-assert.equal(readinessUnknownPacket.routeState.hash, "#/readiness");
-assert.deepEqual(readinessUnknownPacket.routeState.queryEntries, []);
-const readinessUnsafeReleasePacket = contextForPath("#/readiness?packet=proto-verify&token=Bearer-secret-token&path=/etc/passwd&artifactPath=/var/lib/openngfw/release/acceptance.json&access_token=secret-token");
-assert.equal(readinessUnsafeReleasePacket.routeState.hash, "#/readiness?packet=proto-verify");
-assert.deepEqual(readinessUnsafeReleasePacket.routeState.queryEntries, [["packet", "proto-verify"]]);
-const readinessUnsafeReleaseText = automationContextText(readinessUnsafeReleasePacket, { origin: "https://fw.example.com" });
-assert.match(readinessUnsafeReleaseText, /Current Readiness release packet: proto-verify/);
-assert.match(readinessUnsafeReleaseText, /used by the proto-verify readiness packet/);
-assert.doesNotMatch(readinessUnsafeReleaseText, /Bearer-secret-token|\/etc\/passwd|\/var\/lib\/openngfw|access_token|token =|path =|artifactPath/i);
-
 const changes = contextForPath("/changes");
 assert.ok(changes.endpoints.some((endpoint) => endpoint.path.includes("/v1/policy/diff")));
 assert.ok(changes.endpoints.some((endpoint) => endpoint.path === "/v1/candidate/status"));
 assert.ok(changes.endpoints.some((endpoint) => endpoint.path === "/v1/system/status"));
-assert.ok(changes.endpoints.some((endpoint) => endpoint.method === "POST" && endpoint.path === "/v1/system/runtime-readiness:check"));
+assert.ok(!changes.endpoints.some((endpoint) => endpoint.method === "POST" && endpoint.path === "/v1/system/runtime-readiness:check"));
 assert.ok(changes.endpoints.some((endpoint) => endpoint.path === "/v1/commit"));
 assert.ok(changes.endpoints.some((endpoint) => endpoint.path === "/v1/rollback"));
 assert.ok(changes.cli.some((item) => item.command === "ngfwctl policy validate"));

@@ -26,7 +26,7 @@ assert.equal(loginReturnPath("#//evil.example/login"), "/ui/");
 assert.equal(loginReturnPath("javascript:alert(1)"), "/ui/");
 assert.equal(loginReturnPath("#/unknown"), "/ui/");
 assert.equal(loginReturnPath("#/settings#nested"), "/ui/");
-assert.equal(loginRouteHash("#/readiness"), "#/readiness");
+assert.equal(loginRouteHash("#/readiness"), "");
 assert.equal(loginRouteHash("traffic?mode=sessions"), "#/traffic?mode=sessions");
 assert.equal(loginRouteHash("#/settings?tab=access"), "#/settings?tab=access");
 assert.equal(loginRouteHash("#/settings?panel=access"), "#/settings?panel=access");

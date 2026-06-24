@@ -72,7 +72,7 @@ assert.deepEqual(exceptionPolicyState({
 }, { exceptions: [runningException] }), {
   label: "candidate",
   cls: "violet",
-  detail: "Staged only; commit before Suricata receives the suppression.",
+  detail: "Staged only; commit before IDS/IPS engine receives the suppression.",
   withDot: false,
 });
 

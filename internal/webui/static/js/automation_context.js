@@ -5,7 +5,6 @@
 import { api } from "./api.js";
 import { h, icon } from "./core.js";
 import { normalizeObjectRoute } from "./object_route.js";
-import { releaseEvidencePacketDefinition, releaseEvidencePacketIds } from "./readiness_model.js";
 import { setupBaselineCliCommand, setupConfigFromQuery, setupContextSummary } from "./setup_context.js";
 import { telemetryEvidenceCommands } from "./telemetry_settings.js";
 import { closeDrawer, openDrawer, toast } from "./ui.js";
@@ -38,11 +37,10 @@ export const AUTOMATION_REPLAY_VALIDATION = Object.freeze({
 export const AUTOMATION_CONTEXTS = {
   "/": {
     title: "Dashboard",
-    summary: "The dashboard is read-only and composes live system, identity, release readiness, candidate, policy, traffic, threat, version, and feed evidence.",
+    summary: "The dashboard is read-only and composes live system, identity, candidate, policy, traffic, threat, version, and feed evidence.",
     endpoints: [
       get("/v1/system/status", "Runtime, dataplane, host, engine, and management posture"),
       get("/v1/system/identity", "Authenticated actor and role shown in management posture"),
-      get("/v1/system/release-acceptance/status", "Summary release-readiness state and gate counts"),
       get("/v1/candidate/status", "Candidate dirty-state and change counts used by dashboard remediation pivots"),
       get("/v1/policy?source=POLICY_SOURCE_RUNNING", "Running policy version used for dashboard state"),
       get("/v1/alerts?limit=500", "Recent normalized Threat-ID events"),
@@ -54,13 +52,12 @@ export const AUTOMATION_CONTEXTS = {
       cli("ngfwctl status", "Runtime, dataplane, engine, and host posture"),
       cli("ngfwctl whoami", "Authenticated actor and role"),
       cli("ngfwctl status # routing-vpn", "Routing daemon and VPN posture summarized from system status"),
-      cli("ngfwctl system release-acceptance-status --json", "Release-readiness state and gate counts"),
       cli("ngfwctl policy status --json", "Candidate dirty-state and change counts"),
       cli("ngfwctl alerts --limit 50", "Recent Threat-ID events"),
       cli("ngfwctl flows --limit 50", "Recent flow/App-ID evidence"),
       cli("ngfwctl versions --limit 8", "Recent committed versions"),
     ],
-    notes: ["Dashboard actions should navigate to candidate, diagnostics, readiness, or investigation surfaces before mutation."],
+    notes: ["Dashboard actions should navigate to candidate, diagnostics, or investigation surfaces before mutation."],
   },
   "/setup": {
     title: "Guided setup",
@@ -98,7 +95,7 @@ export const AUTOMATION_CONTEXTS = {
     cli("ngfwctl explain --source running --src 10.0.1.20 --dst 203.0.113.10 --protocol tcp --dport 443", "Headless running-side NAT path preview"),
     cli("ngfwctl explain --source candidate --src 10.0.1.20 --dst 203.0.113.10 --protocol tcp --dport 443", "Headless candidate-side NAT path preview"),
   ]),
-  "/inspection": policyWorkspace("Inspection", "IDS/IPS profile changes, Threat-ID package gate review, and false-positive exception posture stage through the candidate before runtime Suricata behavior changes.", [
+  "/inspection": policyWorkspace("Inspection", "IDS/IPS profile changes, Threat-ID package gate review, and false-positive exception posture stage through the candidate before runtime IDS/IPS engine behavior changes.", [
     get("/v1/system/status", "Current inspection engine, fail behavior, bypass, and degraded runtime posture"),
     get("/v1/intel/content/packages", "Threat-ID package provenance, regression, rollout, rollback, and production evidence gates"),
     get("/v1/alerts?limit=200", "Threat-ID events used to stage false-positive exceptions"),
@@ -106,9 +103,9 @@ export const AUTOMATION_CONTEXTS = {
     cli("ngfwctl status", "Current inspection engine and runtime posture"),
     cli("ngfwctl intel content", "Review Threat-ID package gates before prevention rollout"),
     cli("ngfwctl alerts --limit 100", "Review Threat-ID events before staging false-positive exceptions"),
-  ], ["Inspection actions change candidate policy only; Suricata detect/prevent runtime changes after validation and commit."]),
+  ], ["Inspection actions change candidate policy only; IDS/IPS engine detect/prevent runtime changes after validation and commit."]),
   "/netvpn": policyWorkspace("Routing & VPN", "Static route, BGP, OSPF, IPsec, and WireGuard policy edits stage generated engine configuration through the candidate. The edited policy sections are staticRoutes, routing.bgp, routing.ospf, vpn.ipsecTunnels, and vpn.wireguardInterfaces.", [
-    get("/v1/system/status", "Runtime interface, route renderer, FRR, strongSwan, WireGuard, and engine posture before path review"),
+    get("/v1/system/status", "Runtime interface, route renderer, routing service, IPsec service, WireGuard, and engine posture before path review"),
     post("/v1/explain/flow", "Evaluate a representative tunnel or routed flow against the candidate before commit", "{ \"policySource\": \"POLICY_SOURCE_CANDIDATE\", \"fromZone\": \"lan\", \"toZone\": \"vpn\", \"srcIp\": \"10.0.1.10\", \"destIp\": \"10.20.0.10\", \"destPort\": 51820, \"protocol\": \"PROTOCOL_UDP\" }"),
     get("/v1/sessions?protocol=UDP&port=51820&limit=100", "Live tunnel/session evidence for WireGuard or UDP-encapsulated VPN paths"),
   ], [
@@ -121,20 +118,19 @@ export const AUTOMATION_CONTEXTS = {
     cli("ngfwctl sessions --protocol UDP --port 51820 --limit 100", "Live tunnel/session evidence"),
     cli("ngfwctl commit -m \"update routing and VPN\"", "Publish reviewed route or VPN changes after validate and diff"),
   ], ["Secret material never enters policy; IPsec and WireGuard entries store firewall-local key or secret paths only.", "Static routes now have granular CLI operations. BGP, OSPF, IPsec, and WireGuard still converge through candidate export/edit/set, validation, diff, commit, rollback, and audit until dedicated granular APIs exist."]),
-  "/proxy": policyWorkspace("Proxy / WAF", "Virtual-service, WAF policy, route, and backend edits stage only policy.proxy. Validation renders planned Envoy/Coraza-style artifacts, runtime-readiness evidence, and traffic-policy impact; active listener/cutover execution remains external to this slice.", [
+  "/proxy": policyWorkspace("Proxy / WAF", "Virtual-service, WAF policy, route, and backend edits stage only policy.proxy. Validation renders planned proxy/WAF artifacts and traffic-policy impact; active listener/cutover execution remains external to this slice.", [
     get("/v1/policy?source=POLICY_SOURCE_CANDIDATE", "Current staged policy.proxy virtual services and WAF policies"),
     get("/v1/candidate/status", "Candidate revision and change summary used for guarded Proxy/WAF writes"),
     put("/v1/candidate", "Replace the staged candidate with updated policy.proxy", "{ \"policy\": { \"proxy\": { \"virtualServices\": [ ... ], \"wafPolicies\": [ ... ] } }, \"expectedCandidateRevision\": \"sha256:...\" }"),
     post("/v1/candidate/validate", "Validate server-aligned proxy/WAF posture and render the planned proxy artifact", "{}"),
-    post("/v1/system/runtime-readiness:check", "Review planned-not-executed proxy daemon, listener, cutover, rollback, and traffic-policy impact evidence before commit", "{ \"operation\": \"commit\", \"targetPolicy\": { \"proxy\": { ... } }, \"runningPolicy\": { ... } }"),
   ], [
     cli("ngfwctl policy show --source candidate --json", "Export the candidate policy.proxy section for review"),
     cli("ngfwctl policy set -f policy.yaml", "Stage edited policy.proxy through the candidate policy document"),
     cli("ngfwctl policy validate", "Validate proxy/WAF names, WAF provenance, planned listener, route, backend, and mTLS requirements"),
-    cli("ngfwctl status", "Review current proxy engine readiness and degraded runtime impact"),
+    cli("ngfwctl status", "Review current proxy status and degraded runtime impact"),
     cli("ngfwctl policy diff", "Review candidate proxy/WAF changes before commit"),
     cli("ngfwctl commit -m \"update proxy waf plan\"", "Publish reviewed proxy/WAF intent after validation"),
-  ], ["This route is planned-only: it does not install Envoy/Coraza, redirect traffic, store TLS private keys, execute listener cutover/rollback, or prove backend mTLS/HA traffic behavior.", "Runtime readiness can surface proxy engine blockers and planned-not-executed proof artifacts, but active traffic proof and packet inspection execution remain hardening/backend work."]),
+  ], ["This route is planned-only: it does not install proxy/WAF, redirect traffic, store TLS private keys, execute listener cutover/rollback, or prove backend mTLS/HA traffic behavior.", "System preflight can surface proxy blockers and planned-not-executed proof artifacts, but active traffic proof and packet inspection execution remain hardening/backend work."]),
   "/settings": policyWorkspace("Settings", "Network, host-input, telemetry, and auth-adjacent settings either stage policy or call guarded system APIs.", [
     get("/v1/system/identity", "Current actor, role, auth source, and capabilities"),
     get("/v1/auth/oidc/status", "Browser SSO provider posture"),
@@ -153,7 +149,7 @@ export const AUTOMATION_CONTEXTS = {
       get("/v1/system/status", "Current inspection posture, fail behavior, bypass risk, and engine readiness at investigation time"),
       get("/v1/alerts?limit=200", "Threat-ID events with severity, action, signature, and endpoints"),
       get("/v1/policy?source=POLICY_SOURCE_CANDIDATE", "Candidate IDS/IPS profile and exceptions"),
-      post("/v1/threat-exceptions:stage", "Stage one audited false-positive exception", "{ \"threatId\": \"phragma.test\", \"engineSignals\": [{ \"engine\": \"suricata\", \"kind\": \"signature_id\", \"value\": \"9000001\" }], \"scope\": \"THREAT_EXCEPTION_SCOPE_SOURCE\", \"sourceIp\": \"10.0.1.10\", \"reason\": \"known lab false positive\" }"),
+      post("/v1/threat-exceptions:stage", "Stage one audited false-positive exception", "{ \"threatId\": \"phragma.test\", \"engineSignals\": [{ \"engine\": \"ids-ips\", \"kind\": \"signature_id\", \"value\": \"9000001\" }], \"scope\": \"THREAT_EXCEPTION_SCOPE_SOURCE\", \"sourceIp\": \"10.0.1.10\", \"reason\": \"known lab false positive\" }"),
       put("/v1/candidate", "Stage broader IDS/IPS profile changes", "{ \"policy\": { ... } }"),
       post("/v1/candidate/validate", "Validate threat-profile candidate and return structured findings plus render plan"),
       post("/v1/commit", "Publish profile or exception changes with audit comment", "{ \"comment\": \"tune threat exception\" }"),
@@ -165,7 +161,7 @@ export const AUTOMATION_CONTEXTS = {
       cli("ngfwctl policy set -f policy.yaml", "Stage edited IDS/IPS policy"),
       cli("ngfwctl commit -m \"tune threat exception\"", "Publish reviewed changes"),
     ],
-    notes: ["Current inspection posture is handoff-time runtime context, not a substitute for per-event policy version stamps.", "Suricata remains an engine; the UI should display Phragma Threat-ID metadata and evidence."],
+    notes: ["Current inspection posture is handoff-time runtime context, not a substitute for per-event policy version stamps.", "IDS/IPS engine remains an engine; the UI should display Phragma Threat-ID metadata and evidence."],
   },
   "/traffic": {
     title: "Traffic",
@@ -262,13 +258,13 @@ export const AUTOMATION_CONTEXTS = {
       cli("ngfwperf verify perf/results", "Verify benchmark summary against raw artifacts"),
       cli("make benchmark-verify-release", "Verify benchmark evidence for the release gate"),
       cli("ngfwctl status > ngfw-status-active.txt", "Capture runtime status evidence"),
-      cli("sudo nft list table inet openngfw > nft-openngfw-final.txt", "Capture active nftables ruleset counters on Linux"),
+      cli("sudo packet-filter list table inet openngfw > packet-filter-openngfw-final.txt", "Capture active packet filter ruleset counters on Linux"),
     ],
     notes: ["Performance is a browser-local verifier and runbook surface; benchmark artifacts are not uploaded to controld.", "Use live status is current posture only; measured-window status evidence must be captured during the benchmark run.", "Claims must stay scoped to loaded raw evidence and active inspection state."],
   },
   "/fleet": {
     title: "Fleet & templates",
-    summary: "Fleet & templates aggregates the managed appliance, HA posture, candidate drift, content package readiness, release gates, server-retained local templates, bounded local template apply, and retained per-node result custody.",
+    summary: "Fleet & templates aggregates the managed appliance, HA posture, candidate drift, content package posture, server-retained local templates, bounded local template apply, and retained per-node result custody.",
     endpoints: [
       get("/v1/system/status", "Managed appliance runtime, dataplane, engine, routing, VPN, and embedded HA posture"),
       get("/v1/system/ha/status", "Active/passive HA role, peer sync, replication, failover, and recovery metadata when configured"),
@@ -279,8 +275,7 @@ export const AUTOMATION_CONTEXTS = {
       get("/v1/policy/diff?fromSource=POLICY_SOURCE_RUNNING&toSource=POLICY_SOURCE_CANDIDATE", "Running-to-candidate drift details for the managed appliance"),
       get("/v1/versions?limit=100", "Committed version and last-known-good history"),
       get("/v1/intel/feeds", "Feed registry and custom feed posture used by content template review"),
-      get("/v1/intel/content/packages", "App-ID, Threat-ID, and feed package readiness and rollback posture"),
-      get("/v1/system/release-acceptance/status", "Release gate state for production-readiness template review"),
+      get("/v1/intel/content/packages", "App-ID, Threat-ID, and feed package posture and rollback posture"),
       get("/v1/fleet/nodes", "Connected local appliance Fleet inventory boundary"),
       get("/v1/fleet/templates", "Server-retained local Fleet template drafts"),
       post("/v1/fleet/templates", "Create a server-retained local Fleet template draft", "{ \"name\": \"edge baseline\", \"policy\": { ... } }"),
@@ -301,8 +296,7 @@ export const AUTOMATION_CONTEXTS = {
       cli("ngfwctl policy diff", "Review running-to-candidate drift"),
       cli("ngfwctl policy set -f policy.yaml", "Stage an operator-reviewed template import through the existing candidate workflow"),
       cli("ngfwctl versions --limit 100", "Inspect committed version and rollback history"),
-      cli("ngfwctl intel content", "Review content package readiness for App-ID, Threat-ID, and feeds"),
-      cli("ngfwctl system release-acceptance-status --json", "Inspect release gates before production rollout"),
+      cli("ngfwctl intel content", "Review content packages for App-ID, Threat-ID, and feeds"),
       cli("ngfwctl fleet nodes", "Inspect connected local-appliance Fleet inventory boundary"),
       cli("ngfwctl fleet templates", "List server-retained local Fleet templates"),
       cli("ngfwctl fleet templates validate <id>", "Validate one local Fleet template"),
@@ -349,51 +343,13 @@ export const AUTOMATION_CONTEXTS = {
     ],
     notes: ["Content package install sources are firewall-server directories under the configured content import root, not browser uploads or operator workstation paths.", "Content package install and rollback are audited privileged operations, not direct file edits."],
   },
-  "/readiness": {
-    title: "Readiness",
-    summary: "Readiness turns system status and release acceptance evidence into production blockers, action queue items, host tuning review, and support evidence.",
-    endpoints: [
-      get("/v1/system/status", "Production readiness model source"),
-      get("/v1/system/ha/status", "Active/passive HA posture, peer sync, and recovery metadata"),
-      get("/v1/system/telemetry/exports/status", "Passive telemetry export posture included in support evidence"),
-      get("/v1/system/identity", "Authenticated operator identity included in support evidence"),
-      get("/v1/system/release-acceptance/status", "Summary release acceptance state, gate counts, provenance disclosures, and review-needed posture"),
-      get("/v1/system/support-bundle?versionLimit=100&auditLimit=300&eventLimit=500", "Canonical redacted support evidence bundle"),
-      get("/v1/policy?source=POLICY_SOURCE_RUNNING", "Running policy dataplane posture"),
-      get("/v1/candidate/status", "Candidate dirty-state, section changes, and impact summary for support evidence"),
-      post("/v1/system/runtime-readiness:check", "Canonical commit runtime preflight included in support evidence", "{ \"operation\": \"commit\", \"targetPolicy\": { ... }, \"runningPolicy\": { ... } }"),
-      post("/v1/system/tune", "Guarded host tuning action", "{ \"profile\": \"appliance\", \"write\": true, \"apply\": true }"),
-      post("/v1/system/ha/policy:pull", "Manual passive-node HA recovery resync from the active peer through validated/audited apply", "{ \"comment\": \"manual resync from active\", \"ackPull\": true, \"ackRisk\": true, \"ackRuntime\": true }"),
-      post("/v1/system/ha/failover:activate", "Manual passive-node activation; persists local HA role only and leaves traffic cutover/fencing external", "{ \"comment\": \"manual HA failover activation\", \"ackFailover\": true, \"ackExternalCutover\": true, \"ackExternalFencing\": true }"),
-      get("/v1/audit?limit=300", "Support bundle audit evidence"),
-      get("/v1/alerts?limit=300", "Support bundle threat evidence"),
-      get("/v1/flows?limit=300", "Support bundle flow evidence"),
-      get("/v1/sessions?limit=300", "Support bundle live state-table evidence"),
-      get("/v1/intel/feeds", "Support bundle feed registry and license posture"),
-      get("/v1/intel/content/packages", "Support bundle content package posture and blockers"),
-    ],
-    cli: [
-      cli("ngfwctl status", "Same readiness source as the UI"),
-      cli("ngfwctl system release-acceptance-status --json", "Appliance API release acceptance summary, provenance disclosures, and gate counts"),
-      cli("go run ./cmd/ngfwrelease status --json --manifest release/acceptance.json --evidence-dir release/evidence", "Headless operator release acceptance detail and artifact matching; keep path and command fields out of summary surfaces"),
-      cli("make release-acceptance-status RELEASE_NO_PERFORMANCE_CLAIMS=1", "Human release acceptance inventory plus advisory recordability summary"),
-      cli("make release-recordability-check COMMIT=<full-commit> VERSION=<tag>", "Strict source-tree recordability preflight without requiring release acceptance evidence"),
-      cli("ngfwctl system telemetry-export-status --json", "Read support-bundle telemetry export posture without sending test events"),
-      cli("sudo ngfwctl system tune --write --apply", "Apply reviewed appliance tuning"),
-      cli("ngfwctl system ha pull-policy --ack-pull --ack-risk --ack-runtime -m \"replicate from active\"", "Passive-node HA policy replication through the audited apply path"),
-      cli("ngfwctl system ha activate-passive --ack-failover --ack-external-cutover --ack-external-fencing -m \"manual HA failover activation\"", "Mark a ready passive node active after external cutover and fencing review"),
-      cli("ngfwctl support-bundle --output-dir .", "Headless support evidence export with generated phragma-support-...json filename"),
-    ],
-    notes: ["Readiness actions must improve evidence or posture; they do not weaken hard requirements.", "Remote continuation notes and copied smoke paths are not durable release evidence until rerun through repo-local release tooling and artifact-matching workbench commands.", "Automatic passive HA policy replication is reported in status when enabled; manual policy pull remains a guarded recovery resync workflow. Manual activation only marks local control-plane HA role; VIP/route cutover, peer fencing, and connection-state sync remain hardening controls.", "Use the JSON status command for automation; recordability is human guidance from the source checkout and is intentionally separate from JSON output."],
-  },
   "/changes": {
     title: "Changes",
     summary: "Changes exposes candidate review, validation, runtime preflight, diffs, import/export, version history, rollback review, and the audit trail.",
     endpoints: [
       get("/v1/candidate/status", "Current staged candidate dirty-state, section summary, and impact"),
       post("/v1/candidate/validate", "Validate current candidate before commit; returns structured findings plus render plan", "{}"),
-      get("/v1/system/status", "Runtime readiness and action queue used by candidate commit preflight"),
-      post("/v1/system/runtime-readiness:check", "Canonical runtime preflight used before publishing reviewed candidate", "{ \"operation\": \"commit\", \"targetPolicy\": { ... }, \"runningPolicy\": { ... } }"),
+      get("/v1/system/status", "system preflight and action queue used by candidate commit preflight"),
       get("/v1/policy/diff?fromSource=POLICY_SOURCE_RUNNING&toSource=POLICY_SOURCE_CANDIDATE", "Typed running-to-candidate policy diff"),
       get("/v1/versions?limit=100", "Committed version timeline"),
       get("/v1/audit?limit=200", "Audit entries with actor/action/version filters"),
@@ -570,21 +526,9 @@ function sanitizedRouteHash(route) {
 }
 
 function sanitizedRouteEntries(entries = [], path = "") {
-  if (path === "/readiness") return sanitizedReadinessRouteEntries(entries);
   return entries
     .filter(([key, value]) => routeStateAllowed(key, value))
     .map(([key, value]) => [String(key), safeRouteDisplayValue(value)]);
-}
-
-function sanitizedReadinessRouteEntries(entries = []) {
-  const query = new URLSearchParams(entries);
-  const drawer = choice(queryValue(query, "drawer"), ["system", "ha", "ebpf-drill", "ha-cockpit", "support-bundle", "release-acceptance"], "");
-  if (drawer) return [["drawer", drawer]];
-  const packet = choice(queryValue(query, "packet"), releaseEvidencePacketIds(), "");
-  if (packet) return [["packet", packet]];
-  const action = String(queryValue(query, "action") || "").trim();
-  if (/^[a-z0-9][a-z0-9-]{0,80}$/i.test(action)) return [["action", action]];
-  return [];
 }
 
 function routeStateAllowed(key, value) {
@@ -614,7 +558,6 @@ function exactRouteContext(route) {
   if (route.path === "/settings") return exactSettingsContext(route.query);
   if (route.path === "/objects") return exactObjectsContext(route.query);
   if (route.path === "/netvpn") return exactNetvpnContext(route.query);
-  if (route.path === "/readiness") return exactReadinessContext(route.query);
   if (route.path === "/intel") return exactIntelContext(route.query);
   if (route.path === "/logs") return exactLogsContext(route.query);
   if (route.path === "/compliance") return exactComplianceContext(route.query);
@@ -1035,12 +978,12 @@ function exactNetvpnContext(query) {
     const label = drawer.toUpperCase();
     return {
       endpoints: [
-        get("/v1/system/status", `Passive FRR runtime posture for ${label} route review`),
+        get("/v1/system/status", `Passive routing service runtime posture for ${label} route review`),
         get("/v1/policy?source=POLICY_SOURCE_CANDIDATE", `Candidate routing.${drawer} configuration`),
         post("/v1/candidate/validate", `Validate ${label} candidate before commit`, "{}"),
       ],
       cli: [
-        cli("ngfwctl status", `Inspect FRR and ${label} runtime posture`),
+        cli("ngfwctl status", `Inspect routing service and ${label} runtime posture`),
         cli("ngfwctl policy show --source candidate --json", `Export candidate routing.${drawer} configuration`),
         cli("ngfwctl policy diff", `Review ${label} changes against running policy`),
         cli(`ngfwctl commit -m "update ${drawer}"`, `Publish reviewed ${label} changes after validation`),
@@ -1100,147 +1043,6 @@ function exactNetvpnContext(query) {
       "BGP, OSPF, IPsec, and WireGuard edits still converge through candidate export/edit/set, validation, diff, commit, rollback, and audit until dedicated granular VPN CLIs exist.",
     ],
   };
-}
-
-function exactReadinessContext(query) {
-  const drawer = choice(queryValue(query, "drawer"), ["system", "ha", "ebpf-drill", "ha-cockpit", "support-bundle", "release-acceptance"], "");
-  const packet = drawer ? "" : choice(queryValue(query, "packet"), releaseEvidencePacketIds(), "");
-  const action = queryValue(query, "action");
-  if (drawer === "support-bundle") {
-    return {
-      endpoint: get("/v1/system/support-bundle?versionLimit=100&auditLimit=300&eventLimit=500", "Exact support-bundle export used by the current Readiness drawer"),
-      cli: cli("ngfwctl support-bundle --output-dir .", "Headless support evidence export equivalent for the current Readiness drawer"),
-      notes: ["Current Readiness drawer: support-bundle", "The support-bundle drawer is a redacted evidence export workflow; opening it does not stage policy or close release gates."],
-    };
-  }
-  if (drawer === "release-acceptance") {
-    return {
-      endpoint: get("/v1/system/release-acceptance/status", "Release acceptance state, gate counts, provenance disclosures, and review-needed posture for the current Readiness drawer"),
-      cli: [
-        cli("ngfwctl system release-acceptance-status --json", "Appliance API release acceptance summary for the current Readiness drawer"),
-        cli("make release-acceptance-status RELEASE_NO_PERFORMANCE_CLAIMS=1", "Source-tree release acceptance inventory plus advisory recordability summary"),
-      ],
-      notes: ["Current Readiness drawer: release-acceptance", "Remote continuation evidence does not satisfy release gates until recorded through repo-local release tooling.", "Recordability is advisory only and does not create evidence or assemble the manifest."],
-    };
-  }
-  if (drawer === "ha") {
-    return {
-      endpoint: get("/v1/system/ha/status", "Exact active/passive HA status request for the current Readiness drawer"),
-      cli: cli("ngfwctl status", "Headless HA posture, peer sync, failover eligibility, and blockers"),
-      notes: ["Current Readiness drawer: HA evidence", "The HA evidence drawer is read-only; it does not execute peer sync, replication, or failover."],
-    };
-  }
-  if (drawer === "ebpf-drill") {
-    return {
-      endpoints: [
-        get("/v1/system/status", "Exact XDP/tc host-readiness status source for the current eBPF drill drawer"),
-        get("/v1/system/release-acceptance/status", "Release gate state used by the linked eBPF OL9 field-evidence packet"),
-      ],
-      cli: [
-        cli("ngfwctl status", "Headless eBPF host-readiness posture and nftables fallback boundary"),
-        cli("make ebpf-ol9-attach-drill-check", "Rootless preflight before privileged eBPF attach drill collection"),
-      ],
-      notes: ["Current Readiness drawer: eBPF attach drill evidence", "The drill drawer is browser-local handoff evidence; release acceptance still requires recorded OL9 field evidence."],
-    };
-  }
-  if (drawer === "ha-cockpit") {
-    return {
-      endpoints: [
-        get("/v1/system/ha/status", "Exact active/passive HA posture backing the operations cockpit"),
-        post("/v1/system/ha/policy:pull", "Manual passive-node HA recovery resync from the active peer through validated/audited apply", "{ \"comment\": \"manual resync from active\", \"ackPull\": true, \"ackRisk\": true, \"ackRuntime\": true }"),
-        post("/v1/system/ha/failover:activate", "Manual passive-node activation; persists local HA role only and leaves traffic cutover/fencing external", "{ \"comment\": \"manual HA failover activation\", \"ackFailover\": true, \"ackExternalCutover\": true, \"ackExternalFencing\": true }"),
-      ],
-      cli: [
-        cli("ngfwctl status", "Headless HA posture, peer sync, failover eligibility, and blockers"),
-        cli("ngfwctl system ha pull-policy --ack-pull --ack-risk --ack-runtime -m \"replicate from active\"", "Passive-node HA policy replication through the audited apply path"),
-        cli("ngfwctl system ha activate-passive --ack-failover --ack-external-cutover --ack-external-fencing -m \"manual HA failover activation\"", "Mark a ready passive node active after external cutover and fencing review"),
-      ],
-      notes: [
-        "Current Readiness drawer: HA operations cockpit",
-        "Review pull and activation actions still require acknowledgement, audit comments, and the dedicated HA APIs.",
-        "The cockpit does not perform VIP/route cutover, peer fencing, connection-state transfer, or token rotation; those remain production hardening work.",
-      ],
-    };
-  }
-  if (drawer === "system") {
-    return {
-      endpoint: get("/v1/system/status", "Exact system posture source for the current Readiness evidence drawer"),
-      cli: cli("ngfwctl status", "Headless system posture equivalent for the current Readiness drawer"),
-      notes: ["Current Readiness drawer: system evidence"],
-    };
-  }
-  if (packet) {
-    const definition = releaseEvidencePacketDefinition(packet);
-    if (!definition) return null;
-    const endpoints = definition.endpoints.map((path) => releasePacketEndpoint(packet, path));
-    const cliItems = releasePacketCli(definition);
-    return {
-      endpoints,
-      cli: cliItems,
-      notes: releasePacketNotes(definition),
-    };
-  }
-  if (action) {
-    return {
-      endpoint: get("/v1/system/status", "Runtime readiness action queue source for the focused Readiness action"),
-      cli: cli("ngfwctl status", "Headless runtime posture for the focused Readiness action"),
-      notes: [`Current Readiness action focus: ${action}`],
-    };
-  }
-  return null;
-}
-
-function releasePacketEndpoint(packetId, path) {
-  if (path === "/v1/system/release-acceptance/status") {
-    return get(path, `Release gate state used by the ${packetId} readiness packet`);
-  }
-  if (path === "/v1/system/status" && packetId === "ebpf-ol9-field-evidence") {
-    return get(path, "Status API source that must be captured into release/field-evidence/ebpf-ol9/status/system-status-ebpf.json during collection");
-  }
-  if (path === "/v1/system/status") {
-    return get(path, `Runtime status evidence used while reviewing the ${packetId} readiness packet`);
-  }
-  if (path === "/v1/system/ha/status") {
-    return get(path, "Active/passive HA posture backing the recovery evidence packet");
-  }
-  if (path === "/v1/intel/content/packages") {
-    return get(path, "Content package readiness and blocker detail for the selected release packet");
-  }
-  if (path === "/v1/auth/oidc/status") {
-    return get(path, "OIDC provider posture used by the selected auth release packet");
-  }
-  if (path === "/v1/system/identity") {
-    return get(path, "Authenticated actor and role evidence used by the selected auth release packet");
-  }
-  return get(path, `Supporting API evidence used by the ${packetId} readiness packet`);
-}
-
-function releasePacketCli(definition) {
-  const commands = definition.packet.commandItems?.length
-    ? definition.packet.commandItems
-    : (definition.packet.commands || []).map((command) => ({ role: "Command", command }));
-  const items = commands.map((item) => cli(item.command, `${item.role} command for ${definition.id} release evidence`));
-  if (!items.length) {
-    items.push(cli("ngfwctl system release-acceptance-status --json", `Inspect appliance release gate state before recording ${definition.id} evidence`));
-  }
-  return items;
-}
-
-function releasePacketNotes(definition) {
-  const packet = definition.packet || {};
-  const notes = [
-    `Current Readiness release packet: ${definition.id}`,
-    `Release check: ${packet.check || definition.id}`,
-    `Evidence path: ${packet.evidencePath || "release evidence"}`,
-  ];
-  if (packet.artifactPath) notes.push(`Recorded artifact: ${packet.artifactPath}`);
-  if (packet.reference) notes.push(`Reference: ${packet.reference}`);
-  notes.push("Release packet routes are handoff targets; they do not create evidence or make a check clear.");
-  if (definition.id === "ebpf-ol9-field-evidence") {
-    notes.push("Run the privileged collect command only on a reviewed disposable interface with no existing XDP or clsact state.");
-    notes.push("The recorded validator stdout must include required_drill_evidence=drill-manifest,probe-source-sha256,probe-object-sha256,attach-detach-command-records.");
-  }
-  return notes;
 }
 
 function exactSettingsContext(query) {

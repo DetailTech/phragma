@@ -18,7 +18,7 @@ import {
   contentPackagePreviewComparison,
   contentPromotionDecision,
   contentQualityWorkbench,
-  contentReadinessActionPlan,
+  contentActionPlan,
   customFeeds,
   effectiveFeedEnabled,
   normalizeCustomFeed,
@@ -35,7 +35,7 @@ export {
   contentPackagePreviewComparison,
   contentPromotionDecision,
   contentQualityWorkbench,
-  contentReadinessActionPlan,
+  contentActionPlan,
   customFeeds,
   effectiveFeedEnabled,
   normalizeCustomFeed,
@@ -323,7 +323,7 @@ function productionEvidenceInventoryModelRow(kind, pkg, opts = {}) {
       nextAction: `Preview and install a signed ${kind} package from the firewall content import directory.`,
     };
   }
-  const readiness = normalizeContentReadinessForInventory(pkg.contentReadiness || pkg.content_readiness || {});
+  const readiness = normalizeContentForInventory(pkg.content || pkg.content_readiness || {});
   const required = readiness.requiredProductionEvidence.length ? readiness.requiredProductionEvidence : expected.required;
   const attached = new Set(readiness.evidence.filter((ref) => ref.artifact && ref.sha256).map((ref) => ref.type));
   const missing = required.filter((type) => !attached.has(type));
@@ -345,7 +345,7 @@ function productionEvidenceInventoryModelRow(kind, pkg, opts = {}) {
   };
 }
 
-function normalizeContentReadinessForInventory(readiness = {}) {
+function normalizeContentForInventory(readiness = {}) {
   const evidence = Array.isArray(readiness.evidence) ? readiness.evidence : [];
   return {
     scope: readiness.scope || "",
@@ -420,17 +420,17 @@ function productionInventoryCommands(rows = []) {
 }
 
 function productionEvidenceInventoryDetail(status, pkg = {}, readiness = {}, missing = []) {
-  if (status === "production-ready") return readiness.readinessDetail || "Signed package and production evidence gates report ready.";
+  if (status === "production-ready") return readiness.readinessDetail || "Signed package evidence is ready.";
   if (status === "demo") return readiness.readinessDetail || "Package evidence is explicitly demo-only and not approved for production verdict changes.";
-  if (status === "missing") return "Signed production-readiness evidence is not installed for this package.";
+  if (status === "missing") return "Signed package evidence is not installed for this package.";
   if (missing.length) return `Missing required production evidence: ${missing.join(", ")}.`;
-  return readiness.readinessDetail || pkg.detail || "Package or production evidence gates are blocking production readiness.";
+  return readiness.readinessDetail || pkg.detail || "Package evidence needs review.";
 }
 
 function productionEvidenceInventoryNextAction(status, kind, missing = []) {
   if (status === "production-ready") return `Inspect ${kind} evidence and keep rollback/canary handoff attached to the change record.`;
   if (status === "demo") return `Replace demo ${kind} content with a production-scoped signed package before verdict-changing use.`;
-  if (status === "missing") return `Install signed ${kind} content with production readiness evidence.`;
+  if (status === "missing") return `Install signed ${kind} content with package evidence.`;
   if (missing.length) return `Attach ${missing[0]} and re-run content package preview for ${kind}.`;
   return `Resolve package blockers and re-run content package preview for ${kind}.`;
 }
@@ -581,7 +581,7 @@ function openPackageQualityDrawer(surface, opts = {}) {
   if (opts.sync !== false) setIntelDrawerState(surface, "quality");
   openDrawer({
     title: `${surface.name} quality gates`,
-    subtitle: "Package version, required evidence, and production-readiness posture.",
+    subtitle: "Package version, required evidence, and package posture.",
     width: "780px",
     onClose: clearIntelDrawerState,
     body: packageQualityBody(surface),
@@ -609,7 +609,7 @@ function packageQualityBody(surface) {
         h("span", {}, "must be resolved before production use")),
       h("div", { class: "release-acceptance-problem-list" },
         workbench.blockers.slice(0, 10).map((item) => h("span", {}, item)))) : null,
-    contentReadinessActionPlanPanel(surface),
+    contentActionPlanPanel(surface),
     contentCanaryTelemetryPanel(surface),
     contentPromotionDecisionPanel(surface, { lifecycleAction: "quality" }),
     contentQualityEvidenceInventory(workbench, surface),
@@ -729,8 +729,8 @@ function falsePositiveTelemetryRows(workbench = {}) {
       { className: "content-fp-telemetry-table" })));
 }
 
-function contentReadinessActionPlanPanel(surface = {}) {
-  const plan = contentReadinessActionPlan(surface);
+function contentActionPlanPanel(surface = {}) {
+  const plan = contentActionPlan(surface);
   return h("div", { class: "profile-strip content-readiness-action-plan", dataset: { intelContentActionPlan: plan.kind } },
     h("div", { class: "profile-strip-head" },
       h("strong", {}, "Operator action plan"),
@@ -779,8 +779,8 @@ function contentQualityEvidenceInventory(workbench = {}, surface = {}) {
       h("strong", {}, "Evidence inventory"),
       h("span", {}, `${attached.length}/${required.length} required artifacts attached`)),
     h("div", { class: "runtime-grid content-quality-metrics" },
-      metric("Readiness scope", surface.contentReadiness?.scope || "missing"),
-      metric("Evidence status", surface.contentReadiness?.evidenceStatus || "missing"),
+      metric(" scope", surface.content?.scope || "missing"),
+      metric("Evidence status", surface.content?.evidenceStatus || "missing"),
       metric("Regression corpus", corpus.status),
       metric("Inspectable artifacts", String(attached.length))),
     h("div", { class: "content-quality-evidence-list" },

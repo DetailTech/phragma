@@ -12,7 +12,7 @@ const rulesViewSource = readFileSync(new URL("./views/rules.js", import.meta.url
 assert.match(rulesViewSource, /const fieldLabel = String\(opts\.field \|\| "token"\)\.replace/);
 assert.match(rulesViewSource, /type: "button",\s+title: `Remove \$\{v\}`,\s+"aria-label": `Remove \$\{v\} from \$\{fieldLabel\}`/);
 assert.match(rulesViewSource, /dataset: \{ ruleTokenAction: "remove", ruleTokenField: opts\.field \|\| "", ruleTokenValue: v \}/);
-assert.match(rulesViewSource, /supported Suricata signals add managed L7 allow\/drop metadata controls/);
+assert.match(rulesViewSource, /supported IDS\/IPS engine signals add managed L7 allow\/drop metadata controls/);
 
 {
   const pending = {};
@@ -92,7 +92,7 @@ assert.match(rulesViewSource, /supported Suricata signals add managed L7 allow\/
     ports: [],
   }]), [
     "Application signal-only has no TCP/UDP port hints; signal-only App-ID enforcement requires IDS/IPS Prevent with Fail closed.",
-    "Application signal-only has no supported Suricata App-ID signal (supported: dns, http, ssh, tls).",
+    "Application signal-only has no supported IDS/IPS engine App-ID signal (supported: dns, http, ssh, tls).",
   ]);
 
   assert.deepEqual(appRuleIssues({
@@ -151,7 +151,7 @@ assert.match(rulesViewSource, /supported Suricata signals add managed L7 allow\/
   }], {
     ids: { enabled: true, mode: "IDS_MODE_PREVENT", failureBehavior: "IDS_FAILURE_BEHAVIOR_FAIL_CLOSED" },
   }), [
-    "Application signal-only has no TCP/UDP port hints; signal-only App-ID Allow cannot preserve a bounded nftables forwarding path.",
+    "Application signal-only has no TCP/UDP port hints; signal-only App-ID Allow cannot preserve a bounded packet filter forwarding path.",
   ]);
 }
 

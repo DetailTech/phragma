@@ -6,7 +6,7 @@ export const BASELINE_PROFILES = [
   {
     id: "throughput",
     title: "High-throughput edge",
-    summary: "Forwarding, SNAT, host-input hardening, and nftables flowtable acceleration with IDS/IPS off.",
+    summary: "Forwarding, SNAT, host-input hardening, and packet filter flowtable acceleration with IDS/IPS off.",
     defaults: {
       inspectionMode: "off",
       flowOffload: true,
@@ -17,7 +17,7 @@ export const BASELINE_PROFILES = [
   {
     id: "ids-detect",
     title: "IDS detect",
-    summary: "Suricata detect mode with explicit home networks and NIC offload management; flowtable off.",
+    summary: "IDS/IPS engine detect mode with explicit home networks and NIC offload management; flowtable off.",
     defaults: {
       inspectionMode: "detect",
       flowOffload: false,
@@ -28,7 +28,7 @@ export const BASELINE_PROFILES = [
   {
     id: "ips-prevent",
     title: "IPS prevent",
-    summary: "Inline Suricata prevention via NFQUEUE with explicit fail behavior; flowtable off.",
+    summary: "Inline IDS/IPS engine prevention via NFQUEUE with explicit fail behavior; flowtable off.",
     defaults: {
       inspectionMode: "prevent",
       flowOffload: false,

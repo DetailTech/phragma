@@ -226,7 +226,7 @@ function paint(root) {
   const issues = interfaceAssignmentIssues(state, interfaces);
   const hostPrep = hostPreparationModel(setupStatus, state.profile);
   const contentPosture = buildContentPosture(setupFeeds, preview.policy, setupContentPackages, setupContentError);
-  const checklist = setupReadinessChecklist({
+  const checklist = setupChecklist({
     config: state,
     policy: preview.policy,
     issues,
@@ -278,7 +278,7 @@ function paint(root) {
         textField("Inside network", "insideCidr", "10.0.0.0/24", root),
         textField("WebUI/API port", "webuiPort", "8080", root, "number"),
         textField("Global MTU", "mtu", "optional", root, "number"),
-        posture.defaults.inspectionMode !== "off" ? textField("Suricata rule files", "idsRuleFiles", "local.rules", root) : null,
+        posture.defaults.inspectionMode !== "off" ? textField("IDS/IPS engine rule files", "idsRuleFiles", "local.rules", root) : null,
         posture.defaults.inspectionMode === "prevent" ? textField("NFQUEUE", "idsQueueNum", "0", root, "number") : null),
       posture.defaults.inspectionMode === "prevent" ? h("div", { class: "setup-fail" },
         h("span", {}, "IPS failure behavior"),
@@ -801,7 +801,7 @@ export function hostPreparationModel(status = {}, profileId = "throughput") {
   };
 }
 
-export function setupReadinessChecklist({
+export function setupChecklist({
   config = {},
   policy = {},
   issues = [],
@@ -917,8 +917,8 @@ export function setupReadinessChecklist({
           : hostTuningUnknown
             ? "Runtime status is unavailable; collect host tuning evidence before production commit."
             : hostPreparation.baseline?.detail || "Kernel baseline tuning needs review before production commit.",
-      href: "#/readiness",
-      action: "Readiness",
+      href: "#/settings",
+      action: "Settings",
     },
     {
       id: "candidate-review",
@@ -935,6 +935,8 @@ export function setupReadinessChecklist({
     },
   ];
 }
+
+export const setupReadinessChecklist = setupChecklist;
 
 export function setupTopologyProof(config = {}, policy = {}, context = {}) {
   const scenario = SETUP_SCENARIOS.find((item) => item.id === config.scenario);

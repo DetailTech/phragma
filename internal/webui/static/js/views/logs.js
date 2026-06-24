@@ -107,8 +107,7 @@ function paint(root, logs, status) {
   }));
 
   if (!latestEntries.length) {
-    const empty = emptyState("terminal", "No matching log events", summary.warnings?.length ? summary.warnings.join(" ") : "Adjust filters or confirm the appliance log root is populated.",
-      h("a", { class: "btn", href: "#/readiness", title: "Open readiness workbench", "aria-label": "Open readiness workbench", "data-logs-action": "open-readiness" }, h("span", { html: icon("shield", 16) }), "Open readiness"));
+    const empty = emptyState("terminal", "No matching log events", summary.warnings?.length ? summary.warnings.join(" ") : "Adjust filters or confirm the appliance log root is populated.");
     empty.dataset.logsEmptyState = "true";
     root.appendChild(empty);
     return;
@@ -141,7 +140,7 @@ function filterBar(root) {
     ["", "All sources"], ["system", "System"], ["engine", "Engines"], ["dataplane", "Dataplane"], ["audit", "Audit"],
   ], state.source, (value) => updateState(root, { source: value }), { "data-logs-filter": "source" });
   const engine = select([
-    ["", "All engines"], ["suricata", "Suricata"], ["vector", "Vector"], ["frr", "FRR"], ["strongswan", "strongSwan"], ["wireguard", "WireGuard"], ["nftables", "nftables"], ["routes", "Routes"], ["netdev", "Netdev"],
+    ["", "All engines"], ["suricata", "IDS/IPS"], ["vector", "Telemetry"], ["frr", "Routing"], ["strongswan", "IPsec"], ["wireguard", "WireGuard"], ["nftables", "Packet filter"], ["routes", "Routes"], ["netdev", "Network device"],
   ], state.engine, (value) => updateState(root, { engine: value }), { "data-logs-filter": "engine" });
   const severity = select([
     ["", "All severities"], ["critical", "Critical"], ["error", "Error"], ["warn", "Warn"], ["notice", "Notice"], ["info", "Info"], ["debug", "Debug"],
@@ -224,13 +223,11 @@ function openLogEntry(entry) {
 
 function logPivots(entry, context = deriveLogPivotContext(entry)) {
   const lower = String(entry.message || "").toLowerCase();
-  const pivots = [
-    h("a", { class: "btn sm", href: "#/readiness", title: "Pivot to readiness workbench", "aria-label": "Pivot to readiness workbench", "data-log-pivot": "readiness" }, h("span", { html: icon("shield", 14) }), "Readiness"),
-  ];
+  const pivots = [];
   if (entry.source === "audit" || lower.includes("audit") || lower.includes("commit") || lower.includes("rollback")) {
     pivots.push(h("a", { class: "btn sm", href: "#/changes?tab=audit", title: "Pivot to audit log", "aria-label": "Pivot to audit log", "data-log-pivot": "audit" }, h("span", { html: icon("changes", 14) }), "Audit"));
   }
-  if (entry.engine === "suricata" || lower.includes("alert") || lower.includes("signature")) {
+  if (entry.engine === "ids-ips" || lower.includes("alert") || lower.includes("signature")) {
     pivots.push(h("a", { class: "btn sm", href: context.threatsHash || "#/threats", title: "Pivot to threats workbench", "aria-label": "Pivot to threats workbench", "data-log-pivot": "threats" }, h("span", { html: icon("threats", 14) }), "Threats"));
   }
   if (lower.includes("flow") || lower.includes("conntrack") || lower.includes("session") || context.hasTrafficContext) {
@@ -303,7 +300,7 @@ export function deriveLogPivotContext(entry = {}) {
   };
   const hasTuple = Boolean(tuple.srcIp || tuple.destIp || tuple.srcPort || tuple.destPort || tuple.protocol);
   const hasTrafficContext = Boolean(hasTuple || tuple.flowId || tuple.appId);
-  const hasThreatContext = Boolean(tuple.signatureId || entry.engine === "suricata" || String(entry.message || "").toLowerCase().includes("signature"));
+  const hasThreatContext = Boolean(tuple.signatureId || entry.engine === "ids-ips" || String(entry.message || "").toLowerCase().includes("signature"));
   const captureContext = logCapturePlanContext(tuple);
   return {
     ...tuple,

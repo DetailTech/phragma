@@ -1,5 +1,5 @@
 // NAT — source and destination translation policy. Edits stage to the
-// candidate only; commit renders nftables srcnat/dstnat chains.
+// candidate only; commit renders packet filter srcnat/dstnat chains.
 
 import { h, icon, clear } from "../core.js";
 import { api } from "../api.js";

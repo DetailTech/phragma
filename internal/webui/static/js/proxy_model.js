@@ -10,7 +10,7 @@ export const PROXY_PLAN_HARDENING_NOTES = Object.freeze([
   "Backend mTLS runtime certificate proof and rotation remain required before active rollout.",
   "WAF ruleset supply-chain custody must be signed and retained before production enforcement.",
   "Request-body privacy controls need server-side retention and redaction custody.",
-  "Active Envoy/Coraza traffic rollout, listener health, rollback, and HA traffic proof remain separate readiness work.",
+  "Active proxy/WAF traffic rollout, listener health, rollback, and HA traffic proof remain separate operational work.",
 ]);
 
 export const PROXY_ARTIFACT_PREVIEW_LIMITS = Object.freeze({
@@ -267,12 +267,11 @@ export function proxyPlanProofModel(validation = {}, proxy = {}) {
     hardeningNotes: [...PROXY_PLAN_HARDENING_NOTES],
     links: [
       { label: "Changes", href: "#/changes?tab=candidate" },
-      { label: "Readiness", href: "#/readiness" },
     ],
   };
 }
 
-export function proxyRuntimeReadinessModel({
+export function proxyRuntimeModel({
   candidateProxy = {},
   runningProxy = {},
   candidateStatus = null,
@@ -299,7 +298,7 @@ export function proxyRuntimeReadinessModel({
     ...validationErrors.map((detail) => runtimeBlocker("server-validation", "Server candidate validation", detail)),
   ];
   if (!hasCandidateProxy) blockers.push(runtimeBlocker("no-candidate-proxy", "No candidate Proxy/WAF policy", "Add a virtual service or WAF policy before listener rollout review."));
-  if (!validationValid) blockers.push(runtimeBlocker("validation-not-valid", "Candidate validation is not passing", "Run candidate validation and resolve server blockers before rollout readiness review."));
+  if (!validationValid) blockers.push(runtimeBlocker("validation-not-valid", "Candidate validation is not passing", "Run candidate validation and resolve server blockers before rollout review."));
   if (validationValid && !plan?.proxyArtifactPresent) blockers.push(runtimeBlocker("proxy-artifact-missing", "Proxy render artifact missing", "Server validation did not report proxy render-plan metadata for operator review."));
   blockers.push(...PROXY_PLAN_HARDENING_NOTES.map((detail, index) => runtimeBlocker(`hardening-${index + 1}`, "Production hardening required", detail)));
   const hasBlockingValidation = blockers.some((item) => item.id === "candidate-validation" || item.id === "server-validation" || item.id === "validation-not-valid" || item.id === "proxy-artifact-missing");
@@ -308,11 +307,11 @@ export function proxyRuntimeReadinessModel({
       : "review";
   const cls = readiness === "blocked" ? "bad" : readiness === "review" ? "warn" : "info";
   return {
-    schemaVersion: "openngfw.proxy.runtime-readiness.v1",
+    schemaVersion: "openngfw.proxy.runtime-review.v1",
     readiness,
     cls,
     label: readiness === "empty" ? "no proxy policy" : readiness === "blocked" ? "blocked" : "review required",
-    boundary: "Runtime-readiness review only; does not prove active listener traffic, WAF enforcement, daemon launch, TLS key custody, backend mTLS handshake, HA listener failover, signing custody, or traffic cutover.",
+    boundary: "Runtime review only; does not prove active listener traffic, WAF enforcement, daemon launch, TLS key custody, backend mTLS handshake, HA listener failover, signing custody, or traffic cutover.",
     candidateRevision: String(candidateRevision || candidateStatus?.candidateRevision || ""),
     runningVersion: Number(runningVersion) || 0,
     candidateDirty,
@@ -332,7 +331,6 @@ export function proxyRuntimeReadinessModel({
     blockers: dedupeBlockers(blockers),
     handoffLinks: [
       { label: "Changes review", href: "#/changes?tab=candidate" },
-      { label: "Readiness", href: "#/readiness" },
       { label: "Proxy plan proof", href: "#/proxy?drawer=plan" },
     ],
     reviewCommands: [
@@ -343,6 +341,8 @@ export function proxyRuntimeReadinessModel({
     ],
   };
 }
+
+export const proxyRuntimeReadinessModel = proxyRuntimeModel;
 
 export function proxyArtifactPreviewModel(validation = {}, proxy = {}, normalizedArtifacts = null, limits = PROXY_ARTIFACT_PREVIEW_LIMITS) {
   const renderPlan = validation?.renderPlan || validation?.render_plan || {};
@@ -519,31 +519,31 @@ function deterministicProxyPreviews(proxy = {}, limits = PROXY_ARTIFACT_PREVIEW_
   if (!p.virtualServices.length && !p.wafPolicies.length) return [];
   return [
     {
-      id: "envoy-bootstrap",
-      label: "Envoy bootstrap snippet",
-      engine: "envoy",
+      id: "proxy-listener-bootstrap",
+      label: "proxy listener bootstrap snippet",
+      engine: "proxy-listener",
       source: "browser-deterministic",
       language: "yaml",
-      filename: "envoy-bootstrap.preview.yaml",
-      ...boundedArtifactSnippet(renderEnvoySnippet(p), limits),
+      filename: "proxy-listener-bootstrap.preview.yaml",
+      ...boundedArtifactSnippet(renderProxyListenerSnippet(p), limits),
     },
     {
-      id: "coraza-waf",
-      label: "Coraza WAF snippet",
-      engine: "coraza",
+      id: "waf-policy",
+      label: "WAF policy snippet",
+      engine: "waf",
       source: "browser-deterministic",
       language: "text",
-      filename: "coraza-waf.preview.conf",
-      ...boundedArtifactSnippet(renderCorazaSnippet(p), limits),
+      filename: "waf-policy.preview.conf",
+      ...boundedArtifactSnippet(renderWAFSnippet(p), limits),
     },
   ];
 }
 
-function renderEnvoySnippet(proxy = {}) {
+function renderProxyListenerSnippet(proxy = {}) {
   const services = sortedByName(proxy.virtualServices || []);
   const lines = [
     "# Review-only deterministic preview from candidate policy.proxy.",
-    "# Not live listener evidence; no Envoy process or traffic cutover is started.",
+    "# Not live listener evidence; no proxy listener process or traffic cutover is started.",
     "static_resources:",
     "  listeners:",
   ];
@@ -583,10 +583,10 @@ function renderEnvoySnippet(proxy = {}) {
   return lines.join("\n") + "\n";
 }
 
-function renderCorazaSnippet(proxy = {}) {
+function renderWAFSnippet(proxy = {}) {
   const lines = [
     "# Review-only deterministic preview from candidate policy.proxy.",
-    "# Not live WAF enforcement evidence; Coraza runtime custody remains hardening work.",
+    "# Not live WAF enforcement evidence; WAF runtime custody remains hardening work.",
   ];
   for (const policy of sortedByName(proxy.wafPolicies || [])) {
     lines.push("");

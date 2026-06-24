@@ -13,7 +13,6 @@ import { auditEntryHandoffPacket, auditLogHandoffPacket, buildInvestigationPacke
 import { pinInvestigationPacket } from "../investigation_case.js";
 import { session, diffLines, changeImpact, normalizeServerImpact } from "../policy.js";
 import { normalizeSnapshotDrawer, normalizeSnapshotId, parsePolicyImportText, policyExportEnvelope, policyExportFilename, replacePolicyDraft, snapshotRestoreReviewFilename, snapshotRestoreReviewHash, snapshotRestoreReviewJson, snapshotRestoreReviewPacket } from "../policy_io.js";
-import { readinessActionHash } from "../readiness_model.js";
 import { pageHead, emptyState, pill, card, toast, openDrawer, closeDrawer, confirmDialog, keyboardRowAttrs, labeledCell, responsiveTable } from "../ui.js";
 import { renderValidationEvidence } from "../validation_view.js";
 import * as fmt from "../format.js";
@@ -339,7 +338,7 @@ async function candidateReview(wrap, root) {
   wrap.appendChild(h("div", { class: "loading" }, "Loading candidate review…"));
   const [validationResult, runtimePreflightResult, statusResult, diffResult, releaseResult] = await Promise.allSettled([
     api.validate(),
-    api.runtimeReadinessPreflight({ targetPolicy: session.draft, runningPolicy: session.running, operation: "commit" }),
+    api.runtimePreflight({ targetPolicy: session.draft, runningPolicy: session.running, operation: "commit" }),
     api.status(),
     loadCandidateDiff(),
     api.releaseAcceptanceStatus(),
@@ -416,12 +415,11 @@ async function candidateReview(wrap, root) {
         h("span", { html: icon("upload", 16) }), "Commit candidate"),
       h("button", { class: "btn", type: "button", title: "Prepare governance approval packet", "aria-label": "Prepare governance approval packet", dataset: { changesAction: "prepare-approval" }, onclick: () => openRoutedGovernanceApproval(approvalContext) },
         h("span", { html: icon("check", 16) }), "Prepare approval"),
-      h("a", { class: "btn ghost", href: "#/readiness", title: "Open readiness evidence", "aria-label": "Open readiness evidence", dataset: { changesLink: "readiness" } }, h("span", { html: icon("shield", 16) }), "Readiness"),
       h("button", { class: "btn ghost", type: "button", title: "Open candidate diff", "aria-label": "Open candidate diff", dataset: { changesAction: "open-diff" }, onclick: () => showCandidateDiff(diff) }, h("span", { html: icon("diff", 16) }), "Open diff"),
       h("button", { class: "btn ghost", type: "button", title: "Discard the current candidate", "aria-label": "Discard the current candidate", dataset: { changesAction: "discard-candidate" }, onclick: () => discardCandidate(root) }, "Discard candidate")),
     validationError ? h("div", { class: "alert-box bad" }, validationError.message || "Candidate validation failed.") :
       renderValidationEvidence(validation, {
-        validText: "Candidate validated successfully. Engine syntax checks passed.",
+        validText: "Candidate validated successfully. Policy checks passed.",
         invalidLead: "Fix these before committing:",
       }),
     candidateRuntimePanel(runtime),
@@ -467,21 +465,18 @@ export function strictUiEvidenceModel({
   const validationBlocked = Boolean(validationError || (validation && !validation.valid));
   const runtimeBlocked = runtime?.label === "not ready" || runtime?.cls === "bad";
   const runtimeReview = Boolean(runtime?.requiresAck || runtime?.cls === "warn");
-  const releaseSummary = releaseAcceptanceSummary(releaseAcceptance, releaseError);
   const blockers = [];
   if (validationBlocked) blockers.push(validationError ? "validation unavailable" : "validation failed");
-  if (runtimeBlocked) blockers.push("runtime readiness blocks UI apply");
-  if (!releaseSummary.available) blockers.push("release acceptance status unavailable");
-  else if (!releaseSummary.ready) blockers.push(`${releaseSummary.openCount} release evidence item${releaseSummary.openCount === 1 ? "" : "s"} still need review`);
+  if (runtimeBlocked) blockers.push("system preflight blocks UI apply");
   const canClickUiApply = !validationBlocked && !runtimeBlocked;
-  const state = !canClickUiApply ? "blocked" : runtimeReview || !releaseSummary.ready ? "review" : "ready";
+  const state = !canClickUiApply ? "blocked" : runtimeReview ? "review" : "ready";
   const label = state === "blocked" ? "strict apply blocked" : state === "review" ? "strict evidence review" : "strict apply ready";
   const tone = state === "blocked" ? "bad" : state === "review" ? "warn" : "ok";
   const action = op === "rollback" ? "rollback" : "commit";
   const detail = state === "blocked"
-    ? `${action} must stay disabled until validation and runtime readiness blockers are fixed.`
+    ? `${action} must stay disabled until validation and system preflight blockers are fixed.`
     : state === "review"
-      ? `UI ${action} can proceed only after operator acknowledgement and release-evidence review.`
+      ? `UI ${action} can proceed only after operator acknowledgement.`
       : `UI ${action} can be clicked under strict smoke; this is runtime preflight evidence, not field certification.`;
   return {
     operation: op,
@@ -493,15 +488,14 @@ export function strictUiEvidenceModel({
     runtimeReady: !runtimeBlocked,
     runtimeRequiresAck: Boolean(runtime?.requiresAck),
     validation: validationBlocked ? "blocked" : validation?.valid ? "passed" : "unknown",
-    release: releaseSummary,
+    release: releaseAcceptanceSummary(null, null),
     blockers,
     handoff: [
       "Preserve the candidate before cleanup, rollback, or strict apply retry.",
-      "Use Readiness release acceptance to record durable evidence; browser-local Changes packets do not close release gates.",
       "Do not treat this panel as ready-runtime field evidence until the strict UI apply smoke passes on a supported runtime-ready host.",
     ],
-    readinessHref: "#/readiness?drawer=release-acceptance",
-    fieldEvidenceHref: "#/readiness?packet=e2e-install",
+    readinessHref: "",
+    fieldEvidenceHref: "",
   };
 }
 
@@ -596,17 +590,12 @@ function strictUiEvidencePanel(model = {}) {
       kv("UI action", model.canClickUiApply ? "enabled by preflight" : "blocked by preflight"),
       kv("Runtime", model.runtimeRequiresAck ? "acknowledgement required" : model.runtimeReady ? "ready" : "not ready"),
       kv("Validation", model.validation || "unknown"),
-      kv("Release acceptance", release.available ? `${release.state || "review"}; ${release.openCount || 0} open` : "unavailable"),
       kv("Field evidence claim", "not claimed by Changes")),
     model.blockers?.length ? h("div", { class: "warning-list compact" }, model.blockers.map((item) =>
       h("div", { class: "warning-row warn" },
         h("div", {}, pill("review", "warn", true)),
         h("div", {}, item)))) : null,
-    h("div", { class: "flex wrap", style: { marginTop: "10px" } },
-      h("a", { class: "btn sm ghost", href: model.readinessHref || "#/readiness?drawer=release-acceptance", title: "Open release acceptance evidence", "aria-label": "Open release acceptance evidence", dataset: { changesStrictEvidenceAction: "release-acceptance" } },
-        h("span", { html: icon("shield", 15) }), "Release gates"),
-      h("a", { class: "btn sm ghost", href: model.fieldEvidenceHref || "#/readiness?packet=e2e-install", title: "Open runtime field evidence packet", "aria-label": "Open runtime field evidence packet", dataset: { changesStrictEvidenceAction: "runtime-field-evidence" } },
-        h("span", { html: icon("terminal", 15) }), "Runtime packet")));
+    null);
 }
 
 function lifecycleGuidancePanel(model = {}, packetContext = {}) {
@@ -853,13 +842,6 @@ function runtimePreflightActionRow(it, context = "candidate") {
       h("strong", {}, it.title),
       h("span", {}, it.detail || "No action detail returned."),
       h("div", { class: "warning-actions" },
-        h("a", {
-          class: "btn sm ghost",
-          href: readinessActionHash(it.id || it.title),
-          title: "Open this runtime blocker in Readiness",
-          "aria-label": "Open this runtime blocker in Readiness",
-          dataset: { changesRuntimeAction: "readiness" },
-        }, h("span", { html: icon("shield", 15) }), "Readiness"),
         it.href ? h("a", {
           class: "btn sm ghost",
           href: it.href,
@@ -950,7 +932,7 @@ function openGovernanceApprovalDrawer({ model, validation, validationError, runt
         h("div", { class: "note" }, model?.custodyNote || "Server-side approval records gate commit; signed custody and external CAB integration remain hardening work.")),
       h("dl", { class: "kv" },
         kv("State", model?.title || "Governance review"),
-        kv("Commit readiness", packet.summary.commitReadiness || "—"),
+        kv("Commit readiness", packet.summary.commit || "—"),
         kv("Running version", packet.summary.runningVersion ? `v${packet.summary.runningVersion}` : "—"),
         kv("Runtime", packet.summary.runtime || "—"),
         kv("Diff", `${packet.summary.diffSource || "unknown"}${packet.summary.diffChanged ? ", changed" : ", unchanged"}`),
@@ -1202,7 +1184,7 @@ function openCandidateCommitReview(root, { validation, validationError, runtime,
         approvalList,
         h("label", { class: "field" }, h("span", {}, "Approval rationale"), approvalComment),
         h("label", { class: "ack-row" }, approvalAckRisk, h("span", {}, "Approver reviewed high-risk policy impact.")),
-        h("label", { class: "ack-row" }, approvalAckRuntime, h("span", {}, "Approver reviewed runtime readiness warnings.")),
+        h("label", { class: "ack-row" }, approvalAckRuntime, h("span", {}, "Approver reviewed system preflight warnings.")),
         h("div", { class: "flex wrap", style: { marginTop: "10px" } },
           h("button", { class: "btn sm", type: "button", title: "Create a server approval for this candidate revision", "aria-label": "Create a server approval for this candidate revision", dataset: { changesApprovalAction: "create" }, onclick: (e) => createApproval(e.target.closest("button")) },
             h("span", { html: icon("check", 15) }), "Create approval"),
@@ -1224,10 +1206,10 @@ function openCandidateCommitReview(root, { validation, validationError, runtime,
 
 function candidateAckText(impact, runtime) {
   if (impact.level === "high" && runtime.requiresAck) {
-    return "I reviewed the high-risk policy impact and the runtime readiness warnings, and intend to apply this candidate.";
+    return "I reviewed the high-risk policy impact and the system preflight warnings, and intend to apply this candidate.";
   }
   if (runtime.requiresAck) {
-    return "I reviewed the runtime readiness warnings and intend to apply this candidate.";
+    return "I reviewed the system preflight warnings and intend to apply this candidate.";
   }
   return "I reviewed the high-risk policy impact and intend to apply it to the live firewall.";
 }
@@ -1762,7 +1744,7 @@ async function rollback(v, root, opts = {}) {
   const target = vp.policy || {};
   const [validationResult, runtimePreflightResult, statusResult, releaseResult] = await Promise.allSettled([
     api.validatePolicy(target),
-    api.runtimeReadinessPreflight({ targetPolicy: target, runningPolicy: session.running, operation: "rollback" }),
+    api.runtimePreflight({ targetPolicy: target, runningPolicy: session.running, operation: "rollback" }),
     api.status(),
     api.releaseAcceptanceStatus(),
   ]);
@@ -1980,10 +1962,10 @@ function rollbackRuntimePanel(runtime) {
 
 function rollbackAckText(impact, runtime) {
   if (impact.level === "high" && runtime.requiresAck) {
-    return "I reviewed the high-risk rollback impact and the runtime readiness warnings, and intend to apply this version.";
+    return "I reviewed the high-risk rollback impact and the system preflight warnings, and intend to apply this version.";
   }
   if (runtime.requiresAck) {
-    return "I reviewed the runtime readiness warnings and intend to apply this rollback.";
+    return "I reviewed the system preflight warnings and intend to apply this rollback.";
   }
   return "I reviewed the high-risk rollback impact and intend to apply it to the live firewall.";
 }

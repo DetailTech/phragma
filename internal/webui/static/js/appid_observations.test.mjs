@@ -394,7 +394,7 @@ assert.equal(appIdPackageProvenanceFromEvidence(["signed App-ID package /var/lib
   assert.match(appIdClusterReviewOnlyBoundary(model), /Direct staging remains limited/);
   const stagePacket = JSON.parse(investigationPacketJson(appIdObservationClusterHandoffPacket(cluster, {
     route: "#/traffic?mode=app-id",
-    appIdReadiness: {
+    appId: {
       explicit: true,
       productionReady: true,
       status: "passed",
@@ -437,8 +437,8 @@ assert.equal(appIdPackageProvenanceFromEvidence(["signed App-ID package /var/lib
   assert.equal(ready.canStageDrop, false);
   assert.equal(ready.canReviewDrop, true);
   assert.deepEqual(ready.blockers, []);
-  assert.match(ready.signalSupport, /supported Suricata/);
-  assert.equal(ready.representativePathType, "suricata-signal-only-review");
+  assert.match(ready.signalSupport, /supported IDS\/IPS engine/);
+  assert.equal(ready.representativePathType, "ids-ips-signal-only-review");
   assert.equal(ready.directStageEligible, false);
   assert.deepEqual(appIdClusterProductionReadinessRows(ready).map((item) => [item.key, item.status]), [
     ["production-appid-corpus", "ready"],
@@ -447,18 +447,18 @@ assert.equal(appIdPackageProvenanceFromEvidence(["signed App-ID package /var/lib
     ["reviewed-drop-rule-staging", "reviewable"],
     ["non-port-hint-l7-only-boundary", "review-only"],
   ]);
-  assert.equal(appIdDirectStageEligibilityLabel(ready), "review-only: supported Suricata signal path, no direct stage");
+  assert.equal(appIdDirectStageEligibilityLabel(ready), "review-only: supported IDS/IPS engine signal path, no direct stage");
   assert.match(appIdClusterReviewOnlyBoundary(ready), /Review-only boundary/);
   assert.match(ready.reviewBoundary, /Signal-only clusters are review-only handoffs/);
   assert.match(ready.reviewBoundary, /true L7\/proxy allow/);
   const signalPacket = JSON.parse(investigationPacketJson(appIdObservationClusterHandoffPacket(cluster, {
     route: "#/traffic?mode=app-id",
-    appIdReadiness: { explicit: true, productionReady: true, status: "passed", blockers: [] },
+    appId: { explicit: true, productionReady: true, status: "passed", blockers: [] },
     policy: { ids: { enabled: true, mode: "IDS_MODE_PREVENT", failureBehavior: "IDS_FAILURE_BEHAVIOR_FAIL_CLOSED" } },
   })));
-  assert.equal(signalPacket.summary.representativePathType, "suricata-signal-only-review");
+  assert.equal(signalPacket.summary.representativePathType, "ids-ips-signal-only-review");
   assert.equal(signalPacket.summary.directStageEligible, false);
-  assert.match(signalPacket.summary.directStageEligibility, /review-only: supported Suricata signal/);
+  assert.match(signalPacket.summary.directStageEligibility, /review-only: supported IDS\/IPS engine signal/);
   assert.match(signalPacket.summary.productionEvidence, /production ready/);
   assert.equal(signalPacket.summary.clusterEnforcement.canStageDrop, false);
   assert.equal(signalPacket.summary.clusterEnforcement.canReviewDrop, true);
@@ -482,10 +482,10 @@ assert.deepEqual(appIdClusterCorpusCustodyChecklist({
 }, {
   appIdReadiness: { manifestSha256: "a".repeat(64) },
 }).map((item) => item.label), [
-  "Representative queue observation",
-  "Representative path type",
-  "Production readiness evidence",
-  "Signed App-ID package manifest",
+    "Representative queue observation",
+    "Representative path type",
+    "Package evidence",
+    "Signed App-ID package manifest",
   "Corpus review route",
   "Boundary",
 ]);
@@ -600,7 +600,7 @@ assert.deepEqual(appIdClusterCorpusCustodyChecklist({
   assert.deepEqual(signalOnlyPlan.rule.sourceAddresses, []);
   assert.deepEqual(signalOnlyPlan.rule.destinationAddresses, []);
   assert.deepEqual(signalOnlyPlan.dependencies.addresses, []);
-  assert.equal(signalOnlyPlan.rule.description.includes("supported Suricata signal enforcement"), true);
+  assert.equal(signalOnlyPlan.rule.description.includes("supported IDS/IPS engine signal enforcement"), true);
   const signalDraft = structuredClone(policy);
   signalOnlyPlan.beforeSave(signalDraft);
   assert.deepEqual(signalDraft.addresses.map((item) => item.name), ["inside-existing"]);

@@ -26,7 +26,6 @@ const SAFE_LOGIN_PATHS = new Set([
   "/performance",
   "/intel",
   "/netvpn",
-  "/readiness",
   "/changes",
   "/settings",
 ]);

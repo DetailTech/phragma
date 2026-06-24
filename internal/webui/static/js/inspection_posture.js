@@ -37,7 +37,7 @@ export function degradedEngineEvidence(status = {}, policy = {}) {
   const cap = (status.capabilities || []).find((item) => item.name === DEGRADED_ENGINE_EVIDENCE_CAPABILITY) || {};
   const engines = Array.isArray(status.engines) ? status.engines : [];
   const inspection = currentInspectionPosture(status);
-  const engineRows = ["nftables", "suricata", "vector", "proxy"].map((name) => degradedEngineRow(name, status, engines, inspection, policy));
+  const engineRows = ["packet-filter", "ids-ips", "telemetry", "proxy"].map((name) => degradedEngineRow(name, status, engines, inspection, policy));
   const degradedRows = engineRows.filter((row) => row.required && row.degraded);
   const limitations = [
     "Runtime status summary only.",
@@ -50,7 +50,7 @@ export function degradedEngineEvidence(status = {}, policy = {}) {
     policy.ids?.enabled ? `Threat-ID inspection ${inspection.state}; ${failMode || "failure behavior not reported"}.` : "Threat-ID inspection disabled for the running policy.",
     threatProfiles.length ? `${threatProfiles.length} blocking security profile(s) depend on fail-closed inspection posture.` : "No blocking security profile dependency found in policy.",
     exceptions.length ? `${exceptions.length} active false-positive exception(s) require healthy suppression rendering.` : "No active false-positive exceptions found.",
-    telemetryPolicyActive(policy) ? "Vector telemetry is required for export evidence." : "Telemetry export is not required by policy.",
+    telemetryPolicyActive(policy) ? "Telemetry export is required by policy." : "Telemetry export is not required by policy.",
     proxyPolicyActive(policy) ? "Proxy/WAF policy requires external proxy runtime proof." : "Proxy/WAF policy is not configured.",
   ];
   const state = cap.state || (degradedRows.length ? "degraded" : "ready");
@@ -83,10 +83,10 @@ export function inspectionPostureSummary(status = {}) {
 }
 
 function degradedEngineRow(name, status = {}, engines = [], inspection = {}, policy = {}) {
-  if (name === "nftables") {
+  if (name === "packet-filter") {
     const state = status.capabilities?.find((item) => item.name === "Stateful firewall")?.state || "unknown";
     return {
-      name,
+      name: "Packet filter",
       required: true,
       state,
       degraded: !readyState(state),
@@ -94,12 +94,12 @@ function degradedEngineRow(name, status = {}, engines = [], inspection = {}, pol
       impact: "L3/L4 forwarding and policy counters",
     };
   }
-  if (name === "suricata") {
+  if (name === "ids-ips") {
     const required = Boolean(policy.ids?.enabled || inspection.engineRequired || inspection.state === "failed-open" || inspection.state === "failed-closed");
-    const state = inspection.engineLabel || engineState(findEngine(engines, name));
+    const state = inspection.engineLabel || engineState(findEngine(engines, "suricata"));
     const degraded = required && inspection.state !== "ready";
     return {
-      name,
+      name: "IDS/IPS",
       required,
       state: state || inspection.state || "unknown",
       degraded,
@@ -107,12 +107,12 @@ function degradedEngineRow(name, status = {}, engines = [], inspection = {}, pol
       impact: "Threat-ID detection/prevention and false-positive suppressions",
     };
   }
-  if (name === "vector") {
+  if (name === "telemetry") {
     const required = telemetryPolicyActive(policy);
-    const engine = findEngine(engines, name);
+    const engine = findEngine(engines, "vector");
     const state = engineState(engine);
     const degraded = required && !readyState(state);
-    return { name, required, state, degraded, tone: degraded ? "warn" : required ? "ok" : "neutral", impact: "Telemetry export and evidence forwarding" };
+    return { name: "Telemetry", required, state, degraded, tone: degraded ? "warn" : required ? "ok" : "neutral", impact: "Telemetry export and evidence forwarding" };
   }
   const required = proxyPolicyActive(policy);
   const engine = findEngine(engines, "proxy") || findEngine(engines, "envoy") || findEngine(engines, "coraza") || engines.find((item) => /proxy|waf|envoy|coraza/i.test([item.name, item.role, item.detail].filter(Boolean).join(" ")));

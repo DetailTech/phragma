@@ -133,8 +133,7 @@ function inspectionPostureStrip(status = {}) {
       h("div", { class: "flex wrap" },
         h("strong", {}, "Current inspection posture"),
         pill(posture.label, posture.cls, true),
-        h("span", { class: "tag" }, posture.engineLabel)),
-      h("a", { class: "linklike", href: "#/readiness", title: "Open readiness posture", "aria-label": "Open readiness posture", dataset: { threatAction: "open-readiness-posture" } }, "Readiness ->")),
+        h("span", { class: "tag" }, posture.engineLabel))),
     h("div", { class: "note" }, posture.detail),
     h("div", { class: "note" }, "Current runtime posture at handoff time; threat rows retain their own event policy context when stamped."));
 }
@@ -190,7 +189,7 @@ function paint(root, data, status = {}) {
 
   if (!alerts.length) {
     const why = ids.enabled
-      ? "The inspection engine is enabled but hasn't logged any alerts yet. Generate traffic through the firewall, or load rules (e.g. suricata-update)."
+      ? "The inspection engine is enabled but hasn't logged any alerts yet. Generate traffic through the firewall, or load rules (e.g. ids-ips-update)."
       : "IDS/IPS is disabled, so no traffic is being inspected. Enable it to populate Threats and Traffic.";
     root.appendChild(emptyState("shield", ids.enabled ? "No detections yet" : "Inspection is off", why,
       h("button", { class: "btn primary", type: "button", title: ids.enabled ? "Open IDS/IPS settings" : "Enable IDS/IPS inspection", "aria-label": ids.enabled ? "Open IDS/IPS settings" : "Enable IDS/IPS inspection", dataset: { threatAction: "ids-settings" }, onclick: () => openIdsEditor(() => location.reload()) }, h("span", { html: icon("threats", 16) }), ids.enabled ? "IDS/IPS settings" : "Enable IDS/IPS")));
@@ -662,7 +661,7 @@ function threatExceptionWorkbench(root, data, inventory = {}) {
 	        h("a", { class: "btn sm", href: "#/changes?tab=candidate", title: "Open candidate change review", "aria-label": "Open candidate change review", dataset: { threatExceptionAction: "open-candidate" } }, h("span", { html: icon("changes", 14) }), "Candidate"),
 	        h("button", { class: "btn sm", type: "button", title: "Refresh threat exceptions", "aria-label": "Refresh threat exceptions", dataset: { threatExceptionAction: "refresh" }, onclick: () => loadAndPaint(root) }, h("span", { html: icon("refresh", 14) }), "Refresh"))),
     model.error ? h("div", { class: "alert-box warn" }, model.error) : null,
-    h("div", { class: "note" }, "Lifecycle changes stage to the candidate only. Commit review is required before Suricata receives or removes a suppression."),
+    h("div", { class: "note" }, "Lifecycle changes stage to the candidate only. Commit review is required before IDS/IPS engine receives or removes a suppression."),
     h("dl", { class: "kv compact" },
       kv("Active", String(model.active)),
       kv("Disabled", String(model.disabled)),
@@ -1009,7 +1008,7 @@ export function threatExceptionRecordModel(record = {}, posture = null) {
   } else if (candidateOnly) {
     stateLabel = "candidate";
     stateCls = "violet";
-    stateDetail = "Staged only; commit before Suricata receives this suppression.";
+    stateDetail = "Staged only; commit before IDS/IPS engine receives this suppression.";
     stateDot = false;
   } else if (changedFromRunning) {
     stateLabel = "candidate edit";
@@ -1041,8 +1040,9 @@ export function threatExceptionRegressionBridge(record = {}, posture = null) {
   const ex = normalizeException(record.exception || record);
   const surface = threatPackageSurface(posture);
   const packageSummary = threatPackageSummary(posture);
-  const keyRefs = surface?.keyContentReadinessEvidence || packageSummary.keyContentReadinessEvidence || {};
+  const keyRefs = surface?.keyContentEvidence || surface?.keyContentReadinessEvidence || packageSummary.keyContentEvidence || packageSummary.keyContentReadinessEvidence || {};
   const canary = surface ? contentCanaryTelemetryWorkbench(surface) : null;
+  const canarySignalCount = String((Number(canary?.metrics?.falsePositiveSignals) || 0) + (Number(canary?.metrics?.canaryScopes) || 0));
   const context = [
     ex.pcapSha256 ? "exception PCAP hash" : "",
     ex.regressionRef ? "exception regression ref" : "",
@@ -1059,7 +1059,7 @@ export function threatExceptionRegressionBridge(record = {}, posture = null) {
     pcapCorpus: evidenceRefSummary(keyRefs.pcapRegressionCorpus),
     falsePositiveCorpus: evidenceRefSummary(keyRefs.falsePositiveRegression),
     canaryStatus: canary?.cls || "warn",
-    canarySignals: canary?.metrics?.falsePositiveSignals || "0",
+    canarySignals: canarySignalCount,
     canaryScopes: canary?.metrics?.canaryScopes || "0",
     summary: context.length ? context.join(" · ") : "No PCAP/regression/canary context attached",
     routes: {
@@ -1272,7 +1272,7 @@ export function threatPackageSummary(posture = null) {
   const blockers = uniqueThreatPackageBlockers([
     ...(Array.isArray(surface.blockers) ? surface.blockers : []),
     ...(Array.isArray(surface.decision?.blockers) ? surface.decision.blockers : []),
-    ...(Array.isArray(surface.contentReadiness?.blockers) ? surface.contentReadiness.blockers : []),
+    ...(Array.isArray(surface.content?.blockers) ? surface.content.blockers : []),
   ]);
   const status = check.status || surface.signatureStatus || surface.badge || "unknown";
   return {
@@ -1284,22 +1284,22 @@ export function threatPackageSummary(posture = null) {
     version: surface.version || "",
     packageState: surface.badge || "unknown",
     blockerCount: blockers.length,
-    contentReadinessEvidence: Array.isArray(surface.contentReadinessEvidence) ? surface.contentReadinessEvidence : [],
-    keyContentReadinessEvidence: surface.keyContentReadinessEvidence || {},
-    detail: surface.contentReadiness?.productionReady
+    contentEvidence: Array.isArray(surface.contentEvidence) ? surface.contentEvidence : [],
+    keyContentEvidence: surface.keyContentEvidence || {},
+    detail: surface.content?.productionReady
       ? "Production Threat-ID evidence is attached to the signed package."
       : "Threat severity and exception decisions use the normalized package posture reported by Intel.",
   };
 }
 
 function threatPackageEvidenceBlock(summary) {
-  const refs = Array.isArray(summary?.contentReadinessEvidence) ? summary.contentReadinessEvidence : [];
+  const refs = Array.isArray(summary?.contentEvidence) ? summary.contentEvidence : [];
   if (!refs.length) return null;
   return h("div", { class: "profile-strip" },
     h("div", { class: "profile-strip-head" },
       h("strong", {}, "Threat-ID package evidence"),
       pill(summary.status || "package", summary.cls || "info")),
-    h("div", { class: "note" }, "Package-level readiness artifacts attached to the installed Threat-ID catalog."),
+    h("div", { class: "note" }, "Package-level evidence attached to the installed Threat-ID catalog."),
     h("dl", { class: "kv compact" },
       refs.map((ref) => kv(contentEvidenceTypeLabel(ref.type), contentEvidenceRefLabel(ref)))));
 }
@@ -1307,7 +1307,7 @@ function threatPackageEvidenceBlock(summary) {
 function threatAlertRegressionBridge(alert = {}, posture = null) {
   const packageSummary = threatPackageSummary(posture);
   const surface = threatPackageSurface(posture);
-  const keyRefs = surface?.keyContentReadinessEvidence || packageSummary.keyContentReadinessEvidence || {};
+  const keyRefs = surface?.keyContentEvidence || surface?.keyContentReadinessEvidence || packageSummary.keyContentEvidence || packageSummary.keyContentReadinessEvidence || {};
   const canary = surface ? contentCanaryTelemetryWorkbench(surface) : null;
   const pcapSha256 = String(alert.pcapSha256 || alert.pcap_sha256 || "").trim().toLowerCase();
   const regressionRef = compactThreatEvidence(alert.regressionRef || alert.regression_ref || "", 160);
@@ -1671,7 +1671,7 @@ async function suppressThreat(a) {
     width: "620px",
     body: h("div", { dataset: { threatFpDrawer: "true" } },
       h("div", { class: "alert-box warn" }, h("strong", {}, "Candidate-only. "),
-        "This stages a Phragma IDS exception. Commit review is still required before Suricata receives the suppression."),
+        "This stages a Phragma IDS exception. Commit review is still required before IDS/IPS engine receives the suppression."),
       h("dl", { class: "kv" },
         kv("Signature ID", String(sid)),
         kv("Threat-ID", a.threatId || "—"),
@@ -1792,7 +1792,7 @@ function openThreatExceptionStageResult(a, scope, res = {}) {
     body: h("div", { dataset: { threatExceptionStageResult: model.name || "" } },
       h("div", { class: "alert-box ok" },
         h("strong", {}, "Candidate only. "),
-        "Review the diff and commit before Suricata receives this suppression."),
+        "Review the diff and commit before IDS/IPS engine receives this suppression."),
       h("dl", { class: "kv" },
         kv("Exception", model.name || "—"),
         kv("Signature ID", model.signatureId || "—"),

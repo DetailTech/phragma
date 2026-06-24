@@ -1109,7 +1109,7 @@ export function ruleInspectionCoverage(policy = {}, rule = {}) {
     return inspectionCoverage("ids-detect", "IDS detect", "info", "Traffic is observed by IDS; the policy action remains the enforcement verdict.");
   }
   if (flowOffload) {
-    return inspectionCoverage("fast-path", "fast path", "neutral", "IDS/IPS is disabled; forwarding-only traffic can use nftables flowtable acceleration.");
+    return inspectionCoverage("fast-path", "fast path", "neutral", "IDS/IPS is disabled; forwarding-only traffic can use packet filter flowtable acceleration.");
   }
   return inspectionCoverage("not-inspected", "not inspected", "warn", "IDS/IPS is disabled for this policy.");
 }
@@ -4792,11 +4792,11 @@ function buildEditor(rule, editing, idx, insertAt, opts = {}) {
     contextGuard,
     field("Services", serviceEditor, null, "services"),
     field("Applications", appEditor,
-      "allow/drop rules use TCP/UDP port hints; supported Suricata App-ID signals add L7 controls when IDS/IPS is Prevent fail closed", "applications"),
+      "allow/drop rules use TCP/UDP port hints; supported IDS/IPS engine App-ID signals add L7 controls when IDS/IPS is Prevent fail closed", "applications"),
     appGuard,
     field("Security profiles", securityProfileEditor,
       "blocking profile intent on allow rules requires IDS/IPS Prevent with Fail closed; TLS decryption, URL databases, and file engines remain separate integrations", "security-profiles"),
-    field("QoS profile", qosSel, "plan-only shaping intent; live tc/nft enforcement proof remains hardening", "qos-profile"),
+    field("QoS profile", qosSel, "plan-only shaping intent; live traffic shaping/packet-filter enforcement proof remains hardening", "qos-profile"),
     field("Action", actionSel, null, "action"),
     h("div", { class: "grid cols-2" },
       field("Log matches", logT, "Record matching connections.", "log"),
@@ -4889,8 +4889,8 @@ function buildEditor(rule, editing, idx, insertAt, opts = {}) {
 	      appGuard.appendChild(h("div", { class: "alert-box info" },
 	        h("strong", {}, "Current App-ID enforcement path. "),
 	        signalOnly
-	          ? "This signal-only Drop rule is enforced by Suricata App-ID signals in IDS/IPS Prevent fail-closed mode; Source/Destination scope is preserved when present."
-	          : "This App-ID rule matches the selected object's TCP/UDP port hints, and supported Suricata signals add managed L7 allow/drop metadata controls.",
+	          ? "This signal-only Drop rule is enforced by IDS/IPS engine App-ID signals in IDS/IPS Prevent fail-closed mode; Source/Destination scope is preserved when present."
+	          : "This App-ID rule matches the selected object's TCP/UDP port hints, and supported IDS/IPS engine signals add managed L7 allow/drop metadata controls.",
 	        " Engine-signal-only App-ID enforcement is a future L7 dataplane milestone."));
 	    }
     if (profileProblems.length) {
@@ -4905,7 +4905,7 @@ function buildEditor(rule, editing, idx, insertAt, opts = {}) {
     } else if (rule.qosProfile) {
       appGuard.appendChild(h("div", { class: "alert-box info" },
         h("strong", {}, "Current QoS runtime posture. "),
-        "This rule carries bounded shaping intent into validation, diff, and render-plan output; live tc/nft shaping proof is tracked as hardening."));
+        "This rule carries bounded shaping intent into validation, diff, and render-plan output; live traffic shaping/packet-filter shaping proof is tracked as hardening."));
     }
   }
 
@@ -5141,13 +5141,13 @@ export function appRuleIssues(rule, apps = [], policy = {}) {
     }
     if (!hasEnforceableAppPorts(app)) {
       if (rule.action === "ACTION_ALLOW") {
-        issues.push(`Application ${ref} has no TCP/UDP port hints; signal-only App-ID Allow cannot preserve a bounded nftables forwarding path.`);
+        issues.push(`Application ${ref} has no TCP/UDP port hints; signal-only App-ID Allow cannot preserve a bounded packet filter forwarding path.`);
       }
       if (!idsPreventFailClosed(policy?.ids || {})) {
         issues.push(`Application ${ref} has no TCP/UDP port hints; signal-only App-ID enforcement requires IDS/IPS Prevent with Fail closed.`);
       }
       if (!hasSupportedAppIDSignal(app)) {
-        issues.push(`Application ${ref} has no supported Suricata App-ID signal (supported: dns, http, ssh, tls).`);
+        issues.push(`Application ${ref} has no supported IDS/IPS engine App-ID signal (supported: dns, http, ssh, tls).`);
       }
       if (hasSpecificRefs(rule.fromZones) || hasSpecificRefs(rule.toZones)) {
         issues.push("Signal-only App-ID rules cannot be scoped only by From/To zones; add TCP/UDP port hints or use Source/Destination address scope.");

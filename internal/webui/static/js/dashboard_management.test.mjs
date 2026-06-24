@@ -29,7 +29,6 @@ const {
   dashboardCandidateStatusModel,
   dashboardEngineActionLinks,
   dashboardHash,
-  dashboardReleaseGateHash,
   dashboardReleaseReadinessModel,
   dashboardRulesRemediationHash,
   dashboardThreatSeverity,
@@ -95,8 +94,6 @@ const {
   assert.equal(dashboardTrafficHash({ app: "TLS" }), "#/traffic?mode=flows&app=TLS");
   assert.equal(dashboardThreatHash({ sev: 2, alert: "flow:abc" }), "#/threats?sev=2&alert=flow%3Aabc");
   assert.equal(dashboardAuditHash({ version: 12 }), "#/changes?tab=audit&limit=300&version=12");
-  assert.equal(dashboardReleaseGateHash(), "#/readiness?drawer=release-acceptance");
-  assert.equal(dashboardReleaseGateHash("proto-verify"), "#/readiness?packet=proto-verify");
   assert.equal(dashboardRulesRemediationHash(), "#/rules?changed=1&density=compact");
   assert.equal(dashboardTroubleshootCompareHash(), "#/troubleshoot?intent=compare&run=1");
 }
@@ -132,16 +129,15 @@ const {
 
 {
   const suricata = dashboardEngineActionLinks({ name: "suricata", state: "failed", detail: "eve socket unavailable" });
-  assert.deepEqual(suricata.map((link) => link.id), ["readiness", "inspection", "logs"]);
-  assert.equal(suricata.find((link) => link.id === "inspection").href, "#/inspection?engine=suricata&state=failed");
+  assert.deepEqual(suricata.map((link) => link.id), ["troubleshoot", "logs"]);
   assert.equal(suricata.find((link) => link.id === "logs").href, "#/logs?source=engine&engine=suricata&severity=error&q=eve+socket+unavailable");
 
   const frr = dashboardEngineActionLinks({ name: "frr-bgp", state: "restarting", detail: "peer session down" });
-  assert.deepEqual(frr.map((link) => link.id), ["readiness", "netvpn", "logs"]);
+  assert.deepEqual(frr.map((link) => link.id), ["netvpn", "logs"]);
   assert.equal(frr.find((link) => link.id === "netvpn").href, "#/netvpn?drawer=runtime-review&engine=frr-bgp");
 
   const unknown = dashboardEngineActionLinks({ name: "collector", state: "missing-prerequisites", detail: "binary missing" });
-  assert.deepEqual(unknown.map((link) => link.id), ["readiness", "troubleshoot", "logs"]);
+  assert.deepEqual(unknown.map((link) => link.id), ["troubleshoot", "logs"]);
   assert.equal(unknown.find((link) => link.id === "troubleshoot").href, "#/troubleshoot?intent=runtime&run=1&engine=collector");
 }
 
@@ -214,7 +210,7 @@ const {
   assert.equal(candidate.dirty, true);
   assert.equal(candidate.changeCount, 2);
   assert.match(candidate.label, /2 pending changes/);
-  assert.match(candidate.detail, /before release evidence is recorded/);
+  assert.match(candidate.detail, /before commit/);
 
   const clean = dashboardCandidateStatusModel({ hasCandidate: false, dirty: false, runningVersion: 8 });
   assert.equal(clean.dirty, false);

@@ -2,7 +2,7 @@ export const NETWORK_PROFILES = [
   {
     id: "throughput",
     title: "Forwarding throughput",
-    detail: "Jumbo MTU, MSS clamp, and nftables flowtable for L3/L4 forwarding-only policies.",
+    detail: "Jumbo MTU, MSS clamp, and forwarding acceleration for L3/L4 forwarding-only policies.",
     requiresInspectionOff: true,
     settings: {
       mtu: 9000,
@@ -14,7 +14,7 @@ export const NETWORK_PROFILES = [
   {
     id: "inspection",
     title: "IDS/IPS inspected",
-    detail: "Disables flowtable and manages NIC offloads so Suricata sees real packet frames.",
+    detail: "Disables forwarding acceleration and manages NIC offloads so IDS/IPS inspection sees real packet frames.",
     settings: {
       mtu: 0,
       clampMssToPmtu: true,
@@ -49,7 +49,7 @@ export function networkProfileBlockers(policy = {}, profileId) {
   const profile = NETWORK_PROFILES.find((item) => item.id === profileId);
   if (!profile) return [`Unknown network profile "${profileId}".`];
   if (profile.requiresInspectionOff && policy?.ids?.enabled) {
-    return ["Forwarding throughput profile requires IDS/IPS disabled because nftables flowtable bypasses first-packet inspection after offload."];
+    return ["Forwarding throughput profile requires IDS/IPS disabled because acceleration bypasses first-packet inspection after offload."];
   }
   return [];
 }

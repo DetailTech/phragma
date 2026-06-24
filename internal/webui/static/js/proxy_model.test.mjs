@@ -140,7 +140,7 @@ assert.equal(validBackendUrl("https://api.internal?x=1"), false);
       },
     },
   });
-  assert.equal(readiness.schemaVersion, "openngfw.proxy.runtime-readiness.v1");
+  assert.equal(readiness.schemaVersion, "openngfw.proxy.runtime-review.v1");
   assert.equal(readiness.readiness, "review");
   assert.equal(readiness.cls, "warn");
   assert.equal(readiness.candidateRevision, "sha256:candidate");
@@ -152,8 +152,8 @@ assert.equal(validBackendUrl("https://api.internal?x=1"), false);
   assert.equal(readiness.runtime.state, "ready");
   assert.match(readiness.boundary, /does not prove active listener traffic/);
   assert.match(readiness.runtime.proofBoundary, /not accepted here as active listener traffic proof/);
-  assert.ok(readiness.blockers.some((item) => /Active Envoy\/Coraza traffic rollout/.test(item.detail)));
-  assert.deepEqual(readiness.handoffLinks.map((link) => link.href), ["#/changes?tab=candidate", "#/readiness", "#/proxy?drawer=plan"]);
+  assert.ok(readiness.blockers.some((item) => /Active proxy\/WAF traffic rollout/.test(item.detail)));
+  assert.deepEqual(readiness.handoffLinks.map((link) => link.href), ["#/changes?tab=candidate", "#/proxy?drawer=plan"]);
 }
 
 {
@@ -191,8 +191,8 @@ assert.equal(validBackendUrl("https://api.internal?x=1"), false);
   assert.equal(proof.proxyArtifact.name, "proxy");
   assert.equal(proof.artifactCount, 3);
   assert.equal(proof.totalBytes, 640);
-  assert.ok(proof.hardeningNotes.some((note) => /Active Envoy\/Coraza traffic rollout/.test(note)));
-  assert.deepEqual(proof.links.map((link) => link.href), ["#/changes?tab=candidate", "#/readiness"]);
+  assert.ok(proof.hardeningNotes.some((note) => /Active proxy\/WAF traffic rollout/.test(note)));
+  assert.deepEqual(proof.links.map((link) => link.href), ["#/changes?tab=candidate"]);
 }
 
 {
@@ -218,7 +218,7 @@ assert.equal(validBackendUrl("https://api.internal?x=1"), false);
     },
   }, proxy);
   assert.equal(proof.previews.length, 2);
-  assert.deepEqual(proof.previews.map((preview) => preview.id), ["envoy-bootstrap", "coraza-waf"]);
+  assert.deepEqual(proof.previews.map((preview) => preview.id), ["proxy-listener-bootstrap", "waf-policy"]);
   assert.match(proof.previews[0].text, /Review-only deterministic preview/);
   assert.match(proof.previews[0].text, /Not live listener evidence/);
   assert.match(proof.previews[0].text, /\[redacted tls_secret_ref\]/);

@@ -1,5 +1,5 @@
 // content_posture.js - pure threat content and feed readiness model.
-// The Intel view renders this model, and Readiness uses it as a production
+// The Intel view renders this model, and  uses it as a production
 // gate so App-ID/Threat-ID/feed package gaps are visible outside one page.
 
 export const REQUIRED_CONTENT_QUALITY_EVIDENCE = Object.freeze({
@@ -60,7 +60,7 @@ export function buildContentPosture(feeds = [], policy = {}, contentPackages = [
   const appPkg = packageMap.get("app-id");
   const threatPkg = packageMap.get("threat-id");
   const feedPkg = packageMap.get("intel-feeds");
-  const productionContentReadiness = aggregateProductionContentReadiness(packageMap, contentError);
+  const productionContent = aggregateProductionContent(packageMap, contentError);
   const cls = contentError ? "bad" : blockers.length ? "warn" : "ok";
 
   return {
@@ -79,7 +79,10 @@ export function buildContentPosture(feeds = [], policy = {}, contentPackages = [
     },
     blockers: unique(blockers),
     rolloutReview: contentRolloutReview(packageDecisions, contentError),
-    productionContentReadiness,
+    productionContent,
+    productionContentReadiness: productionContent,
+    contentProductionReadiness: productionContent,
+    productionReadiness: productionContent,
     commercialUse,
     nonCommercialEnabled: nonCommercialEnabled.map((feed) => feed.name),
     surfaces: [
@@ -88,7 +91,7 @@ export function buildContentPosture(feeds = [], policy = {}, contentPackages = [
         name: "App-ID catalog",
         badge: "local",
         cls: "warn",
-        detail: `${appObjects} custom application objects plus canonical flow evidence fields. nDPI remains a signal source; Phragma owns taxonomy, confidence, and explanations.`,
+        detail: `${appObjects} custom application objects plus canonical flow evidence fields. application classifier remains a signal source; Phragma owns taxonomy, confidence, and explanations.`,
         evidence: ["policy.applications[]", "flows.app_id", "flows.app_confidence"],
       }),
       packageSurface(threatPkg, {
@@ -96,7 +99,7 @@ export function buildContentPosture(feeds = [], policy = {}, contentPackages = [
         name: "Threat-ID catalog",
         badge: "local",
         cls: "warn",
-        detail: `${threatExceptions} false-positive exceptions staged through policy. Suricata remains the matching engine; Phragma owns severity, profile context, and evidence.`,
+        detail: `${threatExceptions} false-positive exceptions staged through policy. IDS/IPS engine remains the matching engine; Phragma owns severity, profile context, and evidence.`,
         evidence: ["alerts.threat_id", "alerts.threat_severity", "ids.exceptions[]"],
       }),
       packageSurface(feedPkg, {
@@ -191,10 +194,10 @@ export function contentPackageDecisionPath(pkg = {}) {
 export function contentQualityWorkbench(surface = {}) {
   const kind = surface.kind || "package";
   const decision = surface.decision || contentPackageDecisionPath(surface);
-  const readiness = normalizedContentReadiness(surface);
-  const evidence = Array.isArray(surface.contentReadinessEvidence)
-    ? surface.contentReadinessEvidence
-    : contentReadinessEvidenceRefs(readiness);
+  const readiness = normalizedContent(surface);
+  const evidence = Array.isArray(surface.contentEvidence)
+    ? surface.contentEvidence
+    : contentEvidenceRefs(readiness);
   const required = requiredContentQualityEvidence(kind, readiness);
   const evidenceByType = new Map(evidence.map((ref) => [ref.type, ref]));
   const packageGates = (decision.checks || []).map((check) => ({
@@ -217,7 +220,7 @@ export function contentQualityWorkbench(surface = {}) {
       status: attached ? "attached" : "missing",
       cls: attached ? "ok" : "bad",
       detail: attached ? contentEvidenceLabel(ref) : `Required ${contentEvidenceTypeLabel(type)} artifact plus sha256 is not attached to the content readiness declaration.`,
-      action: attached ? "Keep this artifact with the signed content package evidence bundle." : `Attach ${type} evidence in contentReadiness.evidence before production use.`,
+      action: attached ? "Keep this artifact with the signed content package evidence bundle." : `Attach ${type} evidence in content.evidence before production use.`,
       evidence: attached ? contentEvidenceLabel(ref) : "",
       evidenceRef: attached ? ref : null,
       requiredType: type,
@@ -256,7 +259,7 @@ export function contentQualityWorkbench(surface = {}) {
   };
 }
 
-export function contentReadinessActionPlan(surface = {}) {
+export function contentActionPlan(surface = {}) {
   const workbench = contentQualityWorkbench(surface);
   const kind = surface.kind || workbench.kind || "package";
   const missingEvidence = (workbench.gates || [])
@@ -286,7 +289,7 @@ export function contentReadinessActionPlan(surface = {}) {
   return {
     kind,
     cls: workbench.cls,
-    title: workbench.cls === "ok" ? "Production-readiness evidence is inspectable." : "Readiness evidence needs operator action.",
+    title: workbench.cls === "ok" ? "Production-readiness evidence is inspectable." : " evidence needs operator action.",
     detail: workbench.cls === "ok"
       ? "Use the evidence and corpus actions to inspect the installed package before approving content rollout."
       : missingEvidence.length
@@ -300,13 +303,15 @@ export function contentReadinessActionPlan(surface = {}) {
   };
 }
 
+export const contentReadinessActionPlan = contentActionPlan;
+
 export function contentCanaryTelemetryWorkbench(surface = {}) {
   const kind = surface.kind || "package";
   const decision = surface.decision || contentPackageDecisionPath(surface);
-  const readiness = normalizedContentReadiness(surface);
-  const evidence = Array.isArray(surface.contentReadinessEvidence)
-    ? surface.contentReadinessEvidence
-    : contentReadinessEvidenceRefs(readiness);
+  const readiness = normalizedContent(surface);
+  const evidence = Array.isArray(surface.contentEvidence)
+    ? surface.contentEvidence
+    : contentEvidenceRefs(readiness);
   const scopes = normalizeContentCanaryScopes(surface, readiness);
   const telemetry = normalizeFalsePositiveTelemetry(surface, readiness, evidence);
   const hasRollback = !!surface.rollbackAvailable;
@@ -457,8 +462,8 @@ export function contentPackagePreviewComparison(current = {}, preview = {}) {
   const candidate = preview && typeof preview === "object" ? preview : {};
   const currentDecision = installed.decision || contentPackageDecisionPath(installed);
   const previewDecision = candidate.decision || contentPackageDecisionPath(candidate);
-  const currentReadiness = packageContentReadiness(installed);
-  const previewReadiness = packageContentReadiness(candidate);
+  const currentContent = packageContent(installed);
+  const previewContent = packageContent(candidate);
   const rows = [
     packageComparisonRow("version", "Version", installed.version || "missing", candidate.version || "missing", versionComparisonClass(installed.version, candidate.version)),
     packageComparisonRow("manifest", "Manifest hash", shortContentHash(installed.manifestSha256), shortContentHash(candidate.manifestSha256), manifestComparisonClass(installed.manifestSha256, candidate.manifestSha256)),
@@ -466,7 +471,7 @@ export function contentPackagePreviewComparison(current = {}, preview = {}) {
     packageComparisonRow("regression", "Regression", installed.regressionStatus || "missing", candidate.regressionStatus || "missing", statusComparisonClass(candidate.regressionStatus, ["passed"], ["failed"])),
     packageComparisonRow("rollout", "Rollout", installed.rolloutState || "missing", candidate.rolloutState || "missing", candidate.rolloutState ? "info" : "warn"),
     packageComparisonRow("rollback", "Rollback", installed.rollbackAvailable ? "verified backup" : "missing", candidate.rollbackAvailable ? "verified backup" : "missing", candidate.rollbackAvailable ? "ok" : "warn"),
-    packageComparisonRow("production-evidence", "Production evidence", productionEvidenceLabel(currentReadiness), productionEvidenceLabel(previewReadiness), productionEvidenceClass(previewReadiness)),
+    packageComparisonRow("production-evidence", "Package evidence", productionEvidenceLabel(currentContent), productionEvidenceLabel(previewContent), productionEvidenceClass(previewContent)),
     packageComparisonRow("blockers", "Blockers", blockerCountLabel(installed.blockers), blockerCountLabel(candidate.blockers), blockerComparisonClass(candidate.blockers)),
   ];
   const changed = rows.filter((row) => row.changed);
@@ -487,9 +492,9 @@ export function contentPackagePreviewComparison(current = {}, preview = {}) {
   };
 }
 
-function normalizedContentReadiness(surface = {}) {
-  if (surface.contentReadiness && typeof surface.contentReadiness === "object") return surface.contentReadiness;
-  return packageContentReadiness(surface);
+function normalizedContent(surface = {}) {
+  if (surface.content && typeof surface.content === "object") return surface.content;
+  return packageContent(surface);
 }
 
 function normalizeContentCanaryScopes(surface = {}, readiness = null) {
@@ -624,7 +629,7 @@ function contentDecisionCheck({ key, label, ok, bad = false, status, blockerMatc
 }
 
 function productionEvidenceCheck(pkg, blockerText, hasPackage, isVerified) {
-  const readiness = packageContentReadiness(pkg);
+  const readiness = packageContent(pkg);
   if (readiness) {
     const blockers = Array.isArray(readiness.blockers) ? readiness.blockers : [];
     if (readiness.productionReady && readiness.evidenceStatus === "passed" && blockers.length === 0) {
@@ -685,7 +690,7 @@ function readinessAction(readiness, blockers = []) {
     return "Install a production-scoped package before using this content for verdict-changing production updates.";
   }
   if (blockers.length) {
-    return `Resolve content readiness blocker: ${blockers[0]}.`;
+    return `Resolve content system preflight item: ${blockers[0]}.`;
   }
   return "Attach required production evidence artifacts and readiness declaration to the content package.";
 }
@@ -723,7 +728,7 @@ function contentRolloutReview(decisions, contentError) {
   };
 }
 
-function aggregateProductionContentReadiness(packageMap, contentError = "") {
+function aggregateProductionContent(packageMap, contentError = "") {
   const kinds = ["app-id", "threat-id", "intel-feeds"];
   if (contentError) {
     return {
@@ -736,7 +741,7 @@ function aggregateProductionContentReadiness(packageMap, contentError = "") {
       packages: [],
     };
   }
-  const packages = kinds.map((kind) => packageProductionReadiness(kind, packageMap.get(kind)));
+  const packages = kinds.map((kind) => packageProduction(kind, packageMap.get(kind)));
   const blockers = packages.flatMap((pkg) => pkg.blockers);
   const ready = blockers.length === 0 && packages.every((pkg) => pkg.productionReady);
   return {
@@ -752,8 +757,8 @@ function aggregateProductionContentReadiness(packageMap, contentError = "") {
   };
 }
 
-function packageProductionReadiness(kind, pkg) {
-  const readiness = packageContentReadiness(pkg);
+function packageProduction(kind, pkg) {
+  const readiness = packageContent(pkg);
   if (!pkg) {
     return {
       kind,
@@ -803,8 +808,8 @@ function packageMetric(pkg, fallback) {
 function packageSurface(pkg, fallback) {
   if (!pkg) return { ...fallback, fields: [], provenance: [], rollbackAvailable: false, decision: contentPackageDecisionPath({ kind: fallback.kind, name: fallback.name }) };
   const decision = contentPackageDecisionPath(pkg);
-  const readiness = packageContentReadiness(pkg);
-  const readinessEvidence = contentReadinessEvidenceRefs(readiness);
+  const readiness = packageContent(pkg);
+  const readinessEvidence = contentEvidenceRefs(readiness);
   const evidence = [
     pkg.manifestSha256 ? `sha256:${pkg.manifestSha256.slice(0, 12)}` : null,
     `signature:${pkg.signatureStatus || "missing"}`,
@@ -828,9 +833,9 @@ function packageSurface(pkg, fallback) {
     canaryScopes: normalizeContentCanaryScopes(pkg, readiness),
     falsePositiveTelemetry: normalizeFalsePositiveTelemetry(pkg, readiness, readinessEvidence),
     blockers: Array.isArray(pkg.blockers) ? [...pkg.blockers] : [],
-    contentReadiness: readiness,
-    contentReadinessEvidence: readinessEvidence,
-    keyContentReadinessEvidence: keyContentReadinessEvidence(readinessEvidence),
+    content: readiness,
+    contentEvidence: readinessEvidence,
+    keyContentEvidence: keyContentEvidence(readinessEvidence),
     detail: packageDetail(pkg, fallback.detail),
     evidence,
     fields: packageFields(pkg, readinessEvidence),
@@ -841,9 +846,9 @@ function packageSurface(pkg, fallback) {
 }
 
 function packageFields(pkg, readinessEvidence = null) {
-  const readiness = packageContentReadiness(pkg);
-  const evidenceRefs = readinessEvidence || contentReadinessEvidenceRefs(readiness);
-  const keyRefs = keyContentReadinessEvidence(evidenceRefs);
+  const readiness = packageContent(pkg);
+  const evidenceRefs = readinessEvidence || contentEvidenceRefs(readiness);
+  const keyRefs = keyContentEvidence(evidenceRefs);
   return [
     {
       label: "Source",
@@ -903,8 +908,8 @@ function packageFields(pkg, readinessEvidence = null) {
   ].filter(Boolean);
 }
 
-function packageContentReadiness(pkg = {}) {
-  const readiness = pkg.contentReadiness || pkg.content_readiness || null;
+function packageContent(pkg = {}) {
+  const readiness = pkg.content || pkg.content_readiness || null;
   if (!readiness || typeof readiness !== "object") return null;
   return {
     scope: readiness.scope || "",
@@ -913,7 +918,7 @@ function packageContentReadiness(pkg = {}) {
     evidenceStatus: readiness.evidenceStatus || readiness.evidence_status || "",
     readinessLabel: readiness.readinessLabel || readiness.readiness_label || "",
     readinessDetail: readiness.readinessDetail || readiness.readiness_detail || "",
-    evidence: contentReadinessEvidenceRefs(readiness),
+    evidence: contentEvidenceRefs(readiness),
     rolloutState: readiness.rolloutState || readiness.rollout_state || "",
     rolloutScopes: Array.isArray(readiness.rolloutScopes)
       ? readiness.rolloutScopes
@@ -929,12 +934,14 @@ function packageContentReadiness(pkg = {}) {
   };
 }
 
-export function contentReadinessEvidenceRefs(readiness = {}) {
+export function contentEvidenceRefs(readiness = {}) {
   const evidence = Array.isArray(readiness?.evidence) ? readiness.evidence : [];
-  return evidence.map(contentReadinessEvidenceRef).filter(Boolean);
+  return evidence.map(contentEvidenceRef).filter(Boolean);
 }
 
-function contentReadinessEvidenceRef(ref = {}) {
+export const contentReadinessEvidenceRefs = contentEvidenceRefs;
+
+function contentEvidenceRef(ref = {}) {
   const type = safeEvidenceToken(ref.type || ref.evidenceType || ref.evidence_type);
   const artifact = safeEvidenceArtifact(ref.artifact || ref.path || ref.name);
   const sha256 = safeSha256(ref.sha256 || ref.sha256Hash || ref.sha256_hash);
@@ -949,7 +956,7 @@ function contentReadinessEvidenceRef(ref = {}) {
   };
 }
 
-export function keyContentReadinessEvidence(evidence = []) {
+export function keyContentEvidence(evidence = []) {
   return {
     appRegressionCorpus: findContentEvidence(evidence, "app-regression-corpus"),
     pcapRegressionCorpus: findContentEvidence(evidence, "pcap-regression-corpus"),
@@ -1113,7 +1120,7 @@ function provenanceLabel(provenance) {
 function packageDetail(pkg, fallback) {
   const parts = [];
   if (pkg.version) parts.push(`version ${pkg.version}`);
-  const readiness = packageContentReadiness(pkg);
+  const readiness = packageContent(pkg);
   if (readiness?.readinessLabel) parts.push(`content-readiness ${readiness.readinessLabel}`);
   if (pkg.source) parts.push(pkg.source);
   if (pkg.blockers?.length) parts.push(`${pkg.blockers.length} blocker${pkg.blockers.length === 1 ? "" : "s"}`);
