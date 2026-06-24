@@ -87,7 +87,7 @@ jobs:
             --output-certificate dist/sbom.spdx.json.pem
 
       - name: SLSA build provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: |
             dist/*_linux_*
