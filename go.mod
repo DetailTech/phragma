@@ -3,7 +3,7 @@ module github.com/detailtech/oss-ngfw
 go 1.25.0
 
 require (
-	github.com/coreos/go-oidc/v3 v3.18.0
+	github.com/coreos/go-oidc/v3 v3.19.0
 	github.com/crewjam/saml v0.5.1
 	github.com/go-jose/go-jose/v4 v4.1.4
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.29.0
