@@ -823,7 +823,7 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
     },
   }]);
   const surface = posture.surfaces.find((item) => item.kind === "app-id");
-  assert.equal(surface.keyContentReadinessEvidence.appRegressionCorpus.artifact, "evidence/app-regression.json");
+  assert.equal(surface.keyContentEvidence.appRegressionCorpus.artifact, "evidence/app-regression.json");
   assert.ok(surface.evidence.includes("app-regression-corpus:evidence/app-regression.json"));
   assert.ok(surface.fields.some((field) => field.label === "App-ID regression" && field.value.includes("sha256:")));
 }
@@ -855,9 +855,9 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
     },
   }]);
   const surface = posture.surfaces.find((item) => item.kind === "threat-id");
-  assert.equal(surface.contentReadinessEvidence.length, 2);
-  assert.equal(surface.keyContentReadinessEvidence.pcapRegressionCorpus.artifact, "evidence/pcap-regression.json");
-  assert.equal(surface.keyContentReadinessEvidence.falsePositiveRegression.sha256Short, "e".repeat(12));
+  assert.equal(surface.contentEvidence.length, 2);
+  assert.equal(surface.keyContentEvidence.pcapRegressionCorpus.artifact, "evidence/pcap-regression.json");
+  assert.equal(surface.keyContentEvidence.falsePositiveRegression.sha256Short, "e".repeat(12));
   assert.ok(surface.evidence.includes("pcap-regression-corpus:evidence/pcap-regression.json"));
   assert.ok(surface.fields.some((field) => field.label === "PCAP regression" && field.value.includes("sha256:")));
   assert.ok(surface.fields.some((field) => field.label === "False-positive regression" && field.value.includes("evidence/fp-regression.json")));

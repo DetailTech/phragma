@@ -372,8 +372,8 @@ const unknownRuntimePreview = orchestrationPreviewModel({
   content: { label: "ready", detail: "content packages ready", tone: "ok" },
 });
 assert.equal(unknownRuntimePreview.eligibleCount, 1);
-assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").reason.includes("runtime readiness needs positive evidence"));
-assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").missingEvidence.includes("runtime readiness needs positive evidence"));
+assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").reason.includes("system preflight needs positive evidence"));
+assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").missingEvidence.includes("system preflight needs positive evidence"));
 
 const unsafeOrchestration = orchestrationPreviewModel({
   nodes: [{ id: "fw1", name: "fw1", roleLabel: "active", policyVersion: "v9", haTone: "ok", haLabel: "ready", runtimeTone: "ok", runtimeLabel: "healthy" }],
