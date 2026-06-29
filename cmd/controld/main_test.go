@@ -149,8 +149,32 @@ func TestValidateManagementAuth(t *testing.T) {
 			wantErr: "--tls=false requires --http-listen",
 		},
 		{
-			name: "tls remote rest allowed",
-			cfg:  config{usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080", tlsEnabled: true},
+			name: "tls remote rest with operator certificate allowed",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, tlsCert: "/etc/openngfw/tls/cert.pem", tlsKey: "/etc/openngfw/tls/key.pem",
+			},
+		},
+		{
+			name: "tls remote rest rejects generated self signed certificate",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080", tlsEnabled: true,
+			},
+			wantErr: "non-loopback --http-listen requires operator-provided --tls-cert and --tls-key",
+		},
+		{
+			name: "tls remote rest rejects partial operator certificate",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, tlsCert: "/etc/openngfw/tls/cert.pem",
+			},
+			wantErr: "non-loopback --http-listen requires operator-provided --tls-cert and --tls-key",
+		},
+		{
+			name: "tls loopback rest allows generated self signed certificate",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "127.0.0.1:8080", tlsEnabled: true,
+			},
 		},
 		{
 			name:    "missing auth rejected by default",

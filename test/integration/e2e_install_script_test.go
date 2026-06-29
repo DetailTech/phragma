@@ -23,6 +23,7 @@ func TestE2EInstallCheckReportsReleaseEvidenceSentinels(t *testing.T) {
 		"install_smoke_scope=static-preflight",
 		"required_install_artifacts=deploy/install.sh,deploy/systemd/controld.service,docs/testing-plan.md,docs/testing-plan-ol9.md",
 		"run_requires=linux-root,systemd,network-namespaces,nftables,ip-forwarding",
+		"prebuilt_binary_pair_commit_check=passed",
 		"install smoke static preflight complete",
 		"status=passed",
 	} {

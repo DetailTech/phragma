@@ -16,14 +16,42 @@
 # docs/testing-plan-ol9.md (Oracle Linux 9).
 set -euo pipefail
 
-if [[ $EUID -ne 0 ]]; then
-  echo "run as root" >&2
-  exit 1
-fi
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BIN_SOURCE_DIR="${BIN_DIR:-$REPO_ROOT/bin}"
 if [[ "$BIN_SOURCE_DIR" != /* ]]; then
   BIN_SOURCE_DIR="$REPO_ROOT/$BIN_SOURCE_DIR"
+fi
+
+binary_matches_commit() {
+  local binary="$1"
+  if [[ -z "${COMMIT:-}" ]]; then
+    return 0
+  fi
+  [[ -x "$binary" ]] && "$binary" --version 2>/dev/null | grep -q "$COMMIT"
+}
+
+prebuilt_binary_pair_matches_commit() {
+  [[ -x "$BIN_SOURCE_DIR/controld" && -x "$BIN_SOURCE_DIR/ngfwctl" ]] &&
+    binary_matches_commit "$BIN_SOURCE_DIR/controld" &&
+    binary_matches_commit "$BIN_SOURCE_DIR/ngfwctl"
+}
+
+# Rootless, read-only selection probe used by the install smoke test. Normal
+# installation behavior is unchanged; both binaries must pass the same helper
+# used by the installer before a prebuilt pair is reused.
+if [[ "${1:-}" == "--check-prebuilt-binaries" ]]; then
+  echo "check=prebuilt-binary-pair"
+  if prebuilt_binary_pair_matches_commit; then
+    echo "status=passed"
+    exit 0
+  fi
+  echo "status=failed"
+  exit 1
+fi
+
+if [[ $EUID -ne 0 ]]; then
+  echo "run as root" >&2
+  exit 1
 fi
 
 . /etc/os-release
@@ -106,14 +134,6 @@ install_build_toolchain() {
   fi
 }
 
-binary_matches_commit() {
-  local binary="$1"
-  if [[ -z "${COMMIT:-}" ]]; then
-    return 0
-  fi
-  [[ -x "$binary" ]] && "$binary" --version 2>/dev/null | grep -q "$COMMIT"
-}
-
 echo "[1/8] Engine packages"
 if [[ $FAMILY == debian ]]; then
   export DEBIAN_FRONTEND=noninteractive
@@ -184,12 +204,11 @@ if ! command -v vector >/dev/null; then
 fi
 
 echo "[4/8] OpenNGFW binaries"
-if [[ -x "$BIN_SOURCE_DIR/controld" && -x "$BIN_SOURCE_DIR/ngfwctl" ]] &&
-   binary_matches_commit "$BIN_SOURCE_DIR/controld"; then
+if prebuilt_binary_pair_matches_commit; then
   install -m 0755 "$BIN_SOURCE_DIR/controld" "$BIN_SOURCE_DIR/ngfwctl" /usr/local/bin/
 else
   install_build_toolchain
-  (cd "$REPO_ROOT" && make build)
+  (cd "$REPO_ROOT" && make build BIN_DIR="$BIN_SOURCE_DIR")
   install -m 0755 "$BIN_SOURCE_DIR/controld" "$BIN_SOURCE_DIR/ngfwctl" /usr/local/bin/
 fi
 

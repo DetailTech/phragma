@@ -825,8 +825,13 @@ func validateManagementAuth(cfg config) error {
 	if !isLoopbackListenAddress(cfg.grpcListen) {
 		return fmt.Errorf("direct gRPC management listener requires loopback until gRPC TLS/mTLS is configured, got --listen %q", cfg.grpcListen)
 	}
-	if cfg.httpListen != "" && !cfg.tlsEnabled && !isLoopbackListenAddress(cfg.httpListen) {
-		return fmt.Errorf("--tls=false requires --http-listen to be loopback or empty, got %q", cfg.httpListen)
+	if cfg.httpListen != "" && !isLoopbackListenAddress(cfg.httpListen) {
+		if !cfg.tlsEnabled {
+			return fmt.Errorf("--tls=false requires --http-listen to be loopback or empty, got %q", cfg.httpListen)
+		}
+		if strings.TrimSpace(cfg.tlsCert) == "" || strings.TrimSpace(cfg.tlsKey) == "" {
+			return fmt.Errorf("non-loopback --http-listen requires operator-provided --tls-cert and --tls-key; generated self-signed TLS is limited to loopback or SSH-tunnel use")
+		}
 	}
 	if oidcConfigured(cfg) {
 		if err := validateOIDCFlags(cfg); err != nil {
