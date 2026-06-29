@@ -8,24 +8,26 @@ import (
 	"testing"
 )
 
-func TestWebUICheckPropagatesJavaScriptTestFailure(t *testing.T) {
+func TestWebUICheckTargetsPropagateJavaScriptTestFailure(t *testing.T) {
 	if _, err := exec.LookPath("make"); err != nil {
 		t.Skip("make not found")
 	}
 
 	root := webUICheckRepoRoot(t)
-	repo := t.TempDir()
-	copyWebUICheckFile(t, filepath.Join(root, "Makefile"), filepath.Join(repo, "Makefile"), 0o600)
-	writeWebUICheckFile(
-		t,
-		filepath.Join(repo, "internal/webui/static/js/injected_failure.test.mjs"),
-		"throw new Error('the node stub must report this injected failure');\n",
-		0o600,
-	)
+	for _, target := range []string{"webui-check", "webui-enterprise-smoke"} {
+		t.Run(target, func(t *testing.T) {
+			repo := t.TempDir()
+			copyWebUICheckFile(t, filepath.Join(root, "Makefile"), filepath.Join(repo, "Makefile"), 0o600)
+			writeWebUICheckFile(
+				t,
+				filepath.Join(repo, "internal/webui/static/js/injected_failure.test.mjs"),
+				"throw new Error('the node stub must report this injected failure');\n",
+				0o600,
+			)
 
-	binDir := filepath.Join(repo, "bin")
-	nodeStub := filepath.Join(binDir, "node")
-	writeWebUICheckFile(t, nodeStub, `#!/bin/sh
+			binDir := filepath.Join(repo, "bin")
+			nodeStub := filepath.Join(binDir, "node")
+			writeWebUICheckFile(t, nodeStub, `#!/bin/sh
 if [ "${1:-}" = "--check" ]; then
 	exit 0
 fi
@@ -42,19 +44,21 @@ esac
 exit 0
 `, 0o700)
 
-	cmd := exec.Command("make", "webui-check", "WEBUI_CHECK_REQUIRE_NODE=1")
-	cmd.Dir = repo
-	cmd.Env = append(os.Environ(), "PATH="+binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
-	out, err := cmd.CombinedOutput()
-	output := string(out)
-	if err == nil {
-		t.Fatalf("webui-check accepted an injected failing JavaScript test:\n%s", output)
-	}
-	if !strings.Contains(output, "injected webui test failure") {
-		t.Fatalf("webui-check output did not preserve the injected failure:\n%s", output)
-	}
-	if strings.Contains(output, "webui_js_checks=passed") {
-		t.Fatalf("webui-check reported success after the injected failure:\n%s", output)
+			cmd := exec.Command("make", target, "WEBUI_CHECK_REQUIRE_NODE=1")
+			cmd.Dir = repo
+			cmd.Env = append(os.Environ(), "PATH="+binDir+string(os.PathListSeparator)+os.Getenv("PATH"))
+			out, err := cmd.CombinedOutput()
+			output := string(out)
+			if err == nil {
+				t.Fatalf("%s accepted an injected failing JavaScript test:\n%s", target, output)
+			}
+			if !strings.Contains(output, "injected webui test failure") {
+				t.Fatalf("%s output did not preserve the injected failure:\n%s", target, output)
+			}
+			if strings.Contains(output, "webui_js_checks=passed") {
+				t.Fatalf("%s reported success after the injected failure:\n%s", target, output)
+			}
+		})
 	}
 }
 

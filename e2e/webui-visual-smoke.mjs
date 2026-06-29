@@ -39,7 +39,6 @@ const screens = [
   { name: "Routing & VPN", path: "/netvpn" },
   { name: "Proxy / WAF", path: "/proxy" },
   { name: "Compliance", path: "/compliance" },
-  { name: "Readiness", path: "/readiness" },
   { name: "Changes", path: "/changes" },
   { name: "Settings", path: "/settings" },
 ];
@@ -623,12 +622,6 @@ async function runPlaywrightSmoke(playwright, baseURL, opts = {}) {
             if (screen.path === "/setup") {
               await assertGuidedSetupBaselineWorkflow(page, viewport);
             }
-            if (screen.path === "/readiness") {
-              await assertReadinessReleaseEvidence(page, viewport);
-              await assertReadinessEngineTable(page, viewport);
-              await assertReadinessEbpfTables(page, viewport);
-              await assertReadinessRoutingVpnPosture(page, viewport);
-            }
             if (screen.path === "/intel") {
               await assertIntelContentLifecycleWorkbench(page, viewport);
               await assertIntelFeedGovernanceCandidateWorkflow(page, viewport);
@@ -643,7 +636,6 @@ async function runPlaywrightSmoke(playwright, baseURL, opts = {}) {
             }
             if (screen.path === "/") {
               await assertGlobalKeyboardFocusWorkflow(page, viewport);
-              await assertDashboardReleaseReadiness(page, viewport);
               await assertDashboardAutomationContext(page, viewport);
               await assertAutomationRecorderMultiRouteRunbook(page, viewport);
               await assertGlobalDiagnosticConsoleWorkflow(page, viewport);
@@ -1208,9 +1200,11 @@ async function runSmokeRunnerSelfCheck() {
     const broadPolicy = evidencePolicy(broad);
     assertSelfCheck(broadPolicy.mode === "broad", "default smoke route selection should be broad");
     assertSelfCheck(broad.length === screens.length, "default smoke route selection should include every declared route");
+    assertSelfCheck(broad.length === 19, "desktop enterprise smoke should cover the 19 canonical navigation routes");
     assertSelfCheck(plannedSmokeLabels(broad).length === screens.length * viewports.length, "planned labels should cover route x viewport checks");
     const appNavPaths = appNavRoutePaths();
     const smokePaths = screens.map((screen) => screen.path);
+    assertSelfCheck(!smokePaths.includes("/readiness"), "standalone Readiness should not be a canonical smoke route");
     assertSelfCheck(appNavPaths.join(",") === smokePaths.join(","), `smoke route list should match app NAV; app=${appNavPaths.join(",")} smoke=${smokePaths.join(",")}`);
 
     process.env.WEBUI_SMOKE_PATHS = "/settings,/rules,/settings,dashboard";
@@ -1222,7 +1216,7 @@ async function runSmokeRunnerSelfCheck() {
     assertSelfCheck(targetedPolicy.missingBroadRoutes.includes("/traffic"), "targeted policy should list missing broad routes");
     assertSelfCheck(evidencePolicyLines(targeted, targetedPolicy).some((line) => line.includes("targeted visual-smoke evidence is repair diagnostics")), "targeted policy should print release evidence warning");
 
-    process.env.WEBUI_SMOKE_PATHS = "/,/dashboard,/setup,/rules,/objects,/nat,/inspection,/threats,/traffic,/logs,/troubleshoot,/performance,/investigation,/fleet,/intel,/netvpn,/proxy,/compliance,/readiness,/changes,/settings";
+    process.env.WEBUI_SMOKE_PATHS = "/,/dashboard,/setup,/rules,/objects,/nat,/inspection,/threats,/traffic,/logs,/troubleshoot,/performance,/investigation,/fleet,/intel,/netvpn,/proxy,/compliance,/changes,/settings";
     const enterpriseAliasBroad = filteredSmokeScreens();
     const enterpriseAliasPolicy = evidencePolicy(enterpriseAliasBroad);
     assertSelfCheck(enterpriseAliasBroad.length === screens.length, "enterprise path list should de-duplicate dashboard alias into the full broad route set");
@@ -1281,6 +1275,10 @@ async function runSmokeRunnerSelfCheck() {
 	    assertSelfCheck(getOperatorActionViolations([
 	      { label: "Copy", title: "Copy summary", ariaLabel: "Copy summary", hasStableHook: true },
 	    ]).length === 0, "generic action guard should accept stable hook plus title and aria intent");
+	    assertSelfCheck(!dashboardTelemetryDisclosureIssue(false, "", ""), "complete Dashboard telemetry may omit the paging disclosure");
+	    assertSelfCheck(!dashboardTelemetryDisclosureIssue(true, "limited", "Some telemetry is paged. 2/12 alerts and 1/1 flows shown."), "paged Dashboard telemetry should accept the production disclosure");
+	    assertSelfCheck(Boolean(dashboardTelemetryDisclosureIssue(true, "", "")), "paged Dashboard telemetry should reject a missing disclosure");
+	    assertSelfCheck(Boolean(dashboardTelemetryDisclosureIssue(false, "complete", "Telemetry summaries are current.")), "Dashboard should not render the paging disclosure for complete telemetry");
 	    console.log("[webui-smoke] self-check passed: route selection, ordering, policy messaging, duration summaries, action-accessibility guard, and unknown-route diagnostics");
 	  } finally {
     if (originalPaths == null) {
@@ -1433,6 +1431,14 @@ async function assertDashboardEvidenceConsole(page, viewport) {
     const severityLayout = document.querySelector(".dashboard-severity-layout");
     const severityRect = severityLayout?.getBoundingClientRect?.();
     const telemetryScope = document.querySelector("[data-dashboard-telemetry-scope]");
+    const metricFoot = (label) => {
+      const card = [...document.querySelectorAll(".phr-metric-card")]
+        .find((candidate) => candidate.querySelector(".stat-label")?.textContent?.trim() === label);
+      return (card?.querySelector(".stat-foot")?.textContent || "").replace(/\s+/g, " ").trim();
+    };
+    const alertFoot = metricFoot("Threats (recent)");
+    const flowFoot = metricFoot("Traffic (recent)");
+    const telemetryPaged = [alertFoot, flowFoot].some((foot) => /^\d+\/(?:\d+|many) shown$/i.test(foot));
     const severityLegend = [...document.querySelectorAll("[data-dashboard-severity-legend]")].map((el) => {
       const swatch = el.querySelector(".dashboard-severity-swatch");
       const rect = el.getBoundingClientRect();
@@ -1453,6 +1459,9 @@ async function assertDashboardEvidenceConsole(page, viewport) {
       hasSignature: text.includes(seed.signature),
       hasSignatureId: text.includes(String(seed.signatureId)) || text.includes(`SID ${seed.signatureId}`),
       hasRecentChangesEmptyState: text.includes("No versions yet"),
+      telemetryPaged,
+      telemetryAlertFoot: alertFoot,
+      telemetryFlowFoot: flowFoot,
       telemetryScope: telemetryScope?.dataset?.dashboardTelemetryScope || "",
       telemetryScopeText: (telemetryScope?.textContent || "").replace(/\s+/g, " ").trim(),
       engineTable: tableState(".dashboard-engine-table", "[data-dashboard-engine]"),
@@ -1469,8 +1478,9 @@ async function assertDashboardEvidenceConsole(page, viewport) {
   if (!report.hasRecentThreats || (!report.hasSignature && !report.hasSignatureId)) {
     throw new Error(`Dashboard did not render seeded threat evidence at ${viewport.name}: ${JSON.stringify(report)}`);
   }
-  if (!["complete", "limited"].includes(report.telemetryScope) || !/Telemetry summaries/.test(report.telemetryScopeText)) {
-    throw new Error(`Dashboard did not render telemetry scope disclosure at ${viewport.name}: ${JSON.stringify(report)}`);
+  const telemetryDisclosureIssue = dashboardTelemetryDisclosureIssue(report.telemetryPaged, report.telemetryScope, report.telemetryScopeText);
+  if (telemetryDisclosureIssue) {
+    throw new Error(`Dashboard telemetry paging disclosure was invalid at ${viewport.name}: ${telemetryDisclosureIssue}; ${JSON.stringify(report)}`);
   }
   if (!report.severityLayoutClass.includes("dashboard-severity-layout") || report.severityOverflow > 2) {
     throw new Error(`Dashboard severity chart layout overflowed or missed design classes at ${viewport.name}: ${JSON.stringify(report)}`);
@@ -1490,7 +1500,7 @@ async function assertDashboardEvidenceConsole(page, viewport) {
       throw new Error(`Dashboard severity legend mobile target(s) too small at ${viewport.name}: ${JSON.stringify(cramped)}`);
     }
   }
-  assertDashboardTable(report.engineTable, viewport, "engine coverage", ["Engine", "State", "Detail"], "dashboardEngine");
+  assertDashboardTable(report.engineTable, viewport, "capability coverage", ["Capability", "State", "Detail"], "dashboardEngine");
   assertDashboardTable(report.threatTable, viewport, "recent threats", ["Severity", "Threat", "Source", "Time"], "dashboardThreat");
   if (report.versionTable.present) {
     assertDashboardTable(report.versionTable, viewport, "recent changes", ["Version", "Comment", "Actor", "Time"], "dashboardVersion");
@@ -1498,6 +1508,14 @@ async function assertDashboardEvidenceConsole(page, viewport) {
     throw new Error(`Dashboard recent changes rendered neither table nor empty state at ${viewport.name}: ${JSON.stringify(report)}`);
   }
   await assertDashboardNetvpnRuntimeReviewRoute(page, viewport);
+}
+
+function dashboardTelemetryDisclosureIssue(paged = false, scope = "", text = "") {
+  if (!paged && !scope) return "";
+  if (!paged) return `complete telemetry unexpectedly rendered disclosure state ${JSON.stringify(scope)}`;
+  if (scope !== "limited") return `paged telemetry rendered disclosure state ${JSON.stringify(scope || "missing")}`;
+  if (!/Some telemetry is paged\./.test(String(text || ""))) return "limited telemetry omitted the paging explanation";
+  return "";
 }
 
 async function assertDashboardNetvpnRuntimeReviewRoute(page, viewport) {
@@ -1542,45 +1560,6 @@ function assertDashboardTable(state, viewport, label, expectedLabels, rowDataset
   }
   if (!state.mobileLabelsRendered) {
     throw new Error(`Dashboard ${label} mobile labels did not render at ${viewport.name}: ${JSON.stringify(state)}`);
-  }
-}
-
-async function assertDashboardReleaseReadiness(page, viewport) {
-  const report = await page.evaluate(() => {
-    const card = document.querySelector("[data-dashboard-release-readiness='true']");
-    const text = card?.textContent || "";
-    const drawer = card?.querySelector("[data-dashboard-release-drawer='true']");
-    const rules = card?.querySelector("[data-dashboard-candidate-rules='true']");
-    const gate = card?.querySelector("[data-dashboard-release-gate]");
-    const compare = card?.querySelector("[data-dashboard-candidate-compare='true']");
-    return {
-      present: Boolean(card),
-      state: card?.dataset.dashboardReleaseState || "",
-      text,
-      drawerHref: drawer?.getAttribute("href") || "",
-      rulesHref: rules?.getAttribute("href") || "",
-      gateHref: gate?.querySelector("a")?.getAttribute("href") || "",
-      compareHref: compare?.getAttribute("href") || "",
-      leakedDetail: /release\/evidence|manifestPath|evidenceDir|dirtySourcePaths|next_command|make release-|go run|\/tmp\//i.test(text),
-    };
-  });
-  if (!report.present || !report.text.includes("Release readiness")) {
-    throw new Error(`Dashboard release-readiness card missing at ${viewport.name}: ${JSON.stringify(report)}`);
-  }
-  if (report.drawerHref !== "#/readiness?drawer=release-acceptance") {
-    throw new Error(`Dashboard release-readiness drawer link mismatch at ${viewport.name}: ${JSON.stringify(report)}`);
-  }
-  if (report.rulesHref !== "#/rules?changed=1&density=compact") {
-    throw new Error(`Dashboard release-readiness Rules link mismatch at ${viewport.name}: ${JSON.stringify(report)}`);
-  }
-  if (report.gateHref && !report.gateHref.startsWith("#/readiness?packet=")) {
-    throw new Error(`Dashboard release-readiness gate link mismatch at ${viewport.name}: ${JSON.stringify(report)}`);
-  }
-  if (report.compareHref && report.compareHref !== "#/troubleshoot?intent=compare&run=1") {
-    throw new Error(`Dashboard release-readiness compare link mismatch at ${viewport.name}: ${JSON.stringify(report)}`);
-  }
-  if (report.leakedDetail) {
-    throw new Error(`Dashboard release-readiness card leaked detailed release evidence at ${viewport.name}: ${JSON.stringify(report)}`);
   }
 }
 
@@ -1730,42 +1709,36 @@ async function assertFleetTemplatePreviewRoute(page, viewport) {
 async function assertFleetLifecycleDrillThrough(page, viewport) {
   await page.evaluate(() => { location.hash = "#/fleet"; });
   await waitForRouteReady(page, "/fleet");
-  const links = await page.evaluate(() => [...document.querySelectorAll("[data-fleet-workspace='true'] a[href]")]
+  const expectedOwners = [
+    { template: "edge-policy", href: "#/changes?tab=candidate", path: "/changes", hook: '[data-changes-tab="candidate"]' },
+    { template: "content", href: "#/intel", path: "/intel", hook: '[data-intel-action="api-cli"]' },
+    { template: "routing-vpn", href: "#/netvpn", path: "/netvpn", hook: '[data-netvpn-action="add-route"]' },
+    { template: "ha", href: "#/fleet", path: "/fleet", hook: '[data-fleet-workspace="true"]' },
+  ];
+  const links = await page.evaluate(() => [...document.querySelectorAll('[data-fleet-template] [data-fleet-template-action="open"]')]
     .map((link) => ({
-      text: (link.textContent || "").replace(/\s+/g, " ").trim(),
-      href: link.getAttribute("href") || "",
-      actionItem: link.closest("[data-fleet-action-item]")?.getAttribute("data-fleet-action-item") || "",
       template: link.closest("[data-fleet-template]")?.getAttribute("data-fleet-template") || "",
-      drift: link.closest("[data-fleet-drift]")?.getAttribute("data-fleet-drift") || "",
+      href: link.getAttribute("href") || "",
+      text: (link.textContent || "").replace(/\s+/g, " ").trim(),
     })));
-  for (const href of ["#/changes?tab=candidate", "#/readiness?drawer=ha-cockpit", "#/readiness?drawer=release-acceptance"]) {
-    if (!links.some((link) => link.href === href)) {
-      throw new Error(`Fleet lifecycle drill-through link ${href} missing at ${viewport.name}: ${JSON.stringify(links)}`);
+  for (const owner of expectedOwners) {
+    const link = links.find((item) => item.template === owner.template);
+    if (link?.href !== owner.href) {
+      throw new Error(`Fleet ${owner.template} owner route mismatch at ${viewport.name}: ${JSON.stringify({ expected: owner.href, link, links })}`);
+    }
+    await page.click(`[data-fleet-template="${owner.template}"] [data-fleet-template-action="open"]`);
+    await waitForRouteReady(page, owner.path);
+    await page.waitForSelector(owner.hook, { timeout: 10000 });
+    const hash = await page.evaluate(() => location.hash);
+    if (hash !== owner.href) {
+      throw new Error(`Fleet ${owner.template} drill-through opened ${hash || "<empty>"} instead of ${owner.href} at ${viewport.name}`);
+    }
+    if (owner.path !== "/fleet") {
+      await page.evaluate(() => { location.hash = "#/fleet"; });
+      await waitForRouteReady(page, "/fleet");
+      await page.waitForSelector('[data-fleet-workspace="true"]', { timeout: 10000 });
     }
   }
-  await page.click('[data-fleet-template="ha"] a[href="#/readiness?drawer=ha-cockpit"]');
-  await waitForRouteReady(page, "/readiness");
-  await waitForReadinessDrawer(page, "[data-readiness-ha-cockpit='true']");
-  let state = await collectRouteBackedDrawerState(page, "[data-readiness-ha-cockpit='true']");
-  if (!/HA operations cockpit/.test(state.title) || !state.text.includes("Manual passive activation")) {
-    throw new Error(`Fleet HA drill-through did not open HA cockpit at ${viewport.name}: ${JSON.stringify(state)}`);
-  }
-  await page.keyboard.press("Escape");
-  await waitForDrawerClosed(page);
-
-  await page.evaluate(() => { location.hash = "#/fleet"; });
-  await waitForRouteReady(page, "/fleet");
-  await page.click('[data-fleet-template="release"] a[href="#/readiness?drawer=release-acceptance"]');
-  await waitForRouteReady(page, "/readiness");
-  await waitForReadinessDrawer(page, "[data-readiness-release-acceptance='true']");
-  state = await collectRouteBackedDrawerState(page, "[data-readiness-release-acceptance='true']");
-  if (!/Release acceptance status/.test(state.title) || !state.text.includes("release-benchmark")) {
-    throw new Error(`Fleet release drill-through did not open acceptance status at ${viewport.name}: ${JSON.stringify(state)}`);
-  }
-  await page.keyboard.press("Escape");
-  await waitForDrawerClosed(page);
-  await page.evaluate(() => { location.hash = "#/fleet"; });
-  await waitForRouteReady(page, "/fleet");
 }
 
 async function assertGlobalKeyboardFocusWorkflow(page, viewport) {
@@ -2960,7 +2933,6 @@ async function assertSystemLogsWorkbench(page, viewport) {
     `${investigationSeed.srcIp}:${investigationSeed.srcPort}`,
     `${investigationSeed.destIp}:${investigationSeed.destPort}`,
     String(investigationSeed.signatureId),
-    "Readiness",
     "Threats",
     "Traffic",
     "Troubleshoot",
@@ -3135,7 +3107,7 @@ async function assertSystemLogsRoutedEntryReload(page, viewport, routeHash, entr
   await waitForRouteReady(page, "/logs");
   await waitForDrawerTitle(page, "WARN log event");
   const drawer = await collectDrawerState(page);
-  assertDrawerContains(drawer, viewport, "system log routed drawer", ["WARN log event", "suricata engine degraded", "Readiness"], ["Copy packet", "Export JSON", "Pin to case", "Close"]);
+  assertDrawerContains(drawer, viewport, "system log routed drawer", ["WARN log event", "suricata engine degraded", "Threats", "Traffic", "Troubleshoot", "Investigation"], ["Copy packet", "Export JSON", "Pin to case", "Close"]);
   await clickDrawerFooterButton(page, "Close");
   await waitForDrawerClosed(page);
 }
@@ -3149,12 +3121,12 @@ async function assertSystemLogsEmptyState(page, viewport, restoreHash) {
     const rect = root?.getBoundingClientRect?.();
     return {
       text: root?.textContent || "",
-      hasReadinessAction: Boolean(root?.querySelector('[data-logs-action="open-readiness"][href="#/readiness"]')),
+      hasRetiredReadinessAction: Boolean(root?.querySelector('a[href^="#/readiness"]')),
       overflow: root ? Math.max(0, Math.ceil(rect.right - window.innerWidth), Math.ceil(0 - rect.left), Math.ceil(root.scrollWidth - root.clientWidth)) : 999,
     };
   });
-  if (!state.text.includes("No matching log events") || !state.hasReadinessAction) {
-    throw new Error(`system logs empty state missing text or readiness action at ${viewport.name}: ${JSON.stringify(state)}`);
+  if (!state.text.includes("No matching log events") || state.hasRetiredReadinessAction) {
+    throw new Error(`system logs empty state was missing its text or exposed the retired readiness route at ${viewport.name}: ${JSON.stringify(state)}`);
   }
   if (state.overflow > 2) {
     throw new Error(`system logs empty state overflow at ${viewport.name}: ${state.overflow}px`);
@@ -6802,9 +6774,6 @@ async function assertIntelLifecycleAutomationContext(page, viewport, label, requ
   const closedByButton = await page.locator('#drawer:not([hidden]) [aria-label="Close dialog"]').click({ timeout: 1500 }).then(() => true).catch(() => false);
   if (!closedByButton) await page.keyboard.press("Escape");
   await waitForDrawerClosed(page);
-  await page.evaluate(() => {
-    if (location.hash === "#/readiness?drawer=ha-cockpit") location.hash = "#/readiness";
-  });
   await waitForRouteReady(page, "/intel");
 }
 
@@ -7552,9 +7521,8 @@ async function assertProxyPlanProofWorkflow(page, viewport) {
   if (!/metadata only|bounded review snippets/i.test(state.text)) {
     throw new Error(`proxy plan proof missing artifact exposure mode at ${viewport.name}`);
   }
-  if (!state.links.some((link) => link.key === "changes" && link.href === "#/changes?tab=candidate") ||
-      !state.links.some((link) => link.key === "readiness" && link.href === "#/readiness")) {
-    throw new Error(`proxy plan proof links were wrong at ${viewport.name}: ${JSON.stringify(state.links)}`);
+  if (state.links.length !== 1 || !state.links.some((link) => link.key === "changes" && link.href === "#/changes?tab=candidate")) {
+    throw new Error(`proxy plan proof owner link was wrong at ${viewport.name}: ${JSON.stringify(state.links)}`);
   }
   await page.locator("#drawer:not([hidden]) [data-proxy-action='close-plan-proof']").first().click();
   await waitForDrawerClosed(page, 10000);
@@ -11147,17 +11115,18 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   if (inspectedState.overflow > 2) {
     throw new Error(`performance publishable verifier overflow at ${viewport.name}: ${inspectedState.overflow}px`);
   }
-  await assertPerformanceReadinessParity(page, viewport);
+  await assertPerformanceReleaseEvidenceOwnership(page, viewport);
   await page.evaluate(() => { location.hash = "#/performance"; });
   await waitForRouteReady(page, "/performance");
   await page.waitForSelector('[data-perf-route="true"]', { timeout: 10000 });
   await uploadPerfFile(page, "summary", inspected.summary);
   await uploadPerfFile(page, "iperf", inspected.iperf);
   await uploadPerfFile(page, "status", inspected.status);
-  await waitForPerformanceState(page, "publishable inspected evidence restored after readiness parity", (state) => (
+  await waitForPerformanceState(page, "publishable inspected evidence restored after owner check", (state) => (
     state.verdict === "ok" &&
     state.releaseState === "ok" &&
-    state.parityState === "ok"
+    state.releaseBenchmarkState &&
+    state.nextCommandCount >= 3
   ));
 
   await page.click('[data-perf-action="use-live-status"]');
@@ -11185,27 +11154,21 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   await waitForPerformanceState(page, "final clear", (state) => state.verdict === "empty");
 }
 
-async function assertPerformanceReadinessParity(page, viewport) {
+async function assertPerformanceReleaseEvidenceOwnership(page, viewport) {
   const state = await collectPerformanceState(page);
-  if (state.parityState !== "ok" || state.parityHref !== "#/readiness?packet=release-benchmark") {
-    throw new Error(`performance readiness parity panel missing publishable release-benchmark link at ${viewport.name}: ${JSON.stringify(state)}`);
+  if (!state.releaseBenchmarkState || state.nextCommandCount < 3 || state.retiredReadinessHref) {
+    throw new Error(`performance release-evidence ownership hooks were wrong at ${viewport.name}: ${JSON.stringify(state)}`);
   }
-  if (!state.text.includes("does not record backend release evidence") || !state.text.includes("make benchmark-verify-release")) {
-    throw new Error(`performance readiness parity panel missed backend evidence boundary at ${viewport.name}: ${state.text}`);
+  for (const required of [
+    "does not record backend release evidence",
+    "make benchmark-verify-release",
+    "make release-evidence-release-benchmark",
+    "RELEASE_NO_PERFORMANCE_CLAIMS=1",
+  ]) {
+    if (!state.text.includes(required)) {
+      throw new Error(`performance release-evidence owner panel missed ${required} at ${viewport.name}: ${state.text}`);
+    }
   }
-  await page.click('[data-perf-readiness-link="release-benchmark"]');
-  await waitForRouteReady(page, "/readiness");
-  await waitForReadinessDrawer(page, ".drawer [data-release-evidence-packet='release-benchmark']");
-  const drawer = await collectRouteBackedDrawerState(page, ".drawer [data-release-evidence-packet='release-benchmark']");
-  if (!/release-benchmark/.test(drawer.text) ||
-      !drawer.commands.some((command) => /make benchmark-verify-release/.test(command))) {
-    throw new Error(`performance parity did not drill into Readiness release-benchmark packet at ${viewport.name}: ${JSON.stringify(drawer)}`);
-  }
-  if (drawer.overflow > 2) {
-    throw new Error(`performance parity readiness drawer overflow at ${viewport.name}: ${drawer.overflow}px`);
-  }
-  await page.keyboard.press("Escape");
-  await waitForReadinessHashCleared(page);
 }
 
 async function assertPerformanceAutomationContext(page, viewport) {
@@ -11569,8 +11532,9 @@ async function collectPerformanceState(page) {
       verdict: route?.querySelector("[data-perf-verdict]")?.getAttribute("data-perf-verdict") || "",
       releaseState: route?.querySelector("[data-perf-release-state]")?.getAttribute("data-perf-release-state") || "",
       gateState: route?.querySelector("[data-perf-gate-state]")?.getAttribute("data-perf-gate-state") || "",
-      parityState: route?.querySelector("[data-perf-readiness-parity]")?.getAttribute("data-perf-readiness-parity") || "",
-      parityHref: route?.querySelector("[data-perf-readiness-link='release-benchmark']")?.getAttribute("href") || "",
+      releaseBenchmarkState: route?.querySelector("[data-perf-release-benchmark-status]")?.getAttribute("data-perf-release-benchmark-status") || "",
+      nextCommandCount: route?.querySelectorAll("[data-perf-next-command]").length || 0,
+      retiredReadinessHref: route?.querySelector('a[href^="#/readiness"]')?.getAttribute("href") || "",
       artifacts: {
         iperf: artifactValue("iperf"),
         status: artifactValue("status"),
@@ -14748,19 +14712,11 @@ async function assertChangesImportPreviewGuardrail(page, viewport) {
 }
 
 async function assertChangesRunningPolicyExport(page, viewport) {
-  const downloadPromise = page.waitForEvent("download", { timeout: 5000 });
-  const clicked = await page.evaluate(() => {
-    const label = (el) => (el?.textContent || "").replace(/\s+/g, " ").trim();
-    const target = [...document.querySelectorAll("#content button")]
-      .find((button) => label(button) === "Export running");
-    if (!target) return false;
-    target.click();
-    return true;
+  const download = await clickValidatedDownloadAction(page, {
+    selector: '#content [data-changes-action="export-running"]',
+    expectedText: "Export running",
+    unavailableMessage: "changes export running action was not uniquely visible and enabled",
   });
-  if (!clicked) {
-    throw new Error("changes export running action was not visible");
-  }
-  const download = await downloadPromise;
   const filename = download.suggestedFilename();
   if (!/^phragma-running(?:-v\d+)?-\d{4}-\d{2}-\d{2}T[0-9-]+Z\.json$/.test(filename || "")) {
     throw new Error(`changes running export filename had unexpected shape at ${viewport.name}: ${filename || "<none>"}`);
@@ -14780,19 +14736,11 @@ async function assertChangesRunningPolicyExport(page, viewport) {
 async function assertChangesVersionPolicyExport(page, viewport, version, expectedPolicyMarker = "") {
   await page.evaluate(() => { location.hash = "#/changes?tab=versions"; });
   await waitForRouteReady(page, "/changes");
-  await page.waitForSelector(`[data-changes-version-row="${String(version)}"] [data-changes-action="export-version"]`, { timeout: 10000 });
-  const downloadPromise = page.waitForEvent("download", { timeout: 5000 });
-  const clicked = await page.evaluate((targetVersion) => {
-    const row = document.querySelector(`[data-changes-version-row="${String(targetVersion)}"]`);
-    const target = row?.querySelector('[data-changes-action="export-version"]');
-    if (!target || target.disabled) return false;
-    target.click();
-    return true;
-  }, version);
-  if (!clicked) {
-    throw new Error(`changes version export action for v${version} was not visible or enabled`);
-  }
-  const download = await downloadPromise;
+  const download = await clickValidatedDownloadAction(page, {
+    selector: `[data-changes-version-row="${String(version)}"] [data-changes-action="export-version"]`,
+    expectedText: "Export",
+    unavailableMessage: `changes version export action for v${version} was not uniquely visible and enabled`,
+  });
   const filename = download.suggestedFilename();
   const expectedName = new RegExp(`^phragma-version-v${String(version).replace(/^v/i, "")}-\\d{4}-\\d{2}-\\d{2}T[0-9-]+Z\\.json$`);
   if (!expectedName.test(filename || "")) {
@@ -14808,6 +14756,28 @@ async function assertChangesVersionPolicyExport(page, viewport, version, expecte
     throw new Error(`changes version export v${version} did not contain committed policy marker ${expectedPolicyMarker}`);
   }
   return { filename, text, packet };
+}
+
+async function clickValidatedDownloadAction(page, { selector, expectedText = "", unavailableMessage }) {
+  const action = page.locator(selector);
+  const count = await action.count();
+  if (count !== 1) {
+    throw new Error(`${unavailableMessage}: found ${count} matching controls`);
+  }
+  const [visible, enabled, text] = await Promise.all([
+    action.isVisible(),
+    action.isEnabled(),
+    action.textContent(),
+  ]);
+  const normalizedText = String(text || "").replace(/\s+/g, " ").trim();
+  if (!visible || !enabled || (expectedText && normalizedText !== expectedText)) {
+    throw new Error(`${unavailableMessage}: visible=${visible} enabled=${enabled} text=${JSON.stringify(normalizedText)}`);
+  }
+  const [download] = await Promise.all([
+    page.waitForEvent("download", { timeout: 5000 }),
+    action.click(),
+  ]);
+  return download;
 }
 
 function assertChangesPolicyExportEnvelope(text, label, expected = {}) {
@@ -15173,6 +15143,9 @@ async function assertChangesCandidateReview(page, viewport, plan) {
     "Runtime",
     "Impact",
     "Commit impact",
+    "Strict UI apply evidence",
+    "Field evidence claim",
+    "not claimed by Changes",
     "Diff:",
     plan.ruleName,
   ];
@@ -15194,8 +15167,8 @@ async function assertChangesCandidateReview(page, viewport, plan) {
       throw new Error(`changes candidate review missing ${action} action at ${viewport.name}: ${JSON.stringify(state.buttons)}`);
     }
   }
-  if (!state.links.some((link) => link.changesLink === "readiness" && link.href === "#/readiness")) {
-    throw new Error(`changes candidate review missing readiness link semantics at ${viewport.name}: ${JSON.stringify(state.links)}`);
+  if (state.links.some((link) => link.href.startsWith("#/readiness"))) {
+    throw new Error(`changes candidate review exposed the retired readiness route at ${viewport.name}: ${JSON.stringify(state.links)}`);
   }
   if (commit.disabled && !/blocked|not ready|runtime/i.test(state.text)) {
     throw new Error(`changes candidate commit disabled without a visible blocker: ${JSON.stringify({ commit })}`);

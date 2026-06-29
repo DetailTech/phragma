@@ -286,7 +286,7 @@ function callNames(calls) {
     },
   });
   assert.match(routedPacketText, /current_gap=release\/field-evidence\/oidc/);
-  assert.match(routedPacketText, /packet_route=#\/readiness\?packet=m5-oidc-field-evidence/);
+  assert.match(routedPacketText, /packet_route=#\/settings\?panel=access/);
   assert.match(routedPacketText, /operator_route=#\/settings\?panel=access&token=\[redacted\]/);
   assert.doesNotMatch(routedPacketText, /\/home\/opc|super-secret|abc123|TOKEN=abcdef/);
 
@@ -296,7 +296,7 @@ function callNames(calls) {
     label: "missing evidence",
     meta: "release/evidence/webui-enterprise-smoke.txt",
   });
-  assert.match(webuiPacketText, /current 20-route operator route set/);
+  assert.match(webuiPacketText, /current 19-route canonical route set/);
   assert.match(webuiPacketText, /\/compliance/);
   assert.match(webuiPacketText, /continuation or targeted repair evidence is diagnostic only/);
   assert.match(webuiPacketText, /boundary=Browser-local copy\/export\/pin only; durable release evidence still requires ngfwrelease\/release tooling record and manifest verification\./);

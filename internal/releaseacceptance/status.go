@@ -341,7 +341,7 @@ var evidenceStdoutRequiredFragments = map[string][]string{
 		"[webui-smoke] browser_coverage=chromium",
 		"viewport_coverage=desktop",
 		"evidence policy: mode=broad",
-		"route_coverage=20/20",
+		"route_coverage=19/19",
 		"[webui-smoke] summary: result=passed mode=broad",
 		"route_coverage=",
 		"checks=",

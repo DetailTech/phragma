@@ -9,14 +9,16 @@ const RELEASE_ACCEPTANCE_DOC = "docs/RELEASE_ACCEPTANCE.md#approved-evidence-flo
 const API_CONTRACT_SOURCE_ACCEPTANCE_NOTE = "Functional proto/OpenAPI generation and copy consistency can be validated independently, but proto-verify release evidence is not acceptable until proto inputs, generator config, generated Go/gateway files, normalized OpenAPI output, published docs spec, and bundled WebUI spec are accepted together in source control.";
 const M3_FIELD_EVIDENCE_DOC = "docs/testing-plan.md#phase-3--routing--vpn-m3--gaps-b-c-d";
 const OIDC_FIELD_EVIDENCE_DOC = "docs/testing-plan.md#phase-5--authnz--ui-m5--gap-f";
-const READINESS_ROUTE = "#/readiness";
+const CHANGES_CANDIDATE_ROUTE = "#/changes?tab=candidate";
+const INSPECTION_ROUTE = "#/inspection";
 const INTEL_ROUTE = "#/intel";
 const NETVPN_ROUTE = "#/netvpn";
+const PERFORMANCE_ROUTE = "#/performance";
 const SETTINGS_ACCESS_ROUTE = "#/settings?panel=access";
 const SETTINGS_NETWORK_ROUTE = "#/settings?panel=network";
 const SETTINGS_TELEMETRY_ROUTE = "#/settings?panel=telemetry";
 const RELEASE_EVIDENCE_DIR = "release/evidence";
-const WEBUI_ENTERPRISE_SMOKE_SCOPE = "current 20-route operator route set, including /compliance, across supported viewports";
+const WEBUI_ENTERPRISE_SMOKE_SCOPE = "current 19-route canonical route set, including /compliance, across supported viewports";
 const CONTENT_PRODUCTION_EVIDENCE_DIR = "release/field-evidence/content-production";
 const M3_FIELD_EVIDENCE_DIR = "release/field-evidence/m3";
 const EBPF_OL9_FIELD_EVIDENCE_DIR = "release/field-evidence/ebpf-ol9";
@@ -34,6 +36,22 @@ const EXTERNAL_RELEASE_GATE_IDS = Object.freeze([
   "m5-oidc-field-evidence",
   "m5-saml-field-evidence",
 ]);
+const RELEASE_EVIDENCE_OWNER_ROUTES = Object.freeze({
+  "content-production-readiness": INTEL_ROUTE,
+  "content-package-verification": INTEL_ROUTE,
+  "release-benchmark": PERFORMANCE_ROUTE,
+  "ha-readiness-recovery": NETVPN_ROUTE,
+  "m3-live-networking": NETVPN_ROUTE,
+  "m3-field-evidence": NETVPN_ROUTE,
+  "deploy-hardening": SETTINGS_ACCESS_ROUTE,
+  "e2e-install": SETTINGS_ACCESS_ROUTE,
+  "m5-auth-ui": SETTINGS_ACCESS_ROUTE,
+  "m5-oidc-provider": SETTINGS_ACCESS_ROUTE,
+  "m5-oidc-field-evidence": SETTINGS_ACCESS_ROUTE,
+  "m5-saml-field-evidence": SETTINGS_ACCESS_ROUTE,
+  "privileged-integration": SETTINGS_NETWORK_ROUTE,
+  "ebpf-ol9-field-evidence": SETTINGS_NETWORK_ROUTE,
+});
 const CONTENT_PRODUCTION_PACKET = evidencePacket({
   check: "content-production-readiness",
   evidencePath: CONTENT_PRODUCTION_EVIDENCE_DIR,
@@ -244,6 +262,11 @@ export function releaseEvidencePacketDefinition(id = "") {
   };
 }
 
+export function releaseEvidenceOwnerRoute(id = "") {
+  const key = String(id || "").trim();
+  return RELEASE_EVIDENCE_OWNER_ROUTES[key] || CHANGES_CANDIDATE_ROUTE;
+}
+
 export function summarizeReadiness(status = {}, policyDp = {}, flowCap = {}, flowRuntime = {}, ebpfHost = {}, conntrack = {}, contentPosture = null, routingRuntime = null) {
   const warnings = status.warnings || [];
   const engines = status.engines || [];
@@ -363,7 +386,7 @@ export function remediationSteps(status = {}, policyDp = {}, flowCap = {}, flowR
       badge: warning.severity || "warning",
       title: warning.message || "Runtime warning",
       detail: warning.action || "Inspect runtime status before enabling production enforcement.",
-      href: "#/readiness",
+      href: readinessActionHash(warning.message || "runtime warning"),
     });
   }
 
@@ -509,7 +532,7 @@ export function remediationSteps(status = {}, policyDp = {}, flowCap = {}, flowR
       title: ha.cls === "bad" ? "Resolve active/passive HA blockers" : "Review HA readiness posture",
       detail: ha.detail || "Review HA status before relying on active/passive recovery.",
       command: "ngfwctl status",
-      href: "#/readiness",
+      href: NETVPN_ROUTE,
     });
   }
 
@@ -920,8 +943,21 @@ export function remediationActionId(value = "") {
 
 export function readinessActionHash(actionId = "") {
   const action = remediationActionId(actionId);
-  if (!actionId || !action) return READINESS_ROUTE;
-  return `${READINESS_ROUTE}?${new URLSearchParams({ action }).toString()}`;
+  if (!actionId || !action) return CHANGES_CANDIDATE_ROUTE;
+  const route = readinessActionOwnerRoute(action);
+  const separator = route.includes("?") ? "&" : "?";
+  return `${route}${separator}${new URLSearchParams({ action }).toString()}`;
+}
+
+function readinessActionOwnerRoute(action = "") {
+  if (/\b(?:ha|frr|routing|vpn|bgp|ospf)\b/.test(action)) return NETVPN_ROUTE;
+  if (/\b(?:content|threat-id|app-id|feed)\b/.test(action)) return INTEL_ROUTE;
+  if (/\b(?:tls|auth|oidc|saml|rbac|access)\b/.test(action)) return SETTINGS_ACCESS_ROUTE;
+  if (/\b(?:telemetry|vector|clickhouse|export)\b/.test(action)) return SETTINGS_TELEMETRY_ROUTE;
+  if (/\b(?:benchmark|performance|throughput)\b/.test(action)) return PERFORMANCE_ROUTE;
+  if (/\b(?:flowtable|ebpf|xdp|conntrack|sysctl|network|dataplane)\b/.test(action)) return SETTINGS_NETWORK_ROUTE;
+  if (/\b(?:inspection|suricata|ids|ips)\b/.test(action)) return INSPECTION_ROUTE;
+  return CHANGES_CANDIDATE_ROUTE;
 }
 
 export function dynamicRoutingEnabled(policy = {}) {
@@ -1037,7 +1073,7 @@ export function releaseEvidenceChecklist({
       title: "Production readiness gate",
       detail: summary.detail || "Runtime production posture has not been summarized yet.",
       meta: engineCount ? `${readyEngines}/${engineCount} engines ready` : "engine evidence unavailable",
-      href: "#/readiness",
+      href: CHANGES_CANDIDATE_ROUTE,
     },
     ...rootlessAcceptanceItems,
     {
@@ -1074,7 +1110,7 @@ export function releaseEvidenceChecklist({
           ? tuning.throughputDetail || "Throughput profile is available before publishing high-throughput evidence."
           : "Kernel baseline and conntrack state-table posture are ready.",
       meta: conntrack.maxEntries ? `${conntrack.usagePercent.toFixed(1)}% conntrack` : "conntrack limit unavailable",
-      href: "#/readiness",
+      href: SETTINGS_NETWORK_ROUTE,
     },
     {
       id: "dataplane",
@@ -1090,7 +1126,7 @@ export function releaseEvidenceChecklist({
           ? "Flowtable host readiness and live runtime evidence are present for the accelerated policy."
           : "Flowtable acceleration is not requested; standard dataplane evidence is used for this release posture.",
       meta: accelerated ? `host ${flowCap.state || "unknown"} / runtime ${flowRuntime.state || "unknown"}` : policyDp.baseDataplane || "standard forwarding",
-      href: "#/readiness",
+      href: SETTINGS_NETWORK_ROUTE,
     },
     {
       id: "webui-enterprise-smoke",
@@ -1100,7 +1136,7 @@ export function releaseEvidenceChecklist({
       title: "WebUI enterprise smoke",
       detail: webUIEnterpriseSmokeGate.detail,
       meta: webUIEnterpriseSmokeGate.meta,
-      href: READINESS_ROUTE,
+      href: releaseEvidenceOwnerRoute("webui-enterprise-smoke"),
       reference: RELEASE_ACCEPTANCE_DOC,
       packet: WEBUI_ENTERPRISE_SMOKE_PACKET,
     },
@@ -1112,7 +1148,7 @@ export function releaseEvidenceChecklist({
       title: "Privileged integration and live dataplane",
       detail: privilegedIntegrationGate.detail,
       meta: privilegedIntegrationGate.meta,
-      href: READINESS_ROUTE,
+      href: releaseEvidenceOwnerRoute("privileged-integration"),
       reference: RELEASE_ACCEPTANCE_DOC,
       packet: PRIVILEGED_INTEGRATION_PACKET,
     },
@@ -1136,7 +1172,7 @@ export function releaseEvidenceChecklist({
       title: "Active/passive HA readiness",
       detail: ha.detail,
       meta: ha.meta,
-      href: "#/readiness",
+      href: NETVPN_ROUTE,
     },
     telemetryGate,
     {
@@ -1159,7 +1195,7 @@ export function releaseEvidenceChecklist({
       title: "eBPF OL9 field evidence",
       detail: ebpfOL9FieldGate.detail,
       meta: ebpfOL9FieldGate.meta,
-      href: READINESS_ROUTE,
+      href: releaseEvidenceOwnerRoute("ebpf-ol9-field-evidence"),
       reference: RELEASE_ACCEPTANCE_DOC,
       packet: EBPF_OL9_FIELD_PACKET,
     },
@@ -1171,7 +1207,7 @@ export function releaseEvidenceChecklist({
       title: "Inspection and failure behavior",
       detail: inspection.detail || inspection.degradedBehavior || "Inspection readiness and fail-open/fail-closed posture are not available.",
       meta: [inspection.engineLabel, inspection.failureBehavior].filter(Boolean).join(" / ") || "engine evidence unavailable",
-      href: "#/readiness",
+      href: INSPECTION_ROUTE,
     },
     {
       id: "m5-oidc-field-evidence",
@@ -1215,7 +1251,7 @@ export function releaseEvidenceChecklist({
       title: "Support bundle evidence",
       detail: "Preview support bundle exports existing status, policy, validation, runtime-readiness preflight, audit, telemetry, session, feed, and content-package evidence without mutating the firewall.",
       meta: "uses existing read APIs",
-      href: "#/readiness",
+      href: "",
     },
   ].filter(Boolean);
 }
@@ -1264,7 +1300,7 @@ function rootlessReleaseGateItems(releaseAcceptanceStatus = null) {
   const apiContractSourceAcceptance = apiContractSourceAcceptanceModel(releaseAcceptanceStatus?.recordability);
   return [
     {
-      ...releaseChecklistItemFromGate("proto-verify", "Generated API contract", "#/readiness", PROTO_VERIFY_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "proto-verify", {
+      ...releaseChecklistItemFromGate("proto-verify", "Generated API contract", releaseEvidenceOwnerRoute("proto-verify"), PROTO_VERIFY_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "proto-verify", {
       cls: "bad",
       label: "missing evidence",
       detail: `Generated API, gRPC gateway, and OpenAPI artifacts must match proto sources. ${API_CONTRACT_SOURCE_ACCEPTANCE_NOTE}`,
@@ -1278,19 +1314,19 @@ function rootlessReleaseGateItems(releaseAcceptanceStatus = null) {
       detail: "Packaged deployment evidence must be recorded before release acceptance. This gate is a static service-unit and installer check only; live runtime hardening remains a separate pass.",
       meta: `${RELEASE_EVIDENCE_DIR}/deploy-hardening.txt`,
     })),
-    releaseChecklistItemFromGate("policy-restore-drill", "Emergency policy restore drill", "#/readiness", POLICY_RESTORE_DRILL_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "policy-restore-drill", {
+    releaseChecklistItemFromGate("policy-restore-drill", "Emergency policy restore drill", releaseEvidenceOwnerRoute("policy-restore-drill"), POLICY_RESTORE_DRILL_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "policy-restore-drill", {
       cls: "bad",
       label: "missing evidence",
       detail: "Rootless policy rollback, audit, LKG, and engine-apply restore drill evidence must be recorded before release acceptance.",
       meta: `${RELEASE_EVIDENCE_DIR}/policy-restore-drill.txt`,
     })),
-    releaseChecklistItemFromGate("ha-readiness-recovery", "HA readiness recovery evidence", "#/readiness?drawer=ha-cockpit", HA_READINESS_RECOVERY_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "ha-readiness-recovery", {
+    releaseChecklistItemFromGate("ha-readiness-recovery", "HA readiness recovery evidence", releaseEvidenceOwnerRoute("ha-readiness-recovery"), HA_READINESS_RECOVERY_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "ha-readiness-recovery", {
       cls: "bad",
       label: "missing evidence",
       detail: "Rootless active/passive HA readiness and control-plane recovery evidence must be recorded before release acceptance.",
       meta: `${RELEASE_EVIDENCE_DIR}/ha-readiness-recovery.txt`,
     })),
-    releaseChecklistItemFromGate("e2e-install", "Install smoke run", "#/readiness", E2E_INSTALL_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "e2e-install", {
+    releaseChecklistItemFromGate("e2e-install", "Install smoke run", releaseEvidenceOwnerRoute("e2e-install"), E2E_INSTALL_PACKET, releaseAcceptanceCheckGate(releaseAcceptanceStatus, "e2e-install", {
       cls: "bad",
       label: "missing evidence",
       detail: "The privileged install smoke must be recorded from a disposable Linux host after proving installed-service policy enforcement.",
@@ -1696,7 +1732,7 @@ function releaseArtifactWorkbenchRow({ id, item = null, check = null, manifestPr
     evidencePath,
     artifactPath,
     operatorRoute: item?.href || "",
-    packetRoute: `#/readiness?packet=${encodeURIComponent(id)}`,
+    packetRoute: releaseEvidenceOwnerRoute(id),
     nextCommandRole: next.role,
     nextCommand: next.command,
     problems,

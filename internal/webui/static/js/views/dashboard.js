@@ -7,6 +7,7 @@ import { api } from "../api.js";
 import { throwIfAccessDenied } from "../auth_gate.js";
 import { capabilityClass, conntrackCapacity, dataplanePosture, idsModeLabel } from "../dataplane.js";
 import { policyNeedsBaseline } from "../baseline.js";
+import { releaseEvidenceOwnerRoute } from "../readiness_model.js";
 import { pageHead, card, emptyState, pill, metricCard, tag, labeledCell, responsiveTable } from "../ui.js";
 import * as fmt from "../format.js";
 import { area, donut, hbars } from "../charts.js";
@@ -265,7 +266,7 @@ export function dashboardReleaseReadinessModel(input = {}, candidate = {}, unava
       name: firstId,
       state: first.state === "recorded" ? "pending manifest" : first.state || "",
       detail: String(first.detail || "").replace(/\/[^\s]+/g, "[redacted]"),
-      href: firstId ? `#/readiness?packet=${encodeURIComponent(firstId)}` : "",
+      href: firstId ? releaseEvidenceOwnerRoute(firstId) : "",
     } : null,
     candidate: dashboardCandidateStatusModel(candidate, unavailable),
     rulesHref: dashboardRulesRemediationHash(),

@@ -238,7 +238,7 @@ const {
   assert.equal(model.summary.missing, 2);
   assert.equal(model.summary.notApplicable, 1);
   assert.equal(model.firstGate.id, "m3-field-evidence");
-  assert.equal(model.firstGate.href, "#/readiness?packet=m3-field-evidence");
+  assert.equal(model.firstGate.href, "#/netvpn");
   assert.doesNotMatch(model.firstGate.detail, /\/tmp\/secret|make|arguments/);
   assert.equal(model.candidate.dirty, true);
   assert.equal(model.rulesHref, "#/rules?changed=1&density=compact");
@@ -260,7 +260,7 @@ const {
   assert.match(model.detail, /All required evidence is recorded/);
   assert.equal(model.firstGate.id, "proto-verify");
   assert.equal(model.firstGate.state, "pending manifest");
-  assert.equal(model.firstGate.href, "#/readiness?packet=proto-verify");
+  assert.equal(model.firstGate.href, "#/changes?tab=candidate");
   assert.equal(model.candidate.dirty, false);
 }
 

@@ -578,8 +578,10 @@ COMMIT="$(git rev-parse HEAD)" make release-evidence-webui-enterprise-smoke
 
 The wrapper records `make webui-enterprise-smoke` and writes
 `release/evidence/webui-enterprise-smoke.txt`. The underlying target runs the
-full enterprise route list across the desktop viewport by default, requires
-Node.js JavaScript checks, requires browser coverage by default, writes
+full 19-route canonical enterprise set across the desktop viewport by default;
+`/dashboard` remains an input alias for `/` and does not increase the canonical
+route count. The target requires Node.js JavaScript checks, requires browser
+coverage by default, writes
 `webui-smoke-evidence.json`, stores screenshot artifacts under the smoke
 artifact directory, and fails on unlabeled icon controls, generic operator
 actions without stable hooks plus title/ARIA intent, or route-backed drawer
@@ -587,7 +589,7 @@ actions without stable accessible affordances. The recorded stdout must include
 `webui_js_checks=passed`, `javascript_checks=required`,
 `release_smoke_mode=desktop-enterprise`, `browser_required=1`,
 `[webui-smoke] browser_coverage=chromium`, `viewport_coverage=desktop`, the
-broad evidence policy, `route_coverage=20/20`, passed broad summary, check
+broad evidence policy, `route_coverage=19/19`, passed broad summary, check
 count, screenshot count, evidence manifest path, and release-note caveat
 stating that broad visual-smoke evidence supports production release only after
 source-control acceptance and repo-local release evidence recording.

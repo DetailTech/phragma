@@ -400,7 +400,7 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
       cls: "warn",
       detail: "runtime warning /tmp/secret",
       requiresAck: true,
-      items: [{ level: "medium", badge: "runtime", title: "FRR reload", detail: "BGP may flap password=abc123", href: "#/readiness?action=frr" }],
+      items: [{ level: "medium", badge: "runtime", title: "FRR reload", detail: "BGP may flap password=abc123", href: "#/netvpn" }],
     },
     impact: { level: "high", items: [{ level: "high", title: "Rollback impact", detail: "policy replacement /var/lib/openngfw/state" }] },
     diff: { source: "api", changed: true, fromLabel: "running policy", toLabel: "version 3", lines: [{ text: "+ allow-web" }, { text: "+ file /Users/alice/private api_key=abc123" }] },

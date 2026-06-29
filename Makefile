@@ -38,7 +38,7 @@ WEBUI_NODE_TEST_PRELOAD := ./internal/webui/static/js/node_test_polyfills.cjs
 WEBUI_CHECK_REQUIRE_NODE ?= 0
 WEBUI_SMOKE_REQUIRE_BROWSER ?= 1
 WEBUI_ENTERPRISE_SMOKE_TOTAL_TIMEOUT_MS ?= 1800000
-WEBUI_ENTERPRISE_SMOKE_PATHS ?= /,/dashboard,/setup,/rules,/objects,/nat,/inspection,/threats,/traffic,/logs,/troubleshoot,/performance,/investigation,/fleet,/intel,/netvpn,/proxy,/compliance,/readiness,/changes,/settings
+WEBUI_ENTERPRISE_SMOKE_PATHS ?= /,/dashboard,/setup,/rules,/objects,/nat,/inspection,/threats,/traffic,/logs,/troubleshoot,/performance,/investigation,/fleet,/intel,/netvpn,/proxy,/compliance,/changes,/settings
 WEBUI_ENTERPRISE_SMOKE_VIEWPORTS ?= desktop
 WEBUI_ENTERPRISE_SMOKE_ARTIFACT_DIR ?= $${TMPDIR:-/tmp}/openngfw-webui-smoke-enterprise-$$(date -u +%Y%m%dT%H%M%SZ)
 WEBUI_SMOKE_REPLAY_FAILURE_MANIFEST ?=
@@ -108,7 +108,8 @@ webui-visual-smoke-replay-failures: webui-check
 	fi
 
 webui-enterprise-smoke:
-	@if command -v node >/dev/null 2>&1; then \
+	@set -eu; \
+	if command -v node >/dev/null 2>&1; then \
 		$(MAKE) webui-check WEBUI_CHECK_REQUIRE_NODE=1; \
 		echo "release_smoke_mode=desktop-enterprise"; \
 		echo "browser_required=$(WEBUI_SMOKE_REQUIRE_BROWSER)"; \
@@ -279,7 +280,7 @@ release-evidence-m5-saml-field-evidence:
 	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check m5-saml-field-evidence --commit "$(COMMIT)" --detail "release gate: redacted real-provider SAML browser SSO field evidence bundle for $(COMMIT)" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make m5-saml-field-evidence-check $(RELEASE_BUILD_ARGS)
 
 release-evidence-webui-enterprise-smoke:
-	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check webui-enterprise-smoke --commit "$(COMMIT)" --detail "release gate: browser-required broad desktop WebUI enterprise smoke across the current 20-route route set including /compliance for $(COMMIT); continuation, tablet/mobile, or targeted repair evidence is diagnostic only until repo-local release evidence is recorded for the accepted source snapshot" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make webui-enterprise-smoke $(RELEASE_BUILD_ARGS)
+	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check webui-enterprise-smoke --commit "$(COMMIT)" --detail "release gate: browser-required broad desktop WebUI enterprise smoke across the current 19-route canonical route set including /compliance for $(COMMIT); continuation, tablet/mobile, or targeted repair evidence is diagnostic only until repo-local release evidence is recorded for the accepted source snapshot" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make webui-enterprise-smoke $(RELEASE_BUILD_ARGS)
 
 release-evidence-release-benchmark:
 	@if [ "$(RELEASE_NO_PERFORMANCE_CLAIMS)" = "1" ]; then \
