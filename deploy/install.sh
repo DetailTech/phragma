@@ -28,7 +28,9 @@ binary_matches_commit() {
   if [[ -z "${COMMIT:-}" ]]; then
     return 0
   fi
-  [[ -x "$binary" ]] && "$binary" "$@" 2>/dev/null | grep -Fq -- "$COMMIT"
+  # Cobra emits ngfwctl command output on stderr by default; controld's flag
+  # writes to stdout, so version matching intentionally inspects both streams.
+  [[ -x "$binary" ]] && "$binary" "$@" 2>&1 | grep -Fq -- "$COMMIT"
 }
 
 prebuilt_binary_pair_matches_commit() {

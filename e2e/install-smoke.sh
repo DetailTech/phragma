@@ -165,7 +165,7 @@ write_ngfwctl_version_stub() {
   cat > "$path" <<EOF
 #!/usr/bin/env bash
 if [ "\${1:-}" = "version" ]; then
-  printf '%s\n' 'ngfwctl Phragma test (commit ${commit})'
+  printf '%s\n' 'ngfwctl Phragma test (commit ${commit})' >&2
   exit 0
 fi
 exit 2
