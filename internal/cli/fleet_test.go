@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"os"
@@ -14,12 +15,20 @@ import (
 )
 
 type fakeFleetHTTPClient struct {
-	status int
-	body   string
-	err    error
-	req    *http.Request
-	raw    []byte
+	status   int
+	body     string
+	err      error
+	closeErr error
+	req      *http.Request
+	raw      []byte
 }
+
+type fakeFleetResponseBody struct {
+	io.Reader
+	err error
+}
+
+func (b fakeFleetResponseBody) Close() error { return b.err }
 
 func (f *fakeFleetHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	f.req = req
@@ -36,7 +45,7 @@ func (f *fakeFleetHTTPClient) Do(req *http.Request) (*http.Response, error) {
 	}
 	return &http.Response{
 		StatusCode: status,
-		Body:       io.NopCloser(strings.NewReader(f.body)),
+		Body:       fakeFleetResponseBody{Reader: strings.NewReader(f.body), err: f.closeErr},
 		Header:     make(http.Header),
 	}, nil
 }
@@ -70,6 +79,32 @@ func TestFleetTokenTransportRequiresHTTPSOrLoopback(t *testing.T) {
 	}
 	if err := validateFleetTokenTransport("https://fw.example:8443", "token"); err != nil {
 		t.Fatalf("HTTPS token rejected: %v", err)
+	}
+}
+
+func TestFleetAPIErrorTakesPriorityOverResponseCloseError(t *testing.T) {
+	client := &fleetClient{
+		baseURL: "http://127.0.0.1:8080",
+		httpClient: &fakeFleetHTTPClient{
+			status:   http.StatusPreconditionFailed,
+			body:     `{"error":{"code":"CANDIDATE_REVISION_CONFLICT","message":"candidate changed"}}`,
+			closeErr: errors.New("close failed"),
+		},
+	}
+	_, err := client.do(context.Background(), http.MethodGet, "/v1/fleet/templates", nil)
+	if err == nil || !strings.Contains(err.Error(), "CANDIDATE_REVISION_CONFLICT") {
+		t.Fatalf("fleet API error = %v, want candidate revision conflict", err)
+	}
+}
+
+func TestFleetSuccessfulResponseReportsCloseError(t *testing.T) {
+	client := &fleetClient{
+		baseURL:    "http://127.0.0.1:8080",
+		httpClient: &fakeFleetHTTPClient{body: `{}`, closeErr: errors.New("close failed")},
+	}
+	_, err := client.do(context.Background(), http.MethodGet, "/v1/fleet/templates", nil)
+	if err == nil || !strings.Contains(err.Error(), "close fleet API response") {
+		t.Fatalf("fleet API error = %v, want response close failure", err)
 	}
 }
 

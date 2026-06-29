@@ -145,13 +145,27 @@ check_admin_token_not_stdout() {
   ' "$1"
 }
 
-write_version_stub() {
+write_controld_version_stub() {
   local path="$1"
   local commit="$2"
   cat > "$path" <<EOF
 #!/usr/bin/env bash
 if [ "\${1:-}" = "--version" ]; then
   printf '%s\n' 'Phragma test (commit ${commit})'
+  exit 0
+fi
+exit 2
+EOF
+  chmod 0755 "$path"
+}
+
+write_ngfwctl_version_stub() {
+  local path="$1"
+  local commit="$2"
+  cat > "$path" <<EOF
+#!/usr/bin/env bash
+if [ "\${1:-}" = "version" ]; then
+  printf '%s\n' 'ngfwctl Phragma test (commit ${commit})'
   exit 0
 fi
 exit 2
@@ -168,8 +182,8 @@ check_prebuilt_binary_pair_commit() (
   expected_commit="0123456789abcdef0123456789abcdef01234567"
   stale_commit="fedcba9876543210fedcba9876543210fedcba98"
 
-  write_version_stub "$pair_dir/controld" "$expected_commit"
-  write_version_stub "$pair_dir/ngfwctl" "$stale_commit"
+  write_controld_version_stub "$pair_dir/controld" "$expected_commit"
+  write_ngfwctl_version_stub "$pair_dir/ngfwctl" "$stale_commit"
   if COMMIT="$expected_commit" BIN_DIR="$pair_dir" \
       "$REPO_ROOT/deploy/install.sh" --check-prebuilt-binaries \
       >"$pair_dir/stale-pair.out" 2>&1; then
@@ -181,7 +195,7 @@ check_prebuilt_binary_pair_commit() (
     return 1
   fi
 
-  write_version_stub "$pair_dir/ngfwctl" "$expected_commit"
+  write_ngfwctl_version_stub "$pair_dir/ngfwctl" "$expected_commit"
   if ! COMMIT="$expected_commit" BIN_DIR="$pair_dir" \
       "$REPO_ROOT/deploy/install.sh" --check-prebuilt-binaries \
       >"$pair_dir/matching-pair.out" 2>&1; then
@@ -500,15 +514,22 @@ require_installed_commit() {
     return 0
   fi
   local installed_version
+  local client_version
   local remote_version
   installed_version="$(/usr/local/bin/controld --version 2>&1)"
+  client_version="$(/usr/local/bin/ngfwctl version 2>&1)"
   remote_version="$(/usr/local/bin/ngfwctl --server "$GRPC_LISTEN" version --remote 2>&1)"
-  if ! printf '%s\n' "$installed_version" | grep -q "$COMMIT"; then
+  if ! printf '%s\n' "$installed_version" | grep -Fq -- "$COMMIT"; then
     echo "installed controld binary does not report expected commit $COMMIT" >&2
     printf '%s\n' "$installed_version" >&2
     exit 1
   fi
-  if ! printf '%s\n' "$remote_version" | grep -q "$COMMIT"; then
+  if ! printf '%s\n' "$client_version" | grep -Fq -- "$COMMIT"; then
+    echo "installed ngfwctl binary does not report expected commit $COMMIT" >&2
+    printf '%s\n' "$client_version" >&2
+    exit 1
+  fi
+  if ! printf '%s\n' "$remote_version" | grep '^controld ' | grep -Fq -- "$COMMIT"; then
     echo "running controld service does not report expected commit $COMMIT" >&2
     printf '%s\n' "$remote_version" >&2
     exit 1

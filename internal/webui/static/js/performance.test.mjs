@@ -5,6 +5,8 @@ import { artifactSizeProblem, benchmarkCollectionRunbook, benchmarkCollectionRun
 import { performanceClaimGateWorkbenchModel, performanceEvidenceHandoffPacket, performanceReleaseDecisionModel } from "./views/performance.js";
 
 const performanceViewSource = readFileSync(new URL("./views/performance.js", import.meta.url), "utf8");
+assert.match(performanceViewSource, /import \{ api \} from "\.\.\/api\.js";/);
+assert.match(performanceViewSource, /const status = await api\.status\(\)/);
 assert.match(performanceViewSource, /type: "button", title: "Verify benchmark evidence"/);
 assert.match(performanceViewSource, /type: "button", title: "Open Performance API and CLI context"/);
 assert.match(performanceViewSource, /openAutomationContext\("#\/performance"\)/);

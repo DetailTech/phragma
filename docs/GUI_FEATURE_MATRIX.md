@@ -43,7 +43,8 @@ access, network, host-input, and telemetry posture; Performance owns local
 benchmark artifact review and comparison; Intel owns content evidence; and
 Routing/VPN owns routing runtime evidence. Durable benchmark status, detailed
 release certification, and support-bundle collection remain API, CLI, and
-release-tooling workflows.
+release-tooling workflows. Legacy `#/readiness` deep links migrate to these
+owner workspaces without reintroducing a navigation route.
 
 | Route or domain | Implemented current surface | Covered by latest broad WebUI smoke | Remaining functional gaps | Hardening-only gaps |
 |---|---|---:|---|---|

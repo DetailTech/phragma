@@ -636,6 +636,7 @@ async function runPlaywrightSmoke(playwright, baseURL, opts = {}) {
             }
             if (screen.path === "/") {
               await assertGlobalKeyboardFocusWorkflow(page, viewport);
+              await assertLegacyReadinessRedirect(page, viewport);
               await assertDashboardAutomationContext(page, viewport);
               await assertAutomationRecorderMultiRouteRunbook(page, viewport);
               await assertGlobalDiagnosticConsoleWorkflow(page, viewport);
@@ -1516,6 +1517,19 @@ function dashboardTelemetryDisclosureIssue(paged = false, scope = "", text = "")
   if (scope !== "limited") return `paged telemetry rendered disclosure state ${JSON.stringify(scope || "missing")}`;
   if (!/Some telemetry is paged\./.test(String(text || ""))) return "limited telemetry omitted the paging explanation";
   return "";
+}
+
+async function assertLegacyReadinessRedirect(page, viewport) {
+  await page.evaluate(() => { location.hash = "#/readiness?packet=ha-readiness-recovery"; });
+  await waitForRouteReady(page, "/fleet");
+  await page.waitForSelector('[data-fleet-workspace="true"]', { timeout: 10000 });
+  const redirectedHash = await page.evaluate(() => location.hash);
+  if (redirectedHash !== "#/fleet") {
+    throw new Error(`legacy Readiness HA link did not migrate to Fleet at ${viewport.name}: ${redirectedHash || "<empty>"}`);
+  }
+  await page.evaluate(() => { location.hash = "#/"; });
+  await waitForRouteReady(page, "/");
+  await page.waitForSelector('[data-dashboard-action="refresh"]', { timeout: 10000 });
 }
 
 async function assertDashboardNetvpnRuntimeReviewRoute(page, viewport) {
@@ -9491,11 +9505,22 @@ async function fillObjectEditor(page, kind, values = {}) {
 
 function objectLifecyclePayload(kind, values = {}) {
   if (kind !== "applications") return null;
+  const portHints = (protocol, raw) => {
+    const ports = String(raw || "").split(",").map((value) => value.trim()).filter(Boolean).map((value) => {
+      const [start, end] = value.split("-").map(Number);
+      return Number.isFinite(end) ? { start, end } : { start };
+    });
+    return ports.length ? { protocol, ports } : null;
+  };
   return {
     name: String(values.name || ""),
     displayName: String(values.displayName || ""),
     category: String(values.category || ""),
     engineSignals: String(values.engineSignals || "").split(",").map((value) => value.trim()).filter(Boolean),
+    ports: [
+      portHints("PROTOCOL_TCP", values.tcpPorts),
+      portHints("PROTOCOL_UDP", values.udpPorts),
+    ].filter(Boolean),
     description: String(values.description || ""),
   };
 }
@@ -11181,18 +11206,23 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
     state.metrics.rawNft.includes("not loaded")
   ));
 
-  const statusResponsePromise = page.waitForResponse((response) => {
+  const statusRequestPromise = page.waitForRequest((request) => {
     try {
-      return new URL(response.url()).pathname === "/v1/system/status";
+      return request.method() === "GET" && new URL(request.url()).pathname === "/v1/system/status";
     } catch {
       return false;
     }
-  }, { timeout: 5000 }).catch(() => null);
+  }, { timeout: 15000 }).catch(() => null);
   await page.click('[data-perf-action="use-live-status"]');
-  const statusResponse = await statusResponsePromise;
-  if (!statusResponse) {
+  const statusRequest = await statusRequestPromise;
+  if (!statusRequest) {
     const state = await collectPerformanceState(page);
     throw new Error(`performance live status action did not issue a status request: toasts=${JSON.stringify(state.toasts || "<none>")}`);
+  }
+  const statusResponse = await withSmokeTimeout("performance live status response", statusRequest.response(), 15000);
+  if (!statusResponse) {
+    const failure = statusRequest.failure()?.errorText || "request ended without a response";
+    throw new Error(`performance live status request failed before a response: ${failure}`);
   }
   if (!statusResponse.ok()) {
     throw new Error(`performance live status request failed with HTTP ${statusResponse.status()}`);

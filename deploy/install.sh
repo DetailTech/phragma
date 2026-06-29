@@ -24,16 +24,17 @@ fi
 
 binary_matches_commit() {
   local binary="$1"
+  shift
   if [[ -z "${COMMIT:-}" ]]; then
     return 0
   fi
-  [[ -x "$binary" ]] && "$binary" --version 2>/dev/null | grep -q "$COMMIT"
+  [[ -x "$binary" ]] && "$binary" "$@" 2>/dev/null | grep -Fq -- "$COMMIT"
 }
 
 prebuilt_binary_pair_matches_commit() {
   [[ -x "$BIN_SOURCE_DIR/controld" && -x "$BIN_SOURCE_DIR/ngfwctl" ]] &&
-    binary_matches_commit "$BIN_SOURCE_DIR/controld" &&
-    binary_matches_commit "$BIN_SOURCE_DIR/ngfwctl"
+    binary_matches_commit "$BIN_SOURCE_DIR/controld" --version &&
+    binary_matches_commit "$BIN_SOURCE_DIR/ngfwctl" version
 }
 
 # Rootless, read-only selection probe used by the install smoke test. Normal

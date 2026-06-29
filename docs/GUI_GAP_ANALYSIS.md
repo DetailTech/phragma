@@ -37,7 +37,8 @@ access, network, host-input, and telemetry posture; Performance owns local
 benchmark artifact review and comparison; Intel owns content evidence; and
 Routing/VPN owns routing runtime evidence. Durable benchmark status, detailed
 release certification, and support-bundle collection remain API, CLI, and
-release-tooling workflows.
+release-tooling workflows. Legacy `#/readiness` deep links migrate to these
+owner workspaces without reintroducing a navigation route.
 
 In the table below, `Yes` in Broad smoke coverage means desktop remote
 continuation coverage only; durable release evidence is still pending

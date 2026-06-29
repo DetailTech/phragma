@@ -150,7 +150,10 @@ validate_service_unit() {
 validate_installer() {
   require_file "$INSTALLER" "OpenNGFW installer" || return
 
-  require_active_regex "$INSTALLER" '^if[[:space:]]+\[\[ \$EUID -ne 0 \]\]' "installer requires root"
+  require_active_regex "$INSTALLER" '^if \[\[ "\$\{1:-\}" == "--check-prebuilt-binaries" \]\]; then$' "bounded rootless prebuilt-pair probe is explicit"
+  require_active_regex "$INSTALLER" 'binary_matches_commit "\$BIN_SOURCE_DIR/controld" --version' "prebuilt controld uses its supported version flag"
+  require_active_regex "$INSTALLER" 'binary_matches_commit "\$BIN_SOURCE_DIR/ngfwctl" version' "prebuilt ngfwctl uses its supported version subcommand"
+  require_active_regex "$INSTALLER" '^if[[:space:]]+\[\[ \$EUID -ne 0 \]\]' "installer mutations require root"
   require_active_regex "$INSTALLER" 'install -d -m 0700 /var/lib/openngfw /var/log/openngfw' "state and log directories are root-only"
   require_active_regex "$INSTALLER" 'install -d -m 0700 /etc/openngfw /etc/openngfw/secrets /etc/openngfw/keys' "config, secrets, and keys directories are root-only"
   require_active_regex "$INSTALLER" 'ADMIN_TOKEN_FILE="/etc/openngfw/admin\.token"' "bootstrap token path is under /etc/openngfw"

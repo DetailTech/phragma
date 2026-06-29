@@ -10,6 +10,8 @@ const API_CONTRACT_SOURCE_ACCEPTANCE_NOTE = "Functional proto/OpenAPI generation
 const M3_FIELD_EVIDENCE_DOC = "docs/testing-plan.md#phase-3--routing--vpn-m3--gaps-b-c-d";
 const OIDC_FIELD_EVIDENCE_DOC = "docs/testing-plan.md#phase-5--authnz--ui-m5--gap-f";
 const CHANGES_CANDIDATE_ROUTE = "#/changes?tab=candidate";
+const DASHBOARD_ROUTE = "#/";
+const FLEET_ROUTE = "#/fleet";
 const INSPECTION_ROUTE = "#/inspection";
 const INTEL_ROUTE = "#/intel";
 const NETVPN_ROUTE = "#/netvpn";
@@ -40,7 +42,7 @@ const RELEASE_EVIDENCE_OWNER_ROUTES = Object.freeze({
   "content-production-readiness": INTEL_ROUTE,
   "content-package-verification": INTEL_ROUTE,
   "release-benchmark": PERFORMANCE_ROUTE,
-  "ha-readiness-recovery": NETVPN_ROUTE,
+  "ha-readiness-recovery": FLEET_ROUTE,
   "m3-live-networking": NETVPN_ROUTE,
   "m3-field-evidence": NETVPN_ROUTE,
   "deploy-hardening": SETTINGS_ACCESS_ROUTE,
@@ -265,6 +267,24 @@ export function releaseEvidencePacketDefinition(id = "") {
 export function releaseEvidenceOwnerRoute(id = "") {
   const key = String(id || "").trim();
   return RELEASE_EVIDENCE_OWNER_ROUTES[key] || CHANGES_CANDIDATE_ROUTE;
+}
+
+export function legacyReadinessOwnerHash(query = {}) {
+  const packet = String(query.packet || "").trim();
+  if (packet) return releaseEvidenceOwnerRoute(packet);
+  const action = String(query.action || "").trim();
+  if (action) return readinessActionHash(action);
+  const drawer = String(query.drawer || "").trim().toLowerCase();
+  if (/^(ha|ha-cockpit|ha-failover)$/.test(drawer)) return FLEET_ROUTE;
+  if (/^(routing|routing-vpn|vpn)$/.test(drawer)) return NETVPN_ROUTE;
+  if (/^(host|host-tuning|ebpf|ebpf-drill|network)$/.test(drawer)) return SETTINGS_NETWORK_ROUTE;
+  if (/^(inspection|ids|ips)$/.test(drawer)) return INSPECTION_ROUTE;
+  if (/^(content|content-evidence)$/.test(drawer)) return INTEL_ROUTE;
+  if (/^(performance|release-benchmark)$/.test(drawer)) return PERFORMANCE_ROUTE;
+  if (/^(access|auth|oidc|saml)$/.test(drawer)) return SETTINGS_ACCESS_ROUTE;
+  if (/^(telemetry|telemetry-export)$/.test(drawer)) return SETTINGS_TELEMETRY_ROUTE;
+  if (/^(release|release-acceptance|release-evidence)$/.test(drawer)) return CHANGES_CANDIDATE_ROUTE;
+  return DASHBOARD_ROUTE;
 }
 
 export function summarizeReadiness(status = {}, policyDp = {}, flowCap = {}, flowRuntime = {}, ebpfHost = {}, conntrack = {}, contentPosture = null, routingRuntime = null) {
@@ -950,7 +970,8 @@ export function readinessActionHash(actionId = "") {
 }
 
 function readinessActionOwnerRoute(action = "") {
-  if (/\b(?:ha|frr|routing|vpn|bgp|ospf)\b/.test(action)) return NETVPN_ROUTE;
+  if (/\bha\b/.test(action)) return FLEET_ROUTE;
+  if (/\b(?:frr|routing|vpn|bgp|ospf)\b/.test(action)) return NETVPN_ROUTE;
   if (/\b(?:content|threat-id|app-id|feed)\b/.test(action)) return INTEL_ROUTE;
   if (/\b(?:tls|auth|oidc|saml|rbac|access)\b/.test(action)) return SETTINGS_ACCESS_ROUTE;
   if (/\b(?:telemetry|vector|clickhouse|export)\b/.test(action)) return SETTINGS_TELEMETRY_ROUTE;

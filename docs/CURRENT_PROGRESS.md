@@ -9,8 +9,9 @@ needs validation.
 The current candidate branch restores candidate-safety preflight behavior,
 hardens management-listener and installer validation, brings the Go lint gate
 back to zero findings, retires the customer-facing `/readiness` route from the
-canonical WebUI contract, and aligns the remaining owner routes with a 19-route
-enterprise desktop surface. The WebUI repair pass also fixed content-alias
+canonical WebUI contract, migrates legacy Readiness deep links to their owning
+workspaces, and aligns those owner routes with a 19-route enterprise desktop
+surface. The WebUI repair pass also fixed content-alias
 selection, stale route assertions, enterprise workflow selectors, responsive
 operator notes, and the Performance live-status action.
 

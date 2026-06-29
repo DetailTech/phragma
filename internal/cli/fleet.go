@@ -389,9 +389,6 @@ func (c *fleetClient) do(ctx context.Context, method, endpoint string, body any)
 	if readErr != nil {
 		return nil, fmt.Errorf("read fleet API response: %w", readErr)
 	}
-	if closeErr != nil {
-		return nil, fmt.Errorf("close fleet API response: %w", closeErr)
-	}
 	var decoded map[string]any
 	if len(strings.TrimSpace(string(raw))) > 0 {
 		if err := json.Unmarshal(raw, &decoded); err != nil {
@@ -400,6 +397,9 @@ func (c *fleetClient) do(ctx context.Context, method, endpoint string, body any)
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return nil, fleetAPIError(resp.StatusCode, decoded)
+	}
+	if closeErr != nil {
+		return nil, fmt.Errorf("close fleet API response: %w", closeErr)
 	}
 	if decoded == nil {
 		decoded = map[string]any{}

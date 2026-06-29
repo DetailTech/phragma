@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
 import { dataplaneNameRequiresEbpf, ebpfBlocksCurrentDataplane } from "./dataplane.js";
-import { apiContractSourceAcceptanceModel, buildHAEvidencePacket, buildSystemEvidencePacket, dynamicRoutingEnabled, haEvidencePacketReport, haReadiness, readinessActionHash, releaseArtifactWorkbenchModel, releaseEvidenceChecklist, releaseEvidenceCounts, releaseEvidenceOwnerRoute, releaseEvidencePacketDefinition, releaseEvidencePacketIds, releaseEvidenceReport, remediationActionId, remediationSteps, routingRuntimeEvidence, summarizeReadiness, systemEvidencePacketReport } from "./readiness_model.js";
+import { apiContractSourceAcceptanceModel, buildHAEvidencePacket, buildSystemEvidencePacket, dynamicRoutingEnabled, haEvidencePacketReport, haReadiness, legacyReadinessOwnerHash, readinessActionHash, releaseArtifactWorkbenchModel, releaseEvidenceChecklist, releaseEvidenceCounts, releaseEvidenceOwnerRoute, releaseEvidencePacketDefinition, releaseEvidencePacketIds, releaseEvidenceReport, remediationActionId, remediationSteps, routingRuntimeEvidence, summarizeReadiness, systemEvidencePacketReport } from "./readiness_model.js";
 
 const degradedEbpf = {
   state: "degraded",
@@ -45,7 +45,7 @@ const releaseEvidenceOwnerRoutes = {
   "proto-verify": "#/changes?tab=candidate",
   "deploy-hardening": "#/settings?panel=access",
   "policy-restore-drill": "#/changes?tab=candidate",
-  "ha-readiness-recovery": "#/netvpn",
+  "ha-readiness-recovery": "#/fleet",
   "e2e-install": "#/settings?panel=access",
   "content-package-verification": "#/intel",
   "release-benchmark": "#/performance",
@@ -529,8 +529,15 @@ function assertChecklistItemContract(items) {
   assert.equal(remediationActionId("TLS is disabled"), "tls-is-disabled");
   assert.equal(readinessActionHash("flowtable-runtime-evidence"), "#/settings?panel=network&action=flowtable-runtime-evidence");
   assert.equal(readinessActionHash("TLS is disabled"), "#/settings?panel=access&action=tls-is-disabled");
+  assert.equal(readinessActionHash("HA peer is stale"), "#/fleet?action=ha-peer-is-stale");
   assert.equal(readinessActionHash("runtime warning"), "#/changes?tab=candidate&action=runtime-warning");
   assert.equal(readinessActionHash(""), "#/changes?tab=candidate");
+  assert.equal(legacyReadinessOwnerHash({ packet: "ha-readiness-recovery" }), "#/fleet");
+  assert.equal(legacyReadinessOwnerHash({ packet: "release-benchmark" }), "#/performance");
+  assert.equal(legacyReadinessOwnerHash({ drawer: "ha-cockpit" }), "#/fleet");
+  assert.equal(legacyReadinessOwnerHash({ drawer: "release-acceptance" }), "#/changes?tab=candidate");
+  assert.equal(legacyReadinessOwnerHash({ action: "TLS is disabled" }), "#/settings?panel=access&action=tls-is-disabled");
+  assert.equal(legacyReadinessOwnerHash({}), "#/");
 }
 
 {
@@ -825,7 +832,7 @@ function assertChecklistItemContract(items) {
   assert.match(gates["deploy-hardening"].detail, /static service-unit and installer check only/);
   assert.equal(gates["proto-verify"].href, "#/changes?tab=candidate");
   assert.equal(gates["policy-restore-drill"].href, "#/changes?tab=candidate");
-  assert.equal(gates["ha-readiness-recovery"].href, "#/netvpn");
+  assert.equal(gates["ha-readiness-recovery"].href, "#/fleet");
   assert.equal(gates["e2e-install"].href, "#/settings?panel=access");
   assert.equal(gates["m5-auth-ui"].href, "#/settings?panel=access");
   assert.equal(gates["m5-oidc-provider"].href, "#/settings?panel=access");
