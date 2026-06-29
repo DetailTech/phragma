@@ -11181,7 +11181,19 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
     state.metrics.rawNft.includes("not loaded")
   ));
 
-  await page.click('[data-perf-action="use-live-status"]');
+  const [statusResponse] = await Promise.all([
+    page.waitForResponse((response) => {
+      try {
+        return new URL(response.url()).pathname === "/v1/system/status";
+      } catch {
+        return false;
+      }
+    }, { timeout: 10000 }),
+    page.click('[data-perf-action="use-live-status"]'),
+  ]);
+  if (!statusResponse.ok()) {
+    throw new Error(`performance live status request failed with HTTP ${statusResponse.status()}`);
+  }
   await waitForPerformanceState(page, "live status label", (state) => (
     state.artifacts.status === "status: live /v1/system/status"
   ), 15000);
