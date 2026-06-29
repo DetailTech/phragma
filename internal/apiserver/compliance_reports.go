@@ -38,6 +38,7 @@ type createComplianceReportRequest struct {
 	Query        string `json:"query"`
 }
 
+// ListComplianceReports returns retained report summaries to an authorized viewer.
 func (s *SystemService) ListComplianceReports(ctx context.Context, req *openngfwv1.ListComplianceReportsRequest) (*openngfwv1.ListComplianceReportsResponse, error) {
 	if _, err := s.complianceGRPCIdentity(ctx, authz.RoleViewer); err != nil {
 		return nil, err
@@ -63,6 +64,7 @@ func (s *SystemService) ListComplianceReports(ctx context.Context, req *openngfw
 	return out, nil
 }
 
+// GetComplianceReport returns one retained compliance report summary.
 func (s *SystemService) GetComplianceReport(ctx context.Context, req *openngfwv1.GetComplianceReportRequest) (*openngfwv1.GetComplianceReportResponse, error) {
 	if _, err := s.complianceGRPCIdentity(ctx, authz.RoleViewer); err != nil {
 		return nil, err
@@ -77,6 +79,7 @@ func (s *SystemService) GetComplianceReport(ctx context.Context, req *openngfwv1
 	}, nil
 }
 
+// ExportComplianceReport returns one retained report and its JSON payload.
 func (s *SystemService) ExportComplianceReport(ctx context.Context, req *openngfwv1.ExportComplianceReportRequest) (*openngfwv1.ExportComplianceReportResponse, error) {
 	if _, err := s.complianceGRPCIdentity(ctx, authz.RoleViewer); err != nil {
 		return nil, err
@@ -94,6 +97,7 @@ func (s *SystemService) ExportComplianceReport(ctx context.Context, req *openngf
 	}, nil
 }
 
+// CreateComplianceReport captures current evidence and retains an unsigned report.
 func (s *SystemService) CreateComplianceReport(ctx context.Context, req *openngfwv1.CreateComplianceReportRequest) (*openngfwv1.CreateComplianceReportResponse, error) {
 	id, err := s.complianceGRPCIdentity(ctx, authz.RoleOperator)
 	if err != nil {
@@ -590,13 +594,13 @@ func optionalReportTime(value, field string) (time.Time, error) {
 	return out, nil
 }
 
-func intQuery(r *http.Request, key string, fallback, max int) int {
+func intQuery(r *http.Request, key string, fallback, maxValue int) int {
 	value, err := strconv.Atoi(strings.TrimSpace(r.URL.Query().Get(key)))
 	if err != nil || value <= 0 {
 		return fallback
 	}
-	if value > max {
-		return max
+	if value > maxValue {
+		return maxValue
 	}
 	return value
 }

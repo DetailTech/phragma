@@ -112,7 +112,7 @@ func TestIntelListContentPackagesReportsProductionReadiness(t *testing.T) {
 	contentDir := filepath.Join(t.TempDir(), "content")
 	publisher := newAPIContentPublisher(t)
 	publisher.trust(t, contentDir)
-	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), "1.0.0", []byte(`{"apps":["prod"]}`))
+	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), []byte(`{"apps":["prod"]}`))
 
 	resp, err := (&IntelServer{Store: st, ContentDir: contentDir}).ListContentPackages(context.Background(), &openngfwv1.ListContentPackagesRequest{})
 	if err != nil {
@@ -148,7 +148,7 @@ func TestIntelGetContentEvidenceReturnsBoundedJSONArtifact(t *testing.T) {
 	contentDir := filepath.Join(t.TempDir(), "content")
 	publisher := newAPIContentPublisher(t)
 	publisher.trust(t, contentDir)
-	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), "1.0.0", []byte(`{"apps":["prod"]}`))
+	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), []byte(`{"apps":["prod"]}`))
 
 	resp, err := (&IntelServer{Store: st, ContentDir: contentDir}).GetContentEvidence(context.Background(), &openngfwv1.GetContentEvidenceRequest{
 		Kind:         "app-id",
@@ -179,7 +179,7 @@ func TestIntelGetContentCorpusReturnsTypedRows(t *testing.T) {
 	contentDir := filepath.Join(t.TempDir(), "content")
 	publisher := newAPIContentPublisher(t)
 	publisher.trust(t, contentDir)
-	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), "1.0.0", []byte(`{"apps":["prod"]}`))
+	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), []byte(`{"apps":["prod"]}`))
 
 	resp, err := (&IntelServer{Store: st, ContentDir: contentDir}).GetContentCorpus(context.Background(), &openngfwv1.GetContentCorpusRequest{
 		Kind:  "app-id",
@@ -206,7 +206,7 @@ func TestIntelCompareContentPackageReturnsCorpusDiff(t *testing.T) {
 	sourceDir := filepath.Join(importDir, "app-preview")
 	publisher := newAPIContentPublisher(t)
 	publisher.trust(t, contentDir)
-	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), "1.0.0", []byte(`{"apps":["prod"]}`))
+	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), []byte(`{"apps":["prod"]}`))
 	publisher.writePackageWithMutator(t, sourceDir, "app-id", "1.1.0", []byte(`{"apps":["preview"]}`), func(m *contentpkg.Manifest) {
 		addAPIProductionEvidenceForTest(t, sourceDir, m, "app-id", "1.1.0")
 		replaceAPIProductionEvidenceForTest(t, sourceDir, m, "app-regression-corpus", []byte(`{"type":"app-regression-corpus","status":"passed","package_version":"1.1.0","samples":[{"id":"sample-1","pcap_sha256":"`+strings.Repeat("a", 64)+`","expected_app":"corp-admin","observed_app":"corp-admin","verdict":"passed"},{"id":"sample-2","pcap_sha256":"`+strings.Repeat("b", 64)+`","expected_app":"ssh","observed_app":"unknown","verdict":"failed"}]}`))
@@ -237,7 +237,7 @@ func TestIntelGetContentEvidenceUsesStableErrors(t *testing.T) {
 	contentDir := filepath.Join(t.TempDir(), "content")
 	publisher := newAPIContentPublisher(t)
 	publisher.trust(t, contentDir)
-	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), "1.0.0", []byte(`{"apps":["prod"]}`))
+	publisher.writeProductionPackage(t, filepath.Join(contentDir, "app-id"), []byte(`{"apps":["prod"]}`))
 	srv := &IntelServer{Store: st, ContentDir: contentDir}
 
 	for _, tc := range []struct {
@@ -752,9 +752,12 @@ func (p apiContentPublisher) writePackage(t *testing.T, dir, kind, version strin
 	p.writePackageWithMutator(t, dir, kind, version, content, nil)
 }
 
-func (p apiContentPublisher) writeProductionPackage(t *testing.T, dir, version string, content []byte) {
+func (p apiContentPublisher) writeProductionPackage(t *testing.T, dir string, content []byte) {
 	t.Helper()
-	const kind = "app-id"
+	const (
+		kind    = "app-id"
+		version = "1.0.0"
+	)
 	p.writePackageWithMutator(t, dir, kind, version, content, func(m *contentpkg.Manifest) {
 		m.ContentReadiness = &contentpkg.ContentReadiness{
 			Scope:                      "production",

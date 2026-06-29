@@ -50,6 +50,7 @@ type parsedSystemLogLine struct {
 	facility  string
 }
 
+// ListSystemLogs returns a bounded, filtered view of configured local log files.
 func (s *SystemService) ListSystemLogs(_ context.Context, req *openngfwv1.ListSystemLogsRequest) (*openngfwv1.ListSystemLogsResponse, error) {
 	if req == nil {
 		req = &openngfwv1.ListSystemLogsRequest{}

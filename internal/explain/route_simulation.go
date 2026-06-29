@@ -18,6 +18,7 @@ type RouteSimulationScenario struct {
 	ExpectedInterface string
 }
 
+// RouteSimulationResult compares running and candidate decisions for one scenario.
 type RouteSimulationResult struct {
 	Name        string
 	Tunnel      string
@@ -28,6 +29,7 @@ type RouteSimulationResult struct {
 	Limitations []string
 }
 
+// RouteSimulationDecision describes a static-policy route lookup outcome.
 type RouteSimulationDecision struct {
 	Matched   bool
 	Source    string
@@ -38,12 +40,14 @@ type RouteSimulationDecision struct {
 	Reason    string
 }
 
+// RouteSimulationDelta records one changed decision field.
 type RouteSimulationDelta struct {
 	Field     string
 	Running   string
 	Candidate string
 }
 
+// SimulateRouteDecisions evaluates bounded route scenarios against two policies.
 func SimulateRouteDecisions(running, candidate *openngfwv1.Policy, scenarios []RouteSimulationScenario) []RouteSimulationResult {
 	out := make([]RouteSimulationResult, 0, len(scenarios))
 	for _, scenario := range scenarios {

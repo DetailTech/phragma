@@ -15,12 +15,18 @@ import (
 	"github.com/detailtech/oss-ngfw/internal/compiler"
 )
 
+// PlanSchema identifies the reviewable proxy deployment plan format.
 const PlanSchema = "openngfw.proxy.plan.v1"
+
+// RuntimeManifestSchema identifies the deterministic proxy runtime manifest format.
 const RuntimeManifestSchema = "openngfw.proxy.runtime.v1"
 
 const (
-	EnvoyBootstrapArtifact  = "envoy-bootstrap.yaml"
-	CorazaRulesArtifact     = "coraza-waf.conf"
+	// EnvoyBootstrapArtifact is the rendered Envoy bootstrap filename.
+	EnvoyBootstrapArtifact = "envoy-bootstrap.yaml"
+	// CorazaRulesArtifact is the rendered Coraza WAF configuration filename.
+	CorazaRulesArtifact = "coraza-waf.conf"
+	// RuntimeManifestArtifact is the rendered proxy runtime manifest filename.
 	RuntimeManifestArtifact = "proxy-runtime-manifest.json"
 )
 
@@ -51,6 +57,7 @@ type runtimeReadiness struct {
 	Validation    []string          `json:"validation"`
 }
 
+// RuntimeArtifact identifies one hash-addressed proxy runtime input.
 type RuntimeArtifact struct {
 	Name        string `json:"name"`
 	Path        string `json:"path"`
@@ -58,12 +65,14 @@ type RuntimeArtifact struct {
 	SHA256      string `json:"sha256"`
 }
 
+// RuntimeLaunch describes the deterministic command for a managed proxy engine.
 type RuntimeLaunch struct {
 	Engine string   `json:"engine"`
 	Binary string   `json:"binary"`
 	Args   []string `json:"args"`
 }
 
+// RuntimeProof describes the status, evidence, and boundary of one runtime proof.
 type RuntimeProof struct {
 	ID       string   `json:"id"`
 	Kind     string   `json:"kind"`

@@ -55,6 +55,7 @@ type ProxyManagedArtifact struct {
 	SHA256 string
 }
 
+// ProxyRuntimeProof describes one required runtime proof artifact and its boundary.
 type ProxyRuntimeProof struct {
 	ID       string   `json:"id"`
 	Kind     string   `json:"kind"`
