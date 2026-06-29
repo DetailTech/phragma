@@ -169,7 +169,7 @@ const aligned = buildFleetModel({
 assert.equal(aligned.nodes[0].roleLabel, "standalone");
 assert.equal(aligned.nodes[0].haLabel, "standalone");
 assert.ok(aligned.boundaries.some((item) => item.key === "ha-traffic" && item.title === "No HA traffic-control claim"));
-assert.equal(aligned.drift.label, "review");
+assert.equal(aligned.drift.label, "aligned");
 assert.equal(aligned.release.tone, "ok");
 assert.ok(!aligned.actions.some((item) => item.key === "monitor"));
 assert.ok(aligned.templates.some((item) => item.key === "edge-policy" && item.state === "aligned"));

@@ -425,7 +425,7 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
       blockers: [],
     },
   });
-  assert.equal(workbench.cls, "ok");
+  assert.equal(workbench.cls, "warn");
   assert.equal(workbench.metrics.rolloutState, "canary");
   assert.equal(workbench.metrics.canaryScopes, "2");
   assert.equal(workbench.metrics.rollback, "verified backup");
