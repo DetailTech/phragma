@@ -38,8 +38,12 @@ func run(args []string, stdout, stderr io.Writer) error {
 		if err != nil {
 			return fmt.Errorf("write probes: %w", err)
 		}
-		fmt.Fprintf(stdout, "xdp_probe_source=%s\n", paths.XDPSource)
-		fmt.Fprintf(stdout, "tc_probe_source=%s\n", paths.TCSource)
+		if _, err := fmt.Fprintf(stdout, "xdp_probe_source=%s\n", paths.XDPSource); err != nil {
+			return fmt.Errorf("write XDP probe source output: %w", err)
+		}
+		if _, err := fmt.Fprintf(stdout, "tc_probe_source=%s\n", paths.TCSource); err != nil {
+			return fmt.Errorf("write tc probe source output: %w", err)
+		}
 		return nil
 	case "manifest":
 		fs := flag.NewFlagSet("manifest", flag.ContinueOnError)
@@ -57,7 +61,9 @@ func run(args []string, stdout, stderr io.Writer) error {
 		if err := ebpfdrill.WriteManifest(output, ebpfdrill.DefaultManifestOptions(buildDir, iface)); err != nil {
 			return fmt.Errorf("write manifest: %w", err)
 		}
-		fmt.Fprintf(stdout, "manifest=%s\n", output)
+		if _, err := fmt.Fprintf(stdout, "manifest=%s\n", output); err != nil {
+			return fmt.Errorf("write manifest output: %w", err)
+		}
 		return nil
 	default:
 		return fmt.Errorf("unknown command %q", args[0])

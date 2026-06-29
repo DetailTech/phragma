@@ -2540,9 +2540,13 @@ func writeTelemetryProofFile(cfg SystemStatusConfig, target string, event []byte
 	if err != nil {
 		return fmt.Errorf("open telemetry export file: %w", err)
 	}
-	defer f.Close()
-	if _, err := f.Write(event); err != nil {
-		return fmt.Errorf("append telemetry proof event: %w", err)
+	_, writeErr := f.Write(event)
+	closeErr := f.Close()
+	if writeErr != nil {
+		return fmt.Errorf("append telemetry proof event: %w", writeErr)
+	}
+	if closeErr != nil {
+		return fmt.Errorf("close telemetry export file: %w", closeErr)
 	}
 	return nil
 }
@@ -2562,10 +2566,14 @@ func sendTelemetryProofStream(ctx context.Context, exportType openngfwv1.Telemet
 	if err != nil {
 		return fmt.Errorf("send telemetry proof event to %s stream: %w", network, err)
 	}
-	defer conn.Close()
 	_ = conn.SetWriteDeadline(time.Now().Add(3 * time.Second))
-	if _, err := conn.Write(event); err != nil {
-		return fmt.Errorf("write telemetry proof event to %s stream: %w", network, err)
+	_, writeErr := conn.Write(event)
+	closeErr := conn.Close()
+	if writeErr != nil {
+		return fmt.Errorf("write telemetry proof event to %s stream: %w", network, writeErr)
+	}
+	if closeErr != nil {
+		return fmt.Errorf("close telemetry proof %s stream: %w", network, closeErr)
 	}
 	return nil
 }

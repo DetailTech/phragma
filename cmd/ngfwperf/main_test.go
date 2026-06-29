@@ -424,7 +424,7 @@ func TestCheckCitationsAcceptsPublishableReleaseSummary(t *testing.T) {
 	root := t.TempDir()
 	runDir := filepath.Join(root, "perf", "release-results", "20260617T050000Z-ids-prevent")
 	writePublishableRun(t, runDir)
-	doc := writeDoc(t, root, "release-notes.md", "Release benchmark: perf/release-results/20260617T050000Z-ids-prevent/summary.json")
+	doc := writeDoc(t, root, "Release benchmark: perf/release-results/20260617T050000Z-ids-prevent/summary.json")
 
 	out, err := executeForTest("check-citations", "--root", root, doc)
 	if err != nil {
@@ -437,7 +437,7 @@ func TestCheckCitationsAcceptsPublishableReleaseSummary(t *testing.T) {
 
 func TestCheckCitationsRejectsRawResultsSummary(t *testing.T) {
 	root := t.TempDir()
-	doc := writeDoc(t, root, "release-notes.md", "Do not cite raw archive evidence: perf/results/20260617T050000Z-ids-prevent/summary.json")
+	doc := writeDoc(t, root, "Do not cite raw archive evidence: perf/results/20260617T050000Z-ids-prevent/summary.json")
 
 	out, err := executeForTest("check-citations", "--root", root, doc)
 	if err == nil {
@@ -465,7 +465,7 @@ func TestCheckCitationsRejectsNonPublishableReleaseSummary(t *testing.T) {
 		"tcp_retransmits": 0,
 		"claim_scope": "single-host Linux network namespace benchmark; not a cloud-NIC throughput claim"
 	}`)
-	doc := writeDoc(t, root, "release-notes.md", "Bad citation: perf/release-results/local-regression/summary.json")
+	doc := writeDoc(t, root, "Bad citation: perf/release-results/local-regression/summary.json")
 
 	out, err := executeForTest("check-citations", "--root", root, doc)
 	if err == nil {
@@ -478,7 +478,7 @@ func TestCheckCitationsRejectsNonPublishableReleaseSummary(t *testing.T) {
 
 func TestCheckCitationsNoPerformanceClaimsRejectsUncitedClaimText(t *testing.T) {
 	root := t.TempDir()
-	doc := writeDoc(t, root, "release-notes.md", "Release notes: forwarding throughput reached 10 Gbps with lower latency.")
+	doc := writeDoc(t, root, "Release notes: forwarding throughput reached 10 Gbps with lower latency.")
 
 	out, err := executeForTest("check-citations", "--root", root, "--no-performance-claims", doc)
 	if err == nil {
@@ -491,7 +491,7 @@ func TestCheckCitationsNoPerformanceClaimsRejectsUncitedClaimText(t *testing.T) 
 
 func TestCheckCitationsNoPerformanceClaimsAllowsBoundaryText(t *testing.T) {
 	root := t.TempDir()
-	doc := writeDoc(t, root, "release-notes.md", "This tag publishes no throughput, latency, connection-rate, or comparison claims.")
+	doc := writeDoc(t, root, "This tag publishes no throughput, latency, connection-rate, or comparison claims.")
 
 	out, err := executeForTest("check-citations", "--root", root, "--no-performance-claims", doc)
 	if err != nil {
@@ -552,9 +552,9 @@ func writeSummaryInDir(t *testing.T, dir, summary string) string {
 	return path
 }
 
-func writeDoc(t *testing.T, root, name, body string) string {
+func writeDoc(t *testing.T, root, body string) string {
 	t.Helper()
-	path := filepath.Join(root, name)
+	path := filepath.Join(root, "release-notes.md")
 	if err := os.WriteFile(path, []byte(body+"\n"), 0o600); err != nil {
 		t.Fatalf("write doc: %v", err)
 	}

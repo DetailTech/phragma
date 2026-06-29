@@ -28,6 +28,8 @@ type RuleIdentityReport struct {
 
 // PolicyItemIdentityReport describes server-side normalization applied to
 // durable non-forwarding policy item identities such as host-input and NAT.
+//
+//nolint:revive // Retain the established exported name for source compatibility.
 type PolicyItemIdentityReport struct {
 	HostInputAdded           int
 	HostInputDeduped         int

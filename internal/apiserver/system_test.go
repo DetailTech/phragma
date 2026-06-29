@@ -4165,7 +4165,11 @@ func TestVerifyTelemetryExportSendsConfiguredTCPProof(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer ln.Close()
+	t.Cleanup(func() {
+		if err := ln.Close(); err != nil {
+			t.Errorf("close telemetry proof listener: %v", err)
+		}
+	})
 	received := make(chan string, 1)
 	go func() {
 		conn, err := ln.Accept()
@@ -4173,9 +4177,17 @@ func TestVerifyTelemetryExportSendsConfiguredTCPProof(t *testing.T) {
 			received <- err.Error()
 			return
 		}
-		defer conn.Close()
 		buf := make([]byte, 4096)
-		n, _ := conn.Read(buf)
+		n, readErr := conn.Read(buf)
+		closeErr := conn.Close()
+		if readErr != nil {
+			received <- fmt.Sprintf("read telemetry proof connection: %v", readErr)
+			return
+		}
+		if closeErr != nil {
+			received <- fmt.Sprintf("close telemetry proof connection: %v", closeErr)
+			return
+		}
 		received <- string(buf[:n])
 	}()
 

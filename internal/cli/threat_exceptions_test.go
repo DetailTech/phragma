@@ -16,7 +16,7 @@ import (
 
 func TestThreatExceptionListBuildsVersionRequest(t *testing.T) {
 	client := &fakeThreatExceptionClient{listResp: &openngfwv1.ListThreatExceptionsResponse{}}
-	cmd, _, _ := threatExceptionCommandForTest()
+	cmd, _ := threatExceptionCommandForTest()
 
 	err := runThreatExceptionsList(context.Background(), cmd, client, threatExceptionListOptions{source: "version", version: 7})
 	if err != nil {
@@ -37,7 +37,7 @@ func TestThreatExceptionStageBuildsRequest(t *testing.T) {
 		CandidateStatus: &openngfwv1.GetCandidateStatusResponse{Dirty: true, ChangeCount: 2},
 		Validation:      &openngfwv1.ValidateResponse{Valid: true},
 	}}
-	cmd, stdout, _ := threatExceptionCommandForTest()
+	cmd, stdout := threatExceptionCommandForTest()
 
 	err := runThreatExceptionStage(context.Background(), cmd, client, threatExceptionStageOptions{
 		name:        "fp-9000001",
@@ -71,7 +71,7 @@ func TestThreatExceptionStageBuildsRequest(t *testing.T) {
 }
 
 func TestThreatExceptionStageValidatesRequiredFields(t *testing.T) {
-	cmd, _, _ := threatExceptionCommandForTest()
+	cmd, _ := threatExceptionCommandForTest()
 	client := &fakeThreatExceptionClient{}
 	cases := []struct {
 		name string
@@ -108,7 +108,7 @@ func TestThreatExceptionUpdateOverlaysCurrentRecord(t *testing.T) {
 			Validation:      &openngfwv1.ValidateResponse{Valid: true},
 		},
 	}
-	cmd, _, _ := threatExceptionCommandForTest()
+	cmd, _ := threatExceptionCommandForTest()
 
 	err := runThreatExceptionUpdate(context.Background(), cmd, client, "fp-9000001", threatExceptionUpdateOptions{
 		description:    "updated reason",
@@ -134,7 +134,7 @@ func TestThreatExceptionStateAndRemoveBuildRequests(t *testing.T) {
 		stateResp:  &openngfwv1.SetThreatExceptionStateResponse{Exception: threatExceptionForTest("fp-9000001"), Validation: &openngfwv1.ValidateResponse{Valid: true}},
 		removeResp: &openngfwv1.RemoveThreatExceptionResponse{PreviousException: threatExceptionForTest("fp-9000001"), Validation: &openngfwv1.ValidateResponse{Valid: true}},
 	}
-	cmd, _, _ := threatExceptionCommandForTest()
+	cmd, _ := threatExceptionCommandForTest()
 
 	if err := runThreatExceptionState(context.Background(), cmd, client, "fp-9000001", true, threatExceptionStateOptions{reason: "disable for replay"}); err != nil {
 		t.Fatalf("disable returned error: %v", err)
@@ -155,7 +155,7 @@ func TestThreatExceptionJSONUsesProtoNames(t *testing.T) {
 	client := &fakeThreatExceptionClient{listResp: &openngfwv1.ListThreatExceptionsResponse{
 		Exceptions: []*openngfwv1.ThreatExceptionRecord{{Exception: threatExceptionForTest("fp-9000001"), CandidateOnly: true}},
 	}}
-	cmd, stdout, _ := threatExceptionCommandForTest()
+	cmd, stdout := threatExceptionCommandForTest()
 
 	if err := runThreatExceptionsList(context.Background(), cmd, client, threatExceptionListOptions{outJSON: true}); err != nil {
 		t.Fatalf("json list returned error: %v", err)
@@ -180,13 +180,13 @@ func threatExceptionForTest(name string) *openngfwv1.IdsException {
 	}
 }
 
-func threatExceptionCommandForTest() (*cobra.Command, *bytes.Buffer, *bytes.Buffer) {
+func threatExceptionCommandForTest() (*cobra.Command, *bytes.Buffer) {
 	stdout := new(bytes.Buffer)
 	stderr := new(bytes.Buffer)
 	cmd := &cobra.Command{}
 	cmd.SetOut(stdout)
 	cmd.SetErr(stderr)
-	return cmd, stdout, stderr
+	return cmd, stdout
 }
 
 type fakeThreatExceptionClient struct {

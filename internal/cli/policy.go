@@ -18,7 +18,6 @@ import (
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/encoding/protojson"
 	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protoreflect"
 	"sigs.k8s.io/yaml"
 
 	openngfwv1 "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1"
@@ -1723,14 +1722,6 @@ type staticRouteListResult struct {
 	routes []*openngfwv1.StaticRoute
 }
 
-type policyNatClient interface {
-	ListNatRules(context.Context, *openngfwv1.ListNatRulesRequest, ...grpc.CallOption) (*openngfwv1.ListNatRulesResponse, error)
-	UpsertCandidateSourceNat(context.Context, *openngfwv1.UpsertCandidateSourceNatRequest, ...grpc.CallOption) (*openngfwv1.UpsertCandidateSourceNatResponse, error)
-	DeleteCandidateSourceNat(context.Context, *openngfwv1.DeleteCandidateSourceNatRequest, ...grpc.CallOption) (*openngfwv1.DeleteCandidateSourceNatResponse, error)
-	UpsertCandidateDestinationNat(context.Context, *openngfwv1.UpsertCandidateDestinationNatRequest, ...grpc.CallOption) (*openngfwv1.UpsertCandidateDestinationNatResponse, error)
-	DeleteCandidateDestinationNat(context.Context, *openngfwv1.DeleteCandidateDestinationNatRequest, ...grpc.CallOption) (*openngfwv1.DeleteCandidateDestinationNatResponse, error)
-}
-
 type candidateNatMutation interface {
 	proto.Message
 	GetAction() string
@@ -2487,7 +2478,7 @@ func printNatMutation(cmd *cobra.Command, resp proto.Message, outJSON bool) erro
 
 func sourceNatOutput(rule *openngfwv1.SourceNat) *sourceNatRow {
 	return &sourceNatRow{
-		ID:                protoStringField(rule, "id"),
+		ID:                strings.TrimSpace(rule.GetId()),
 		Name:              rule.GetName(),
 		ToZone:            rule.GetToZone(),
 		SourceAddress:     rule.GetSourceAddress(),
@@ -2498,7 +2489,7 @@ func sourceNatOutput(rule *openngfwv1.SourceNat) *sourceNatRow {
 
 func destinationNatOutput(rule *openngfwv1.DestinationNat) *destinationNatRow {
 	return &destinationNatRow{
-		ID:                 protoStringField(rule, "id"),
+		ID:                 strings.TrimSpace(rule.GetId()),
 		Name:               rule.GetName(),
 		FromZone:           rule.GetFromZone(),
 		Service:            rule.GetService(),
@@ -2506,17 +2497,6 @@ func destinationNatOutput(rule *openngfwv1.DestinationNat) *destinationNatRow {
 		TranslatedAddress:  rule.GetTranslatedAddress(),
 		TranslatedPort:     rule.GetTranslatedPort(),
 	}
-}
-
-func protoStringField(msg proto.Message, name protoreflect.Name) string {
-	if msg == nil {
-		return ""
-	}
-	field := msg.ProtoReflect().Descriptor().Fields().ByName(name)
-	if field == nil || field.Kind() != protoreflect.StringKind {
-		return ""
-	}
-	return strings.TrimSpace(msg.ProtoReflect().Get(field).String())
 }
 
 func natIDLabel(id string) string {

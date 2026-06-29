@@ -187,9 +187,13 @@ func newThreatExceptionUpdateCommand(server *string) *cobra.Command {
 
 func newThreatExceptionStateCommand(server *string, action string, disabled bool) *cobra.Command {
 	opts := threatExceptionStateOptions{}
+	titleAction := action
+	if titleAction != "" {
+		titleAction = strings.ToUpper(titleAction[:1]) + titleAction[1:]
+	}
 	cmd := &cobra.Command{
 		Use:   action + " NAME",
-		Short: strings.Title(action) + " one Threat-ID exception in the candidate policy",
+		Short: titleAction + " one Threat-ID exception in the candidate policy",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			conn, ctx, cancel, err := dial(cmd.Context(), *server)

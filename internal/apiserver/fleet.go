@@ -349,7 +349,7 @@ func (s *SystemService) handleFleetTemplateApplyPlan(w http.ResponseWriter, r *h
 		fleetJSONError(w, http.StatusPreconditionFailed, "CANDIDATE_REVISION_CONFLICT", "candidate changed since the template apply plan was requested")
 		return
 	}
-	localNode := map[string]any{}
+	var localNode map[string]any
 	statusResp, statusErr := s.GetStatus(r.Context(), &openngfwv1.GetStatusRequest{})
 	haResp, haErr := s.GetHighAvailabilityStatus(r.Context(), &openngfwv1.GetHighAvailabilityStatusRequest{})
 	if statusErr == nil {

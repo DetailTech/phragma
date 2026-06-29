@@ -14,6 +14,7 @@ import (
 )
 
 const (
+	// RegressionCorpusArtifact is the content-root-relative reviewed corpus path.
 	RegressionCorpusArtifact = "app-id/.reviewed-corpus/app-regression-corpus.jsonl"
 	regressionSampleSchema   = "openngfw.appid.regression_sample.v1"
 )

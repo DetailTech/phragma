@@ -104,6 +104,8 @@ type telemetryPolicyContext struct {
 	Source               string `json:"source"`
 }
 
+// EventPolicyStamp records the policy version and provenance attached to an
+// engine event.
 type EventPolicyStamp struct {
 	Version   uint64
 	Stamp     string
@@ -422,10 +424,6 @@ func rawIDString(raw json.RawMessage) string {
 		return strings.TrimSpace(s)
 	}
 	return strings.TrimSpace(string(raw))
-}
-
-func eventPolicyVersion(direct uint64, contexts ...telemetryPolicyContext) uint64 {
-	return eventPolicyStamp(direct, "", "", contexts...).Version
 }
 
 func eventPolicyStamp(direct uint64, directStamp, directFreshness string, contexts ...telemetryPolicyContext) EventPolicyStamp {
