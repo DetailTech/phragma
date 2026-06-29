@@ -33,10 +33,11 @@ must still be regenerated after the source-control state is accepted.
 The standalone customer-facing `/readiness` route is retired. Dashboard owns
 the global runtime and engine rollup; Changes owns commit and rollback system
 preflight; Fleet owns HA and local release-summary posture; Settings owns
-access, network, host-input, and telemetry posture; Performance owns benchmark
-release status; Intel owns content evidence; and Routing/VPN owns routing
-runtime evidence. Detailed release certification and support-bundle collection
-remain API, CLI, and release-tooling workflows.
+access, network, host-input, and telemetry posture; Performance owns local
+benchmark artifact review and comparison; Intel owns content evidence; and
+Routing/VPN owns routing runtime evidence. Durable benchmark status, detailed
+release certification, and support-bundle collection remain API, CLI, and
+release-tooling workflows.
 
 In the table below, `Yes` in Broad smoke coverage means desktop remote
 continuation coverage only; durable release evidence is still pending

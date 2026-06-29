@@ -4,6 +4,29 @@ This file is the move-safe handoff for the `v2-mixed` tree. It records what is
 inside this folder, what is intentionally external at runtime, and what still
 needs validation.
 
+## 2026-06-29 Firewall Fix Wave
+
+The current candidate branch restores candidate-safety preflight behavior,
+hardens management-listener and installer validation, brings the Go lint gate
+back to zero findings, retires the customer-facing `/readiness` route from the
+canonical WebUI contract, and aligns the remaining owner routes with a 19-route
+enterprise desktop surface. The WebUI repair pass also fixed content-alias
+selection, stale route assertions, enterprise workflow selectors, responsive
+operator notes, and the Performance live-status action.
+
+Remote continuation validation on source snapshot `8694041` passed the strict
+Node.js WebUI checks and a browser-required Chromium sweep of all 19 canonical
+routes (`19/19` checks and screenshots). The broad evidence manifest is at
+`/var/oled/oss-ngfw-validation/artifacts/8694041-enterprise-desktop-r1/webui-smoke-evidence.json`
+on the Oracle Linux validation host. This remains continuation evidence until
+the accepted source snapshot is recorded through the repo-local release
+evidence tooling.
+
+Performance owns browser-local benchmark artifact review, comparison, and
+operator handoff. It does not record or certify release evidence; durable
+release-benchmark status remains owned by `ngfwperf`, `ngfwrelease`, and the
+repo-local release workflow.
+
 ## Move Boundary
 
 `v2-mixed` is a standalone Git worktree rooted at this folder. The firewall
@@ -37,30 +60,16 @@ Validation evidence provenance:
 - Durable release evidence should be regenerated and recorded through the
   release tooling after source-control acceptance. `release/evidence/` contains
   only the evidence files that are currently present in this checkout.
-- The API contract tree is still source-control dirty in this worktree.
-  Proto/OpenAPI/generated functionality may be locally generated and validated,
-  but `proto-verify` release evidence cannot be accepted until proto inputs,
-  generator config, generated Go/gateway files, normalized OpenAPI output,
-  published docs spec, and bundled WebUI spec are accepted as one unit.
+- The API contract tree is source-control clean on the current candidate
+  branch. `proto-verify` still needs to pass on the accepted source snapshot
+  before generated API evidence can be recorded for release.
 - The latest broad WebUI route sweep is remote continuation evidence, not local
-  validation. The dedicated `webui-enterprise-smoke` target is now the
-  accepted-source desktop release-evidence path: it requires Node.js WebUI
-  JavaScript checks, requires browser-backed Chromium coverage, defaults
-  `WEBUI_SMOKE_VIEWPORTS` to `desktop`, and records the complete 20-route
-  canonical screen set only through `release-evidence-webui-enterprise-smoke`
-  after source-control acceptance. Earlier all-viewport sweeps remain useful
-  continuation evidence but are not durable release artifacts by themselves.
-  The previous all-viewport remote sweep passed every desktop, tablet, and
-  mobile route on the remote Oracle Linux host in the current integrated copy.
-  The Makefile path list includes both `/` and `/dashboard`, but the smoke
-  runner canonicalizes `/dashboard` to the Dashboard screen, so broad coverage
-  reports as 20 routes. Manifest:
-  `/home/opc/oss-ngfw-smoke-tmp/openngfw-webui-smoke-investigation-handoff-polish-enterprise-r1/webui-smoke-evidence.json`
-  (`result=passed`, `mode=broad`, `routeCoverage=20/20`, `checks=60/60`,
-  `screenshots=60`, elapsed `21m21s`) from
-  `/home/opc/oss-ngfw-v2-mixed-work/investigation-handoff-polish-20260622-r1`.
-  Treat this as continuation proof until source-control acceptance and release
-  evidence are regenerated through the repo-local release tooling.
+  validation. The dedicated `webui-enterprise-smoke` target requires Node.js
+  checks, real Chromium coverage, the desktop viewport, and all 19 canonical
+  routes. The Makefile input list also accepts `/dashboard` as an alias for `/`,
+  so it contains 20 path entries without increasing canonical coverage.
+  Durable evidence must still be recorded through
+  `release-evidence-webui-enterprise-smoke` after source-control acceptance.
 - Current evidence gap: remote continuation paths cited here do not yet replace
   durable recorded release artifacts for the recent SAML provider lifecycle,
   Traffic/App-ID drawer and route-backed review-drop workflow, telemetry
