@@ -11593,6 +11593,7 @@ async function collectPerformanceState(page) {
     }));
     return {
       text: (content?.textContent || "").replace(/\s+/g, " ").trim(),
+      toasts: (document.querySelector("#toasts")?.textContent || "").replace(/\s+/g, " ").trim(),
       verdict: route?.querySelector("[data-perf-verdict]")?.getAttribute("data-perf-verdict") || "",
       gateState: route?.querySelector("[data-perf-gate-state]")?.getAttribute("data-perf-gate-state") || "",
       retiredReadinessHref: route?.querySelector('a[href^="#/readiness"]')?.getAttribute("href") || "",
