@@ -581,10 +581,13 @@ function falsePositiveSignal(item = {}) {
 }
 
 function firstArray(...values) {
+  let empty = null;
   for (const value of values) {
-    if (Array.isArray(value)) return value;
+    if (!Array.isArray(value)) continue;
+    if (value.length) return value;
+    if (empty === null) empty = value;
   }
-  return [];
+  return empty || [];
 }
 
 function safeOperatorLabel(value = "") {

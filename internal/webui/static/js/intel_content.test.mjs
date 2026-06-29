@@ -425,12 +425,14 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
       blockers: [],
     },
   });
-  assert.equal(workbench.cls, "warn");
+  assert.equal(workbench.cls, "ok");
   assert.equal(workbench.metrics.rolloutState, "canary");
   assert.equal(workbench.metrics.canaryScopes, "2");
   assert.equal(workbench.metrics.rollback, "verified backup");
   assert.equal(workbench.scopes[0].name, "branch-east");
   assert.equal(workbench.scopes[0].exposure, "10%");
+  assert.equal(workbench.scopes[1].name, "dmz-observe");
+  assert.ok(workbench.telemetry.signals.some((signal) => signal.label === "New FP reports" && signal.count === "0" && signal.cls === "ok"));
   assert.ok(workbench.telemetry.signals.some((signal) => signal.label === "False-positive regression evidence" && signal.cls === "ok"));
   assert.match(workbench.boundary, /Browser-local review only/);
 }
