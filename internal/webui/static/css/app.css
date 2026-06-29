@@ -2109,7 +2109,8 @@ label.field .help { font-weight: 400; color: var(--text-faint); }
   overflow: hidden;
 }
 .card > .note.inspection-runtime-detail,
-.card > .note.inspection-engine-evidence-detail {
+.card > .note.inspection-engine-evidence-detail,
+.card > .note.settings-access-browser-sso-note {
   display: block;
   min-width: 0;
   white-space: normal;

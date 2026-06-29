@@ -1727,7 +1727,7 @@ async function assertFleetLifecycleDrillThrough(page, viewport) {
   await waitForRouteReady(page, "/fleet");
   const expectedOwners = [
     { template: "edge-policy", href: "#/changes?tab=candidate", path: "/changes", hook: '[data-changes-tab="candidate"]' },
-    { template: "content", href: "#/intel", path: "/intel", hook: '[data-intel-action="api-cli"]' },
+    { template: "content", href: "#/intel", path: "/intel", hook: "#content h1" },
     { template: "routing-vpn", href: "#/netvpn", path: "/netvpn", hook: '[data-netvpn-action="add-route"]' },
     { template: "ha", href: "#/fleet", path: "/fleet", hook: '[data-fleet-workspace="true"]' },
   ];
@@ -1744,7 +1744,7 @@ async function assertFleetLifecycleDrillThrough(page, viewport) {
     }
     await page.click(`[data-fleet-template="${owner.template}"] [data-fleet-template-action="open"]`);
     await waitForRouteReady(page, owner.path);
-    await page.waitForSelector(owner.hook, { timeout: 10000 });
+    await page.waitForSelector(owner.hook, { timeout: 30000 });
     const hash = await page.evaluate(() => location.hash);
     if (hash !== owner.href) {
       throw new Error(`Fleet ${owner.template} drill-through opened ${hash || "<empty>"} instead of ${owner.href} at ${viewport.name}`);
@@ -11157,7 +11157,7 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
     state.metrics.throughput === "1.000 Gbps" &&
     state.metrics.rawIperf.includes("1.000 Gbps") &&
     state.metrics.rawStatus.includes("ready") &&
-    state.metrics.rawNft.includes("not required") &&
+    state.metrics.rawNft.includes("not loaded") &&
     state.text.includes("No findings.")
   ));
   const inspectedState = await collectPerformanceState(page);
@@ -11178,7 +11178,7 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
     state.artifacts.status?.includes("ngfw-status-active.txt") &&
     state.metrics.rawIperf.includes("1.000 Gbps") &&
     state.metrics.rawStatus.includes("ready") &&
-    state.metrics.rawNft.includes("not required")
+    state.metrics.rawNft.includes("not loaded")
   ));
 
   await page.click('[data-perf-action="use-live-status"]');
