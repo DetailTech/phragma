@@ -1567,19 +1567,29 @@ async function assertDashboardAutomationContext(page, viewport) {
   const copied = await assertAutomationContextDrawer(page, viewport, "dashboard automation context", [
     "/v1/system/status",
     "/v1/system/identity",
-    "/v1/system/release-acceptance/status",
     "/v1/candidate/status",
+    "/v1/policy?source=POLICY_SOURCE_RUNNING",
+    "/v1/alerts?limit=500",
+    "/v1/flows?limit=500",
+    "/v1/versions?limit=8",
+    "/v1/intel/feeds",
     "ngfwctl status",
     "ngfwctl whoami",
     "ngfwctl status # routing-vpn",
-    "ngfwctl system release-acceptance-status --json",
     "ngfwctl policy status --json",
+    "ngfwctl alerts --limit 50",
+    "ngfwctl flows --limit 50",
+    "ngfwctl versions --limit 8",
   ]);
   for (const required of [
     "GET /v1/system/status",
     "GET /v1/system/identity",
-    "GET /v1/system/release-acceptance/status",
     "GET /v1/candidate/status",
+    "GET /v1/policy?source=POLICY_SOURCE_RUNNING",
+    "GET /v1/alerts?limit=500",
+    "GET /v1/flows?limit=500",
+    "GET /v1/versions?limit=8",
+    "GET /v1/intel/feeds",
   ]) {
     if (!copied.includes(required)) {
       throw new Error(`Dashboard automation copied context missing ${required} at ${viewport.name}`);
@@ -1651,7 +1661,7 @@ async function assertFleetTemplatesWorkspace(page, viewport) {
   if (state.nodeCount < 1 || state.templateCount < 4 || state.evidenceCount < 4 || !state.apiCli) {
     throw new Error(`Fleet workspace missing expected hooks at ${viewport.name}: ${JSON.stringify(state)}`);
   }
-  for (const required of ["Managed nodes", "Policy drift", "Content posture", "Release gates", "local control plane"]) {
+  for (const required of ["Managed nodes", "Policy drift", "Content posture", "Fleet apply result custody", "local control plane"]) {
     if (!state.text.includes(required)) {
       throw new Error(`Fleet workspace missing ${required} at ${viewport.name}: ${state.text}`);
     }
@@ -5601,7 +5611,7 @@ async function assertInspectionWorkspace(page, viewport) {
       "ngfwctl status",
       "ngfwctl intel content",
       "ngfwctl alerts --limit 100",
-      "Suricata detect/prevent runtime changes after validation and commit",
+      "IDS/IPS engine detect/prevent runtime changes after validation and commit",
     ]);
   } finally {
     await restoreRulesWorkspaceCandidate(page, previousPolicy);
@@ -7513,7 +7523,7 @@ async function assertProxyPlanProofWorkflow(page, viewport) {
   if (state.artifactPresent !== "true" || !state.rows.some((row) => row.key === "proxy" && /yes/i.test(row.text))) {
     throw new Error(`proxy plan proof did not show proxy artifact presence at ${viewport.name}: ${JSON.stringify(state.rows)}`);
   }
-  for (const term of ["Artifact exposure", "Hardening notes", "Active Envoy/Coraza traffic rollout"]) {
+  for (const term of ["Artifact exposure", "Hardening notes", "Active proxy/WAF traffic rollout"]) {
     if (!state.text.includes(term)) {
       throw new Error(`proxy plan proof missing "${term}" at ${viewport.name}`);
     }
@@ -9371,6 +9381,7 @@ async function assertObjectAddEditDeleteLifecycle(page, viewport, kind, labelKin
   await waitForObjectLifecycleState(page, `${labelKind} add`, kind, runningFingerprint, {
     present: [spec.added],
     runningAbsent: [spec.added],
+    object: objectLifecyclePayload(kind, spec.addValues),
   });
 
   await page.click(`[data-object-action="edit"][data-object-kind="${kind}"][data-object-name="${spec.added}"]`);
@@ -9382,6 +9393,7 @@ async function assertObjectAddEditDeleteLifecycle(page, viewport, kind, labelKin
     present: [spec.edited],
     absent: [spec.added],
     runningAbsent: [spec.edited],
+    object: objectLifecyclePayload(kind, spec.editValues),
   });
 
   await page.click(`[data-object-action="delete"][data-object-kind="${kind}"][data-object-name="${spec.unreferenced}"]`);
@@ -9397,6 +9409,7 @@ async function assertObjectAddEditDeleteLifecycle(page, viewport, kind, labelKin
     present: [spec.edited],
     absent: [spec.unreferenced],
     runningAbsent: [spec.unreferenced],
+    object: objectLifecyclePayload(kind, spec.editValues),
   });
 }
 
@@ -9451,7 +9464,7 @@ async function fillObjectEditor(page, kind, values = {}) {
       setLabel("App-ID", values.name);
       setLabel("Display name", values.displayName);
       setLabel("Category", values.category);
-      setLabel("Engine signals", values.engineSignals);
+      setLabel("Inspection signals", values.engineSignals);
       setLabel("TCP ports", values.tcpPorts);
       setLabel("UDP ports", values.udpPorts);
       setLabel("Description", values.description);
@@ -9466,6 +9479,17 @@ async function fillObjectEditor(page, kind, values = {}) {
       setSecurityProfileField("description", values.description);
     }
   }, { kind, values });
+}
+
+function objectLifecyclePayload(kind, values = {}) {
+  if (kind !== "applications") return null;
+  return {
+    name: String(values.name || ""),
+    displayName: String(values.displayName || ""),
+    category: String(values.category || ""),
+    engineSignals: String(values.engineSignals || "").split(",").map((value) => value.trim()).filter(Boolean),
+    description: String(values.description || ""),
+  };
 }
 
 async function objectPolicyCount(page, kind, name) {
@@ -9505,9 +9529,16 @@ async function waitForObjectLifecycleState(page, label, kind, runningFingerprint
       runningFingerprint: stable(running),
     };
     if (state.runningFingerprint !== runningFingerprint) return false;
+    const expectedObject = expected.object || null;
+    const candidateObject = expectedObject
+      ? (candidate[kind] || []).find((item) => item?.name === expectedObject.name)
+      : null;
+    const objectMatches = !expectedObject || (Boolean(candidateObject) && Object.entries(expectedObject)
+      .every(([key, value]) => stable(candidateObject[key]) === stable(value)));
     return (expected.present || []).every((name) => state.names.includes(name)) &&
       (expected.absent || []).every((name) => !state.names.includes(name)) &&
-      (expected.runningAbsent || []).every((name) => !state.runningText.includes(name));
+      (expected.runningAbsent || []).every((name) => !state.runningText.includes(name)) &&
+      objectMatches;
   }, { kind, runningFingerprint, expected }, { timeout: 10000 }).catch(async (error) => {
     const state = await page.evaluate(async (kind) => {
       const [candidateResponse, runningResponse] = await Promise.all([
@@ -9518,6 +9549,7 @@ async function waitForObjectLifecycleState(page, label, kind, runningFingerprint
       const running = runningResponse.ok ? (await runningResponse.json())?.policy || {} : {};
       return {
         names: (candidate[kind] || []).map((item) => item?.name || ""),
+        objects: (candidate[kind] || []).filter((item) => item?.name),
         runningText: JSON.stringify(running),
       };
     }, kind);

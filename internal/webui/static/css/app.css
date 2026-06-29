@@ -935,12 +935,27 @@ html[data-theme="light"] .diag-console {
 .setup-checklist-row.bad { border-color: color-mix(in srgb, var(--bad) 46%, var(--border)); }
 .setup-checklist-row.info { border-color: color-mix(in srgb, var(--info) 34%, var(--border)); }
 .setup-checklist-main { min-width: 0; display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px; align-items: start; }
+.setup-checklist-main > div { min-width: 0; }
 .setup-checklist-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: var(--radius-sm); background: var(--panel-2); color: var(--accent); }
 .setup-checklist-row.ok .setup-checklist-icon { color: var(--ok); }
 .setup-checklist-row.warn .setup-checklist-icon { color: var(--warn); }
 .setup-checklist-row.bad .setup-checklist-icon { color: var(--bad); }
-.setup-checklist-main strong { display: block; line-height: 1.25; overflow-wrap: anywhere; }
-.setup-checklist-main span { display: block; color: var(--text-faint); font-size: .8rem; line-height: 1.35; overflow-wrap: anywhere; }
+.setup-checklist-main > div > strong { display: block; line-height: 1.25; overflow-wrap: anywhere; }
+.setup-checklist-detail,
+.setup-topology-proof-label {
+  display: block;
+  min-width: 0;
+  color: var(--text-faint);
+  font-size: .8rem;
+  line-height: 1.35;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: unset;
+}
+.setup-topology-proof { min-width: 0; margin-top: 6px; }
+.setup-topology-proof-row { min-width: 0; }
+.setup-topology-proof-detail { display: block; min-width: 0; white-space: normal; overflow: visible; overflow-wrap: anywhere; }
 .setup-checklist-proof { min-width: 0; display: flex; align-items: center; justify-content: flex-end; gap: 6px; flex-wrap: wrap; }
 .setup-checklist-proof code { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
@@ -2087,7 +2102,6 @@ label.field .help { font-weight: 400; color: var(--text-faint); }
 .profile-strip > .note,
 .warning-row .note,
 .investigation-plan-main span,
-.setup-checklist-main span,
 .settings-panel-link span {
   display: -webkit-box;
   -webkit-line-clamp: 2;

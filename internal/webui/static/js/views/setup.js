@@ -618,13 +618,13 @@ function setupChecklistRow(item) {
       h("span", { class: "setup-checklist-icon", html: icon(itemIcon(item.cls), 15) }),
       h("div", {},
         h("strong", {}, item.title),
-        h("span", {}, item.detail),
+        h("span", { class: "setup-checklist-detail" }, item.detail),
         Array.isArray(item.proofRows) && item.proofRows.length
           ? h("div", { class: "setup-topology-proof", dataset: { setupTopologyProof: item.id } },
             item.proofRows.map((row) => h("div", { class: "setup-topology-proof-row", dataset: { setupTopologyProofRow: row.key || "" } },
               pill(row.status || "review", row.cls || "warn", true),
-              h("span", {}, row.label || "Proof"),
-              h("strong", {}, row.detail || "Review required"))))
+              h("span", { class: "setup-topology-proof-label" }, row.label || "Proof"),
+              h("strong", { class: "setup-topology-proof-detail" }, row.detail || "Review required"))))
           : null)),
     labeledCell("Status", {}, pill(setupChecklistStatusLabel(item.cls), item.cls || "neutral", true)),
     labeledCell("Proof", { class: "setup-checklist-proof" },

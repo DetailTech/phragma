@@ -258,7 +258,7 @@ export const AUTOMATION_CONTEXTS = {
       cli("ngfwperf verify perf/results", "Verify benchmark summary against raw artifacts"),
       cli("make benchmark-verify-release", "Verify benchmark evidence for the release gate"),
       cli("ngfwctl status > ngfw-status-active.txt", "Capture runtime status evidence"),
-      cli("sudo packet-filter list table inet openngfw > packet-filter-openngfw-final.txt", "Capture active packet filter ruleset counters on Linux"),
+      cli("sudo nft list table inet openngfw > nft-openngfw-final.txt", "Capture active packet filter ruleset counters on Linux"),
     ],
     notes: ["Performance is a browser-local verifier and runbook surface; benchmark artifacts are not uploaded to controld.", "Use live status is current posture only; measured-window status evidence must be captured during the benchmark run.", "Claims must stay scoped to loaded raw evidence and active inspection state."],
   },

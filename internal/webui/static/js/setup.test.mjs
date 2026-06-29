@@ -6,6 +6,7 @@ import { setupBaselineCliCommand, setupConfigFromQuery, setupRouteHashFromConfig
 import { SETUP_SCENARIOS, discoveredSetupInterfaces, hostPreparationModel, interfaceAssignmentIssues, restoreSetupRouteState, setupReadinessChecklist, setupScenarioConfig, setupScenarioReview, setupTopologyProof, setupTopologyProofRows, splitInterfaceList } from "./views/setup.js";
 
 const setupViewSource = readFileSync(new URL("./views/setup.js", import.meta.url), "utf8");
+const setupCSS = readFileSync(new URL("../css/app.css", import.meta.url), "utf8");
 assert.match(setupViewSource, /type: "button",\n        "data-setup-action": "stage"/);
 assert.match(setupViewSource, /title: `Select setup profile \$\{profile\.title\}`/);
 assert.match(setupViewSource, /title: `Select setup scenario \$\{scenario\.title\}`/);
@@ -17,6 +18,11 @@ assert.match(setupViewSource, /setupSegmentValue: value/);
 assert.match(setupViewSource, /type: "button", title: "Open guided setup API and CLI context"/);
 assert.match(setupViewSource, /title: `Open \$\{item\.title\} proof`/);
 assert.match(setupViewSource, /setupCheckAction: item\.id/);
+assert.match(setupViewSource, /class: "setup-checklist-detail"/);
+assert.match(setupViewSource, /class: "setup-topology-proof-label"/);
+assert.match(setupViewSource, /class: "setup-topology-proof-detail"/);
+assert.match(setupCSS, /\.setup-checklist-detail,\n\.setup-topology-proof-label \{[\s\S]*?white-space: normal;[\s\S]*?overflow: visible;[\s\S]*?-webkit-line-clamp: unset;\n\}/);
+assert.doesNotMatch(setupCSS, /\.setup-checklist-main span,\n\.settings-panel-link span/);
 assert.match(setupViewSource, /restoreSetupRouteState\(ctx\.query \|\| \{\}\)/);
 assert.match(setupViewSource, /Object\.assign\(state, restored\)/);
 assert.match(setupViewSource, /await session\.apply\(\(draft\) =>/);
