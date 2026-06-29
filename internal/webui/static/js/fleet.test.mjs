@@ -412,7 +412,7 @@ assert.equal(invalidWorkbench.changedAreas[0].key, "empty");
   assert.equal(evidence.ready, false);
   assert.ok(evidence.positiveEvidence.includes("running policy v12"));
   assert.ok(evidence.positiveEvidence.includes("runtime healthy"));
-  assert.ok(evidence.missingEvidence.includes("HA/readiness evidence needs review"));
+  assert.ok(evidence.missingEvidence.includes("HA evidence needs review"));
 
   const custody = localTemplateCustodyModel("browser-preview");
   assert.equal(custody.signed, false);
