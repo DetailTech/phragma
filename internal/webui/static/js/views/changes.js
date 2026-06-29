@@ -338,7 +338,7 @@ async function candidateReview(wrap, root) {
   wrap.appendChild(h("div", { class: "loading" }, "Loading candidate review…"));
   const [validationResult, runtimePreflightResult, statusResult, diffResult, releaseResult] = await Promise.allSettled([
     api.validate(),
-    api.runtimePreflight({ targetPolicy: session.draft, runningPolicy: session.running, operation: "commit" }),
+    api.runtimeReadinessPreflight({ targetPolicy: session.draft, runningPolicy: session.running, operation: "commit" }),
     api.status(),
     loadCandidateDiff(),
     api.releaseAcceptanceStatus(),
@@ -1744,7 +1744,7 @@ async function rollback(v, root, opts = {}) {
   const target = vp.policy || {};
   const [validationResult, runtimePreflightResult, statusResult, releaseResult] = await Promise.allSettled([
     api.validatePolicy(target),
-    api.runtimePreflight({ targetPolicy: target, runningPolicy: session.running, operation: "rollback" }),
+    api.runtimeReadinessPreflight({ targetPolicy: target, runningPolicy: session.running, operation: "rollback" }),
     api.status(),
     api.releaseAcceptanceStatus(),
   ]);

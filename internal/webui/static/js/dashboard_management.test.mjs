@@ -54,7 +54,7 @@ const {
   assert.equal(summary.cls, "ok");
   assert.match(summary.title, /controls are active/);
   assert.match(summary.detail, /alice \(admin, local-users-file\)/);
-  assert.match(summary.detail, /Production certification still depends on the hardening pass/);
+  assert.doesNotMatch(summary.detail, /certification|hardening pass/i);
 }
 
 {
@@ -106,8 +106,7 @@ const {
   assert.equal(limited.limited, true);
   assert.equal(limited.alertFoot, "2/12 shown");
   assert.equal(limited.flowFoot, "1 shown");
-  assert.match(limited.detail, /first page only/);
-  assert.match(limited.detail, /Open Traffic or Threats/);
+  assert.equal(limited.detail, "2/12 alerts and 1/1 flows shown.");
 
   const complete = dashboardTelemetryScopeModel(
     { alerts: [{ id: "a1" }], totalMatches: 1 },
@@ -116,7 +115,7 @@ const {
   assert.equal(complete.limited, false);
   assert.equal(complete.alertFoot, "1 shown");
   assert.equal(complete.flowFoot, "2 shown");
-  assert.match(complete.detail, /current result set/);
+  assert.equal(complete.detail, "1 alerts and 2 flows shown.");
 
   const snakeCaseLimited = dashboardTelemetryScopeModel(
     { alerts: [{ id: "a1" }, { id: "a2" }], total_matches: 5, has_more: false },
@@ -124,7 +123,7 @@ const {
   );
   assert.equal(snakeCaseLimited.limited, true);
   assert.equal(snakeCaseLimited.alertFoot, "2/5 shown");
-  assert.match(snakeCaseLimited.detail, /first page only/);
+  assert.equal(snakeCaseLimited.detail, "2/5 alerts and 1/1 flows shown.");
 }
 
 {

@@ -315,6 +315,22 @@ await assertApiContract({
 });
 
 await assertApiContract({
+  name: "runtimeReadinessPreflight",
+  invoke: () => api.runtimeReadinessPreflight({
+    targetPolicy: { version: 18, securityRules: [{ name: "candidate-rule" }] },
+    runningPolicy: { version: 17, securityRules: [] },
+    operation: "commit",
+  }),
+  method: "POST",
+  path: "/v1/system/runtime-readiness:check",
+  body: {
+    targetPolicy: { version: 18, securityRules: [{ name: "candidate-rule" }] },
+    runningPolicy: { version: 17, securityRules: [] },
+    operation: "commit",
+  },
+});
+
+await assertApiContract({
   name: "fleetNodes",
   invoke: () => api.fleetNodes(),
   method: "GET",

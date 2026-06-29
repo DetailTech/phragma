@@ -909,7 +909,9 @@ function packageFields(pkg, readinessEvidence = null) {
 }
 
 function packageContent(pkg = {}) {
-  const readiness = pkg.content || pkg.content_readiness || null;
+  // grpc-gateway emits the protobuf JSON name (`contentReadiness`), while
+  // retained/manual payloads can still use the snake_case field.
+  const readiness = pkg.contentReadiness || pkg.content_readiness || pkg.content || null;
   if (!readiness || typeof readiness !== "object") return null;
   return {
     scope: readiness.scope || "",

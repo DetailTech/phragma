@@ -323,7 +323,7 @@ function productionEvidenceInventoryModelRow(kind, pkg, opts = {}) {
       nextAction: `Preview and install a signed ${kind} package from the firewall content import directory.`,
     };
   }
-  const readiness = normalizeContentForInventory(pkg.content || pkg.content_readiness || {});
+  const readiness = normalizeContentForInventory(pkg.contentReadiness || pkg.content_readiness || pkg.content || {});
   const required = readiness.requiredProductionEvidence.length ? readiness.requiredProductionEvidence : expected.required;
   const attached = new Set(readiness.evidence.filter((ref) => ref.artifact && ref.sha256).map((ref) => ref.type));
   const missing = required.filter((type) => !attached.has(type));

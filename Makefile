@@ -62,7 +62,8 @@ test: webui-check
 	go test -race ./...
 
 webui-check:
-	@if command -v node >/dev/null 2>&1; then \
+	@set -eu; \
+	if command -v node >/dev/null 2>&1; then \
 		find internal/webui/static/js -type f ! -name '._*' \( -name '*.js' -o -name '*.mjs' \) -print | sort | xargs -n1 node --check; \
 		find internal/webui/static/js -type f ! -name '._*' -name '*.test.mjs' -print | sort | xargs -n1 node --require $(WEBUI_NODE_TEST_PRELOAD); \
 		echo "webui_js_checks=passed"; \
