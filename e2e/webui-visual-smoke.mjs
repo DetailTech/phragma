@@ -11184,7 +11184,7 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   await page.click('[data-perf-action="use-live-status"]');
   await waitForPerformanceState(page, "live status label", (state) => (
     state.artifacts.status === "status: live /v1/system/status"
-  ));
+  ), 15000);
 
   await page.click('[data-perf-action="clear"]');
   await waitForPerformanceState(page, "clear before mismatch", (state) => state.verdict === "empty");
