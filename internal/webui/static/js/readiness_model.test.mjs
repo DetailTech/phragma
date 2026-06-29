@@ -282,14 +282,19 @@ function assertExternalEvidencePacket(item, expected) {
 function assertChecklistItemContract(items) {
   const seenIds = new Set();
   for (const item of items) {
-    for (const key of ["id", "title", "detail", "meta", "href"]) {
+    for (const key of ["id", "title", "detail", "meta"]) {
       assert.equal(typeof item[key], "string", `${item.id || "release evidence item"} ${key} should be a string`);
       assert.ok(item[key].trim(), `${item.id || "release evidence item"} ${key} should be non-empty`);
     }
+    assert.equal(typeof item.href, "string", `${item.id || "release evidence item"} href should be a string`);
 
     assert.ok(!seenIds.has(item.id), `${item.id} should be unique`);
     seenIds.add(item.id);
-    assert.ok(item.href.startsWith("#/"), `${item.id} href should be an in-app hash route`);
+    if (item.id === "support") {
+      assert.equal(item.href, "", "support bundle collection should remain API/CLI-only");
+    } else {
+      assert.ok(item.href.startsWith("#/"), `${item.id} href should be an in-app hash route`);
+    }
 
     if (item.reference !== undefined) {
       assert.equal(typeof item.reference, "string", `${item.id} reference should be a string`);

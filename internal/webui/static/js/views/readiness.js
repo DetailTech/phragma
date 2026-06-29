@@ -12,7 +12,7 @@ import { degradedEngineEvidence } from "../inspection_posture.js";
 import { activeInvestigationServerCaseHref, appendInvestigationPacketToActiveServerCase, pinInvestigationPacket } from "../investigation_case.js";
 import { buildInvestigationPacket, investigationPacketFilename, investigationPacketJson, investigationPacketText } from "../investigation_packet.js";
 import { readQueryState, writeQueryState } from "../query_state.js";
-import { buildEbpfDrillEvidencePacket, buildHAEvidencePacket, buildSystemEvidencePacket, ebpfDrillEvidencePacketReport, haEvidencePacketReport, haReadiness, readinessActionHash, releaseArtifactWorkbenchModel, releaseEvidenceChecklist, releaseEvidenceCounts, releaseEvidencePacketDefinition, releaseEvidencePacketIds, releaseEvidenceReport, remediationSteps, routingRuntimeEvidence, summarizeReadiness, systemEvidencePacketReport } from "../readiness_model.js";
+import { buildEbpfDrillEvidencePacket, buildHAEvidencePacket, buildSystemEvidencePacket, ebpfDrillEvidencePacketReport, haEvidencePacketReport, haReadiness, readinessActionHash, releaseArtifactWorkbenchModel, releaseEvidenceChecklist, releaseEvidenceCounts, releaseEvidenceOwnerRoute, releaseEvidencePacketDefinition, releaseEvidencePacketIds, releaseEvidenceReport, remediationSteps, routingRuntimeEvidence, summarizeReadiness, systemEvidencePacketReport } from "../readiness_model.js";
 import { buildSupportBundle, supportBundleFilename, supportBundlePreviewModel, supportBundlePreviewReport } from "../support_bundle.js";
 import { pageHead, card, badge, emptyState, toast, confirmDialog, openDrawer, closeDrawer, labeledCell, responsiveTable } from "../ui.js";
 import { vpnTunnelHash, vpnTunnelModels } from "./netvpn.js";
@@ -1539,7 +1539,7 @@ function releaseEvidencePacketCurrentGap(item = {}) {
 function releaseEvidencePacketRoute(item = {}) {
   const id = String(item.id || item.packet?.check || "").trim();
   if (!id || !releaseEvidencePacketIds().includes(id)) return "";
-  return `#/readiness?packet=${encodeURIComponent(id)}`;
+  return releaseEvidenceOwnerRoute(id);
 }
 
 async function copyReleaseEvidencePacket(handoff) {
