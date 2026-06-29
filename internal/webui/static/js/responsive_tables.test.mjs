@@ -81,6 +81,9 @@ for (const label of ["Threat-ID", "Reason", "Scope object", "Evidence", "Policy 
 assert.match(ids, /\{ className: "inspection-coverage-table" \}/);
 assert.match(ids, /\{ className: "inspection-exception-table" \}/);
 assert.match(ids, /\{ className: "ids-exception-table" \}/);
+assert.match(ids, /class: "note inspection-runtime-detail" \}, posture\.detail/);
+assert.match(ids, /class: "note inspection-engine-evidence-detail" \}, model\.detail/);
+assert.match(css, /\.card > \.note\.inspection-runtime-detail,\n\.card > \.note\.inspection-engine-evidence-detail \{[\s\S]*?white-space: normal;[\s\S]*?overflow: visible;[\s\S]*?-webkit-line-clamp: unset;[\s\S]*?\n\}/);
 assert.match(ids, /responsiveTable\(\["Coverage", "Rules", "Examples", "Operator action"\]/);
 assert.match(ids, /responsiveTable\(\["Threat-ID", "Scope", "Reason", "Evidence", "Policy state"\]/);
 for (const label of ["Coverage", "Rules", "Examples", "Operator action", "Scope"]) {

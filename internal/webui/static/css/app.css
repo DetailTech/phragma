@@ -2108,6 +2108,17 @@ label.field .help { font-weight: 400; color: var(--text-faint); }
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
+.card > .note.inspection-runtime-detail,
+.card > .note.inspection-engine-evidence-detail {
+  display: block;
+  min-width: 0;
+  white-space: normal;
+  overflow: visible;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  -webkit-line-clamp: unset;
+  -webkit-box-orient: initial;
+}
 .drawer .note,
 .diag-console .note,
 .modal .note,

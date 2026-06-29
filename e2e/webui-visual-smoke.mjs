@@ -1705,15 +1705,21 @@ async function assertFleetTemplatePreviewRoute(page, viewport) {
   await page.click('#drawer:not([hidden]) [data-fleet-template-action="close-preview"]');
   await page.waitForFunction(() => !document.querySelector("#drawer:not([hidden])") && (location.hash === "#/fleet" || location.hash === ""), null, { timeout: 5000 });
 
-  await page.click('[data-fleet-template="release"] [data-fleet-template-action="preview"]');
-  await page.waitForSelector('[data-fleet-template-preview="release"]', { timeout: 10000 });
-  state = await collectRouteBackedDrawerState(page, '[data-fleet-template-preview="release"]');
+  await page.click('[data-fleet-template="edge-policy"] [data-fleet-template-action="preview"]');
+  await page.waitForSelector('[data-fleet-template-preview="edge-policy"]', { timeout: 10000 });
+  state = await collectRouteBackedDrawerState(page, '[data-fleet-template-preview="edge-policy"]');
   const hash = await page.evaluate(() => location.hash);
-  if (!/release/i.test(state.title) || !hash.includes("drawer=template-preview") || !hash.includes("template=release")) {
+  const ownerHref = await page.locator('#drawer:not([hidden]) [data-fleet-template-action="open-changes"]').getAttribute("href");
+  if (!/Edge policy template preview/.test(state.title) || !hash.includes("drawer=template-preview") || !hash.includes("template=edge-policy") || ownerHref !== "#/changes?tab=candidate") {
     throw new Error(`Fleet template preview click did not set shareable route at ${viewport.name}: ${JSON.stringify({ state, hash })}`);
   }
-  await page.click('#drawer:not([hidden]) [data-fleet-template-action="close-preview"]');
-  await page.waitForFunction(() => !document.querySelector("#drawer:not([hidden])") && (location.hash === "#/fleet" || location.hash === ""), null, { timeout: 5000 });
+  await page.click('#drawer:not([hidden]) [data-fleet-template-action="open-changes"]');
+  await waitForRouteReady(page, "/changes");
+  await page.waitForSelector('[data-changes-tab="candidate"]', { timeout: 10000 });
+  const ownerHash = await page.evaluate(() => location.hash);
+  if (ownerHash !== "#/changes?tab=candidate") {
+    throw new Error(`Fleet edge-policy preview owner route mismatch at ${viewport.name}: ${ownerHash || "<empty>"}`);
+  }
 }
 
 async function assertFleetLifecycleDrillThrough(page, viewport) {
@@ -1933,13 +1939,14 @@ function assertDiagnosticConsoleState(state, viewport, source) {
     "read-only",
     "ngfwctl status",
     "ngfwctl whoami",
-    "ngfwctl system release-acceptance-status --json",
+    "ngfwctl status # engines",
+    "ngfwctl status # routing-vpn",
     "ngfwctl policy status --json",
     "ngfwctl sessions --limit 8",
     "ngfwctl audit --limit 8",
+    "ngfwctl status # warnings",
     "Refresh",
     "Copy",
-    "Readiness",
     "Sessions",
   ]) {
     if (!state.text.includes(required)) {
@@ -1961,11 +1968,12 @@ function assertDiagnosticSnapshot(text, viewport, label) {
     "# Phragma diagnostic snapshot",
     "$ ngfwctl status",
     "$ ngfwctl whoami",
+    "$ ngfwctl status # engines",
     "$ ngfwctl status # routing-vpn",
-    "$ ngfwctl system release-acceptance-status --json",
     "$ ngfwctl policy status --json",
     "$ ngfwctl sessions --limit 8",
     "$ ngfwctl audit --limit 8",
+    "$ ngfwctl status # warnings",
   ]) {
     if (!text.includes(required)) {
       throw new Error(`diagnostic ${label} missing ${required} at ${viewport.name}`);
@@ -9142,7 +9150,7 @@ async function assertObjectsAppIdPortHintHygiene(page, viewport) {
     for (const expected of [
       "App-ID without port hints",
       signalOnly,
-      "enforcement requires either TCP/UDP port hints or a supported Suricata signal",
+      "enforcement requires either TCP/UDP port hints or a supported IDS/IPS signal",
     ]) {
       if (!hygiene.text.includes(expected)) {
         throw new Error(`Objects App-ID hygiene missing ${expected} at ${viewport.name}: ${hygiene.text}`);
@@ -11116,6 +11124,8 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
     state.verdict === "warn" &&
     state.artifacts.iperf?.includes("not loaded") &&
     state.artifacts.status?.includes("not loaded") &&
+    state.artifacts.nft?.includes("not loaded") &&
+    hasPerformanceSummaryOnlyRawWarnings(state) &&
     state.repairs.some((step) => step.text.includes("Load raw iperf3 evidence")) &&
     state.repairs.some((step) => step.text.includes("Load active runtime status"))
   ));
@@ -11124,7 +11134,11 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   await page.check('[data-perf-toggle="strict"]');
   await waitForPerformanceState(page, "strict warning gate", (state) => (
     state.verdict === "bad" &&
-    state.releaseState === "bad" &&
+    state.gateState === "bad" &&
+    state.artifacts.iperf?.includes("not loaded") &&
+    state.artifacts.status?.includes("not loaded") &&
+    state.artifacts.nft?.includes("not loaded") &&
+    hasPerformanceSummaryOnlyRawWarnings(state) &&
     state.text.includes("Strict gate failed")
   ));
 
@@ -11136,11 +11150,14 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   await uploadPerfFile(page, "status", inspected.status);
   await waitForPerformanceState(page, "publishable inspected evidence", (state) => (
     state.verdict === "ok" &&
-    state.releaseState === "ok" &&
     state.gateState === "ok" &&
+    state.artifacts.iperf?.includes("iperf3.json") &&
+    state.artifacts.status?.includes("ngfw-status-active.txt") &&
+    state.artifacts.nft?.includes("not loaded") &&
     state.metrics.throughput === "1.000 Gbps" &&
     state.metrics.rawIperf.includes("1.000 Gbps") &&
     state.metrics.rawStatus.includes("ready") &&
+    state.metrics.rawNft.includes("not required") &&
     state.text.includes("No findings.")
   ));
   const inspectedState = await collectPerformanceState(page);
@@ -11156,9 +11173,12 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   await uploadPerfFile(page, "status", inspected.status);
   await waitForPerformanceState(page, "publishable inspected evidence restored after owner check", (state) => (
     state.verdict === "ok" &&
-    state.releaseState === "ok" &&
-    state.releaseBenchmarkState &&
-    state.nextCommandCount >= 3
+    state.gateState === "ok" &&
+    state.artifacts.iperf?.includes("iperf3.json") &&
+    state.artifacts.status?.includes("ngfw-status-active.txt") &&
+    state.metrics.rawIperf.includes("1.000 Gbps") &&
+    state.metrics.rawStatus.includes("ready") &&
+    state.metrics.rawNft.includes("not required")
   ));
 
   await page.click('[data-perf-action="use-live-status"]');
@@ -11173,7 +11193,7 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   await uploadPerfFile(page, "status", mismatch.status);
   await waitForPerformanceState(page, "mismatch blocked", (state) => (
     state.verdict === "bad" &&
-    state.releaseState === "bad" &&
+    state.gateState === "bad" &&
     state.findings.some((finding) => finding.text.includes("tcp_bits_per_second")) &&
     state.findings.some((finding) => finding.text.includes("target.ip")) &&
     state.repairs.some((step) => step.text.includes("Fix blocking evidence errors")) &&
@@ -11186,19 +11206,31 @@ async function assertPerformanceBenchmarkEvidenceVerifier(page, viewport) {
   await waitForPerformanceState(page, "final clear", (state) => state.verdict === "empty");
 }
 
+function hasPerformanceSummaryOnlyRawWarnings(state) {
+  const expected = [
+    "raw iperf3.json is not loaded; throughput cannot be traced to raw iperf evidence",
+    "inspection_evidence.status_captured is true but no raw ngfwctl status artifact is loaded",
+    "host_tuning_evidence.status_captured is true but no raw ngfwctl status artifact is loaded",
+    "conntrack_evidence.status_captured is true but no raw ngfwctl status artifact is loaded",
+  ];
+  return state.findings.length === expected.length && expected.every((message) => (
+    state.findings.some((finding) => finding.text.includes(message))
+  ));
+}
+
 async function assertPerformanceReleaseEvidenceOwnership(page, viewport) {
   const state = await collectPerformanceState(page);
-  if (!state.releaseBenchmarkState || state.nextCommandCount < 3 || state.retiredReadinessHref) {
-    throw new Error(`performance release-evidence ownership hooks were wrong at ${viewport.name}: ${JSON.stringify(state)}`);
+  if (state.retiredReadinessHref) {
+    throw new Error(`performance release handoff linked to retired readiness ownership at ${viewport.name}: ${JSON.stringify(state)}`);
   }
   for (const required of [
-    "does not record backend release evidence",
+    "It does not record release evidence or certify a performance claim.",
+    "Benchmark collection runbook",
     "make benchmark-verify-release",
-    "make release-evidence-release-benchmark",
-    "RELEASE_NO_PERFORMANCE_CLAIMS=1",
+    "RELEASE_NO_PERFORMANCE_CLAIMS=1 make release-acceptance-status",
   ]) {
     if (!state.text.includes(required)) {
-      throw new Error(`performance release-evidence owner panel missed ${required} at ${viewport.name}: ${state.text}`);
+      throw new Error(`performance release handoff missed ${required} at ${viewport.name}: ${state.text}`);
     }
   }
 }
@@ -11562,20 +11594,18 @@ async function collectPerformanceState(page) {
     return {
       text: (content?.textContent || "").replace(/\s+/g, " ").trim(),
       verdict: route?.querySelector("[data-perf-verdict]")?.getAttribute("data-perf-verdict") || "",
-      releaseState: route?.querySelector("[data-perf-release-state]")?.getAttribute("data-perf-release-state") || "",
       gateState: route?.querySelector("[data-perf-gate-state]")?.getAttribute("data-perf-gate-state") || "",
-      releaseBenchmarkState: route?.querySelector("[data-perf-release-benchmark-status]")?.getAttribute("data-perf-release-benchmark-status") || "",
-      nextCommandCount: route?.querySelectorAll("[data-perf-next-command]").length || 0,
       retiredReadinessHref: route?.querySelector('a[href^="#/readiness"]')?.getAttribute("href") || "",
       artifacts: {
         iperf: artifactValue("iperf"),
         status: artifactValue("status"),
-        nft: artifactValue("nft"),
+        nft: artifactValue("packet-filter"),
       },
       metrics: {
         throughput: metricValue("throughput"),
         rawIperf: metricValue("raw-iperf"),
         rawStatus: metricValue("raw-status"),
+        rawNft: metricValue("raw-packet-filter"),
       },
       repairs: rowList("[data-perf-repair-step]"),
       findings: rowList("[data-perf-finding]"),
