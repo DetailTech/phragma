@@ -200,9 +200,11 @@ The loopback WebUI/API listener uses a generated self-signed HTTPS certificate
 by default. Browse `https://127.0.0.1:8080/ui/` and accept or locally trust that
 certificate, or pass `--tls=false` for loopback cleartext debugging only.
 Non-loopback listeners require `--tls-cert` and `--tls-key` by default. A
-temporary lab may explicitly acknowledge generated self-signed TLS with
-`--allow-public-self-signed-tls`; runtime status then remains degraded and
-emits a critical warning until an operator-provided certificate is configured.
+temporary test lab may explicitly acknowledge generated self-signed TLS with
+`--allow-public-self-signed-tls`. That acknowledged posture is recorded in the
+startup log and does not by itself make runtime status degraded or critical;
+authentication remains required, and an operator-provided certificate is still
+required for production.
 For browser first-run setup, open **Guided setup** to stage a two-zone
 throughput, IDS detect, or IPS prevent baseline through the same candidate
 review and commit path. When runtime status is available, Guided setup lists

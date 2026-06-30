@@ -336,6 +336,35 @@ func TestUsesPublicSelfSignedTLS(t *testing.T) {
 	}
 }
 
+func TestLogManagementTLSPostureWarnsForExplicitPublicSelfSignedTLS(t *testing.T) {
+	var logs bytes.Buffer
+	previous := slog.Default()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(&logs, nil)))
+	t.Cleanup(func() {
+		slog.SetDefault(previous)
+	})
+
+	logManagementTLSPosture(config{
+		httpListen: "0.0.0.0:8080", tlsEnabled: true, allowPublicSelfSignedTLS: true,
+	}, "/var/lib/openngfw/tls/cert.pem", true)
+
+	logBody := logs.String()
+	for _, want := range []string{
+		`"level":"WARN"`,
+		"non-loopback WebUI/REST listener with generated self-signed TLS",
+		"explicitly accepted for temporary lab use",
+		`"listen":"0.0.0.0:8080"`,
+		`"cert":"/var/lib/openngfw/tls/cert.pem"`,
+		`"trust":"generated-self-signed"`,
+		`"operator_acknowledged":true`,
+		`"scope":"test-only"`,
+	} {
+		if !strings.Contains(logBody, want) {
+			t.Fatalf("management TLS log = %s, want %q", logBody, want)
+		}
+	}
+}
+
 func TestValidateHAFlags(t *testing.T) {
 	tests := []struct {
 		name    string

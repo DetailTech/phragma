@@ -48,12 +48,13 @@ TLS/mTLS transport is added. Remote operators should use the HTTPS WebUI/REST
 gateway; `--tls=false` is refused for non-loopback REST listeners.
 Non-loopback REST/WebUI listeners also require operator-provided `--tls-cert`
 and `--tls-key` by default. `--allow-public-self-signed-tls` is an explicit
-temporary-lab acknowledgement, not production trust: status remains degraded
-with a critical warning, and generated material may not contain a SAN for the
-public endpoint. Use a controlled path such as an SSH tunnel or explicit
-browser exception, then replace the certificate before production. The shipped
-systemd unit stays loopback-only and the deploy-hardening gate rejects this lab
-opt-in in packaged service defaults.
+test-only acknowledgement, not production trust. Its use is recorded in the
+startup log and does not by itself make runtime status degraded or critical.
+It does not relax authentication, and generated material may not contain a SAN
+for the public endpoint. Use a controlled path such as an SSH tunnel or
+explicit browser exception, then replace the certificate before production.
+The shipped systemd unit stays loopback-only and the deploy-hardening gate
+rejects this opt-in in packaged service defaults.
 The gateway sends restrictive browser security headers for both the WebUI and
 REST API, including frame denial, no-referrer, cross-origin opener/resource
 policy, a no-object/no-frame content security policy, and a permissions policy

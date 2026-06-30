@@ -1205,7 +1205,6 @@ type SystemStatusConfig struct {
 	GRPCListen                          string
 	HTTPListen                          string
 	TLSEnabled                          bool
-	PublicSelfSignedTLS                 bool
 	AuthEnabled                         bool
 	OIDCEnabled                         bool
 	OIDCCookieSecure                    bool
@@ -4558,9 +4557,6 @@ func managementGuardrailCapability(cfg SystemStatusConfig) (string, string) {
 	if cfg.HTTPListen != "" && !cfg.TLSEnabled {
 		issues = append(issues, "TLS disabled")
 	}
-	if cfg.PublicSelfSignedTLS {
-		issues = append(issues, "public listener uses generated self-signed TLS")
-	}
 	if !cfg.AuthEnabled {
 		issues = append(issues, "authentication disabled")
 	}
@@ -4587,13 +4583,6 @@ func managementGuardrailCapability(cfg SystemStatusConfig) (string, string) {
 
 func managementWarnings(cfg SystemStatusConfig) []*openngfwv1.StatusWarning {
 	var warnings []*openngfwv1.StatusWarning
-	if cfg.PublicSelfSignedTLS {
-		warnings = append(warnings, &openngfwv1.StatusWarning{
-			Severity: "critical",
-			Message:  "Public REST/WebUI listener uses generated self-signed TLS.",
-			Action:   "Use only a controlled temporary lab path such as an SSH tunnel or explicit browser exception, then replace it with an operator-provided --tls-cert and --tls-key before production.",
-		})
-	}
 	if cfg.RateLimitRPM <= 0 {
 		warnings = append(warnings, &openngfwv1.StatusWarning{
 			Severity: "warning",

@@ -466,7 +466,6 @@ func run(cfg config) error {
 			GRPCListen:                          grpcListen,
 			HTTPListen:                          httpListen,
 			TLSEnabled:                          cfg.tlsEnabled,
-			PublicSelfSignedTLS:                 usesPublicSelfSignedTLS(cfg),
 			AuthEnabled:                         authEnabled,
 			OIDCEnabled:                         oidcAuth != nil,
 			OIDCCookieSecure:                    oidcCookieSecure,
@@ -632,13 +631,7 @@ func run(cfg config) error {
 			if err != nil {
 				return fmt.Errorf("tls material: %w", err)
 			}
-			if selfSigned && usesPublicSelfSignedTLS(cfg) {
-				slog.Warn("serving a non-loopback WebUI/REST listener with generated self-signed TLS; explicitly accepted for temporary lab use", "listen", httpListen, "cert", certFile)
-			} else if selfSigned {
-				slog.Info("serving WebUI/REST over HTTPS with a self-signed certificate (browsers will warn until you supply --tls-cert/--tls-key)", "cert", certFile)
-			} else {
-				slog.Info("serving WebUI/REST over HTTPS with operator-provided certificate", "cert", certFile)
-			}
+			logManagementTLSPosture(cfg, certFile, selfSigned)
 		} else {
 			slog.Warn("TLS is DISABLED (--tls=false): WebUI/REST is served as cleartext HTTP — do not expose off-host")
 		}
@@ -874,6 +867,25 @@ func validateManagementAuth(cfg config) error {
 func usesPublicSelfSignedTLS(cfg config) bool {
 	return cfg.tlsEnabled && cfg.httpListen != "" && !isLoopbackListenAddress(cfg.httpListen) &&
 		strings.TrimSpace(cfg.tlsCert) == "" && strings.TrimSpace(cfg.tlsKey) == "" && cfg.allowPublicSelfSignedTLS
+}
+
+func logManagementTLSPosture(cfg config, certFile string, selfSigned bool) {
+	if selfSigned && usesPublicSelfSignedTLS(cfg) {
+		slog.Warn(
+			"serving a non-loopback WebUI/REST listener with generated self-signed TLS; explicitly accepted for temporary lab use",
+			"listen", cfg.httpListen,
+			"cert", certFile,
+			"trust", "generated-self-signed",
+			"operator_acknowledged", true,
+			"scope", "test-only",
+		)
+		return
+	}
+	if selfSigned {
+		slog.Info("serving WebUI/REST over HTTPS with a self-signed certificate (browsers will warn until you supply --tls-cert/--tls-key)", "cert", certFile)
+		return
+	}
+	slog.Info("serving WebUI/REST over HTTPS with operator-provided certificate", "cert", certFile)
 }
 
 func validateOIDCFlags(cfg config) error {

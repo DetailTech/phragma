@@ -2709,12 +2709,11 @@ func TestSystemStatusWarnsForDisabledManagementGuardrails(t *testing.T) {
 	}
 }
 
-func TestSystemStatusWarnsForPublicSelfSignedTLS(t *testing.T) {
+func TestSystemStatusDoesNotDegradeAuthenticatedPublicTLSForCertificateTrust(t *testing.T) {
 	svc := &SystemService{Status: SystemStatusConfig{
 		StartedAt:             time.Now().UTC(),
 		HTTPListen:            "0.0.0.0:8080",
 		TLSEnabled:            true,
-		PublicSelfSignedTLS:   true,
 		AuthEnabled:           true,
 		RateLimitRPM:          600,
 		RateLimitBurst:        120,
@@ -2732,15 +2731,15 @@ func TestSystemStatusWarnsForPublicSelfSignedTLS(t *testing.T) {
 	if err != nil {
 		t.Fatalf("GetStatus returned error: %v", err)
 	}
-	if got := capabilityState(resp.GetCapabilities(), "Management plane guardrails"); got != "degraded" {
-		t.Fatalf("management guardrail capability = %q, want degraded", got)
+	if got := capabilityState(resp.GetCapabilities(), "Management plane guardrails"); got != "ready" {
+		t.Fatalf("management guardrail capability = %q, want ready", got)
 	}
 	detail := capabilityDetail(resp.GetCapabilities(), "Management plane guardrails")
-	if !strings.Contains(detail, "public listener uses generated self-signed TLS") {
-		t.Fatalf("management guardrail detail = %q, want public self-signed TLS disclosure", detail)
+	if strings.Contains(detail, "self-signed TLS") {
+		t.Fatalf("management guardrail detail = %q, should not classify certificate trust", detail)
 	}
-	if !hasWarning(resp.GetWarnings(), "critical", "Public REST/WebUI listener uses generated self-signed TLS.") {
-		t.Fatalf("missing critical public self-signed TLS warning in %#v", resp.GetWarnings())
+	if hasWarning(resp.GetWarnings(), "critical", "Public REST/WebUI listener uses generated self-signed TLS.") {
+		t.Fatalf("unexpected critical public self-signed TLS warning in %#v", resp.GetWarnings())
 	}
 }
 
