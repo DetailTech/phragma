@@ -221,7 +221,7 @@ for the current commit.
 
 This static gate fails if the shipped `deploy/systemd/controld.service` or
 `deploy/install.sh` drifts toward lab defaults: unauthenticated local mode,
-`--tls=false`, dry-run mode, non-loopback management listeners, broad systemd
+`--tls=false`, `--allow-public-self-signed-tls`, dry-run mode, non-loopback management listeners, broad systemd
 capabilities, missing systemd sandbox directives, non-root-only state/config
 paths, plaintext bootstrap users, or an unguarded remote Vector installer. It
 does not start `controld`, install packages, perform live listener exposure,
@@ -578,8 +578,10 @@ COMMIT="$(git rev-parse HEAD)" make release-evidence-webui-enterprise-smoke
 
 The wrapper records `make webui-enterprise-smoke` and writes
 `release/evidence/webui-enterprise-smoke.txt`. The underlying target runs the
-full enterprise route list across the desktop viewport by default, requires
-Node.js JavaScript checks, requires browser coverage by default, writes
+full 19-route canonical enterprise set across the desktop viewport by default;
+`/dashboard` remains an input alias for `/` and does not increase the canonical
+route count. The target requires Node.js JavaScript checks, requires browser
+coverage by default, writes
 `webui-smoke-evidence.json`, stores screenshot artifacts under the smoke
 artifact directory, and fails on unlabeled icon controls, generic operator
 actions without stable hooks plus title/ARIA intent, or route-backed drawer
@@ -587,7 +589,7 @@ actions without stable accessible affordances. The recorded stdout must include
 `webui_js_checks=passed`, `javascript_checks=required`,
 `release_smoke_mode=desktop-enterprise`, `browser_required=1`,
 `[webui-smoke] browser_coverage=chromium`, `viewport_coverage=desktop`, the
-broad evidence policy, `route_coverage=20/20`, passed broad summary, check
+broad evidence policy, `route_coverage=19/19`, passed broad summary, check
 count, screenshot count, evidence manifest path, and release-note caveat
 stating that broad visual-smoke evidence supports production release only after
 source-control acceptance and repo-local release evidence recording.
@@ -668,7 +670,7 @@ The `deploy-hardening` check records the packaged service/installer posture
 validator through `COMMIT="$(git rev-parse HEAD)" make
 release-evidence-deploy-hardening`. The wrapped stdout from
 `bash release/deploy-hardening-check.sh --check` must include
-`required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,systemd-sandbox,capability-bounds`,
+`required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,no-public-self-signed,systemd-sandbox,capability-bounds`,
 `required_installer_posture=root-only,0700-state-log-config,hashed-admin-token,0600-secret-files,unsafe-remote-install-opt-in`,
 and `status=passed`. This proves the shipped service unit and installer
 defaults, not live host hardening.
@@ -944,9 +946,11 @@ make release-recordability-check VERSION=<tag> COMMIT=<full-commit>
 
 `make release-check-rootless` is a preflight gate bundle, not a release
 manifest evidence bundle. It includes `make benchmark-verify-release` and checks
-locally runnable rootless/static posture, but it does not assemble or certify the
-release manifest. Publishable benchmark evidence under `perf/release-results/`
-is required by default. It still does not collect
+locally runnable rootless/static posture, including a pinned `govulncheck`
+1.5.0 reachable-vulnerability scan under the patch-level Go floor declared in
+`go.mod`, but it does not assemble or certify the release manifest.
+Publishable benchmark evidence under `perf/release-results/` is required by
+default. It still does not collect
 `content-production-readiness`, `m5-oidc-field-evidence`, or
 `m5-saml-field-evidence`; record content readiness from the signed production
 package evidence bundle and record OIDC/SAML field evidence from the

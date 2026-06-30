@@ -14,15 +14,22 @@ import (
 )
 
 const (
+	// XDPProbeFile is the generated XDP probe source filename.
 	XDPProbeFile = "xdp_probe.c"
-	TCProbeFile  = "tc_probe.c"
+	// TCProbeFile is the generated traffic-control probe source filename.
+	TCProbeFile = "tc_probe.c"
 
+	// XDPObjectFile is the expected compiled XDP object filename.
 	XDPObjectFile = "xdp_probe.o"
-	TCObjectFile  = "tc_probe.o"
+	// TCObjectFile is the expected compiled traffic-control object filename.
+	TCObjectFile = "tc_probe.o"
 
-	ManifestSchema  = "phragma.ebpf.ol9.attach-drill.v1"
+	// ManifestSchema identifies the attach-drill evidence manifest format.
+	ManifestSchema = "phragma.ebpf.ol9.attach-drill.v1"
+	// ActiveDataplane names the production dataplane that the drill does not replace.
 	ActiveDataplane = "nftables/conntrack"
 
+	// XDPProbeSource is the pass-through XDP program used by the attach drill.
 	XDPProbeSource = `#include <linux/bpf.h>
 #define SEC(NAME) __attribute__((section(NAME), used))
 SEC("xdp")
@@ -32,6 +39,7 @@ int xdp_probe(struct xdp_md *ctx) {
 char _license[] SEC("license") = "GPL";
 `
 
+	// TCProbeSource is the pass-through traffic-control program used by the attach drill.
 	TCProbeSource = `#include <linux/bpf.h>
 #include <linux/pkt_cls.h>
 #define SEC(NAME) __attribute__((section(NAME), used))
@@ -43,11 +51,13 @@ char _license[] SEC("license") = "GPL";
 `
 )
 
+// ProbePaths contains the generated probe source paths.
 type ProbePaths struct {
 	XDPSource string
 	TCSource  string
 }
 
+// ManifestOptions identifies the drill interface and source and object artifacts.
 type ManifestOptions struct {
 	Interface     string
 	XDPSourcePath string
@@ -56,6 +66,7 @@ type ManifestOptions struct {
 	TCObjectPath  string
 }
 
+// WriteProbeSources writes the first-party pass-through probes into buildDir.
 func WriteProbeSources(buildDir string) (ProbePaths, error) {
 	buildDir = strings.TrimSpace(buildDir)
 	if buildDir == "" {
@@ -77,6 +88,7 @@ func WriteProbeSources(buildDir string) (ProbePaths, error) {
 	return paths, nil
 }
 
+// DefaultManifestOptions derives the standard drill artifact paths for buildDir.
 func DefaultManifestOptions(buildDir, iface string) ManifestOptions {
 	return ManifestOptions{
 		Interface:     iface,
@@ -87,6 +99,7 @@ func DefaultManifestOptions(buildDir, iface string) ManifestOptions {
 	}
 }
 
+// Manifest renders a custody manifest after hashing all drill artifacts.
 func Manifest(opts ManifestOptions) (string, error) {
 	if strings.TrimSpace(opts.Interface) == "" {
 		return "", fmt.Errorf("interface is required")
@@ -137,6 +150,7 @@ active_dataplane=%s
 	), nil
 }
 
+// WriteManifest renders and writes the attach-drill custody manifest.
 func WriteManifest(path string, opts ManifestOptions) error {
 	path = strings.TrimSpace(path)
 	if path == "" {
@@ -155,12 +169,16 @@ func WriteManifest(path string, opts ManifestOptions) error {
 	return nil
 }
 
-func sha256File(path string) (string, error) {
+func sha256File(path string) (digest string, err error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer func() {
+		if closeErr := f.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+	}()
 	h := sha256.New()
 	if _, err := io.Copy(h, f); err != nil {
 		return "", err

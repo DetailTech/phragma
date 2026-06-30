@@ -478,11 +478,9 @@ func TestReplayThreatEvidenceUsesRecentAlertsAndReportsDegradedEngine(t *testing
 type fakeThreatReplayAlertSource struct {
 	resp *openngfwv1.ListAlertsResponse
 	err  error
-	req  *openngfwv1.ListAlertsRequest
 }
 
-func (f fakeThreatReplayAlertSource) ListAlerts(_ context.Context, req *openngfwv1.ListAlertsRequest) (*openngfwv1.ListAlertsResponse, error) {
-	f.req = req
+func (f fakeThreatReplayAlertSource) ListAlerts(_ context.Context, _ *openngfwv1.ListAlertsRequest) (*openngfwv1.ListAlertsResponse, error) {
 	if f.err != nil {
 		return nil, f.err
 	}

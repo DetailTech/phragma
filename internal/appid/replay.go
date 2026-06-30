@@ -11,10 +11,14 @@ import (
 type ReplayVerdict string
 
 const (
-	ReplayVerdictMatch            ReplayVerdict = "match"
-	ReplayVerdictMismatch         ReplayVerdict = "mismatch"
+	// ReplayVerdictMatch means the observed and expected App-IDs agree.
+	ReplayVerdictMatch ReplayVerdict = "match"
+	// ReplayVerdictMismatch means the bounded evidence does not satisfy the expected App-ID.
+	ReplayVerdictMismatch ReplayVerdict = "mismatch"
+	// ReplayVerdictNeedsExpectedApp means comparison requires a reviewed expected App-ID.
 	ReplayVerdictNeedsExpectedApp ReplayVerdict = "needs_expected_app"
-	ReplayVerdictNeedsEvidence    ReplayVerdict = "needs_evidence"
+	// ReplayVerdictNeedsEvidence means replay did not produce an observed App-ID.
+	ReplayVerdictNeedsEvidence ReplayVerdict = "needs_evidence"
 )
 
 // ReplayInput is a normalized observation or corpus row submitted for

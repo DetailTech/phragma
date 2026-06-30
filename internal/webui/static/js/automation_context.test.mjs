@@ -131,6 +131,10 @@ assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl whoami"));
 assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl status # routing-vpn"));
 assert.ok(dashboard.cli.some((item) => item.command === "ngfwctl policy status --json"));
 
+const performance = contextForPath("/performance");
+assert.ok(performance.cli.some((item) => item.command === "sudo nft list table inet openngfw > nft-openngfw-final.txt"));
+assert.ok(!performance.cli.some((item) => /packet-filter/.test(item.command)));
+
 const trafficSessionKey = "ct1%7Cipv4%7Ctcp%7C10.0.1.20%7C51515%7C203.0.113.20%7C443%7C203.0.113.20%7C443%7C10.0.1.20%7C51515";
 const trafficSessions = contextForPath(`#/traffic?mode=sessions&ip=10.0.1.20&protocol=TCP&sessionState=ESTABLISHED&limit=100&sessionSort=packets&sessionKey=${trafficSessionKey}`);
 assert.equal(trafficSessions.routeState.hash, `#/traffic?mode=sessions&ip=10.0.1.20&protocol=TCP&sessionState=ESTABLISHED&limit=100&sessionSort=packets&sessionKey=${trafficSessionKey}`);

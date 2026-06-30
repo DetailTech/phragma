@@ -808,7 +808,7 @@ func synthesizeInvestigationCase(record investigationCaseRecord) investigationSy
 		}
 		flow := investigationSynthesisFlowFromGroup(key, group)
 		flows = append(flows, flow)
-		for _, action := range investigationSynthesisActionsForFlow(flow, group) {
+		for _, action := range investigationSynthesisActionsForFlow(flow) {
 			if _, ok := actionsByKey[action.ID+"|"+action.Href]; ok {
 				continue
 			}
@@ -1007,7 +1007,7 @@ func investigationEvidenceCandidateHint(evidence investigationEvidence) string {
 	return ""
 }
 
-func investigationSynthesisActionsForFlow(flow investigationSynthesisFlow, group []investigationEvidence) []investigationSynthesisAction {
+func investigationSynthesisActionsForFlow(flow investigationSynthesisFlow) []investigationSynthesisAction {
 	out := []investigationSynthesisAction{}
 	if len(flow.OwnerRoutes) > 0 {
 		out = append(out, investigationSynthesisAction{

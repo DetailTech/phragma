@@ -282,7 +282,7 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
   assert.ok(posture.blockers.includes("production evidence"));
   assert.equal(posture.rolloutReview.cls, "bad");
   assert.equal(inventory.status, "missing");
-  assert.equal(inventory.rows[0].status, "missing");
+  assert.equal(inventory.rows[0].status, "production-ready");
   assert.equal(inventory.rows[1].status, "missing");
   assert.equal(inventory.rows[2].status, "missing");
   assert.match(posture.rolloutReview.detail, /package gate/);
@@ -295,16 +295,16 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
   assert.equal(posture.surfaces[0].regressionStatus, "passed");
   assert.equal(posture.surfaces[0].rolloutState, "stable");
   assert.deepEqual(posture.surfaces[0].blockers, []);
-  assert.equal(posture.surfaces[0].decision.cls, "warn");
+  assert.equal(posture.surfaces[0].decision.cls, "ok");
   assert.equal(posture.surfaces[0].decision.checks.find((check) => check.key === "signature").cls, "ok");
-  assert.equal(posture.surfaces[0].decision.checks.find((check) => check.key === "production-evidence").status, "not exposed");
-  assert.equal(posture.surfaces[0].decision.checks.find((check) => check.key === "production-evidence").cls, "warn");
+  assert.equal(posture.surfaces[0].decision.checks.find((check) => check.key === "production-evidence").status, "production-ready");
+  assert.equal(posture.surfaces[0].decision.checks.find((check) => check.key === "production-evidence").cls, "ok");
   assert.ok(posture.surfaces[0].evidence.includes("signature:verified"));
   assert.ok(posture.surfaces[0].evidence.includes("rollback-backup:yes"));
-  assert.ok(!posture.surfaces[0].evidence.includes("content-readiness:production-ready"));
+  assert.ok(posture.surfaces[0].evidence.includes("content-readiness:production-ready"));
   assert.ok(posture.surfaces[0].fields.some((field) => field.label === "Provenance" && field.value.includes("Apache-2.0")));
   assert.ok(posture.surfaces[0].fields.some((field) => field.label === "Rollback" && field.value === "verified backup" && field.cls === "ok"));
-  assert.ok(!posture.surfaces[0].fields.some((field) => field.label === "Production evidence"));
+  assert.ok(posture.surfaces[0].fields.some((field) => field.label === "Production evidence" && field.value === "production-ready (2 artifacts)" && field.cls === "ok"));
   assert.equal(posture.surfaces[0].provenance.length, 2);
   assert.equal(posture.surfaces[1].fields.find((field) => field.label === "Signature").cls, "warn");
   assert.equal(posture.surfaces[1].fields.find((field) => field.label === "Rollback").value, "missing");
@@ -431,6 +431,8 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
   assert.equal(workbench.metrics.rollback, "verified backup");
   assert.equal(workbench.scopes[0].name, "branch-east");
   assert.equal(workbench.scopes[0].exposure, "10%");
+  assert.equal(workbench.scopes[1].name, "dmz-observe");
+  assert.ok(workbench.telemetry.signals.some((signal) => signal.label === "New FP reports" && signal.count === "0" && signal.cls === "ok"));
   assert.ok(workbench.telemetry.signals.some((signal) => signal.label === "False-positive regression evidence" && signal.cls === "ok"));
   assert.match(workbench.boundary, /Browser-local review only/);
 }
@@ -821,7 +823,7 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
     },
   }]);
   const surface = posture.surfaces.find((item) => item.kind === "app-id");
-  assert.equal(surface.keyContentReadinessEvidence.appRegressionCorpus.artifact, "evidence/app-regression.json");
+  assert.equal(surface.keyContentEvidence.appRegressionCorpus.artifact, "evidence/app-regression.json");
   assert.ok(surface.evidence.includes("app-regression-corpus:evidence/app-regression.json"));
   assert.ok(surface.fields.some((field) => field.label === "App-ID regression" && field.value.includes("sha256:")));
 }
@@ -853,9 +855,9 @@ const intelViewSource = readFileSync(new URL("./views/intel.js", import.meta.url
     },
   }]);
   const surface = posture.surfaces.find((item) => item.kind === "threat-id");
-  assert.equal(surface.contentReadinessEvidence.length, 2);
-  assert.equal(surface.keyContentReadinessEvidence.pcapRegressionCorpus.artifact, "evidence/pcap-regression.json");
-  assert.equal(surface.keyContentReadinessEvidence.falsePositiveRegression.sha256Short, "e".repeat(12));
+  assert.equal(surface.contentEvidence.length, 2);
+  assert.equal(surface.keyContentEvidence.pcapRegressionCorpus.artifact, "evidence/pcap-regression.json");
+  assert.equal(surface.keyContentEvidence.falsePositiveRegression.sha256Short, "e".repeat(12));
   assert.ok(surface.evidence.includes("pcap-regression-corpus:evidence/pcap-regression.json"));
   assert.ok(surface.fields.some((field) => field.label === "PCAP regression" && field.value.includes("sha256:")));
   assert.ok(surface.fields.some((field) => field.label === "False-positive regression" && field.value.includes("evidence/fp-regression.json")));

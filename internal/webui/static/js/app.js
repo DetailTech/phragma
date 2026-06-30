@@ -12,6 +12,7 @@ import { openDiagnosticConsole } from "./diagnostic_console.js";
 import { normalizePolicyDiffLines, policyDiffLabels, renderDiffLines } from "./diff_view.js";
 import { applyNetworkProfileToPolicy } from "./network_profiles.js";
 import { session, diffLines, changeImpact, normalizeServerImpact } from "./policy.js";
+import { legacyReadinessOwnerHash } from "./readiness_model.js";
 import { toast, openDrawer, closeDrawer, confirmDialog, pill, handleFocusTrap } from "./ui.js";
 import { renderValidationEvidence } from "./validation_view.js";
 
@@ -116,6 +117,17 @@ const router = new Router();
 let currentRoute = null;
 let routeRenderToken = 0;
 NAV.forEach((n) => router.add(n.path, n));
+router.add("/readiness", {
+  path: "/readiness",
+  title: "System status",
+  view: {
+    render: ({ query = {} } = {}) => {
+      const target = legacyReadinessOwnerHash(query);
+      location.replace(target);
+      return h("div", { class: "loading" }, "Opening the owning system workspace…");
+    },
+  },
+});
 
 async function renderRoute(r) {
   if (!r) {

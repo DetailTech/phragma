@@ -1170,9 +1170,6 @@ func printReleaseAcceptanceStatus(cmd *cobra.Command, resp *openngfwv1.GetReleas
 		if dirty := recordability.GetDirtySourcePaths(); len(dirty) > 0 {
 			cmd.Printf("    dirty paths:   %s\n", releaseStatusDisplayValue(strings.Join(dirty, ", ")))
 		}
-		if recordability.GetTruncatedDirtySourceCount() > 0 {
-			cmd.Printf("    dirty paths:   +%d truncated\n", recordability.GetTruncatedDirtySourceCount())
-		}
 		if allowed := recordability.GetAllowedDirtyPaths(); len(allowed) > 0 {
 			cmd.Printf("    allowed dirty: %s\n", releaseStatusDisplayValue(strings.Join(allowed, ", ")))
 		}
@@ -1245,7 +1242,7 @@ func printProtoVerifyAcceptanceNote(cmd *cobra.Command, recordability *openngfwv
 		cmd.Println("      source:      acceptance unknown; proto-verify release evidence also requires the atomic API contract tree to be accepted in source control")
 		return
 	}
-	dirtyCount := len(recordability.GetDirtySourcePaths()) + int(recordability.GetTruncatedDirtySourceCount())
+	dirtyCount := len(recordability.GetDirtySourcePaths())
 	problemCount := len(recordability.GetProblems())
 	blocked := !recordability.GetReady() || dirtyCount > 0 || problemCount > 0
 	if blocked {

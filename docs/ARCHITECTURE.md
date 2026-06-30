@@ -261,6 +261,13 @@ TLS/auth state, rate-limit settings, REST body/header caps, gRPC message caps,
 and HTTP timeout values. These fields are operator posture, not policy state;
 Readiness and automation use them to flag disabled guardrails before the
 management plane is exposed beyond a trusted network.
+An explicitly acknowledged public generated self-signed listener is an
+accepted, startup-logged test-only posture and does not by itself make runtime
+status degraded or critical. It remains authenticated, SAN/trust-limited, and
+non-production; the shipped service remains loopback-only. See
+[`ADR-0019`](adr/ADR-0019-public-generated-tls-runtime-classification.md),
+which supersedes only the runtime-classification portion of
+[`ADR-0018`](adr/ADR-0018-management-tls-trust-posture.md).
 
 Version history and audit entries persist actor name, actor role, and auth
 source. Older records may only contain actor names, but new privileged actions

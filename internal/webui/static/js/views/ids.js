@@ -99,7 +99,7 @@ function inspectionWorkspace({ status = {}, packageSummary = null, contentError 
 function degradedEngineEvidenceCard(model = {}) {
   const rows = Array.isArray(model.rows) ? model.rows : [];
   return card(h("h2", {}, "Degraded engine evidence", h("span", { class: "spacer" }), pill(model.label || model.state || "unknown", model.cls || "neutral", true)),
-    h("div", { class: "note" }, model.detail || "Runtime engine evidence is unavailable."),
+    h("div", { class: "note inspection-engine-evidence-detail" }, model.detail || "Runtime engine evidence is unavailable."),
     h("div", { class: "alert-box " + ((model.cls === "bad" || model.cls === "warn") ? model.cls : "info") },
       h("strong", {}, "Threat-ID impact"),
       h("div", { class: "note" }, (model.impact || []).slice(0, 3).join(" "))),
@@ -180,7 +180,7 @@ function inspectionRuntimeCard(posture = {}, status = {}) {
   const engines = Array.isArray(status.engines) ? status.engines : [];
   const idsIps = engines.find((engine) => /ids-ips|suricata/i.test(engine.name || engine.role || engine.detail || "")) || engines[0] || null;
   return card(h("h2", {}, "Runtime posture", h("span", { class: "spacer" }), pill(posture.label, posture.cls, true)),
-    h("div", { class: "note" }, posture.detail),
+    h("div", { class: "note inspection-runtime-detail" }, posture.detail),
     h("dl", { class: "kv compact" },
       kv("Engine", posture.engineLabel || "inspection engine unavailable"),
       kv("Inspection state", posture.inspectionState || "unknown"),

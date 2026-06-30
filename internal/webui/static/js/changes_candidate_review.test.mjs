@@ -85,6 +85,9 @@ assert.match(changesSource, /function runtimePreflightActionRow/);
 assert.doesNotMatch(changesSource, /Open this runtime blocker in Readiness/);
 assert.match(changesSource, /runtimePreflightActionRow\(it, "candidate"\)/);
 assert.match(changesSource, /runtimePreflightActionRow\(it, "rollback"\)/);
+assert.match(changesSource, /api\.runtimeReadinessPreflight\(\{ targetPolicy: session\.draft, runningPolicy: session\.running, operation: "commit" \}\)/);
+assert.match(changesSource, /api\.runtimeReadinessPreflight\(\{ targetPolicy: target, runningPolicy: session\.running, operation: "rollback" \}\)/);
+assert.doesNotMatch(changesSource, /api\.runtimePreflight\(/);
 assert.match(changesSource, /commitRuntimePreflight\(\{/);
 assert.match(candidateReviewSource, /Rollback re-applies/);
 assert.match(candidateReviewSource, /candidate will be cleared/);
@@ -397,7 +400,7 @@ assert.equal(normalizeChangesTab("invalid"), "candidate");
       cls: "warn",
       detail: "runtime warning /tmp/secret",
       requiresAck: true,
-      items: [{ level: "medium", badge: "runtime", title: "FRR reload", detail: "BGP may flap password=abc123", href: "#/readiness?action=frr" }],
+      items: [{ level: "medium", badge: "runtime", title: "FRR reload", detail: "BGP may flap password=abc123", href: "#/netvpn" }],
     },
     impact: { level: "high", items: [{ level: "high", title: "Rollback impact", detail: "policy replacement /var/lib/openngfw/state" }] },
     diff: { source: "api", changed: true, fromLabel: "running policy", toLabel: "version 3", lines: [{ text: "+ allow-web" }, { text: "+ file /Users/alice/private api_key=abc123" }] },

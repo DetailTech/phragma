@@ -496,7 +496,14 @@ func TestWebUIEnterpriseSmokeReleaseGateModel(t *testing.T) {
 			t.Fatalf("%s accepted unapproved command %#v", WebUIEnterpriseSmokeCheckName, command)
 		}
 	}
-	stdout := strings.Join(RequiredStdoutFragments(WebUIEnterpriseSmokeCheckName), "\n") + "\n"
+	fragments := strings.Join(RequiredStdoutFragments(WebUIEnterpriseSmokeCheckName), "\n")
+	if !strings.Contains(fragments, "route_coverage=19/19") {
+		t.Fatalf("required stdout fragments do not enforce the 19-route canonical sweep: %q", fragments)
+	}
+	if strings.Contains(fragments, "route_coverage=20/20") {
+		t.Fatalf("required stdout fragments still enforce the retired 20-route sweep: %q", fragments)
+	}
+	stdout := fragments + "\n"
 	if problems := ValidateEvidenceStdout(WebUIEnterpriseSmokeCheckName, stdout); len(problems) != 0 {
 		t.Fatalf("ValidateEvidenceStdout() problems = %v, want none", problems)
 	}

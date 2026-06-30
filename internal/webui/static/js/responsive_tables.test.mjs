@@ -81,6 +81,9 @@ for (const label of ["Threat-ID", "Reason", "Scope object", "Evidence", "Policy 
 assert.match(ids, /\{ className: "inspection-coverage-table" \}/);
 assert.match(ids, /\{ className: "inspection-exception-table" \}/);
 assert.match(ids, /\{ className: "ids-exception-table" \}/);
+assert.match(ids, /class: "note inspection-runtime-detail" \}, posture\.detail/);
+assert.match(ids, /class: "note inspection-engine-evidence-detail" \}, model\.detail/);
+assert.match(css, /\.card > \.note\.inspection-runtime-detail,\n\.card > \.note\.inspection-engine-evidence-detail,\n\.card > \.note\.settings-access-browser-sso-note \{[\s\S]*?white-space: normal;[\s\S]*?overflow: visible;[\s\S]*?-webkit-line-clamp: unset;[\s\S]*?\n\}/);
 assert.match(ids, /responsiveTable\(\["Coverage", "Rules", "Examples", "Operator action"\]/);
 assert.match(ids, /responsiveTable\(\["Threat-ID", "Scope", "Reason", "Evidence", "Policy state"\]/);
 for (const label of ["Coverage", "Rules", "Examples", "Operator action", "Scope"]) {
@@ -261,7 +264,7 @@ assert.doesNotMatch(intel, /style: \{ maxWidth: "120px" \}/);
 assert.doesNotMatch(intel, /style: \{ maxWidth: "340px", marginTop: "14px" \}/);
 assert.doesNotMatch(intel, /style: \{ textAlign: "right" \}/);
 
-assert.match(dashboard, /responsiveTable\(\[\s*\{ label: "Engine", attrs: \{ class: "dashboard-engine-name-col" \} \}/);
+assert.match(dashboard, /responsiveTable\(\[\s*\{ label: "Capability", attrs: \{ class: "dashboard-engine-name-col" \} \}/);
 assert.match(dashboard, /\{ label: "Threat", attrs: \{ class: "dashboard-threat-name-col" \} \}/);
 assert.match(dashboard, /\{ label: "Comment", attrs: \{ class: "dashboard-version-comment-col" \} \}/);
 assert.match(dashboard, /\{ className: "dashboard-engine-table" \}/);
@@ -270,10 +273,10 @@ assert.match(dashboard, /\{ className: "dashboard-version-table" \}/);
 assert.match(dashboard, /dataset: \{ dashboardEngine: e\.name \|\| "engine" \}/);
 assert.match(dashboard, /dataset: \{ dashboardThreat: alert \|\| summary\.label \|\| "threat" \}/);
 assert.match(dashboard, /dataset: \{ dashboardVersion: String\(v\.id \|\| ""\) \}/);
-assert.match(dashboard, /labeledCell\("Engine", \{ class: "mono data-clip" \}/);
+assert.match(dashboard, /labeledCell\("Capability", \{ class: "data-clip" \}/);
 assert.match(dashboard, /labeledCell\("Source", \{ class: "mono muted data-clip" \}/);
 assert.match(dashboard, /labeledCell\("Actor", \{ class: "muted data-clip" \}/);
-for (const label of ["Engine", "State", "Detail", "Severity", "Threat", "Source", "Time", "Version", "Comment", "Actor"]) {
+for (const label of ["Capability", "State", "Detail", "Open", "Severity", "Threat", "Source", "Time", "Version", "Comment", "Actor"]) {
   assert.match(dashboard, new RegExp(`labeledCell\\("${label}"`));
 }
 assert.doesNotMatch(dashboard, /engines\.length \? h\("table", \{\}/);

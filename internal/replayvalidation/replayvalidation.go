@@ -1,3 +1,5 @@
+// Package replayvalidation validates replay runbooks and builds bounded,
+// non-executing replay plans for callers to review.
 package replayvalidation
 
 import (
@@ -10,6 +12,7 @@ import (
 	"time"
 )
 
+// SchemaVersion identifies the replay-validation report contract.
 const (
 	SchemaVersion    = "phragma.automation.replay-validation.v1"
 	PlanSchema       = "phragma.automation.replay-execution-plan.v1"
@@ -28,6 +31,7 @@ var (
 	unsafeMethodSet = map[string]bool{"POST": true, "PUT": true, "PATCH": true, "DELETE": true}
 )
 
+// Request contains replay input and the safety constraints used to validate it.
 type Request struct {
 	SchemaVersion             string          `json:"schemaVersion,omitempty"`
 	Runbook                   string          `json:"runbook,omitempty"`
@@ -41,6 +45,7 @@ type Request struct {
 	AllowUnknownReadOnlySteps bool            `json:"allowUnknownReadOnlySteps,omitempty"`
 }
 
+// InputStep is one requested replay action in structured or command form.
 type InputStep struct {
 	ID      string          `json:"id,omitempty"`
 	Title   string          `json:"title,omitempty"`
@@ -53,6 +58,7 @@ type InputStep struct {
 	Curl    string          `json:"curl,omitempty"`
 }
 
+// State describes the policy state against which replay input is validated.
 type State struct {
 	RunningVersion     uint64 `json:"runningVersion"`
 	HasCandidate       bool   `json:"hasCandidate"`
@@ -63,6 +69,7 @@ type State struct {
 	CurrentStateLoaded bool   `json:"currentStateLoaded"`
 }
 
+// Report contains normalized steps, safety findings, and the execution plan.
 type Report struct {
 	SchemaVersion   string   `json:"schemaVersion"`
 	ValidatedAt     string   `json:"validatedAt"`
@@ -77,6 +84,7 @@ type Report struct {
 	Hardening       []string `json:"hardening"`
 }
 
+// Summary contains aggregate replay-validation counts and the final decision.
 type Summary struct {
 	StepCount                   int  `json:"stepCount"`
 	ExecutableStepCount         int  `json:"executableStepCount"`
@@ -90,6 +98,7 @@ type Summary struct {
 	ReplayAllowed               bool `json:"replayAllowed"`
 }
 
+// Plan describes the bounded actions that validation determined are eligible.
 type Plan struct {
 	SchemaVersion      string     `json:"schemaVersion"`
 	Mode               string     `json:"mode"`
@@ -106,6 +115,7 @@ type Plan struct {
 	Boundaries         []string   `json:"boundaries"`
 }
 
+// PlanStep describes the authority and eligibility of one normalized step.
 type PlanStep struct {
 	StepIndex int      `json:"stepIndex"`
 	Action    string   `json:"action"`
@@ -116,6 +126,7 @@ type PlanStep struct {
 	Required  []string `json:"required,omitempty"`
 }
 
+// Result records the outcome of a caller-managed bounded replay execution.
 type Result struct {
 	SchemaVersion string       `json:"schemaVersion"`
 	Mode          string       `json:"mode"`
@@ -127,6 +138,7 @@ type Result struct {
 	Boundaries    []string     `json:"boundaries"`
 }
 
+// StepResult records the outcome and audit context for one executed step.
 type StepResult struct {
 	StepIndex               int    `json:"stepIndex"`
 	Action                  string `json:"action"`
@@ -138,6 +150,7 @@ type StepResult struct {
 	Detail                  string `json:"detail,omitempty"`
 }
 
+// Step is the normalized representation of one replay action.
 type Step struct {
 	Index                int               `json:"index"`
 	ID                   string            `json:"id,omitempty"`
@@ -162,6 +175,7 @@ type Step struct {
 	Metadata             map[string]string `json:"metadata,omitempty"`
 }
 
+// Issue describes a replay-validation warning or error.
 type Issue struct {
 	StepIndex int    `json:"stepIndex,omitempty"`
 	Code      string `json:"code"`
@@ -169,6 +183,7 @@ type Issue struct {
 	Message   string `json:"message"`
 }
 
+// Validate normalizes replay input and returns its safety report and plan.
 func Validate(req Request, state State, now time.Time) Report {
 	if now.IsZero() {
 		now = time.Now().UTC()
@@ -570,7 +585,7 @@ func validateStep(step Step, state State, requireAcks, requireRevision, allowUnk
 			step.Kind = "system-mutation"
 		}
 	}
-	if !step.KnownRoute && !(allowUnknownReadOnly && step.ReadOnly) {
+	if !step.KnownRoute && (!allowUnknownReadOnly || !step.ReadOnly) {
 		step.Warnings = append(step.Warnings, "unknown route is not part of the bounded replay safety table")
 	}
 	if step.WouldMutate {
@@ -834,10 +849,10 @@ func firstNonEmpty(values ...string) string {
 	return ""
 }
 
-func truncate(value string, max int) string {
+func truncate(value string, maxLength int) string {
 	value = strings.TrimSpace(value)
-	if len(value) <= max {
+	if len(value) <= maxLength {
 		return value
 	}
-	return value[:max]
+	return value[:maxLength]
 }

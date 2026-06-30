@@ -100,6 +100,7 @@ func main() {
 	tlsEnabled := flag.Bool("tls", true, "serve the REST gateway/WebUI over HTTPS (self-signed cert generated under <data-dir>/tls if no cert/key given)")
 	tlsCert := flag.String("tls-cert", "", "PEM certificate for the REST gateway (enables operator-provided TLS instead of self-signed)")
 	tlsKey := flag.String("tls-key", "", "PEM private key for the REST gateway")
+	allowPublicSelfSignedTLS := flag.Bool("allow-public-self-signed-tls", false, "allow generated self-signed TLS on a non-loopback REST/WebUI listener (temporary lab use only)")
 	rateLimitRPM := flag.Int("rate-limit-rpm", 600, "per-client request rate limit for REST API/OIDC and direct gRPC; embedded WebUI static assets are not counted; 0 disables")
 	rateLimitBurst := flag.Int("rate-limit-burst", 120, "per-client burst allowed by --rate-limit-rpm")
 	rateLimitMaxClients := flag.Int("rate-limit-max-clients", defaultRateLimitMaxClients, "maximum client identities tracked by the REST API/OIDC and direct gRPC rate limiter")
@@ -133,7 +134,7 @@ func main() {
 		oidcIssuer: *oidcIssuer, oidcClientID: *oidcClientID, oidcClientSecretFile: *oidcClientSecretFile,
 		oidcRedirectURL: *oidcRedirectURL, oidcRoleClaim: *oidcRoleClaim, oidcDefaultRole: *oidcDefaultRole, oidcScopes: *oidcScopes,
 		dryRun: *dryRun, allowUnauthenticatedLocal: *allowUnauthenticatedLocal,
-		tlsEnabled: *tlsEnabled, tlsCert: *tlsCert, tlsKey: *tlsKey,
+		tlsEnabled: *tlsEnabled, tlsCert: *tlsCert, tlsKey: *tlsKey, allowPublicSelfSignedTLS: *allowPublicSelfSignedTLS,
 		rateLimitRPM: *rateLimitRPM, rateLimitBurst: *rateLimitBurst, rateLimitMaxClients: *rateLimitMaxClients, trustedProxyCIDRs: *trustedProxyCIDRs,
 		httpMaxBodyBytes: *httpMaxBodyBytes, httpMaxHeaderBytes: *httpMaxHeaderBytes,
 		httpReadHeaderTimeout: *httpReadHeaderTimeout, httpReadTimeout: *httpReadTimeout,
@@ -189,6 +190,7 @@ type config struct {
 	allowUnauthenticatedLocal   bool
 	tlsEnabled                  bool
 	tlsCert, tlsKey             string
+	allowPublicSelfSignedTLS    bool
 	rateLimitRPM                int
 	rateLimitBurst              int
 	rateLimitMaxClients         int
@@ -629,11 +631,7 @@ func run(cfg config) error {
 			if err != nil {
 				return fmt.Errorf("tls material: %w", err)
 			}
-			if selfSigned {
-				slog.Info("serving WebUI/REST over HTTPS with a self-signed certificate (browsers will warn until you supply --tls-cert/--tls-key)", "cert", certFile)
-			} else {
-				slog.Info("serving WebUI/REST over HTTPS with operator-provided certificate", "cert", certFile)
-			}
+			logManagementTLSPosture(cfg, certFile, selfSigned)
 		} else {
 			slog.Warn("TLS is DISABLED (--tls=false): WebUI/REST is served as cleartext HTTP — do not expose off-host")
 		}
@@ -825,8 +823,26 @@ func validateManagementAuth(cfg config) error {
 	if !isLoopbackListenAddress(cfg.grpcListen) {
 		return fmt.Errorf("direct gRPC management listener requires loopback until gRPC TLS/mTLS is configured, got --listen %q", cfg.grpcListen)
 	}
-	if cfg.httpListen != "" && !cfg.tlsEnabled && !isLoopbackListenAddress(cfg.httpListen) {
-		return fmt.Errorf("--tls=false requires --http-listen to be loopback or empty, got %q", cfg.httpListen)
+	hasTLSCert := strings.TrimSpace(cfg.tlsCert) != ""
+	hasTLSKey := strings.TrimSpace(cfg.tlsKey) != ""
+	if hasTLSCert != hasTLSKey {
+		return errors.New("--tls-cert and --tls-key must be provided together")
+	}
+	if !cfg.tlsEnabled {
+		if cfg.allowPublicSelfSignedTLS {
+			return errors.New("--allow-public-self-signed-tls requires --tls=true")
+		}
+		if hasTLSCert {
+			return errors.New("--tls-cert and --tls-key require --tls=true")
+		}
+	}
+	if cfg.httpListen != "" && !isLoopbackListenAddress(cfg.httpListen) {
+		if !cfg.tlsEnabled {
+			return fmt.Errorf("--tls=false requires --http-listen to be loopback or empty, got %q", cfg.httpListen)
+		}
+		if !hasTLSCert && !cfg.allowPublicSelfSignedTLS {
+			return fmt.Errorf("non-loopback --http-listen requires operator-provided --tls-cert and --tls-key unless --allow-public-self-signed-tls is explicitly set for temporary lab use")
+		}
 	}
 	if oidcConfigured(cfg) {
 		if err := validateOIDCFlags(cfg); err != nil {
@@ -846,6 +862,30 @@ func validateManagementAuth(cfg config) error {
 		return fmt.Errorf("--allow-unauthenticated-local requires --http-listen to be loopback or empty, got %q", cfg.httpListen)
 	}
 	return nil
+}
+
+func usesPublicSelfSignedTLS(cfg config) bool {
+	return cfg.tlsEnabled && cfg.httpListen != "" && !isLoopbackListenAddress(cfg.httpListen) &&
+		strings.TrimSpace(cfg.tlsCert) == "" && strings.TrimSpace(cfg.tlsKey) == "" && cfg.allowPublicSelfSignedTLS
+}
+
+func logManagementTLSPosture(cfg config, certFile string, selfSigned bool) {
+	if selfSigned && usesPublicSelfSignedTLS(cfg) {
+		slog.Warn(
+			"serving a non-loopback WebUI/REST listener with generated self-signed TLS; explicitly accepted for temporary lab use",
+			"listen", cfg.httpListen,
+			"cert", certFile,
+			"trust", "generated-self-signed",
+			"operator_acknowledged", true,
+			"scope", "test-only",
+		)
+		return
+	}
+	if selfSigned {
+		slog.Info("serving WebUI/REST over HTTPS with a self-signed certificate (browsers will warn until you supply --tls-cert/--tls-key)", "cert", certFile)
+		return
+	}
+	slog.Info("serving WebUI/REST over HTTPS with operator-provided certificate", "cert", certFile)
 }
 
 func validateOIDCFlags(cfg config) error {

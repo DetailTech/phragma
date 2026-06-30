@@ -36,6 +36,9 @@ assertSource(appSource, /if \(renderToken !== routeRenderToken\) return;\n    mo
 assertSource(appSource, /if \(renderToken !== routeRenderToken\) return;\n    if \(isAuthError\(e\) \|\| isPermissionError\(e\)\)/, "stale route errors cannot overwrite current content");
 assertSource(appSource, /import \* as proxy from "\.\/views\/proxy\.js";/, "Proxy/WAF route module is imported");
 assertSource(appSource, /\{ path: "\/proxy", title: "Proxy \/ WAF", icon: "globe", view: proxy \}/, "Proxy/WAF route is registered");
+assertSource(appSource, /router\.add\("\/readiness"/, "retired Readiness route has a compatibility migration");
+assertSource(appSource, /legacyReadinessOwnerHash\(query\)/, "Readiness migration resolves the owning route");
+assertSource(appSource, /location\.replace\(target\)/, "Readiness migration replaces the legacy history entry");
 
 for (const action of ["retry-access-gate", "use-local-token", "oidc-sign-in"]) {
   assertControl(appSource, new RegExp(`"data-app-action": "${action}"`), `app action ${action}`);

@@ -2709,6 +2709,40 @@ func TestSystemStatusWarnsForDisabledManagementGuardrails(t *testing.T) {
 	}
 }
 
+func TestSystemStatusDoesNotDegradeAuthenticatedPublicTLSForCertificateTrust(t *testing.T) {
+	svc := &SystemService{Status: SystemStatusConfig{
+		StartedAt:             time.Now().UTC(),
+		HTTPListen:            "0.0.0.0:8080",
+		TLSEnabled:            true,
+		AuthEnabled:           true,
+		RateLimitRPM:          600,
+		RateLimitBurst:        120,
+		TrustedProxyCIDRs:     []string{"10.0.0.0/8"},
+		HTTPMaxBodyBytes:      10 << 20,
+		GRPCMaxRecvBytes:      16 << 20,
+		GRPCMaxSendBytes:      16 << 20,
+		HTTPReadHeaderTimeout: 10 * time.Second,
+		HTTPReadTimeout:       15 * time.Second,
+		HTTPWriteTimeout:      30 * time.Second,
+		HTTPIdleTimeout:       2 * time.Minute,
+	}}
+
+	resp, err := svc.GetStatus(context.Background(), &openngfwv1.GetStatusRequest{})
+	if err != nil {
+		t.Fatalf("GetStatus returned error: %v", err)
+	}
+	if got := capabilityState(resp.GetCapabilities(), "Management plane guardrails"); got != "ready" {
+		t.Fatalf("management guardrail capability = %q, want ready", got)
+	}
+	detail := capabilityDetail(resp.GetCapabilities(), "Management plane guardrails")
+	if strings.Contains(detail, "self-signed TLS") {
+		t.Fatalf("management guardrail detail = %q, should not classify certificate trust", detail)
+	}
+	if hasWarning(resp.GetWarnings(), "critical", "Public REST/WebUI listener uses generated self-signed TLS.") {
+		t.Fatalf("unexpected critical public self-signed TLS warning in %#v", resp.GetWarnings())
+	}
+}
+
 func TestSystemStatusAcceptsSecureOIDCCookiesBehindReverseProxy(t *testing.T) {
 	svc := &SystemService{Status: SystemStatusConfig{
 		StartedAt:             time.Now().UTC(),
@@ -4165,7 +4199,11 @@ func TestVerifyTelemetryExportSendsConfiguredTCPProof(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer ln.Close()
+	t.Cleanup(func() {
+		if err := ln.Close(); err != nil {
+			t.Errorf("close telemetry proof listener: %v", err)
+		}
+	})
 	received := make(chan string, 1)
 	go func() {
 		conn, err := ln.Accept()
@@ -4173,9 +4211,17 @@ func TestVerifyTelemetryExportSendsConfiguredTCPProof(t *testing.T) {
 			received <- err.Error()
 			return
 		}
-		defer conn.Close()
 		buf := make([]byte, 4096)
-		n, _ := conn.Read(buf)
+		n, readErr := conn.Read(buf)
+		closeErr := conn.Close()
+		if readErr != nil {
+			received <- fmt.Sprintf("read telemetry proof connection: %v", readErr)
+			return
+		}
+		if closeErr != nil {
+			received <- fmt.Sprintf("close telemetry proof connection: %v", closeErr)
+			return
+		}
 		received <- string(buf[:n])
 	}()
 

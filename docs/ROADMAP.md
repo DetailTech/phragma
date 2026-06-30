@@ -212,6 +212,50 @@ renderer/fallback while moving Phragma toward the product definition.
    Next keep validating desktop/tablet/mobile layout while finishing the broader
    keyboard/focus, artifact-currency, and interaction-regression hardening pass.
 
+## Product UX And Access Direction
+
+Status: Accepted direction; design and implementation pending.
+
+These decisions simplify the operator experience without weakening the
+underlying health, evidence, audit, or recovery contracts.
+
+1. **Replace the standalone customer-facing Readiness workbench with a concise
+   system state.** Remove `/readiness` from the primary navigation and
+   customer-facing route contract. Operators should see one persistent,
+   plain-language rollup—`Ready`, `Attention required`, or `Blocked`—with the
+   affected capability and next safe action. Keep detailed release evidence,
+   engine prerequisites, HA checks, host tuning, and field diagnostics behind
+   the relevant System, Settings, Audit/Compliance, Performance, or feature
+   page instead of repeating a deep readiness cockpit across the product.
+   Preserve machine-readable health/preflight detail for commit safety,
+   automation, support, and release tooling; this is a presentation and
+   information-architecture simplification, not removal of safety checks.
+   Deep links must resolve to the owning diagnostic panel rather than a hidden
+   duplicate page.
+2. **Make every supported UI action reproducible through the CLI and public
+   API.** Add a progressive-disclosure `View as CLI / API` affordance to
+   previews, confirmation steps, and completed actions. It should show the
+   exact `ngfwctl` command and REST/gRPC request represented by the current UI
+   state, including candidate/revision context, stable resource IDs, and
+   validation or dry-run options. Generated examples must be copyable,
+   shell-safe, redacted, and must never embed credentials. Treat feature parity
+   as a release contract: supported management behavior cannot be UI-only,
+   CLI-only, or hand-modeled differently in REST. Maintain one generated parity
+   inventory and executable conformance tests from the canonical
+   gRPC/OpenAPI contract. Document narrow exceptions such as browser identity
+   redirects or binary downloads rather than silently allowing drift.
+3. **Add a local initial-deployment and break-glass administrator.** The first
+   secure setup should create a named local administrator with an interactive
+   login instead of requiring an API token as the only bootstrap identity.
+   Ship no default password. Restrict enrollment to an explicit bootstrap
+   window and trusted local/console path, store credentials with a
+   password-specific KDF, require rotation/recovery controls, and audit
+   creation, login, use, reset, disablement, and recovery. Keep at least one
+   tested local recovery path when external OIDC/SAML is unavailable, while
+   applying last-admin guardrails, step-up for sensitive actions, rate limits,
+   session controls, and clear posture in Settings. API keys remain scoped
+   automation credentials rather than the primary human login mechanism.
+
 ## Core Eventual Scope
 
 Core eventual remains fully open source. It includes:

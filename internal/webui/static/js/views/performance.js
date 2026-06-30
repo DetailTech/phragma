@@ -3,6 +3,7 @@
 // controld.
 
 import { h, icon, clear } from "../core.js";
+import { api } from "../api.js";
 import { openAutomationContext } from "../automation_context.js";
 import { activeInvestigationServerCaseHref, appendInvestigationPacketToActiveServerCase, pinInvestigationPacket } from "../investigation_case.js";
 import { buildInvestigationPacket, investigationPacketFilename, investigationPacketJson, investigationPacketText } from "../investigation_packet.js";

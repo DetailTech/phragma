@@ -478,7 +478,8 @@ func splitCLIFlag(arg string) (prefix, name string, assigned *string, ok bool) {
 		return "", "", nil, false
 	}
 	for _, r := range before {
-		if !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_' || r == '-') {
+		validFlagCharacter := r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9' || r == '_' || r == '-'
+		if !validFlagCharacter {
 			return "", "", nil, false
 		}
 	}

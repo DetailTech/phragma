@@ -145,6 +145,72 @@ check_admin_token_not_stdout() {
   ' "$1"
 }
 
+write_controld_version_stub() {
+  local path="$1"
+  local commit="$2"
+  cat > "$path" <<EOF
+#!/usr/bin/env bash
+if [ "\${1:-}" = "--version" ]; then
+  printf '%s\n' 'Phragma test (commit ${commit})'
+  exit 0
+fi
+exit 2
+EOF
+  chmod 0755 "$path"
+}
+
+write_ngfwctl_version_stub() {
+  local path="$1"
+  local commit="$2"
+  cat > "$path" <<EOF
+#!/usr/bin/env bash
+if [ "\${1:-}" = "version" ]; then
+  printf '%s\n' 'ngfwctl Phragma test (commit ${commit})' >&2
+  exit 0
+fi
+exit 2
+EOF
+  chmod 0755 "$path"
+}
+
+check_prebuilt_binary_pair_commit() (
+  set -e
+
+  local pair_dir expected_commit stale_commit
+  pair_dir="$(mktemp -d "${TMPDIR:-/tmp}/openngfw-prebuilt-pair.XXXXXX")"
+  trap 'rm -rf -- "$pair_dir"' EXIT
+  expected_commit="0123456789abcdef0123456789abcdef01234567"
+  stale_commit="fedcba9876543210fedcba9876543210fedcba98"
+
+  write_controld_version_stub "$pair_dir/controld" "$expected_commit"
+  write_ngfwctl_version_stub "$pair_dir/ngfwctl" "$stale_commit"
+  if COMMIT="$expected_commit" BIN_DIR="$pair_dir" \
+      "$REPO_ROOT/deploy/install.sh" --check-prebuilt-binaries \
+      >"$pair_dir/stale-pair.out" 2>&1; then
+    echo "deploy/install.sh accepted a stale ngfwctl paired with a matching controld" >&2
+    return 1
+  fi
+  if ! grep -q '^status=failed$' "$pair_dir/stale-pair.out"; then
+    echo "deploy/install.sh did not report a failed stale-pair preflight" >&2
+    return 1
+  fi
+
+  write_ngfwctl_version_stub "$pair_dir/ngfwctl" "$expected_commit"
+  if ! COMMIT="$expected_commit" BIN_DIR="$pair_dir" \
+      "$REPO_ROOT/deploy/install.sh" --check-prebuilt-binaries \
+      >"$pair_dir/matching-pair.out" 2>&1; then
+    echo "deploy/install.sh rejected a prebuilt pair matching the expected commit" >&2
+    cat "$pair_dir/matching-pair.out" >&2
+    return 1
+  fi
+  if ! grep -q '^status=passed$' "$pair_dir/matching-pair.out"; then
+    echo "deploy/install.sh did not report a passing matching-pair preflight" >&2
+    return 1
+  fi
+
+  echo "prebuilt_binary_pair_commit_check=passed"
+)
+
 unit_setting_values() {
   local unit="$1"
   local key="$2"
@@ -273,6 +339,15 @@ check_static() {
     echo "deploy/install.sh must reject stale prebuilt binaries when COMMIT is provided" >&2
     failed=1
   fi
+  if ! grep -q '^if prebuilt_binary_pair_matches_commit; then$' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must gate prebuilt reuse on the complete binary pair" >&2
+    failed=1
+  fi
+  if ! grep -q 'make build BIN_DIR="\$BIN_SOURCE_DIR"' "$REPO_ROOT/deploy/install.sh"; then
+    echo "deploy/install.sh must rebuild both binaries into the selected binary directory" >&2
+    failed=1
+  fi
+  check_prebuilt_binary_pair_commit || failed=1
   if ! grep -q 'BIN_SOURCE_DIR="${BIN_DIR:-$REPO_ROOT/bin}"' "$REPO_ROOT/deploy/install.sh"; then
     echo "deploy/install.sh must honor BIN_DIR when release evidence redirects build output" >&2
     failed=1
@@ -439,15 +514,22 @@ require_installed_commit() {
     return 0
   fi
   local installed_version
+  local client_version
   local remote_version
   installed_version="$(/usr/local/bin/controld --version 2>&1)"
+  client_version="$(/usr/local/bin/ngfwctl version 2>&1)"
   remote_version="$(/usr/local/bin/ngfwctl --server "$GRPC_LISTEN" version --remote 2>&1)"
-  if ! printf '%s\n' "$installed_version" | grep -q "$COMMIT"; then
+  if ! printf '%s\n' "$installed_version" | grep -Fq -- "$COMMIT"; then
     echo "installed controld binary does not report expected commit $COMMIT" >&2
     printf '%s\n' "$installed_version" >&2
     exit 1
   fi
-  if ! printf '%s\n' "$remote_version" | grep -q "$COMMIT"; then
+  if ! printf '%s\n' "$client_version" | grep -Fq -- "$COMMIT"; then
+    echo "installed ngfwctl binary does not report expected commit $COMMIT" >&2
+    printf '%s\n' "$client_version" >&2
+    exit 1
+  fi
+  if ! printf '%s\n' "$remote_version" | grep '^controld ' | grep -Fq -- "$COMMIT"; then
     echo "running controld service does not report expected commit $COMMIT" >&2
     printf '%s\n' "$remote_version" >&2
     exit 1

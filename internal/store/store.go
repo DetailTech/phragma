@@ -1008,6 +1008,7 @@ func (s *Store) SaveComplianceReport(record ComplianceReportRecord) error {
 	})
 }
 
+// DeleteComplianceReport removes one retained compliance report by ID.
 func (s *Store) DeleteComplianceReport(id string) error {
 	id = strings.TrimSpace(id)
 	if id == "" {

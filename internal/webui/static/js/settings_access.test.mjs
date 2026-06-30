@@ -25,7 +25,10 @@ import {
 } from "./access_governance.js";
 
 const settingsViewSource = readFileSync(new URL("./views/settings.js", import.meta.url), "utf8");
+const appCSS = readFileSync(new URL("../css/app.css", import.meta.url), "utf8");
 const apiSource = readFileSync(new URL("./api.js", import.meta.url), "utf8");
+assert.match(settingsViewSource, /class: "note settings-access-browser-sso-note"/);
+assert.match(appCSS, /\.card > \.note\.settings-access-browser-sso-note \{[\s\S]*?overflow: visible;[\s\S]*?-webkit-line-clamp: unset;/);
 const {
   accessFieldEvidenceArtifactStatus,
   accessFieldEvidenceCertificationModel,

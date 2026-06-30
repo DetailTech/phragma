@@ -169,9 +169,9 @@ const aligned = buildFleetModel({
 assert.equal(aligned.nodes[0].roleLabel, "standalone");
 assert.equal(aligned.nodes[0].haLabel, "standalone");
 assert.ok(aligned.boundaries.some((item) => item.key === "ha-traffic" && item.title === "No HA traffic-control claim"));
-assert.equal(aligned.drift.label, "review");
+assert.equal(aligned.drift.label, "aligned");
 assert.equal(aligned.release.tone, "ok");
-assert.ok(!aligned.actions.some((item) => item.key === "monitor"));
+assert.ok(aligned.actions.some((item) => item.key === "monitor"));
 assert.ok(aligned.templates.some((item) => item.key === "edge-policy" && item.state === "aligned"));
 assert.ok(!aligned.evidence.some((item) => item.key === "release"));
 
@@ -372,8 +372,8 @@ const unknownRuntimePreview = orchestrationPreviewModel({
   content: { label: "ready", detail: "content packages ready", tone: "ok" },
 });
 assert.equal(unknownRuntimePreview.eligibleCount, 1);
-assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").reason.includes("runtime readiness needs positive evidence"));
-assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").missingEvidence.includes("runtime readiness needs positive evidence"));
+assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").reason.includes("system preflight needs positive evidence"));
+assert.ok(unknownRuntimePreview.nodes.find((node) => node.id === "fw-unknown").missingEvidence.includes("system preflight needs positive evidence"));
 
 const unsafeOrchestration = orchestrationPreviewModel({
   nodes: [{ id: "fw1", name: "fw1", roleLabel: "active", policyVersion: "v9", haTone: "ok", haLabel: "ready", runtimeTone: "ok", runtimeLabel: "healthy" }],
@@ -412,7 +412,7 @@ assert.equal(invalidWorkbench.changedAreas[0].key, "empty");
   assert.equal(evidence.ready, false);
   assert.ok(evidence.positiveEvidence.includes("running policy v12"));
   assert.ok(evidence.positiveEvidence.includes("runtime healthy"));
-  assert.ok(evidence.missingEvidence.includes("HA/readiness evidence needs review"));
+  assert.ok(evidence.missingEvidence.includes("HA evidence needs review"));
 
   const custody = localTemplateCustodyModel("browser-preview");
   assert.equal(custody.signed, false);

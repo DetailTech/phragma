@@ -934,7 +934,7 @@ func TestVerifyAcceptanceRejectsIncompleteDeployHardeningStdout(t *testing.T) {
 		check.Artifact,
 		"deploy-hardening",
 		[]string{"make", "deploy-hardening-check"},
-		"required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,systemd-sandbox,capability-bounds\nstatus=passed\n",
+		"required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,no-public-self-signed,systemd-sandbox,capability-bounds\nstatus=passed\n",
 	)
 	manifest := writeManifestJSON(t, dir, m)
 

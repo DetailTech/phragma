@@ -149,8 +149,94 @@ func TestValidateManagementAuth(t *testing.T) {
 			wantErr: "--tls=false requires --http-listen",
 		},
 		{
-			name: "tls remote rest allowed",
-			cfg:  config{usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080", tlsEnabled: true},
+			name: "public self signed opt in still requires tls",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: false, allowPublicSelfSignedTLS: true,
+			},
+			wantErr: "--allow-public-self-signed-tls requires --tls=true",
+		},
+		{
+			name: "loopback self signed opt in still requires tls",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "127.0.0.1:8080",
+				tlsEnabled: false, allowPublicSelfSignedTLS: true,
+			},
+			wantErr: "--allow-public-self-signed-tls requires --tls=true",
+		},
+		{
+			name: "operator certificate requires tls",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "127.0.0.1:8080",
+				tlsCert: "/etc/openngfw/tls/cert.pem", tlsKey: "/etc/openngfw/tls/key.pem",
+			},
+			wantErr: "--tls-cert and --tls-key require --tls=true",
+		},
+		{
+			name: "tls remote rest with operator certificate allowed",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, tlsCert: "/etc/openngfw/tls/cert.pem", tlsKey: "/etc/openngfw/tls/key.pem",
+			},
+		},
+		{
+			name: "tls remote rest allows generated self signed certificate with explicit opt in",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, allowPublicSelfSignedTLS: true,
+			},
+		},
+		{
+			name: "public self signed opt in does not bypass authentication",
+			cfg: config{
+				grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, allowPublicSelfSignedTLS: true,
+			},
+			wantErr: "API authentication is required",
+		},
+		{
+			name: "tls remote rest rejects generated self signed certificate",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080", tlsEnabled: true,
+			},
+			wantErr: "non-loopback --http-listen requires operator-provided --tls-cert and --tls-key",
+		},
+		{
+			name: "tls remote rest rejects partial operator certificate",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, tlsCert: "/etc/openngfw/tls/cert.pem",
+			},
+			wantErr: "--tls-cert and --tls-key must be provided together",
+		},
+		{
+			name: "tls remote rest opt in rejects certificate without key",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, tlsCert: "/etc/openngfw/tls/cert.pem", allowPublicSelfSignedTLS: true,
+			},
+			wantErr: "--tls-cert and --tls-key must be provided together",
+		},
+		{
+			name: "tls remote rest opt in rejects key without certificate",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "0.0.0.0:8080",
+				tlsEnabled: true, tlsKey: "/etc/openngfw/tls/key.pem", allowPublicSelfSignedTLS: true,
+			},
+			wantErr: "--tls-cert and --tls-key must be provided together",
+		},
+		{
+			name: "tls loopback rest allows generated self signed certificate",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "127.0.0.1:8080", tlsEnabled: true,
+			},
+		},
+		{
+			name: "tls loopback rest tolerates redundant public self signed opt in",
+			cfg: config{
+				usersFile: "/etc/openngfw/users.yaml", grpcListen: "127.0.0.1:9443", httpListen: "127.0.0.1:8080",
+				tlsEnabled: true, allowPublicSelfSignedTLS: true,
+			},
 		},
 		{
 			name:    "missing auth rejected by default",
@@ -210,6 +296,72 @@ func TestValidateManagementAuth(t *testing.T) {
 				t.Fatalf("validateManagementAuth() error = %v, want substring %q", err, tt.wantErr)
 			}
 		})
+	}
+}
+
+func TestUsesPublicSelfSignedTLS(t *testing.T) {
+	tests := []struct {
+		name string
+		cfg  config
+		want bool
+	}{
+		{
+			name: "explicit public generated certificate",
+			cfg:  config{httpListen: "0.0.0.0:8080", tlsEnabled: true, allowPublicSelfSignedTLS: true},
+			want: true,
+		},
+		{
+			name: "public operator certificate",
+			cfg: config{
+				httpListen: "0.0.0.0:8080", tlsEnabled: true, allowPublicSelfSignedTLS: true,
+				tlsCert: "/etc/openngfw/tls/cert.pem", tlsKey: "/etc/openngfw/tls/key.pem",
+			},
+		},
+		{
+			name: "loopback generated certificate",
+			cfg:  config{httpListen: "127.0.0.1:8080", tlsEnabled: true, allowPublicSelfSignedTLS: true},
+		},
+		{
+			name: "public tls disabled",
+			cfg:  config{httpListen: "0.0.0.0:8080", allowPublicSelfSignedTLS: true},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			if got := usesPublicSelfSignedTLS(test.cfg); got != test.want {
+				t.Fatalf("usesPublicSelfSignedTLS() = %t, want %t", got, test.want)
+			}
+		})
+	}
+}
+
+func TestLogManagementTLSPostureWarnsForExplicitPublicSelfSignedTLS(t *testing.T) {
+	var logs bytes.Buffer
+	previous := slog.Default()
+	slog.SetDefault(slog.New(slog.NewJSONHandler(&logs, nil)))
+	t.Cleanup(func() {
+		slog.SetDefault(previous)
+	})
+
+	logManagementTLSPosture(config{
+		httpListen: "0.0.0.0:8080", tlsEnabled: true, allowPublicSelfSignedTLS: true,
+	}, "/var/lib/openngfw/tls/cert.pem", true)
+
+	logBody := logs.String()
+	for _, want := range []string{
+		`"level":"WARN"`,
+		"non-loopback WebUI/REST listener with generated self-signed TLS",
+		"explicitly accepted for temporary lab use",
+		`"listen":"0.0.0.0:8080"`,
+		`"cert":"/var/lib/openngfw/tls/cert.pem"`,
+		`"trust":"generated-self-signed"`,
+		`"operator_acknowledged":true`,
+		`"scope":"test-only"`,
+	} {
+		if !strings.Contains(logBody, want) {
+			t.Fatalf("management TLS log = %s, want %q", logBody, want)
+		}
 	}
 }
 

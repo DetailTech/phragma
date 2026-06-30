@@ -1613,7 +1613,7 @@ func (s *SystemService) ProveNetworkPath(ctx context.Context, req *openngfwv1.Pr
 	resp.Mismatches = pathProofMismatches(req, resp.Route, resp.Vpn)
 	resp.Warnings = append(resp.Warnings, pathProofWarnings(req, resp.Route, resp.Vpn)...)
 	resp.CliHandoff, resp.ApiHandoff = networkPathProofHandoffs(req)
-	resp.State, resp.Detail = networkPathProofState(resp.Route, resp.Vpn, resp.Warnings)
+	resp.State, resp.Detail = networkPathProofState(resp.Route, resp.Warnings)
 	return resp, nil
 }
 
@@ -2194,7 +2194,7 @@ func networkPathShellQuote(value string) string {
 	return "'" + strings.ReplaceAll(value, "'", "'\\''") + "'"
 }
 
-func networkPathProofState(route *openngfwv1.NetworkPathRouteProof, vpn *openngfwv1.NetworkPathVpnProof, warnings []string) (string, string) {
+func networkPathProofState(route *openngfwv1.NetworkPathRouteProof, warnings []string) (string, string) {
 	if route.GetState() == "ready" && len(warnings) == 0 {
 		return "ready", "kernel route and requested passive VPN evidence are ready"
 	}
@@ -2540,9 +2540,13 @@ func writeTelemetryProofFile(cfg SystemStatusConfig, target string, event []byte
 	if err != nil {
 		return fmt.Errorf("open telemetry export file: %w", err)
 	}
-	defer f.Close()
-	if _, err := f.Write(event); err != nil {
-		return fmt.Errorf("append telemetry proof event: %w", err)
+	_, writeErr := f.Write(event)
+	closeErr := f.Close()
+	if writeErr != nil {
+		return fmt.Errorf("append telemetry proof event: %w", writeErr)
+	}
+	if closeErr != nil {
+		return fmt.Errorf("close telemetry export file: %w", closeErr)
 	}
 	return nil
 }
@@ -2562,10 +2566,14 @@ func sendTelemetryProofStream(ctx context.Context, exportType openngfwv1.Telemet
 	if err != nil {
 		return fmt.Errorf("send telemetry proof event to %s stream: %w", network, err)
 	}
-	defer conn.Close()
 	_ = conn.SetWriteDeadline(time.Now().Add(3 * time.Second))
-	if _, err := conn.Write(event); err != nil {
-		return fmt.Errorf("write telemetry proof event to %s stream: %w", network, err)
+	_, writeErr := conn.Write(event)
+	closeErr := conn.Close()
+	if writeErr != nil {
+		return fmt.Errorf("write telemetry proof event to %s stream: %w", network, writeErr)
+	}
+	if closeErr != nil {
+		return fmt.Errorf("close telemetry proof %s stream: %w", network, closeErr)
 	}
 	return nil
 }
@@ -3491,10 +3499,10 @@ func (s *SystemService) highAvailabilityTransportEvidenceStatus() *openngfwv1.Hi
 	if status.NeighborState == "" {
 		status.NeighborState = "unknown"
 	}
-	switch {
-	case claim == "linux_local_vip_route_promoted":
+	switch claim {
+	case "linux_local_vip_route_promoted":
 		status.State = "promoted"
-	case claim == "not_performed":
+	case "not_performed":
 		status.State = "not_performed"
 	default:
 		status.State = "degraded"
@@ -4247,7 +4255,7 @@ func (s *SystemService) RuntimeReadinessWarnings(ctx context.Context, target, ru
 		return nil, err
 	}
 	out := runtimeReadinessWarnings(resp, target, running)
-	if policyRequestsIDS(target) {
+	if policyRequestsThreatInspection(target) {
 		if warning := threatIDProductionReadinessWarning(s.Status); warning != "" {
 			out = append(out, warning)
 		}
@@ -4420,7 +4428,7 @@ func policyRequestsFlowOffload(p *openngfwv1.Policy) bool {
 	return p != nil && p.GetNetwork().GetEnableFlowOffload()
 }
 
-func policyRequestsIDS(p *openngfwv1.Policy) bool {
+func policyRequestsThreatInspection(p *openngfwv1.Policy) bool {
 	return p != nil && p.GetIds().GetEnabled()
 }
 

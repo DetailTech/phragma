@@ -83,6 +83,7 @@ type ProxyIR struct {
 	WAFPolicies     []WAFPolicyIR      `json:"wafPolicies"`
 }
 
+// VirtualServiceIR is one rendered reverse-proxy virtual service.
 type VirtualServiceIR struct {
 	Name        string          `json:"name"`
 	Enabled     bool            `json:"enabled"`
@@ -92,6 +93,7 @@ type VirtualServiceIR struct {
 	Description string          `json:"description,omitempty"`
 }
 
+// ProxyListenerIR is the bind and TLS configuration for a virtual service.
 type ProxyListenerIR struct {
 	BindAddress  string `json:"bindAddress"`
 	Port         uint32 `json:"port"`
@@ -99,6 +101,7 @@ type ProxyListenerIR struct {
 	TLSSecretRef string `json:"tlsSecretRef,omitempty"`
 }
 
+// ProxyRouteIR maps a path prefix to proxy backends and an optional WAF policy.
 type ProxyRouteIR struct {
 	Name                 string           `json:"name"`
 	PathPrefix           string           `json:"pathPrefix"`
@@ -108,12 +111,14 @@ type ProxyRouteIR struct {
 	StripPrefix          bool             `json:"stripPrefix"`
 }
 
+// ProxyBackendIR is one weighted upstream target for a proxy route.
 type ProxyBackendIR struct {
 	Name   string `json:"name"`
 	URL    string `json:"url"`
 	Weight uint32 `json:"weight"`
 }
 
+// WAFPolicyIR is a rendered web-application-firewall policy.
 type WAFPolicyIR struct {
 	Name               string         `json:"name"`
 	Mode               string         `json:"mode"`
@@ -124,6 +129,7 @@ type WAFPolicyIR struct {
 	Description        string         `json:"description,omitempty"`
 }
 
+// WAFRuleSetIR identifies one pinned rule-set artifact used by a WAF policy.
 type WAFRuleSetIR struct {
 	Name    string `json:"name"`
 	Version string `json:"version"`

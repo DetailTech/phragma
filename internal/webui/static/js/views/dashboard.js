@@ -5,8 +5,9 @@
 import { h, icon } from "../core.js";
 import { api } from "../api.js";
 import { throwIfAccessDenied } from "../auth_gate.js";
-import { capabilityClass, conntrackCapacity, dataplanePosture, flowtableRuntimeEvidence, idsModeLabel } from "../dataplane.js";
+import { capabilityClass, conntrackCapacity, dataplanePosture, idsModeLabel } from "../dataplane.js";
 import { policyNeedsBaseline } from "../baseline.js";
+import { releaseEvidenceOwnerRoute } from "../readiness_model.js";
 import { pageHead, card, emptyState, pill, metricCard, tag, labeledCell, responsiveTable } from "../ui.js";
 import * as fmt from "../format.js";
 import { area, donut, hbars } from "../charts.js";
@@ -55,7 +56,7 @@ export async function render() {
         metricCard({ label: "Traffic (recent)", value: fmt.bytes(totalBytes), foot: telemetryScope.flowFoot || `${flows.length} flows`, iconName: "traffic", spark: bytesSpark(flows), tone: flows.length ? "allow" : "neutral" }),
         metricCard({ label: "Intel feeds", value: enabledFeeds, foot: `${feeds.length} available`, iconName: "intel", tone: enabledFeeds ? "change" : "neutral" })),
 
-      telemetryScopeCard(telemetryScope),
+      telemetryScope.limited ? telemetryScopeCard(telemetryScope) : null,
 
       h("div", { class: "grid cols-3" },
         severityCard(alerts),
@@ -85,7 +86,7 @@ function dashboardLoadIssues(results = {}) {
   };
   return Object.entries(labels)
     .filter(([key]) => results[key]?.status === "rejected")
-    .map(([key, label]) => ({ key, label, detail: results[key]?.reason?.message || String(results[key]?.reason || "request failed") }));
+    .map(([key, label]) => ({ key, label, detail: dashboardLoadIssueDetail(results[key]?.reason) }));
 }
 
 function dashboardLoadIssueBanner(issues = []) {
@@ -96,11 +97,17 @@ function dashboardLoadIssueBanner(issues = []) {
   ];
   return h("div", { class: "alert-box warn", dataset: { dashboardLoadIssues: String(issues.length) } },
     h("strong", {}, "Dashboard is showing partial data. "),
-    h("span", {}, issues.map((issue) => issue.label).join(", ")),
-    h("div", { class: "note" }, issues.slice(0, 3).map((issue) => `${issue.label}: ${issue.detail}`).join(" · ")),
+    h("span", {}, issues.length === 1 ? issues[0].label : `${issues.length} data sources unavailable`),
+    issues.length === 1 ? h("div", { class: "note" }, issues[0].detail) : null,
     h("div", { class: "flex wrap" },
       h("button", { class: "btn sm", type: "button", title: "Retry dashboard data load", "aria-label": "Retry dashboard data load", dataset: { dashboardAction: "retry" }, onclick: () => location.reload() }, h("span", { html: icon("refresh", 14) }), "Retry"),
       ...routeLinks.map(([label, href]) => h("a", { class: "btn sm", href, title: `Open ${label} workspace`, "aria-label": `Open ${label} workspace`, dataset: { dashboardLoadIssueAction: label.toLowerCase().replace(/\s+/g, "-") } }, label))));
+}
+
+function dashboardLoadIssueDetail(reason) {
+  const raw = String(reason?.message || reason || "Request failed");
+  if (/<html|<!doctype|error response/i.test(raw)) return "The API did not return dashboard data.";
+  return raw.replace(/\s+/g, " ").slice(0, 120);
 }
 
 export function dashboardHash(path, params = {}) {
@@ -151,14 +158,14 @@ export function dashboardTelemetryScopeModel(alertData = {}, flowData = {}) {
     alertFoot: alertMore ? `${alertCount}/${alertTotal || "many"} shown` : `${alertCount} shown`,
     flowFoot: flowMore ? `${flowCount}/${flowTotal || "many"} shown` : `${flowCount} shown`,
     detail: limited
-      ? `Dashboard charts summarize the first page only: ${alertCount}/${alertTotal || "many"} alerts and ${flowCount}/${flowTotal || "many"} flows. Open Traffic or Threats for paged review.`
-      : `Dashboard charts include the current result set: ${alertCount} alerts and ${flowCount} flows.`,
+      ? `${alertCount}/${alertTotal || "many"} alerts and ${flowCount}/${flowTotal || "many"} flows shown.`
+      : `${alertCount} alerts and ${flowCount} flows shown.`,
   };
 }
 
 function telemetryScopeCard(model) {
   return h("div", { class: "alert-box " + (model.limited ? "warn" : "info"), dataset: { dashboardTelemetryScope: model.limited ? "limited" : "complete" } },
-    h("strong", {}, model.limited ? "Telemetry summaries are page-limited." : "Telemetry summaries are current."),
+    h("strong", {}, model.limited ? "Some telemetry is paged." : "Telemetry summaries are current."),
     h("div", { class: "note" }, model.detail),
     h("div", { class: "flex wrap" },
       h("a", { class: "btn sm", href: dashboardTrafficHash({ limit: 500 }), title: "Open paged Traffic review", "aria-label": "Open paged Traffic review", dataset: { dashboardTelemetryAction: "traffic" } }, h("span", { html: icon("traffic", 14) }), "Traffic"),
@@ -259,7 +266,7 @@ export function dashboardReleaseReadinessModel(input = {}, candidate = {}, unava
       name: firstId,
       state: first.state === "recorded" ? "pending manifest" : first.state || "",
       detail: String(first.detail || "").replace(/\/[^\s]+/g, "[redacted]"),
-      href: firstId ? `#/readiness?packet=${encodeURIComponent(firstId)}` : "",
+      href: firstId ? releaseEvidenceOwnerRoute(firstId) : "",
     } : null,
     candidate: dashboardCandidateStatusModel(candidate, unavailable),
     rulesHref: dashboardRulesRemediationHash(),
@@ -270,9 +277,9 @@ export function dashboardReleaseReadinessModel(input = {}, candidate = {}, unava
 function changeReadinessCard(candidate) {
   return card(h("div", { dataset: { dashboardCandidateState: candidate.dirty ? "dirty" : "clean" } },
     h("h2", {}, "Candidate", h("span", { class: "spacer" }), pill(candidate.label, candidate.dirty ? "warn" : "ok", true)),
-    h("div", { class: "alert-box " + (candidate.dirty ? "warn" : "ok") },
+    candidate.dirty ? h("div", { class: "alert-box warn" },
       h("strong", {}, candidate.label),
-      h("div", { class: "note" }, candidate.detail)),
+      h("div", { class: "note" }, candidate.detail)) : null,
     h("div", { class: "flex wrap" },
       h("a", { class: "btn sm", href: "#/changes?tab=candidate", title: "Open candidate review", "aria-label": "Open candidate review", dataset: { dashboardCandidateReview: "true" } }, h("span", { html: icon("diff", 14) }), "Review"),
       h("a", { class: "btn sm ghost", href: dashboardRulesRemediationHash(), title: "Open rules", "aria-label": "Open rules", dataset: { dashboardCandidateRules: "true" } }, h("span", { html: icon("rules", 14) }), "Rules"))));
@@ -283,39 +290,28 @@ function runtimePostureCard(status, policy, identity) {
   const host = status.host || {};
   const dp = dataplanePosture(policy, status);
   const warnings = status.warnings || [];
-  const flowRuntime = flowtableRuntimeEvidence(status);
   const conntrack = conntrackCapacity(status);
   const critical = warnings.filter((w) => w.severity === "critical").length;
   const warn = warnings.filter((w) => w.severity === "warning").length;
   const cls = critical ? "bad" : warn ? "warn" : "ok";
   const label = critical ? "Action required" : warn ? "Review needed" : "Ready";
   const management = managementPlaneSummary(status, identity);
-  const workerText = `${rt.inspectionWorkers || 0}/${rt.hostCpus || 0} CPUs`;
-  const flowHits = flowRuntime.packets || flowRuntime.bytes ? `${flowRuntime.packets} pkts / ${fmt.bytes(flowRuntime.bytes)}` : "none";
   return card(h("h2", {}, "Runtime posture", h("span", { class: "spacer" }), pill(label, cls, true)),
     h("div", { class: "runtime-grid" },
       postureMetric("Dataplane", displayDataplane(status.dataplane?.activeDataplane || rt.activeDataplane || "—")),
       postureMetric("Throughput path", dp.label),
-      postureMetric("Flowtable evidence", flowRuntime.state || "unknown"),
-      postureMetric("Flowtable devices", flowRuntime.devices.length ? flowRuntime.devices.join(", ") : "none"),
-      postureMetric("Flowtable hits", flowHits),
       postureMetric("State table", conntrackLabel(conntrack)),
       postureMetric("Inspection", idsModeLabel(policy)),
       postureMetric("Mode", rt.dryRun ? "Dry run" : "Enforcing"),
-      postureMetric("TLS", rt.tlsEnabled ? "Enabled" : "Disabled"),
       postureMetric("Auth", rt.authEnabled ? "Enabled" : "Disabled"),
-      postureMetric("Actor", identity.actor ? `${identity.actor} (${identity.role || "unknown"})` : rt.authEnabled ? "Auth required" : "Local admin"),
-      postureMetric("Inspection fan-out", workerText),
       postureMetric("Host load", hostLoadLabel(host)),
-      postureMetric("Memory", hostMemoryLabel(host)),
-      postureMetric("Interfaces", hostInterfaceHealth(host)),
-      postureMetric("Uptime", fmtDuration(rt.uptimeSeconds))),
-    h("div", { class: "alert-box " + management.cls },
+      postureMetric("Interfaces", hostInterfaceHealth(host))),
+    management.cls !== "ok" ? h("div", { class: "alert-box " + management.cls },
       h("strong", {}, management.title),
-      h("div", { class: "note" }, management.detail)),
-    h("div", { class: "alert-box " + postureBoxClass(dp.cls) },
+      h("div", { class: "note" }, management.detail)) : null,
+    dp.cls !== "ok" ? h("div", { class: "alert-box " + postureBoxClass(dp.cls) },
       h("strong", {}, dp.summary),
-      h("div", { class: "note" }, dp.detail)),
+      h("div", { class: "note" }, dp.detail)) : null,
     warnings.length ? h("div", { class: "status-warnings" }, warnings.slice(0, 3).map((w) =>
       h("div", { class: "alert-box " + warningClass(w.severity) },
         h("strong", {}, w.message),
@@ -353,15 +349,15 @@ export function managementPlaneSummary(status = {}, identity = {}) {
   if (!issues.length) {
     return {
       cls: "ok",
-      title: "Management plane controls are active.",
-      detail: `TLS, authentication, rate limits, and trusted client identity are active. Current actor: ${actor}. Production certification still depends on the hardening pass.`,
+      title: "Management controls are active.",
+      detail: `TLS, authentication, rate limits, and trusted client identity are active. Current actor: ${actor}.`,
     };
   }
   const cls = rt.authEnabled === false || rt.tlsEnabled === false || rt.dryRun ? "bad" : "warn";
   return {
     cls,
-    title: "Management plane controls need review.",
-    detail: `${issues.join(", ")}. Actor: ${actor}. Rate limit: ${rate}. Review  before exposing the UI or API.`,
+    title: "Management controls need review.",
+    detail: `${issues.join(", ")}. Actor: ${actor}. Rate limit: ${rate}. Review before exposing the UI or API.`,
   };
 }
 
@@ -378,15 +374,6 @@ function hostLoadLabel(host) {
   return `${load.toFixed(2)} · ${perCPU.toFixed(2)}/CPU`;
 }
 
-function hostMemoryLabel(host) {
-  const total = fmt.num(host?.memoryTotalBytes);
-  const available = fmt.num(host?.memoryAvailableBytes);
-  if (!total) return "—";
-  const usedPercent = Number(host.memoryUsedPercent || 0);
-  const used = Math.max(0, total - available);
-  return `${usedPercent.toFixed(1)}% · ${fmt.bytes(used)}`;
-}
-
 function hostInterfaceHealth(host) {
   const interfaces = Array.isArray(host?.interfaces) ? host.interfaces : [];
   if (!interfaces.length) return "none";
@@ -397,20 +384,20 @@ function hostInterfaceHealth(host) {
 function engineCoverageCard(status) {
   const engines = status.engines || [];
   const caps = status.capabilities || [];
-  return card(h("h2", {}, "Engine coverage", h("span", { class: "spacer" }),
+  return card(h("h2", {}, "Capability coverage", h("span", { class: "spacer" }),
       pill(`${engines.length} managed`, "info")),
     engines.length ? h("div", { class: "table-wrap flat" },
       responsiveTable([
-        { label: "Engine", attrs: { class: "dashboard-engine-name-col" } },
+        { label: "Capability", attrs: { class: "dashboard-engine-name-col" } },
         { label: "State", attrs: { class: "dashboard-engine-state-col" } },
         { label: "Detail", attrs: { class: "dashboard-engine-detail-col" } },
-        { label: "Owner", attrs: { class: "dashboard-engine-actions-col" } },
+        { label: "Open", attrs: { class: "dashboard-engine-actions-col" } },
       ], engines.map((e) =>
         h("tr", { dataset: { dashboardEngine: e.name || "engine" } },
-          labeledCell("Engine", { class: "mono data-clip" }, e.name),
+          labeledCell("Capability", { class: "data-clip" }, dashboardEngineCapability(e)),
           labeledCell("State", {}, pill(e.state || "unknown", engineStateClass(e))),
-          labeledCell("Detail", { class: "muted data-wrap" }, e.detail || e.role || "—"),
-          labeledCell("Owner", { class: "dashboard-engine-actions" },
+          labeledCell("Detail", { class: "muted data-wrap" }, dashboardEngineCustomerDetail(e)),
+          labeledCell("Open", { class: "dashboard-engine-actions" },
             h("div", { class: "flex wrap" }, dashboardEngineActionLinks(e).map((link) =>
               h("a", {
                 class: "btn sm ghost",
@@ -420,12 +407,49 @@ function engineCoverageCard(status) {
                 dataset: { dashboardEngineAction: link.id, dashboardEngineName: e.name || e.role || "engine" },
               }, link.label)))))),
       { className: "dashboard-engine-table" })) :
-      emptyState("settings", "No engine status", "Runtime engine coverage is not available."),
+      emptyState("settings", "No capability status", "Runtime coverage is not available."),
     caps.length ? h("div", { class: "cap-list" }, caps.map((c) =>
       h("div", { class: "cap-item" },
-        h("span", { class: "mono" }, c.name),
+        h("span", {}, dashboardCapabilityName(c.name)),
         pill(c.state || "unknown", capabilityClass(c.state)),
-        h("span", { class: "muted" }, c.detail || "")))) : null);
+        h("span", { class: "muted" }, dashboardCapabilityDetail(c.detail || ""))))) : null);
+}
+
+function dashboardEngineCapability(engine = {}) {
+  const text = `${engine.role || ""} ${engine.name || ""}`.toLowerCase();
+  if (/ids|ips|threat|inspection|suricata/.test(text)) return "IDS/IPS";
+  if (/route|routing|bgp|ospf|frr/.test(text)) return "Routing";
+  if (/vpn|ipsec|wireguard|strongswan/.test(text)) return "VPN";
+  if (/dns|url|intel|feed/.test(text)) return "Threat intelligence";
+  if (/log|telemetry|siem/.test(text)) return "Telemetry";
+  return titleCase(engine.role || "System service");
+}
+
+function dashboardEngineCustomerDetail(engine = {}) {
+  const state = engine.state || "unknown";
+  const capability = dashboardEngineCapability(engine).toLowerCase();
+  if (state === "ready" || state === "active") return `${capability} is active.`;
+  if (state === "simulation") return `${capability} is in simulation mode.`;
+  if (state === "missing-prerequisites") return `${capability} needs configuration.`;
+  if (state === "failed") return `${capability} needs attention.`;
+  return `${capability} status is ${state}.`;
+}
+
+function dashboardCapabilityName(name = "") {
+  return dashboardEngineCapability({ name });
+}
+
+function dashboardCapabilityDetail(detail = "") {
+  return String(detail || "")
+    .replace(/\b(Suricata|FRR|strongSwan|WireGuard|nftables|conntrack|eBPF|XDP|tc)\b/gi, "the backing service")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function titleCase(value = "") {
+  return String(value || "")
+    .replace(/[-_]+/g, " ")
+    .replace(/\b\w/g, (ch) => ch.toUpperCase());
 }
 
 function engineStateClass(engine) {
@@ -449,18 +473,6 @@ function warningClass(sev) {
 function postureBoxClass(cls) {
   if (cls === "bad" || cls === "warn" || cls === "ok" || cls === "info") return cls;
   return "";
-}
-
-function fmtDuration(seconds) {
-  const n = Number(seconds) || 0;
-  const d = Math.floor(n / 86400);
-  const h = Math.floor((n % 86400) / 3600);
-  const m = Math.floor((n % 3600) / 60);
-  const s = Math.floor(n % 60);
-  if (d) return `${d}d ${h}h`;
-  if (h) return `${h}h ${m}m`;
-  if (m) return `${m}m ${s}s`;
-  return `${s}s`;
 }
 
 function ruleSpark(rules) {

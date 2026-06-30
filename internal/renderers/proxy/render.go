@@ -15,12 +15,18 @@ import (
 	"github.com/detailtech/oss-ngfw/internal/compiler"
 )
 
+// PlanSchema identifies the reviewable proxy deployment plan format.
 const PlanSchema = "openngfw.proxy.plan.v1"
+
+// RuntimeManifestSchema identifies the deterministic proxy runtime manifest format.
 const RuntimeManifestSchema = "openngfw.proxy.runtime.v1"
 
 const (
-	EnvoyBootstrapArtifact  = "envoy-bootstrap.yaml"
-	CorazaRulesArtifact     = "coraza-waf.conf"
+	// EnvoyBootstrapArtifact is the rendered Envoy bootstrap filename.
+	EnvoyBootstrapArtifact = "envoy-bootstrap.yaml"
+	// CorazaRulesArtifact is the rendered Coraza WAF configuration filename.
+	CorazaRulesArtifact = "coraza-waf.conf"
+	// RuntimeManifestArtifact is the rendered proxy runtime manifest filename.
 	RuntimeManifestArtifact = "proxy-runtime-manifest.json"
 )
 
@@ -51,6 +57,7 @@ type runtimeReadiness struct {
 	Validation    []string          `json:"validation"`
 }
 
+// RuntimeArtifact identifies one hash-addressed proxy runtime input.
 type RuntimeArtifact struct {
 	Name        string `json:"name"`
 	Path        string `json:"path"`
@@ -58,12 +65,14 @@ type RuntimeArtifact struct {
 	SHA256      string `json:"sha256"`
 }
 
+// RuntimeLaunch describes the deterministic command for a managed proxy engine.
 type RuntimeLaunch struct {
 	Engine string   `json:"engine"`
 	Binary string   `json:"binary"`
 	Args   []string `json:"args"`
 }
 
+// RuntimeProof describes the status, evidence, and boundary of one runtime proof.
 type RuntimeProof struct {
 	ID       string   `json:"id"`
 	Kind     string   `json:"kind"`
@@ -87,10 +96,7 @@ func Render(ir *compiler.IR) ([]byte, error) {
 	if ir == nil || ir.Proxy == nil {
 		return []byte("{}\n"), nil
 	}
-	runtime, err := runtimePlan(ir.Proxy)
-	if err != nil {
-		return nil, err
-	}
+	runtime := runtimePlan(ir.Proxy)
 	out := plan{
 		SchemaVersion: PlanSchema,
 		GeneratedBy:   "openngfw-controld",
@@ -156,13 +162,10 @@ func RuntimeArtifacts(ir *compiler.IR) (map[string][]byte, error) {
 	}, nil
 }
 
-func runtimePlan(proxy *compiler.ProxyIR) (runtimeReadiness, error) {
+func runtimePlan(proxy *compiler.ProxyIR) runtimeReadiness {
 	envoy := renderEnvoyBootstrap(proxy)
 	coraza := renderCorazaRules(proxy)
-	manifest, err := runtimeManifestFor(envoy, coraza)
-	if err != nil {
-		return runtimeReadiness{}, err
-	}
+	manifest := runtimeManifestFor(envoy, coraza)
 	return runtimeReadiness{
 		SchemaVersion: RuntimeManifestSchema,
 		Artifacts:     manifest.Artifacts,
@@ -174,14 +177,11 @@ func runtimePlan(proxy *compiler.ProxyIR) (runtimeReadiness, error) {
 			"managed runtime launch arguments are deterministic but not registered",
 			"daemon, listener, cutover, and rollback proof artifacts are planned-not-executed status fields",
 		},
-	}, nil
+	}
 }
 
 func renderRuntimeManifest(envoy, coraza []byte) ([]byte, error) {
-	manifest, err := runtimeManifestFor(envoy, coraza)
-	if err != nil {
-		return nil, err
-	}
+	manifest := runtimeManifestFor(envoy, coraza)
 	raw, err := json.MarshalIndent(manifest, "", "  ")
 	if err != nil {
 		return nil, err
@@ -190,7 +190,7 @@ func renderRuntimeManifest(envoy, coraza []byte) ([]byte, error) {
 	return raw, nil
 }
 
-func runtimeManifestFor(envoy, coraza []byte) (runtimeManifest, error) {
+func runtimeManifestFor(envoy, coraza []byte) runtimeManifest {
 	artifacts := []RuntimeArtifact{
 		{
 			Name:        EnvoyBootstrapArtifact,
@@ -222,7 +222,7 @@ func runtimeManifestFor(envoy, coraza []byte) (runtimeManifest, error) {
 		Artifacts:     artifacts,
 		Launch:        launch,
 		Proof:         runtimeProofArtifacts(proxyRuntimeInputs{artifacts: artifacts, launch: launch}),
-	}, nil
+	}
 }
 
 type proxyRuntimeInputs struct {

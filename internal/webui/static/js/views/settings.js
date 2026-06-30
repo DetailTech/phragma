@@ -1221,7 +1221,7 @@ function accessCard(root, status, identity, oidc = {}, saml = {}, accessAdminist
     h("p", { class: "note" }, "Runtime auth is ", h("strong", {}, runtimeBool(rt, "authEnabled")), ". TLS is ", h("strong", {}, runtimeBool(rt, "tlsEnabled")), "."),
     accessPostureStrip(rt, oidc, saml, identity),
     oidc?.enabled || saml?.enabled ? browserSSOAccess(identityNode, governanceNode, rt, oidc, saml, identity, accessAdministration, { root, status, telemetryExportStatus, routeContext }) : null,
-    h("p", { class: "note" }, "Browser SSO is the preferred path when OIDC or SAML is enabled. API tokens remain available for break-glass, CLI, and automation access. A token saved here is kept only for this browser session and sent as ", h("span", { class: "mono" }, "Authorization: Bearer …"), "."),
+    h("p", { class: "note settings-access-browser-sso-note" }, "Browser SSO is the preferred path when OIDC or SAML is enabled. API tokens remain available for break-glass, CLI, and automation access. A token saved here is kept only for this browser session and sent as ", h("span", { class: "mono" }, "Authorization: Bearer …"), "."),
     identityNode,
     governanceNode,
     h("label", { class: "field" }, h("span", {}, "API token"), tok),

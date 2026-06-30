@@ -50,6 +50,7 @@ type parsedSystemLogLine struct {
 	facility  string
 }
 
+// ListSystemLogs returns a bounded, filtered view of configured local log files.
 func (s *SystemService) ListSystemLogs(_ context.Context, req *openngfwv1.ListSystemLogsRequest) (*openngfwv1.ListSystemLogsResponse, error) {
 	if req == nil {
 		req = &openngfwv1.ListSystemLogsRequest{}
@@ -265,7 +266,6 @@ func scanSystemLogFile(candidate systemLogCandidate, filter systemLogFilter, lim
 	if err != nil {
 		return err
 	}
-	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	scanner.Buffer(make([]byte, 0, 4096), maxSystemLogLineBytes)
 	var lineNo uint32
@@ -273,7 +273,7 @@ func scanSystemLogFile(candidate systemLogCandidate, filter systemLogFilter, lim
 		lineNo++
 		resp.Summary.ScannedLines++
 		if resp.Summary.ScannedLines > maxSystemLogScanLines {
-			return nil
+			break
 		}
 		parsed := parseSystemLogLine(scanner.Text())
 		if parsed.message == "" {
@@ -299,10 +299,18 @@ func scanSystemLogFile(candidate systemLogCandidate, filter systemLogFilter, lim
 		}
 		resp.Entries = append(resp.Entries, entry)
 		if len(resp.Entries) >= limit {
-			return nil
+			break
 		}
 	}
-	return scanner.Err()
+	scanErr := scanner.Err()
+	closeErr := file.Close()
+	if scanErr != nil {
+		return scanErr
+	}
+	if closeErr != nil {
+		return fmt.Errorf("close system log file %q: %w", candidate.file, closeErr)
+	}
+	return nil
 }
 
 func parseSystemLogLine(raw string) parsedSystemLogLine {

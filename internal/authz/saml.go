@@ -660,11 +660,12 @@ func samlServiceProvider(ctx context.Context, cfg SAMLConfig) (*saml.ServiceProv
 		return nil, err
 	}
 	sp := &saml.ServiceProvider{
-		EntityID:          cfg.SPEntityID,
-		MetadataURL:       metadataURL,
-		AcsURL:            *acsURL,
-		IDPMetadata:       idpMetadata,
-		AuthnNameIDFormat: saml.UnspecifiedNameIDFormat,
+		EntityID:                    cfg.SPEntityID,
+		MetadataURL:                 metadataURL,
+		AcsURL:                      *acsURL,
+		IDPMetadata:                 idpMetadata,
+		AuthnNameIDFormat:           saml.UnspecifiedNameIDFormat,
+		ValidateAudienceRestriction: strictSAMLAudienceValidator(cfg.SPEntityID),
 	}
 	if cfg.CertificateFingerprint != "" {
 		fp := cfg.CertificateFingerprint
@@ -673,6 +674,24 @@ func samlServiceProvider(ctx context.Context, cfg SAMLConfig) (*saml.ServiceProv
 		sp.IDPCertificateFingerprintAlgorithm = &alg
 	}
 	return sp, nil
+}
+
+func strictSAMLAudienceValidator(expected string) func(*saml.Assertion) error {
+	expected = strings.TrimSpace(expected)
+	return func(assertion *saml.Assertion) error {
+		if assertion == nil || assertion.Conditions == nil {
+			return errors.New("SAML assertion conditions are required")
+		}
+		if len(assertion.Conditions.AudienceRestrictions) == 0 {
+			return errors.New("SAML assertion audience restriction is required")
+		}
+		for _, restriction := range assertion.Conditions.AudienceRestrictions {
+			if strings.TrimSpace(restriction.Audience.Value) != expected {
+				return fmt.Errorf("SAML assertion audience restriction does not contain %q", expected)
+			}
+		}
+		return nil
+	}
 }
 
 func samlIDPMetadata(ctx context.Context, cfg SAMLConfig) (*saml.EntityDescriptor, error) {

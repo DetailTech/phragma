@@ -1,3 +1,4 @@
+// Package fleet persists local policy templates and bounded apply evidence.
 package fleet
 
 import (
@@ -21,17 +22,26 @@ import (
 )
 
 const (
-	SchemaVersion       = "phragma.fleet.local-template-registry.v1"
-	APISchemaVersion    = "phragma.fleet.local-api.v1"
-	MaxTemplates        = 100
-	MaxApplyResults     = 50
-	MaxPolicyJSONBytes  = 2 << 20
+	// SchemaVersion identifies the persisted local template registry format.
+	SchemaVersion = "phragma.fleet.local-template-registry.v1"
+	// APISchemaVersion identifies Fleet API response payloads.
+	APISchemaVersion = "phragma.fleet.local-api.v1"
+	// MaxTemplates limits the number of templates retained in the local registry.
+	MaxTemplates = 100
+	// MaxApplyResults limits the number of recent apply records retained locally.
+	MaxApplyResults = 50
+	// MaxPolicyJSONBytes limits a template policy's encoded size.
+	MaxPolicyJSONBytes = 2 << 20
+	// MaxTemplateNameSize limits normalized template names in bytes.
 	MaxTemplateNameSize = 120
-	MaxDescriptionSize  = 1024
+	// MaxDescriptionSize limits normalized template descriptions in bytes.
+	MaxDescriptionSize = 1024
 )
 
 var (
-	ErrNotFound             = errors.New("fleet template not found")
+	// ErrNotFound indicates that a requested fleet template does not exist.
+	ErrNotFound = errors.New("fleet template not found")
+	// ErrTemplateLimit indicates that the local registry has reached MaxTemplates.
 	ErrTemplateLimit        = errors.New("fleet template limit exceeded")
 	templateIDRE            = regexp.MustCompile(`^tmpl-[a-z0-9][a-z0-9_.-]{1,79}$`)
 	templateSlugUnsafeRE    = regexp.MustCompile(`[^a-z0-9_.-]+`)
@@ -41,17 +51,20 @@ var (
 	}
 )
 
+// Store provides serialized access to a local Fleet template registry.
 type Store struct {
 	path string
 	mu   sync.Mutex
 }
 
+// Registry is the persisted collection of templates and recent apply results.
 type Registry struct {
 	SchemaVersion string           `json:"schemaVersion"`
 	Templates     []TemplateRecord `json:"templates"`
 	ApplyResults  []ApplyRecord    `json:"applyResults,omitempty"`
 }
 
+// TemplateRecord is a stored policy template with revision and creation metadata.
 type TemplateRecord struct {
 	ID            string          `json:"id"`
 	Name          string          `json:"name"`
@@ -68,6 +81,7 @@ type TemplateRecord struct {
 	AuthSource    string          `json:"authSource"`
 }
 
+// PolicySummary contains operator-facing counts for a template policy.
 type PolicySummary struct {
 	Zones            int  `json:"zones"`
 	Rules            int  `json:"rules"`
@@ -82,6 +96,7 @@ type PolicySummary struct {
 	Applications     int  `json:"applications"`
 }
 
+// ApplyRecord captures one bounded template-apply attempt and its evidence.
 type ApplyRecord struct {
 	ID                      string            `json:"id"`
 	TemplateID              string            `json:"templateId"`
@@ -100,6 +115,7 @@ type ApplyRecord struct {
 	CustodyBoundary         string            `json:"custodyBoundary"`
 }
 
+// ApplyNodeResult records the outcome for one node targeted by an apply attempt.
 type ApplyNodeResult struct {
 	NodeID           string   `json:"nodeId"`
 	NodeName         string   `json:"nodeName"`
@@ -115,6 +131,7 @@ type ApplyNodeResult struct {
 	Custody          string   `json:"custody"`
 }
 
+// CreateTemplateInput contains policy and custody metadata for a new template.
 type CreateTemplateInput struct {
 	Name          string
 	Description   string
@@ -126,10 +143,12 @@ type CreateTemplateInput struct {
 	AuthSource    string
 }
 
+// NewStore returns a Store backed by path.
 func NewStore(path string) *Store {
 	return &Store{path: path}
 }
 
+// DefaultStorePath returns the Fleet template registry path beneath dataDir.
 func DefaultStorePath(dataDir string) string {
 	base := strings.TrimSpace(dataDir)
 	if base == "" {
@@ -138,6 +157,7 @@ func DefaultStorePath(dataDir string) string {
 	return filepath.Join(base, "fleet", "templates.json")
 }
 
+// ListTemplates returns templates ordered by most recent update, then ID.
 func (s *Store) ListTemplates() ([]TemplateRecord, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -155,6 +175,7 @@ func (s *Store) ListTemplates() ([]TemplateRecord, error) {
 	return records, nil
 }
 
+// GetTemplate returns the template with the normalized ID.
 func (s *Store) GetTemplate(id string) (TemplateRecord, error) {
 	id, err := NormalizeTemplateID(id)
 	if err != nil {
@@ -174,6 +195,7 @@ func (s *Store) GetTemplate(id string) (TemplateRecord, error) {
 	return TemplateRecord{}, ErrNotFound
 }
 
+// DeleteTemplate removes the template with the normalized ID.
 func (s *Store) DeleteTemplate(id string) error {
 	id, err := NormalizeTemplateID(id)
 	if err != nil {
@@ -201,6 +223,7 @@ func (s *Store) DeleteTemplate(id string) error {
 	return writeRegistry(s.path, registry)
 }
 
+// ListApplyResults returns recent apply records, optionally filtered by template ID.
 func (s *Store) ListApplyResults(templateID string) ([]ApplyRecord, error) {
 	templateID = strings.TrimSpace(strings.ToLower(templateID))
 	s.mu.Lock()
@@ -224,6 +247,7 @@ func (s *Store) ListApplyResults(templateID string) ([]ApplyRecord, error) {
 	return out, nil
 }
 
+// RecordApplyResult normalizes and stores a completed template-apply record.
 func (s *Store) RecordApplyResult(record ApplyRecord) (ApplyRecord, error) {
 	record.TemplateID = strings.TrimSpace(strings.ToLower(record.TemplateID))
 	if record.TemplateID == "" {
@@ -257,6 +281,7 @@ func (s *Store) RecordApplyResult(record ApplyRecord) (ApplyRecord, error) {
 	return record, nil
 }
 
+// CreateTemplate validates and stores a new local policy template.
 func (s *Store) CreateTemplate(input CreateTemplateInput) (TemplateRecord, error) {
 	if input.Policy == nil {
 		return TemplateRecord{}, errors.New("policy is required")
@@ -318,6 +343,7 @@ func (s *Store) CreateTemplate(input CreateTemplateInput) (TemplateRecord, error
 	return record, nil
 }
 
+// DecodePolicy decodes a size-bounded template policy from protobuf JSON.
 func DecodePolicy(raw json.RawMessage) (*openngfwv1.Policy, error) {
 	if len(raw) == 0 {
 		return nil, errors.New("policy is required")
@@ -332,6 +358,7 @@ func DecodePolicy(raw json.RawMessage) (*openngfwv1.Policy, error) {
 	return p, nil
 }
 
+// TemplateRevision returns the deterministic revision digest for a template record.
 func TemplateRevision(record TemplateRecord) string {
 	h := sha256.New()
 	_, _ = h.Write([]byte(record.Name))
@@ -342,6 +369,7 @@ func TemplateRevision(record TemplateRecord) string {
 	return "sha256:" + hex.EncodeToString(h.Sum(nil))
 }
 
+// SummarizePolicy derives operator-facing feature counts from a policy.
 func SummarizePolicy(p *openngfwv1.Policy) PolicySummary {
 	if p == nil {
 		return PolicySummary{}
@@ -362,6 +390,7 @@ func SummarizePolicy(p *openngfwv1.Policy) PolicySummary {
 	return summary
 }
 
+// NormalizeTemplateID canonicalizes and validates a Fleet template ID.
 func NormalizeTemplateID(id string) (string, error) {
 	clean := strings.TrimSpace(strings.ToLower(id))
 	if clean == "" {

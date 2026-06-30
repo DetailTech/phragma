@@ -34,7 +34,6 @@ const Any = "any"
 
 var (
 	nameRE      = regexp.MustCompile(`^[a-z0-9]([a-z0-9_-]{0,62}[a-z0-9])?$`)
-	ruleIDRE    = regexp.MustCompile(`^[a-z0-9][a-z0-9_.:-]{0,127}$`)
 	appSignalRE = regexp.MustCompile(`^[a-z0-9][a-z0-9_.-]{0,127}$`)
 	tagRE       = regexp.MustCompile(`^[a-z0-9][a-z0-9_.:-]{0,63}$`)
 	contextRE   = regexp.MustCompile(`^[a-z0-9][a-z0-9_.:@/-]{0,127}$`)
@@ -105,7 +104,7 @@ func AnalyzeProxyTrafficPolicy(p *openngfwv1.Policy) []ProxyTrafficPolicyFinding
 	staticRoutes := parseStaticRoutePrefixes(p.GetStaticRoutes())
 	var findings []ProxyTrafficPolicyFinding
 	for _, vs := range p.GetProxy().GetVirtualServices() {
-		if vs == nil || vs.GetEnabled() == false {
+		if vs == nil || !vs.GetEnabled() {
 			continue
 		}
 		listener := vs.GetListener()

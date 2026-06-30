@@ -14,11 +14,6 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protodesc"
-	"google.golang.org/protobuf/reflect/protoreflect"
-	"google.golang.org/protobuf/types/descriptorpb"
-	"google.golang.org/protobuf/types/dynamicpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	openngfwv1 "github.com/detailtech/oss-ngfw/api/gen/openngfw/v1"
@@ -369,33 +364,15 @@ func TestNatListRequestAndPrint(t *testing.T) {
 	}
 }
 
-func TestNatIDOutputHelpersPreferFutureDurableID(t *testing.T) {
-	fileDesc, err := protodesc.NewFile(&descriptorpb.FileDescriptorProto{
-		Name:    proto.String("test/nat_identity.proto"),
-		Package: proto.String("test"),
-		Syntax:  proto.String("proto3"),
-		MessageType: []*descriptorpb.DescriptorProto{{
-			Name: proto.String("NatRule"),
-			Field: []*descriptorpb.FieldDescriptorProto{{
-				Name:   proto.String("id"),
-				Number: proto.Int32(1),
-				Label:  descriptorpb.FieldDescriptorProto_LABEL_OPTIONAL.Enum(),
-				Type:   descriptorpb.FieldDescriptorProto_TYPE_STRING.Enum(),
-			}},
-		}},
-	}, nil)
-	if err != nil {
-		t.Fatalf("build dynamic descriptor: %v", err)
+func TestNatIDOutputHelpersUseDurableID(t *testing.T) {
+	if got := sourceNatOutput(&openngfwv1.SourceNat{Id: " snat-lan-masq "}).ID; got != "snat-lan-masq" {
+		t.Fatalf("source NAT id = %q", got)
 	}
-	msgDesc := fileDesc.Messages().ByName("NatRule")
-	msg := dynamicpb.NewMessage(msgDesc)
-	msg.Set(msgDesc.Fields().ByName("id"), protoreflect.ValueOfString(" snat-lan-masq "))
-
-	if got := protoStringField(msg, "id"); got != "snat-lan-masq" {
-		t.Fatalf("protoStringField dynamic id = %q", got)
+	if got := destinationNatOutput(&openngfwv1.DestinationNat{Id: " dnat-web "}).ID; got != "dnat-web" {
+		t.Fatalf("destination NAT id = %q", got)
 	}
-	if got := protoStringField(&openngfwv1.SourceNat{Name: "legacy-name-only"}, "id"); got != "" {
-		t.Fatalf("protoStringField legacy NAT id = %q, want empty fallback", got)
+	if got := sourceNatOutput(&openngfwv1.SourceNat{Name: "legacy-name-only"}).ID; got != "" {
+		t.Fatalf("legacy NAT id = %q, want empty fallback", got)
 	}
 	if got := natIDLabel(" snat-lan-masq "); got != " id=snat-lan-masq" {
 		t.Fatalf("natIDLabel = %q", got)
@@ -1802,7 +1779,7 @@ func (f *fakePolicyClient) SetCandidate(_ context.Context, req *openngfwv1.SetCa
 	return &openngfwv1.SetCandidateResponse{}, nil
 }
 
-func (f *fakePolicyClient) GetCandidateStatus(_ context.Context, req *openngfwv1.GetCandidateStatusRequest, _ ...grpc.CallOption) (*openngfwv1.GetCandidateStatusResponse, error) {
+func (f *fakePolicyClient) GetCandidateStatus(_ context.Context, _ *openngfwv1.GetCandidateStatusRequest, _ ...grpc.CallOption) (*openngfwv1.GetCandidateStatusResponse, error) {
 	f.statusCalls++
 	if f.statusErr != nil {
 		return nil, f.statusErr

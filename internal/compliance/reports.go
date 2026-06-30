@@ -1,3 +1,4 @@
+// Package compliance builds server-retained operational evidence reports.
 package compliance
 
 import (
@@ -13,6 +14,7 @@ import (
 )
 
 const (
+	// ReportSchemaVersion identifies the generated compliance report payload format.
 	ReportSchemaVersion = "phragma.compliance.report-record.v1"
 	defaultAuditLimit   = 300
 	maxAuditLimit       = 1000
@@ -27,6 +29,7 @@ var (
 	pathRE   = regexp.MustCompile(`(?i)(^|[\s"'({=,;])/(?:var/lib|var/log(?:/openngfw)?|etc(?:/openngfw|/phragma)?|tmp|private/tmp|var/folders|private/var/folders|home/[^'"\s,;}]+|Users/[^'"\s,;}]+|opt/[^'"\s,;}]+|data/[^'"\s,;}]+)[^'"\s,;}]*`)
 )
 
+// Request selects the profile, evidence limits, and filters for a report.
 type Request struct {
 	Profile      string
 	Title        string
@@ -41,6 +44,7 @@ type Request struct {
 	Query        string
 }
 
+// SystemLogEntry represents one local log entry retained in a report.
 type SystemLogEntry struct {
 	Timestamp string `json:"timestamp,omitempty"`
 	Source    string `json:"source,omitempty"`
@@ -48,6 +52,7 @@ type SystemLogEntry struct {
 	Message   string `json:"message,omitempty"`
 }
 
+// SystemLogSummary describes the source scan that produced retained log entries.
 type SystemLogSummary struct {
 	ScannedFiles uint32   `json:"scanned_files,omitempty"`
 	ScannedLines uint32   `json:"scanned_lines,omitempty"`
@@ -55,6 +60,7 @@ type SystemLogSummary struct {
 	Warnings     []string `json:"warnings,omitempty"`
 }
 
+// SourceState contains the audit, version, integrity, and log evidence for a report.
 type SourceState struct {
 	AuditEntries   []store.AuditEntry
 	Versions       []store.VersionInfo
@@ -65,6 +71,7 @@ type SourceState struct {
 	SystemLogSummary
 }
 
+// NewReport builds an unsigned compliance report record from a supplied evidence snapshot.
 func NewReport(req Request, identity store.ActorIdentity, state SourceState, now time.Time) (store.ComplianceReportRecord, error) {
 	if now.IsZero() {
 		now = time.Now().UTC()
@@ -137,6 +144,7 @@ func NewReport(req Request, identity store.ActorIdentity, state SourceState, now
 	}, nil
 }
 
+// NormalizeRequest applies supported profiles, defaults, limits, and text sanitization.
 func NormalizeRequest(req Request) Request {
 	req.Profile = normalizeProfile(req.Profile)
 	req.Title = cleanDefault(req.Title, ProfileLabel(req.Profile)+" compliance report")
@@ -149,6 +157,7 @@ func NormalizeRequest(req Request) Request {
 	return req
 }
 
+// ProfileLabel returns the operator-facing label for a normalized report profile.
 func ProfileLabel(profile string) string {
 	switch normalizeProfile(profile) {
 	case "change-control":
@@ -173,12 +182,12 @@ func normalizeProfile(profile string) string {
 	}
 }
 
-func clamp(value, fallback, max int) int {
+func clamp(value, fallback, maxValue int) int {
 	if value <= 0 {
 		value = fallback
 	}
-	if value > max {
-		return max
+	if value > maxValue {
+		return maxValue
 	}
 	return value
 }

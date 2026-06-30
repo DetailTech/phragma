@@ -38,20 +38,21 @@ WEBUI_NODE_TEST_PRELOAD := ./internal/webui/static/js/node_test_polyfills.cjs
 WEBUI_CHECK_REQUIRE_NODE ?= 0
 WEBUI_SMOKE_REQUIRE_BROWSER ?= 1
 WEBUI_ENTERPRISE_SMOKE_TOTAL_TIMEOUT_MS ?= 1800000
-WEBUI_ENTERPRISE_SMOKE_PATHS ?= /,/dashboard,/setup,/rules,/objects,/nat,/inspection,/threats,/traffic,/logs,/troubleshoot,/performance,/investigation,/fleet,/intel,/netvpn,/proxy,/compliance,/readiness,/changes,/settings
+WEBUI_ENTERPRISE_SMOKE_PATHS ?= /,/dashboard,/setup,/rules,/objects,/nat,/inspection,/threats,/traffic,/logs,/troubleshoot,/performance,/investigation,/fleet,/intel,/netvpn,/proxy,/compliance,/changes,/settings
 WEBUI_ENTERPRISE_SMOKE_VIEWPORTS ?= desktop
 WEBUI_ENTERPRISE_SMOKE_ARTIFACT_DIR ?= $${TMPDIR:-/tmp}/openngfw-webui-smoke-enterprise-$$(date -u +%Y%m%dT%H%M%SZ)
 WEBUI_SMOKE_REPLAY_FAILURE_MANIFEST ?=
 
-# Pinned codegen tool versions. Bump deliberately; regenerated output is
-# committed, so CI verifies `make proto` produces no diff.
+# Pinned build and verification tool versions. Bump deliberately; generated
+# API output is committed, so CI verifies `make proto` produces no diff.
 BUF_VERSION                 := v1.50.1
 PROTOC_GEN_GO_VERSION       := v1.36.11
 PROTOC_GEN_GO_GRPC_VERSION  := v1.5.1
 PROTOC_GEN_GW_VERSION       := v2.27.7
 PROTOC_GEN_OPENAPIV2_VERSION := $(PROTOC_GEN_GW_VERSION)
+GOVULNCHECK_VERSION          := v1.5.0
 
-.PHONY: all build test webui-check webui-visual-smoke webui-visual-smoke-self-check webui-visual-smoke-replay-failures webui-enterprise-smoke lint vet proto proto-status proto-verify tools clean integration-compile integration-test privileged-integration-evidence-check deploy-hardening-check policy-restore-drill-check ha-readiness-recovery-check m3-live-networking-check m3-live-networking m3-field-evidence-check ebpf-ol9-attach-drill-check ebpf-ol9-attach-drill ebpf-ol9-field-evidence-check m5-oidc-field-evidence-check m5-saml-field-evidence-check content-production-readiness-check e2e-install-check e2e-install e2e-auth-runtime-smoke e2e-oidc-runtime-smoke content-package-smoke benchmark-verify benchmark-verify-release benchmark-citation-check benchmark-stage-release benchmark-check benchmark benchmark-netns-check benchmark-netns release-evidence-rootless release-evidence-proto-verify release-evidence-privileged-integration release-evidence-deploy-hardening release-evidence-policy-restore-drill release-evidence-ha-readiness-recovery release-evidence-e2e-install release-evidence-content-package-verification release-evidence-content-production-readiness release-evidence-m3-live-networking release-evidence-m3-field-evidence release-evidence-ebpf-ol9-field-evidence release-evidence-m5-auth-ui release-evidence-m5-oidc-provider release-evidence-m5-oidc-field-evidence release-evidence-m5-saml-field-evidence release-evidence-webui-enterprise-smoke release-evidence-release-benchmark release-acceptance-status release-acceptance-status-functional release-recordability-check release-recordability-diagnostics release-acceptance-assemble release-acceptance-assemble-functional release-acceptance-verify release-check-rootless release-verify
+.PHONY: all build test webui-check webui-visual-smoke webui-visual-smoke-self-check webui-visual-smoke-replay-failures webui-enterprise-smoke lint vet vuln-check proto proto-status proto-verify tools clean integration-compile integration-test privileged-integration-evidence-check deploy-hardening-check policy-restore-drill-check ha-readiness-recovery-check m3-live-networking-check m3-live-networking m3-field-evidence-check ebpf-ol9-attach-drill-check ebpf-ol9-attach-drill ebpf-ol9-field-evidence-check m5-oidc-field-evidence-check m5-saml-field-evidence-check content-production-readiness-check e2e-install-check e2e-install e2e-auth-runtime-smoke e2e-oidc-runtime-smoke content-package-smoke benchmark-verify benchmark-verify-release benchmark-citation-check benchmark-stage-release benchmark-check benchmark benchmark-netns-check benchmark-netns release-evidence-rootless release-evidence-proto-verify release-evidence-privileged-integration release-evidence-deploy-hardening release-evidence-policy-restore-drill release-evidence-ha-readiness-recovery release-evidence-e2e-install release-evidence-content-package-verification release-evidence-content-production-readiness release-evidence-m3-live-networking release-evidence-m3-field-evidence release-evidence-ebpf-ol9-field-evidence release-evidence-m5-auth-ui release-evidence-m5-oidc-provider release-evidence-m5-oidc-field-evidence release-evidence-m5-saml-field-evidence release-evidence-webui-enterprise-smoke release-evidence-release-benchmark release-acceptance-status release-acceptance-status-functional release-recordability-check release-recordability-diagnostics release-acceptance-assemble release-acceptance-assemble-functional release-acceptance-verify release-check-rootless release-verify
 
 all: build test lint
 
@@ -62,7 +63,8 @@ test: webui-check
 	go test -race ./...
 
 webui-check:
-	@if command -v node >/dev/null 2>&1; then \
+	@set -eu; \
+	if command -v node >/dev/null 2>&1; then \
 		find internal/webui/static/js -type f ! -name '._*' \( -name '*.js' -o -name '*.mjs' \) -print | sort | xargs -n1 node --check; \
 		find internal/webui/static/js -type f ! -name '._*' -name '*.test.mjs' -print | sort | xargs -n1 node --require $(WEBUI_NODE_TEST_PRELOAD); \
 		echo "webui_js_checks=passed"; \
@@ -107,7 +109,8 @@ webui-visual-smoke-replay-failures: webui-check
 	fi
 
 webui-enterprise-smoke:
-	@if command -v node >/dev/null 2>&1; then \
+	@set -eu; \
+	if command -v node >/dev/null 2>&1; then \
 		$(MAKE) webui-check WEBUI_CHECK_REQUIRE_NODE=1; \
 		echo "release_smoke_mode=desktop-enterprise"; \
 		echo "browser_required=$(WEBUI_SMOKE_REQUIRE_BROWSER)"; \
@@ -278,7 +281,7 @@ release-evidence-m5-saml-field-evidence:
 	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check m5-saml-field-evidence --commit "$(COMMIT)" --detail "release gate: redacted real-provider SAML browser SSO field evidence bundle for $(COMMIT)" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make m5-saml-field-evidence-check $(RELEASE_BUILD_ARGS)
 
 release-evidence-webui-enterprise-smoke:
-	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check webui-enterprise-smoke --commit "$(COMMIT)" --detail "release gate: browser-required broad desktop WebUI enterprise smoke across the current 20-route route set including /compliance for $(COMMIT); continuation, tablet/mobile, or targeted repair evidence is diagnostic only until repo-local release evidence is recorded for the accepted source snapshot" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make webui-enterprise-smoke $(RELEASE_BUILD_ARGS)
+	go run ./cmd/ngfwrelease record --evidence-dir "$(RELEASE_EVIDENCE_DIR)" --check webui-enterprise-smoke --commit "$(COMMIT)" --detail "release gate: browser-required broad desktop WebUI enterprise smoke across the current 19-route canonical route set including /compliance for $(COMMIT); continuation, tablet/mobile, or targeted repair evidence is diagnostic only until repo-local release evidence is recorded for the accepted source snapshot" $(RELEASE_EVIDENCE_RECORD_FLAGS) -- make webui-enterprise-smoke $(RELEASE_BUILD_ARGS)
 
 release-evidence-release-benchmark:
 	@if [ "$(RELEASE_NO_PERFORMANCE_CLAIMS)" = "1" ]; then \
@@ -350,6 +353,9 @@ lint:
 vet:
 	go vet ./...
 
+vuln-check:
+	go run golang.org/x/vuln/cmd/govulncheck@$(GOVULNCHECK_VERSION) ./...
+
 release-acceptance-verify:
 	@if [ "$(RELEASE_NO_PERFORMANCE_CLAIMS)" = "1" ]; then \
 		go run ./cmd/ngfwrelease verify --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --commit $(COMMIT) --version $(VERSION) --allow-no-performance-claims; \
@@ -357,7 +363,7 @@ release-acceptance-verify:
 		go run ./cmd/ngfwrelease verify --manifest $(RELEASE_ACCEPTANCE_MANIFEST) --commit $(COMMIT) --version $(VERSION); \
 	fi
 
-release-check-rootless: build test vet integration-compile deploy-hardening-check policy-restore-drill-check ha-readiness-recovery-check e2e-install-check content-package-smoke e2e-auth-runtime-smoke e2e-oidc-runtime-smoke webui-enterprise-smoke benchmark-verify-release benchmark-citation-check
+release-check-rootless: build test vet vuln-check integration-compile deploy-hardening-check policy-restore-drill-check ha-readiness-recovery-check e2e-install-check content-package-smoke e2e-auth-runtime-smoke e2e-oidc-runtime-smoke webui-enterprise-smoke benchmark-verify-release benchmark-citation-check
 
 release-verify: proto-verify release-check-rootless release-acceptance-verify release-recordability-check
 

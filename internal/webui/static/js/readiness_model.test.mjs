@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 
 import { dataplaneNameRequiresEbpf, ebpfBlocksCurrentDataplane } from "./dataplane.js";
-import { apiContractSourceAcceptanceModel, buildHAEvidencePacket, buildSystemEvidencePacket, dynamicRoutingEnabled, haEvidencePacketReport, haReadiness, readinessActionHash, releaseArtifactWorkbenchModel, releaseEvidenceChecklist, releaseEvidenceCounts, releaseEvidencePacketDefinition, releaseEvidencePacketIds, releaseEvidenceReport, remediationActionId, remediationSteps, routingRuntimeEvidence, summarizeReadiness, systemEvidencePacketReport } from "./readiness_model.js";
+import { apiContractSourceAcceptanceModel, buildHAEvidencePacket, buildSystemEvidencePacket, dynamicRoutingEnabled, haEvidencePacketReport, haReadiness, legacyReadinessOwnerHash, readinessActionHash, releaseArtifactWorkbenchModel, releaseEvidenceChecklist, releaseEvidenceCounts, releaseEvidenceOwnerRoute, releaseEvidencePacketDefinition, releaseEvidencePacketIds, releaseEvidenceReport, remediationActionId, remediationSteps, routingRuntimeEvidence, summarizeReadiness, systemEvidencePacketReport } from "./readiness_model.js";
 
 const degradedEbpf = {
   state: "degraded",
@@ -40,6 +40,26 @@ const rootlessReleaseGateIds = [
   "m5-oidc-provider",
 ];
 
+const releaseEvidenceOwnerRoutes = {
+  "content-production-readiness": "#/intel",
+  "proto-verify": "#/changes?tab=candidate",
+  "deploy-hardening": "#/settings?panel=access",
+  "policy-restore-drill": "#/changes?tab=candidate",
+  "ha-readiness-recovery": "#/fleet",
+  "e2e-install": "#/settings?panel=access",
+  "content-package-verification": "#/intel",
+  "release-benchmark": "#/performance",
+  "m5-auth-ui": "#/settings?panel=access",
+  "m5-oidc-provider": "#/settings?panel=access",
+  "webui-enterprise-smoke": "#/changes?tab=candidate",
+  "privileged-integration": "#/settings?panel=network",
+  "m3-live-networking": "#/netvpn",
+  "m3-field-evidence": "#/netvpn",
+  "ebpf-ol9-field-evidence": "#/settings?panel=network",
+  "m5-oidc-field-evidence": "#/settings?panel=access",
+  "m5-saml-field-evidence": "#/settings?panel=access",
+};
+
 const documentedReferencePaths = new Set([
   "docs/RELEASE_ACCEPTANCE.md#approved-evidence-flow",
   "docs/testing-plan.md#phase-3--routing--vpn-m3--gaps-b-c-d",
@@ -62,7 +82,7 @@ const externalReleaseGateEvidencePackets = {
     evidenceDirectory: "release/evidence",
     artifactPath: "release/evidence/webui-enterprise-smoke.txt",
     reference: "docs/RELEASE_ACCEPTANCE.md#approved-evidence-flow",
-    summary: /broad WebUI enterprise smoke|current 20-route operator route set|\/compliance|continuation or targeted repair evidence is diagnostic/i,
+    summary: /broad WebUI enterprise smoke|current 19-route canonical route set|\/compliance|continuation or targeted repair evidence is diagnostic/i,
     commands: [
       "make webui-enterprise-smoke",
       "COMMIT=\"$(git rev-parse HEAD)\" make release-evidence-webui-enterprise-smoke",
@@ -262,14 +282,19 @@ function assertExternalEvidencePacket(item, expected) {
 function assertChecklistItemContract(items) {
   const seenIds = new Set();
   for (const item of items) {
-    for (const key of ["id", "title", "detail", "meta", "href"]) {
+    for (const key of ["id", "title", "detail", "meta"]) {
       assert.equal(typeof item[key], "string", `${item.id || "release evidence item"} ${key} should be a string`);
       assert.ok(item[key].trim(), `${item.id || "release evidence item"} ${key} should be non-empty`);
     }
+    assert.equal(typeof item.href, "string", `${item.id || "release evidence item"} href should be a string`);
 
     assert.ok(!seenIds.has(item.id), `${item.id} should be unique`);
     seenIds.add(item.id);
-    assert.ok(item.href.startsWith("#/"), `${item.id} href should be an in-app hash route`);
+    if (item.id === "support") {
+      assert.equal(item.href, "", "support bundle collection should remain API/CLI-only");
+    } else {
+      assert.ok(item.href.startsWith("#/"), `${item.id} href should be an in-app hash route`);
+    }
 
     if (item.reference !== undefined) {
       assert.equal(typeof item.reference, "string", `${item.id} reference should be a string`);
@@ -500,10 +525,19 @@ function assertChecklistItemContract(items) {
   assert.ok(steps.some((step) => step.id === "conntrack-pressure" && step.command.includes("--profile throughput")));
   assert.ok(steps.some((step) => step.id === "flowtable-runtime-evidence" && step.command === "ngfwctl status"));
   assert.ok(steps.some((step) => step.id === "engine-suricata" && step.command === "sudo systemctl restart controld"));
+  assert.ok(steps.some((step) => step.id === "tls-is-disabled" && step.href === "#/settings?panel=access&action=tls-is-disabled"));
   assert.equal(remediationActionId("TLS is disabled"), "tls-is-disabled");
-  assert.equal(readinessActionHash("flowtable-runtime-evidence"), "#/readiness?action=flowtable-runtime-evidence");
-  assert.equal(readinessActionHash("TLS is disabled"), "#/readiness?action=tls-is-disabled");
-  assert.equal(readinessActionHash(""), "#/readiness");
+  assert.equal(readinessActionHash("flowtable-runtime-evidence"), "#/settings?panel=network&action=flowtable-runtime-evidence");
+  assert.equal(readinessActionHash("TLS is disabled"), "#/settings?panel=access&action=tls-is-disabled");
+  assert.equal(readinessActionHash("HA peer is stale"), "#/fleet?action=ha-peer-is-stale");
+  assert.equal(readinessActionHash("runtime warning"), "#/changes?tab=candidate&action=runtime-warning");
+  assert.equal(readinessActionHash(""), "#/changes?tab=candidate");
+  assert.equal(legacyReadinessOwnerHash({ packet: "ha-readiness-recovery" }), "#/fleet");
+  assert.equal(legacyReadinessOwnerHash({ packet: "release-benchmark" }), "#/performance");
+  assert.equal(legacyReadinessOwnerHash({ drawer: "ha-cockpit" }), "#/fleet");
+  assert.equal(legacyReadinessOwnerHash({ drawer: "release-acceptance" }), "#/changes?tab=candidate");
+  assert.equal(legacyReadinessOwnerHash({ action: "TLS is disabled" }), "#/settings?panel=access&action=tls-is-disabled");
+  assert.equal(legacyReadinessOwnerHash({}), "#/");
 }
 
 {
@@ -591,10 +625,11 @@ function assertChecklistItemContract(items) {
     assert.equal(gates[id].cls, "bad");
     assert.notEqual(gates[id].label, "clear");
     assert.ok(gates[id].href, `${id} href missing`);
+    assert.equal(gates[id].href, releaseEvidenceOwnerRoutes[id], `${id} owner route`);
   }
 
   assert.match(gates["content-production-readiness"].detail, /demo smoke are not enough/);
-  assert.match(gates["webui-enterprise-smoke"].detail, /current 20-route operator route set/);
+  assert.match(gates["webui-enterprise-smoke"].detail, /current 19-route canonical route set/);
   assert.match(gates["webui-enterprise-smoke"].detail, /\/compliance/);
   assert.match(gates["webui-enterprise-smoke"].detail, /continuation evidence.*do not record durable release evidence/);
   assert.match(gates["privileged-integration"].detail, /root Linux host/);
@@ -638,9 +673,10 @@ function assertChecklistItemContract(items) {
     assert.ok(definition.packet.commands.length, `${id} catalog commands missing`);
     assert.ok(packetItems.has(id), `${id} releaseEvidenceChecklist packet missing`);
     assert.deepEqual(packetItems.get(id).packet.commands, definition.packet.commands, `${id} packet commands drifted from catalog`);
+    assert.equal(releaseEvidenceOwnerRoute(id), releaseEvidenceOwnerRoutes[id], `${id} owner route drifted`);
   }
   const webuiDefinition = releaseEvidencePacketDefinition("webui-enterprise-smoke");
-  assert.match(webuiDefinition.packet.summary, /current 20-route operator route set/);
+  assert.match(webuiDefinition.packet.summary, /current 19-route canonical route set/);
   assert.match(webuiDefinition.packet.summary, /\/compliance/);
   assert.match(webuiDefinition.packet.summary, /continuation or targeted repair evidence is diagnostic only/);
   assert.deepEqual(webuiDefinition.packet.commands, [
@@ -670,14 +706,17 @@ function assertChecklistItemContract(items) {
 
   assert.equal(model.manifestPresent, true);
   assert.equal(rows["proto-verify"].evidenceState, "recorded");
+  assert.equal(rows["proto-verify"].packetRoute, "#/changes?tab=candidate");
   assert.match(rows["proto-verify"].manifestBinding, /accepted by release\/acceptance\.json/);
   assert.equal(rows["deploy-hardening"].evidenceState, "recorded");
+  assert.equal(rows["deploy-hardening"].packetRoute, "#/settings?panel=access");
   assert.match(rows["deploy-hardening"].manifestBinding, /manifest verification pending/);
   assert.equal(rows["webui-enterprise-smoke"].evidenceState, "stale");
   assert.equal(rows["webui-enterprise-smoke"].cls, "warn");
   assert.match(rows["webui-enterprise-smoke"].manifestBinding, /not bindable/);
   assert.match(rows["webui-enterprise-smoke"].nextCommand, /release-evidence-webui-enterprise-smoke/);
   assert.equal(rows["m3-field-evidence"].evidenceState, "missing");
+  assert.equal(rows["m3-field-evidence"].packetRoute, "#/netvpn");
   assert.equal(rows["m3-field-evidence"].nextCommand, "ngfwrelease record --check m3-field-evidence");
   assert.equal(rows["m5-saml-field-evidence"].evidenceState, "missing");
   assert.equal(model.counts.recorded, 2);
@@ -791,7 +830,10 @@ function assertChecklistItemContract(items) {
   assert.equal(gates["deploy-hardening"].href, "#/settings?panel=access");
   assert.match(gates["deploy-hardening"].packet.summary, /deploy\/systemd\/controld\.service and deploy\/install\.sh only/);
   assert.match(gates["deploy-hardening"].detail, /static service-unit and installer check only/);
-  assert.equal(gates["ha-readiness-recovery"].href, "#/readiness?drawer=ha-cockpit");
+  assert.equal(gates["proto-verify"].href, "#/changes?tab=candidate");
+  assert.equal(gates["policy-restore-drill"].href, "#/changes?tab=candidate");
+  assert.equal(gates["ha-readiness-recovery"].href, "#/fleet");
+  assert.equal(gates["e2e-install"].href, "#/settings?panel=access");
   assert.equal(gates["m5-auth-ui"].href, "#/settings?panel=access");
   assert.equal(gates["m5-oidc-provider"].href, "#/settings?panel=access");
   for (const id of ["deploy-hardening", "policy-restore-drill", "ha-readiness-recovery", "content-package-verification", "m5-auth-ui", "m5-oidc-provider"]) {
@@ -950,7 +992,7 @@ function assertChecklistItemContract(items) {
   assert.match(report, /reference: docs\/RELEASE_ACCEPTANCE\.md#approved-evidence-flow/);
   assert.match(report, /- \[REVIEW\] host - Host tuning and state table/);
   assert.match(report, /- \[BLOCKED\] privileged-integration - Privileged integration and live dataplane/);
-  assert.match(report, /link: #\/readiness/);
+  assert.match(report, /link: #\/settings\?panel=network/);
   assert.match(report, /reference: docs\/RELEASE_ACCEPTANCE\.md#approved-evidence-flow/);
   assert.match(report, /- \[BLOCKED\] m3-field-evidence - M3 external field evidence/);
   assert.match(report, /link: #\/netvpn/);
