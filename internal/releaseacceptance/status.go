@@ -231,7 +231,7 @@ var evidenceStdoutRequiredFragments = map[string][]string{
 		"status=passed",
 	},
 	"deploy-hardening": {
-		"required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,systemd-sandbox,capability-bounds",
+		"required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,no-public-self-signed,systemd-sandbox,capability-bounds",
 		"required_installer_posture=root-only,0700-state-log-config,hashed-admin-token,0600-secret-files,unsafe-remote-install-opt-in",
 		"status=passed",
 	},

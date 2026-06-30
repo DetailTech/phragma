@@ -221,7 +221,7 @@ for the current commit.
 
 This static gate fails if the shipped `deploy/systemd/controld.service` or
 `deploy/install.sh` drifts toward lab defaults: unauthenticated local mode,
-`--tls=false`, dry-run mode, non-loopback management listeners, broad systemd
+`--tls=false`, `--allow-public-self-signed-tls`, dry-run mode, non-loopback management listeners, broad systemd
 capabilities, missing systemd sandbox directives, non-root-only state/config
 paths, plaintext bootstrap users, or an unguarded remote Vector installer. It
 does not start `controld`, install packages, perform live listener exposure,
@@ -670,7 +670,7 @@ The `deploy-hardening` check records the packaged service/installer posture
 validator through `COMMIT="$(git rev-parse HEAD)" make
 release-evidence-deploy-hardening`. The wrapped stdout from
 `bash release/deploy-hardening-check.sh --check` must include
-`required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,systemd-sandbox,capability-bounds`,
+`required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,no-public-self-signed,systemd-sandbox,capability-bounds`,
 `required_installer_posture=root-only,0700-state-log-config,hashed-admin-token,0600-secret-files,unsafe-remote-install-opt-in`,
 and `status=passed`. This proves the shipped service unit and installer
 defaults, not live host hardening.
@@ -946,9 +946,11 @@ make release-recordability-check VERSION=<tag> COMMIT=<full-commit>
 
 `make release-check-rootless` is a preflight gate bundle, not a release
 manifest evidence bundle. It includes `make benchmark-verify-release` and checks
-locally runnable rootless/static posture, but it does not assemble or certify the
-release manifest. Publishable benchmark evidence under `perf/release-results/`
-is required by default. It still does not collect
+locally runnable rootless/static posture, including a pinned `govulncheck`
+1.5.0 reachable-vulnerability scan under the patch-level Go floor declared in
+`go.mod`, but it does not assemble or certify the release manifest.
+Publishable benchmark evidence under `perf/release-results/` is required by
+default. It still does not collect
 `content-production-readiness`, `m5-oidc-field-evidence`, or
 `m5-saml-field-evidence`; record content readiness from the signed production
 package evidence bundle and record OIDC/SAML field evidence from the

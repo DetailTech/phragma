@@ -15,6 +15,17 @@ surface. The WebUI repair pass also fixed content-alias
 selection, stale route assertions, enterprise workflow selectors, responsive
 operator notes, and the Performance live-status action.
 
+The follow-on security wave permits generated self-signed TLS on a public
+REST/WebUI listener only behind the explicit
+`--allow-public-self-signed-tls` acknowledgement. That temporary posture is
+visible as degraded with a critical runtime warning; packaged deployment
+defaults remain loopback-only and do not set the opt-in. The wave also upgrades
+the patched SAML XML-signature and HTTP/2 dependency lines, raises the module
+toolchain floor to the patched Go 1.25.11 branch, and adds signed SAML negative
+regressions before the final validation pass. The rootless release gate now
+also runs pinned `govulncheck` 1.5.0. Release validation continues to use Go
+1.26.4 on the Oracle Linux host.
+
 Remote continuation validation on source snapshot `8694041` passed the strict
 Node.js WebUI checks and a browser-required Chromium sweep of all 19 canonical
 routes (`19/19` checks and screenshots). The broad evidence manifest is at

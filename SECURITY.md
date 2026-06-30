@@ -46,6 +46,14 @@ placing bearer tokens in shell history.
 The direct gRPC management listener must remain loopback-only until a gRPC
 TLS/mTLS transport is added. Remote operators should use the HTTPS WebUI/REST
 gateway; `--tls=false` is refused for non-loopback REST listeners.
+Non-loopback REST/WebUI listeners also require operator-provided `--tls-cert`
+and `--tls-key` by default. `--allow-public-self-signed-tls` is an explicit
+temporary-lab acknowledgement, not production trust: status remains degraded
+with a critical warning, and generated material may not contain a SAN for the
+public endpoint. Use a controlled path such as an SSH tunnel or explicit
+browser exception, then replace the certificate before production. The shipped
+systemd unit stays loopback-only and the deploy-hardening gate rejects this lab
+opt-in in packaged service defaults.
 The gateway sends restrictive browser security headers for both the WebUI and
 REST API, including frame denial, no-referrer, cross-origin opener/resource
 policy, a no-object/no-frame content security policy, and a permissions policy
@@ -121,6 +129,11 @@ site-specific hardening experiment until Suricata runs under its own profile.
 
 Releases ship with an SBOM (syft), are signed (cosign keyless), and carry SLSA
 provenance. Verify before deploying.
+
+Build and CI toolchains must satisfy the patch-level floor in `go.mod` (Go
+1.25.11 or newer on the 1.25 branch; Go 1.26.4 or newer on the 1.26 branch).
+`make vuln-check` runs pinned `govulncheck` 1.5.0, and the rootless release gate
+requires that scan to report no reachable vulnerabilities.
 
 Production App-ID, Threat-ID, and intel-feed readiness claims require the
 separate `content-production-readiness` release check. The rootless

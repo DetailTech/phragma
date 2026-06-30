@@ -23,12 +23,13 @@ func TestReleaseDeployHardeningCheckAcceptsPackagedArtifacts(t *testing.T) {
 	for _, want := range []string{
 		"check=deploy-hardening",
 		"mode=check",
-		"required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,systemd-sandbox,capability-bounds",
+		"required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,no-public-self-signed,systemd-sandbox,capability-bounds",
 		"required_installer_posture=root-only,0700-state-log-config,hashed-admin-token,0600-secret-files,unsafe-remote-install-opt-in",
 		"ok: gRPC management listener is loopback by default",
 		"ok: REST/WebUI listener is loopback by default",
 		"ok: users file authentication is configured",
 		"ok: unauthenticated local dev bypass absent",
+		"ok: public self-signed TLS lab opt-in absent",
 		"ok: cleartext TLS-disable flag absent",
 		"ok: NoNewPrivileges systemd sandbox",
 		"ok: capability bounding set is explicit",
@@ -43,6 +44,37 @@ func TestReleaseDeployHardeningCheckAcceptsPackagedArtifacts(t *testing.T) {
 	} {
 		if !hasOutputLine(output, want) {
 			t.Fatalf("deploy hardening output missing line %q:\n%s", want, output)
+		}
+	}
+}
+
+func TestReleaseDeployHardeningCheckRejectsPublicSelfSignedTLS(t *testing.T) {
+	root := releaseRepoRoot(t)
+	service := copyRepoFileToTemp(t, root, "deploy/systemd/controld.service")
+	installer := filepath.Join(root, "deploy/install.sh")
+
+	body := readTestFile(t, service)
+	body = strings.Replace(
+		body,
+		"  --users-file /etc/openngfw/users.yaml",
+		"  --users-file /etc/openngfw/users.yaml \\\n  --allow-public-self-signed-tls",
+		1,
+	)
+	writeTestFile(t, service, body)
+
+	cmd := exec.Command("bash", "release/deploy-hardening-check.sh", "--service-unit", service, "--installer", installer)
+	cmd.Dir = root
+	out, err := cmd.CombinedOutput()
+	output := string(out)
+	if err == nil {
+		t.Fatalf("deploy hardening check accepted public self-signed TLS lab opt-in:\n%s", output)
+	}
+	for _, want := range []string{
+		"contains prohibited active setting: public self-signed TLS lab opt-in",
+		"status=failed",
+	} {
+		if !strings.Contains(output, want) {
+			t.Fatalf("deploy hardening output missing failure %q:\n%s", want, output)
 		}
 	}
 }

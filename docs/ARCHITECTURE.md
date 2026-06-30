@@ -261,6 +261,10 @@ TLS/auth state, rate-limit settings, REST body/header caps, gRPC message caps,
 and HTTP timeout values. These fields are operator posture, not policy state;
 Readiness and automation use them to flag disabled guardrails before the
 management plane is exposed beyond a trusted network.
+An explicitly acknowledged public generated self-signed listener is reported
+as degraded with a critical warning until an operator certificate replaces it;
+the shipped service remains loopback-only. See
+[`ADR-0018`](adr/ADR-0018-management-tls-trust-posture.md).
 
 Version history and audit entries persist actor name, actor role, and auth
 source. Older records may only contain actor names, but new privileged actions

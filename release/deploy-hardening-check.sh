@@ -124,6 +124,7 @@ validate_service_unit() {
   require_active_regex "$SERVICE_UNIT" '--http-listen[[:space:]]+127\.0\.0\.1:8080' "REST/WebUI listener is loopback by default"
   require_active_regex "$SERVICE_UNIT" '--users-file[[:space:]]+/etc/openngfw/users\.yaml' "users file authentication is configured"
   reject_active_regex "$SERVICE_UNIT" '--allow-unauthenticated-local' "unauthenticated local dev bypass"
+  reject_active_regex "$SERVICE_UNIT" '--allow-public-self-signed-tls' "public self-signed TLS lab opt-in"
   reject_active_regex "$SERVICE_UNIT" '--tls=false' "cleartext TLS-disable flag"
   reject_active_regex "$SERVICE_UNIT" '--dry-run' "dry-run mode"
 
@@ -175,7 +176,7 @@ main() {
   log "mode=check"
   log "service_unit=$SERVICE_UNIT"
   log "installer=$INSTALLER"
-  log "required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,systemd-sandbox,capability-bounds"
+  log "required_service_posture=loopback-listeners,authenticated-by-default,no-dev-bypass,no-public-self-signed,systemd-sandbox,capability-bounds"
   log "required_installer_posture=root-only,0700-state-log-config,hashed-admin-token,0600-secret-files,unsafe-remote-install-opt-in"
 
   validate_service_unit

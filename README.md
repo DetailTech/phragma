@@ -86,10 +86,13 @@ rollback impact unless the request sets `ack_risk`. The CLI maps that to
 
 ## Quick start (development)
 
-Requires Go ≥ 1.25 and [golangci-lint](https://golangci-lint.run/) v2.
+Requires Go ≥ 1.25.11 and [golangci-lint](https://golangci-lint.run/) v2. The
+patch-level floor is intentional so local builds and CI include the supported
+Go 1.25 security fixes; Go 1.26 builds must use 1.26.4 or newer.
 
 ```sh
 make build test lint    # build bin/{controld,ngfwctl}, race tests, lint
+make vuln-check         # reachable Go vulnerability scan (pinned scanner)
 make e2e-install-check  # non-destructive 10-minute install harness check
 ./bin/controld --version
 ./bin/controld --dry-run --allow-unauthenticated-local \
@@ -193,9 +196,13 @@ NIC-offload management, and nftables flowtable posture while preserving
 per-interface MTU overrides; use `ngfwctl policy network set` for manual
 overrides.
 
-The WebUI/API listener uses a generated self-signed HTTPS certificate by
-default. Browse `https://127.0.0.1:8080/ui/` and accept the local certificate
-warning, or pass `--tls=false` for local cleartext debugging only.
+The loopback WebUI/API listener uses a generated self-signed HTTPS certificate
+by default. Browse `https://127.0.0.1:8080/ui/` and accept or locally trust that
+certificate, or pass `--tls=false` for loopback cleartext debugging only.
+Non-loopback listeners require `--tls-cert` and `--tls-key` by default. A
+temporary lab may explicitly acknowledge generated self-signed TLS with
+`--allow-public-self-signed-tls`; runtime status then remains degraded and
+emits a critical warning until an operator-provided certificate is configured.
 For browser first-run setup, open **Guided setup** to stage a two-zone
 throughput, IDS detect, or IPS prevent baseline through the same candidate
 review and commit path. When runtime status is available, Guided setup lists
@@ -253,6 +260,11 @@ Starting `controld` without `--users-file` or OIDC is rejected by default.
 For isolated demos only, pass `--allow-unauthenticated-local --dry-run` with
 loopback-only `--listen` and `--http-listen`; enforcing mode and wildcard
 management binds are refused.
+Generated self-signed TLS on a non-loopback REST/WebUI listener is likewise
+refused unless `--allow-public-self-signed-tls` is explicit. That acknowledgement
+provides encryption but not public CA trust or a guaranteed SAN for the public
+endpoint. Use a controlled lab path such as an SSH tunnel or explicit browser
+exception, and replace the certificate before production.
 The direct gRPC listener is loopback-only in this branch because `ngfwctl` uses
 local bearer-token gRPC without transport security. Expose remote management
 through the HTTPS WebUI/REST gateway until gRPC TLS/mTLS is implemented.

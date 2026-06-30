@@ -2709,6 +2709,41 @@ func TestSystemStatusWarnsForDisabledManagementGuardrails(t *testing.T) {
 	}
 }
 
+func TestSystemStatusWarnsForPublicSelfSignedTLS(t *testing.T) {
+	svc := &SystemService{Status: SystemStatusConfig{
+		StartedAt:             time.Now().UTC(),
+		HTTPListen:            "0.0.0.0:8080",
+		TLSEnabled:            true,
+		PublicSelfSignedTLS:   true,
+		AuthEnabled:           true,
+		RateLimitRPM:          600,
+		RateLimitBurst:        120,
+		TrustedProxyCIDRs:     []string{"10.0.0.0/8"},
+		HTTPMaxBodyBytes:      10 << 20,
+		GRPCMaxRecvBytes:      16 << 20,
+		GRPCMaxSendBytes:      16 << 20,
+		HTTPReadHeaderTimeout: 10 * time.Second,
+		HTTPReadTimeout:       15 * time.Second,
+		HTTPWriteTimeout:      30 * time.Second,
+		HTTPIdleTimeout:       2 * time.Minute,
+	}}
+
+	resp, err := svc.GetStatus(context.Background(), &openngfwv1.GetStatusRequest{})
+	if err != nil {
+		t.Fatalf("GetStatus returned error: %v", err)
+	}
+	if got := capabilityState(resp.GetCapabilities(), "Management plane guardrails"); got != "degraded" {
+		t.Fatalf("management guardrail capability = %q, want degraded", got)
+	}
+	detail := capabilityDetail(resp.GetCapabilities(), "Management plane guardrails")
+	if !strings.Contains(detail, "public listener uses generated self-signed TLS") {
+		t.Fatalf("management guardrail detail = %q, want public self-signed TLS disclosure", detail)
+	}
+	if !hasWarning(resp.GetWarnings(), "critical", "Public REST/WebUI listener uses generated self-signed TLS.") {
+		t.Fatalf("missing critical public self-signed TLS warning in %#v", resp.GetWarnings())
+	}
+}
+
 func TestSystemStatusAcceptsSecureOIDCCookiesBehindReverseProxy(t *testing.T) {
 	svc := &SystemService{Status: SystemStatusConfig{
 		StartedAt:             time.Now().UTC(),

@@ -132,8 +132,8 @@ operator detail, and commit to the release evidence artifact.
 It statically checks the packaged deployment artifacts only: the shipped
 `deploy/systemd/controld.service` and `deploy/install.sh`. The service unit
 must keep loopback management listeners, auth-by-default, no `--tls=false` or
-unauthenticated dev bypass, no dry-run mode, systemd sandbox directives,
-bounded capabilities, and root-only state/config paths. The installer must keep
+unauthenticated dev bypass, no public-self-signed opt-in, no dry-run mode,
+systemd sandbox directives, bounded capabilities, and root-only state/config paths. The installer must keep
 root-only state/log/config directories, hashed bootstrap users, 0600 secret
 files, and an explicit opt-in guard around the legacy remote Vector installer.
 This gate does not start `controld`, install packages, expose management
@@ -265,6 +265,11 @@ invent publishable benchmark evidence. The tagged release workflow uses the
 same no-performance-claims setting by default; a performance-claiming release
 must first record real benchmark evidence and change that workflow setting for
 the tag.
+
+The same rootless bundle runs `make vuln-check` with pinned `govulncheck`
+1.5.0 and fails when the current module graph reaches a vulnerability in the
+Go vulnerability database. CI resolves the patch-level toolchain floor from
+`go.mod`; it must not substitute an unpatched Go 1.25 or 1.26 release.
 
 `make release-check-rootless` also runs `make webui-enterprise-smoke`. That
 gate wraps `make webui-check`, requires Node.js plus a launchable Playwright

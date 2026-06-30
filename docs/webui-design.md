@@ -917,6 +917,14 @@ operator-provided cert is configured. This is a standard TLS server setup —
 **not** TLS interception or a MITM CA (which remain a locked, human-only
 effort per build plan §9).
 
+Generated self-signed TLS is accepted automatically only on loopback. A
+non-loopback listener requires an operator certificate unless the operator
+explicitly passes `--allow-public-self-signed-tls` for a temporary lab. That
+opt-in keeps the management capability degraded and a critical runtime warning
+active because encryption alone does not establish a publicly trusted server
+identity. The shipped systemd unit remains loopback-only and never sets this
+opt-in.
+
 ## 6. Access Model
 
 The Settings view and the route-level access gate support two access paths:
